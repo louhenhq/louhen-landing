@@ -13,7 +13,7 @@ function initAdmin() {
     credential: admin.credential.cert({
       projectId: creds.project_id,
       clientEmail: creds.client_email,
-      privateKey: creds.private_key?.replace(/\\n/g, '\n'),
+      privateKey: creds.private_key?.replace(/\n/g, '\n'),
     }),
   });
 }
@@ -23,7 +23,6 @@ function makeReferralCode() {
   return Array.from({ length: 8 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join('');
 }
 
-// GET health check
 export async function GET() {
   try {
     const hasEnv = !!process.env.FIREBASE_SERVICE_ACCOUNT;
@@ -35,13 +34,13 @@ export async function GET() {
       canInit = true;
     }
     return NextResponse.json({ ok: true, hasEnv, canInit });
-  } catch (e: any) {
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : String(e);
     console.error('GET /api/waitlist error:', e);
-    return NextResponse.json({ ok: false, error: e?.message || 'health_error' }, { status: 500 });
+    return NextResponse.json({ ok: false, error: message || 'health_error' }, { status: 500 });
   }
 }
 
-// POST to create waitlist entry
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -76,8 +75,9 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ ok: true, code });
-  } catch (e: any) {
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : String(e);
     console.error('POST /api/waitlist error:', e);
-    return NextResponse.json({ ok: false, error: e?.message || 'server_error' }, { status: 500 });
+    return NextResponse.json({ ok: false, error: message || 'server_error' }, { status: 500 });
   }
 }

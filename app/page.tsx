@@ -177,7 +177,7 @@ function WaitlistForm() {
       setStatus('ok');
       setMessage('You’re on the list! We’ll email your unique referral link soon.');
       (e.target as HTMLFormElement).reset();
-    } catch (err) {
+    } catch {
       setStatus('error');
       setMessage('Something went wrong. Please try again or email hello@louhen.com');
     }
