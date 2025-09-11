@@ -150,8 +150,9 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 }
 
 function WaitlistForm() {
-  const [status, setStatus] = React.useState<'idle' | 'loading' | 'ok' | 'error'>('idle');
+  const [status, setStatus] = React.useState<'idle' | 'loading' | 'ok' | 'error' | 'dupe' | 'rate'>('idle');
   const [message, setMessage] = React.useState<string>('');
+  const [locked, setLocked] = React.useState<boolean>(false);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -173,10 +174,30 @@ function WaitlistForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error('Request failed');
+      if (res.status === 429) {
+        let retryAfterText = '';
+        try {
+          const data = await res.json();
+          if (data?.retryAfterMs) {
+            const secs = Math.ceil(Number(data.retryAfterMs) / 1000);
+            retryAfterText = ` Please try again in ~${secs}s.`;
+          }
+        } catch {}
+        setStatus('rate');
+        setMessage('Too many attempts in a short time.' + retryAfterText);
+        return;
+      }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || 'Request failed');
+      if (data?.dupe) {
+        setStatus('dupe');
+        setMessage('You’re already on the list — thanks for your enthusiasm!');
+        return;
+      }
       setStatus('ok');
       setMessage('You’re on the list! We’ll email your unique referral link soon.');
       (e.target as HTMLFormElement).reset();
+      setLocked(true);
     } catch {
       setStatus('error');
       setMessage('Something went wrong. Please try again or email hello@louhen.com');
@@ -232,11 +253,21 @@ function WaitlistForm() {
           <label htmlFor="consent" className="text-xs text-slate-600">I agree to receive early-access emails from Louhen and accept the <a href="/privacy" className="underline">Privacy Policy</a>. You can opt out anytime.</label>
         </div>
         <div className="sm:col-span-2">
-          <button type="submit" disabled={status==='loading'} className="w-full rounded-xl bg-slate-900 text-white py-3 font-semibold hover:opacity-90 disabled:opacity-60">
+          <button type="submit" disabled={status==='loading' || locked} className="w-full rounded-xl bg-slate-900 text-white py-3 font-semibold hover:opacity-90 disabled:opacity-60">
             {status === 'loading' ? 'Joining…' : 'Join the waitlist'}
           </button>
           {message && (
-            <p className={`mt-3 text-sm ${status==='ok' ? 'text-emerald-700' : 'text-rose-600'}`}>{message}</p>
+            <p
+              aria-live="polite"
+              className={`mt-3 text-sm ${
+                status==='ok' ? 'text-emerald-700'
+                : status==='dupe' ? 'text-slate-700'
+                : status==='rate' ? 'text-amber-700'
+                : 'text-rose-600'
+              }`}
+            >
+              {message}
+            </p>
           )}
         </div>
       </div>
