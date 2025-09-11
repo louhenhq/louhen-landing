@@ -231,10 +231,16 @@ function WaitlistForm() {
       setLocked(true);
       // Small cooldown after success to prevent accidental resubmits
       setCooldownUntil(Date.now() + 5000);
-      // Build share link from returned code (e.g. /r/ABCDEFGH)
+      // Build share link from returned code (e.g. /r/ABCDEFGH) + UTM params
       if (data?.code && typeof window !== 'undefined') {
         const origin = window.location.origin;
-        setShareLink(`${origin}/r/${String(data.code).toUpperCase()}`);
+        const codeUpper = String(data.code).toUpperCase();
+        const url = new URL(`/r/${codeUpper}`, origin);
+        url.searchParams.set('utm_source', 'referral');
+        url.searchParams.set('utm_medium', 'waitlist');
+        url.searchParams.set('utm_campaign', 'prelaunch');
+        url.searchParams.set('utm_content', codeUpper);
+        setShareLink(url.toString());
       }
     } catch {
       setStatus('error');
