@@ -1,0 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global tweaks */
+html, body { height: 100%; }
+body { @apply bg-white text-slate-900 antialiased; }
