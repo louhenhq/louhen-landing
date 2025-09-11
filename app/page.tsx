@@ -36,7 +36,9 @@ export default function WaitlistLanding() {
               Louhen is a fit-first shoe companion for kids aged 10 months to 6 years. Scan feet, get data-driven recommendations, and relax under our LouhenFit Guarantee: if they don’t fit, we’ll make it right.
             </p>
 
-            <WaitlistForm />
+            <React.Suspense fallback={null}>
+              <WaitlistForm />
+            </React.Suspense>
 
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm text-slate-600">
               <div className="flex items-center gap-2">
