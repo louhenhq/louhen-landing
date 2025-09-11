@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-import * as admin from 'firebase-admin';
+import { initAdmin, admin } from '@/lib/firebaseAdmin';
 
 // --- Simple in-memory rate limit: 3 req / 60s per IP (per server instance) ---
 type Bucket = { count: number; resetAt: number };
@@ -18,19 +18,7 @@ function getIp(req: Request): string {
   return ip;
 }
 
-function initAdmin() {
-  if (admin.apps.length) return admin.app();
-  const svc = process.env.FIREBASE_SERVICE_ACCOUNT;
-  if (!svc) throw new Error('Missing FIREBASE_SERVICE_ACCOUNT');
-  const creds = JSON.parse(svc);
-  return admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: creds.project_id,
-      clientEmail: creds.client_email,
-      privateKey: creds.private_key?.replace(/\n/g, '\n'),
-    }),
-  });
-}
+// (init moved to lib/firebaseAdmin)
 
 function makeReferralCode() {
   const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -58,6 +46,7 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const ip = getIp(req);
+    const ua = req.headers.get('user-agent') || null;
     const nowMs = Date.now();
     const b = BUCKETS.get(ip);
     if (!b || nowMs > b.resetAt) {
@@ -130,8 +119,8 @@ export async function POST(req: Request) {
       referralCount: 0,
       consentAt: now,
       createdAt: now,
-      ua: null,
-      ip: null,
+      ua,
+      ip,
       source: 'landing:v1'
     });
 
@@ -144,8 +133,8 @@ export async function POST(req: Request) {
         refereeId: newDocRef.id,
         code: refCode,
         createdAt: now,
-        ua: null,
-        ip: null,
+        ua,
+        ip,
         source: 'landing:v1'
       });
     }
