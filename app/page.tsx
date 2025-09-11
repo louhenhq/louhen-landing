@@ -3,6 +3,7 @@
 // app/page.tsx
 import * as React from 'react';
 import { useSearchParams } from 'next/navigation';
+type NavigatorWithShare = Navigator & { share?: (data: ShareData) => Promise<void> };
 
 export default function WaitlistLanding() {
   return (
@@ -160,7 +161,7 @@ function WaitlistForm() {
   const [now, setNow] = React.useState<number>(() => Date.now());
   const [shareLink, setShareLink] = React.useState<string>('');
   const [copied, setCopied] = React.useState<boolean>(false);
-  const canWebShare = typeof navigator !== 'undefined' && !!(navigator as any).share;
+  const canWebShare = typeof navigator !== 'undefined' && typeof (navigator as NavigatorWithShare).share === 'function';
   const search = useSearchParams();
   const refFromUrl = (search.get('ref') || '').toUpperCase();
   React.useEffect(() => {
@@ -355,8 +356,9 @@ function WaitlistForm() {
                     type="button"
                     onClick={async () => {
                       try {
-                        if ((navigator as any).share) {
-                          await (navigator as any).share({
+                        const nav = navigator as NavigatorWithShare;
+                        if (typeof nav.share === 'function') {
+                          await nav.share({
                             title: 'Join me on Louhen',
                             text: 'Perfect fit for growing feet — join the waitlist:',
                             url: shareLink,
