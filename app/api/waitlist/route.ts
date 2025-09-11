@@ -94,14 +94,40 @@ export async function POST(req: Request) {
     const code = makeReferralCode();
     const now = admin.firestore.FieldValue.serverTimestamp();
 
-    await db.collection('waitlist').add({
+    // Resolve referrer (optional)
+    let refAccepted = false;
+    let referrerId: string | null = null;
+    let refCode = typeof ref === 'string' ? ref.trim().toUpperCase() : null;
+    if (refCode) {
+      const snap = await db.collection('waitlist').where('referralCode', '==', refCode).limit(1).get();
+      if (!snap.empty) {
+        const doc = snap.docs[0];
+        referrerId = doc.id;
+        // Prevent self-referral by comparing emails (best-effort)
+        const refEmailLc = (doc.get('emailLc') as string | undefined) || undefined;
+        if (refEmailLc && refEmailLc === emailLc) {
+          refAccepted = false;
+          refCode = null;
+          referrerId = null;
+        } else {
+          refAccepted = true;
+        }
+      } else {
+        // Unknown code: ignore silently
+        refCode = null;
+      }
+    }
+
+    const newDocRef = await db.collection('waitlist').add({
       email, emailLc,
       firstName: firstName ?? null,
       country: country ?? null,
       ageBand: ageBand ?? null,
-      referralInput: ref ?? null,
+      referralInput: refCode ?? null,
+      referredById: refAccepted ? referrerId : null,
       notes: notes ?? null,
       referralCode: code,
+      referralCount: 0,
       consentAt: now,
       createdAt: now,
       ua: null,
@@ -109,7 +135,22 @@ export async function POST(req: Request) {
       source: 'landing:v1'
     });
 
-    return NextResponse.json({ ok: true, code });
+    if (refAccepted && referrerId) {
+      const referrerRef = db.collection('waitlist').doc(referrerId);
+      await referrerRef.update({ referralCount: admin.firestore.FieldValue.increment(1) });
+      await db.collection('referralEvents').add({
+        type: 'signup_credit',
+        referrerId,
+        refereeId: newDocRef.id,
+        code: refCode,
+        createdAt: now,
+        ua: null,
+        ip: null,
+        source: 'landing:v1'
+      });
+    }
+
+    return NextResponse.json({ ok: true, code, refAccepted });
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : String(e);
     console.error('POST /api/waitlist error:', e);

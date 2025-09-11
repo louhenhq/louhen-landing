@@ -226,7 +226,8 @@ function WaitlistForm() {
         return;
       }
       setStatus('ok');
-      setMessage('You’re on the list! We’ll email your unique referral link soon.');
+      const extra = data?.refAccepted ? ' Referral applied — thanks for supporting your friend!' : '';
+      setMessage('You’re on the list! We’ll email your unique referral link soon.' + extra);
       (e.target as HTMLFormElement).reset();
       setLocked(true);
       // Small cooldown after success to prevent accidental resubmits
