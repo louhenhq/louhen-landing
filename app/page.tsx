@@ -2,6 +2,7 @@
 
 // app/page.tsx
 import * as React from 'react';
+import { useSearchParams } from 'next/navigation';
 
 export default function WaitlistLanding() {
   return (
@@ -155,6 +156,10 @@ function WaitlistForm() {
   const [locked, setLocked] = React.useState<boolean>(false);
   const [cooldownUntil, setCooldownUntil] = React.useState<number | null>(null);
   const [now, setNow] = React.useState<number>(() => Date.now());
+  const [shareLink, setShareLink] = React.useState<string>('');
+  const [copied, setCopied] = React.useState<boolean>(false);
+  const search = useSearchParams();
+  const refFromUrl = (search.get('ref') || '').toUpperCase();
   React.useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
@@ -222,6 +227,11 @@ function WaitlistForm() {
       setLocked(true);
       // Small cooldown after success to prevent accidental resubmits
       setCooldownUntil(Date.now() + 5000);
+      // Build share link from returned code (e.g. /r/ABCDEFGH)
+      if (data?.code && typeof window !== 'undefined') {
+        const origin = window.location.origin;
+        setShareLink(`${origin}/r/${String(data.code).toUpperCase()}`);
+      }
     } catch {
       setStatus('error');
       setMessage('Something went wrong. Please try again or email hello@louhen.com');
@@ -263,7 +273,13 @@ function WaitlistForm() {
         </div>
         <div>
           <label htmlFor="ref" className="block text-sm font-medium">Referral code (optional)</label>
-          <input id="ref" name="ref" className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-900" placeholder="e.g. LOUISE123" />
+          <input
+            id="ref"
+            name="ref"
+            defaultValue={refFromUrl}
+            className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-900"
+            placeholder="e.g. LOUISE123"
+          />
         </div>
         <div className="sm:col-span-2">
           <label htmlFor="notes" className="block text-sm font-medium">Anything we should know? (optional)</label>
@@ -303,6 +319,26 @@ function WaitlistForm() {
             >
               {message}
             </p>
+          )}
+          {/* Show share link after success */}
+          {status === 'ok' && shareLink && (
+            <div className="mt-3 text-sm text-slate-700 flex items-center gap-3">
+              <span className="truncate">Your invite link: <a className="underline" href={shareLink}>{shareLink}</a></span>
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(shareLink);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 1500);
+                  } catch {}
+                }}
+                className="shrink-0 rounded-lg border border-slate-300 px-2 py-1 hover:bg-slate-50"
+                aria-label="Copy referral link"
+              >
+                {copied ? 'Copied!' : 'Copy'}
+              </button>
+            </div>
           )}
         </div>
       </div>
