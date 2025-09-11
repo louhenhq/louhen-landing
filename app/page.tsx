@@ -115,9 +115,9 @@ export default function WaitlistLanding() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 text-sm text-slate-600 flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
           <p>© {new Date().getFullYear()} Louhen GmbH (in formation)</p>
           <nav className="flex gap-6">
-            <a href="#" className="hover:opacity-70">Privacy</a>
-            <a href="#" className="hover:opacity-70">Terms</a>
-            <a href="#" className="hover:opacity-70">Imprint</a>
+            <a href="/privacy" className="hover:opacity-70">Privacy</a>
+            <a href="/terms" className="hover:opacity-70">Terms</a>
+            <a href="/imprint" className="hover:opacity-70">Imprint</a>
           </nav>
         </div>
       </footer>
@@ -222,9 +222,14 @@ function WaitlistForm() {
           <label htmlFor="notes" className="block text-sm font-medium">Anything we should know? (optional)</label>
           <textarea id="notes" name="notes" rows={3} className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-900" placeholder="Tell us about your kid’s shoe needs" />
         </div>
+        {/* Honeypot field (bot trap) */}
+        <div className="hidden" aria-hidden="true">
+          <label htmlFor="website">Website</label>
+          <input id="website" name="website" autoComplete="off" tabIndex={-1} />
+        </div>
         <div className="sm:col-span-2 flex items-start gap-3">
           <input id="consent" name="consent" type="checkbox" className="mt-1 h-4 w-4 rounded border-slate-300" />
-          <label htmlFor="consent" className="text-xs text-slate-600">I agree to receive early-access emails from Louhen and accept the <a href="#" className="underline">Privacy Policy</a>. You can opt out anytime.</label>
+          <label htmlFor="consent" className="text-xs text-slate-600">I agree to receive early-access emails from Louhen and accept the <a href="/privacy" className="underline">Privacy Policy</a>. You can opt out anytime.</label>
         </div>
         <div className="sm:col-span-2">
           <button type="submit" disabled={status==='loading'} className="w-full rounded-xl bg-slate-900 text-white py-3 font-semibold hover:opacity-90 disabled:opacity-60">

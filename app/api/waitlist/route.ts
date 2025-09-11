@@ -4,6 +4,20 @@ export const dynamic = 'force-dynamic';
 
 import * as admin from 'firebase-admin';
 
+// --- Simple in-memory rate limit: 3 req / 60s per IP (per server instance) ---
+type Bucket = { count: number; resetAt: number };
+const rlGlobal = (globalThis as unknown as { __waitlistBuckets?: Map<string, Bucket> });
+if (!rlGlobal.__waitlistBuckets) rlGlobal.__waitlistBuckets = new Map();
+const BUCKETS = rlGlobal.__waitlistBuckets;
+const RATE_WINDOW_MS = 60_000;
+const RATE_MAX = 3;
+
+function getIp(req: Request): string {
+  const fwd = req.headers.get('x-forwarded-for') || '';
+  const ip = fwd.split(',')[0].trim() || 'unknown';
+  return ip;
+}
+
 function initAdmin() {
   if (admin.apps.length) return admin.app();
   const svc = process.env.FIREBASE_SERVICE_ACCOUNT;
@@ -43,8 +57,29 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
+    const ip = getIp(req);
+    const nowMs = Date.now();
+    const b = BUCKETS.get(ip);
+    if (!b || nowMs > b.resetAt) {
+      BUCKETS.set(ip, { count: 1, resetAt: nowMs + RATE_WINDOW_MS });
+    } else {
+      if (b.count >= RATE_MAX) {
+        const retryAfterMs = Math.max(0, b.resetAt - nowMs);
+        return NextResponse.json(
+          { ok: false, error: 'rate_limited', retryAfterMs },
+          { status: 429, headers: { 'Retry-After': String(Math.ceil(retryAfterMs / 1000)) } }
+        );
+      }
+      b.count += 1;
+    }
+
     const body = await req.json();
-    const { email, firstName, country, ageBand, ref, notes, consent } = body || {};
+    const { email, firstName, country, ageBand, ref, notes, consent, website } = body || {};
+
+    // Honeypot trap: bots fill hidden "website" field -> silently accept but do nothing
+    if (website && String(website).trim() !== '') {
+      return NextResponse.json({ ok: true, queued: true });
+    }
     if (!email || !consent) {
       return NextResponse.json({ ok: false, error: 'email_and_consent_required' }, { status: 400 });
     }
