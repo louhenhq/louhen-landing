@@ -160,6 +160,7 @@ function WaitlistForm() {
   const [now, setNow] = React.useState<number>(() => Date.now());
   const [shareLink, setShareLink] = React.useState<string>('');
   const [copied, setCopied] = React.useState<boolean>(false);
+  const canWebShare = typeof navigator !== 'undefined' && !!(navigator as any).share;
   const search = useSearchParams();
   const refFromUrl = (search.get('ref') || '').toUpperCase();
   React.useEffect(() => {
@@ -322,24 +323,58 @@ function WaitlistForm() {
               {message}
             </p>
           )}
-          {/* Show share link after success */}
           {status === 'ok' && shareLink && (
-            <div className="mt-3 text-sm text-slate-700 flex items-center gap-3">
-              <span className="truncate">Your invite link: <a className="underline" href={shareLink}>{shareLink}</a></span>
-              <button
-                type="button"
-                onClick={async () => {
-                  try {
-                    await navigator.clipboard.writeText(shareLink);
-                    setCopied(true);
-                    setTimeout(() => setCopied(false), 1500);
-                  } catch {}
-                }}
-                className="shrink-0 rounded-lg border border-slate-300 px-2 py-1 hover:bg-slate-50"
-                aria-label="Copy referral link"
-              >
-                {copied ? 'Copied!' : 'Copy'}
-              </button>
+            <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <h4 className="text-sm font-semibold text-slate-900">Invite friends</h4>
+              <p className="mt-1 text-sm text-slate-600">
+                Share your link and both of you earn credit when they place their first order.
+              </p>
+              <div className="mt-3 flex flex-col sm:flex-row gap-2 sm:items-center">
+                <a
+                  href={shareLink}
+                  className="text-sm underline break-all sm:break-normal"
+                >
+                  {shareLink}
+                </a>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(shareLink);
+                        setCopied(true);
+                        setTimeout(() => setCopied(false), 1500);
+                      } catch {}
+                    }}
+                    className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm hover:bg-white"
+                    aria-label="Copy referral link"
+                  >
+                    {copied ? 'Copied!' : 'Copy'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        if ((navigator as any).share) {
+                          await (navigator as any).share({
+                            title: 'Join me on Louhen',
+                            text: 'Perfect fit for growing feet — join the waitlist:',
+                            url: shareLink,
+                          });
+                        } else {
+                          await navigator.clipboard.writeText(shareLink);
+                          setCopied(true);
+                          setTimeout(() => setCopied(false), 1500);
+                        }
+                      } catch {}
+                    }}
+                    className="rounded-lg bg-slate-900 text-white px-3 py-1.5 text-sm hover:opacity-90"
+                    aria-label="Share referral link"
+                  >
+                    {canWebShare ? 'Share' : 'Copy link'}
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>
