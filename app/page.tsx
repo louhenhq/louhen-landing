@@ -153,9 +153,23 @@ function WaitlistForm() {
   const [status, setStatus] = React.useState<'idle' | 'loading' | 'ok' | 'error' | 'dupe' | 'rate'>('idle');
   const [message, setMessage] = React.useState<string>('');
   const [locked, setLocked] = React.useState<boolean>(false);
+  const [cooldownUntil, setCooldownUntil] = React.useState<number | null>(null);
+  const [now, setNow] = React.useState<number>(() => Date.now());
+  React.useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const remainingMs = cooldownUntil ? Math.max(0, cooldownUntil - now) : 0;
+  const remainingSec = Math.ceil(remainingMs / 1000);
+  const inCooldown = remainingMs > 0;
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (inCooldown) {
+      setStatus('rate');
+      setMessage(`Please wait ~${remainingSec}s before trying again.`);
+      return;
+    }
     setStatus('loading');
     setMessage('');
 
@@ -176,15 +190,21 @@ function WaitlistForm() {
       });
       if (res.status === 429) {
         let retryAfterText = '';
+        let retryAfterMs = 0;
         try {
           const data = await res.json();
           if (data?.retryAfterMs) {
-            const secs = Math.ceil(Number(data.retryAfterMs) / 1000);
+            retryAfterMs = Number(data.retryAfterMs) || 0;
+            const secs = Math.ceil(retryAfterMs / 1000);
             retryAfterText = ` Please try again in ~${secs}s.`;
           }
         } catch {}
         setStatus('rate');
         setMessage('Too many attempts in a short time.' + retryAfterText);
+        // Apply a client-side cooldown, respect server hint but ensure at least 5s
+        const minMs = 5000;
+        const cd = Math.max(minMs, retryAfterMs || 0);
+        setCooldownUntil(Date.now() + cd);
         return;
       }
       const data = await res.json();
@@ -192,15 +212,21 @@ function WaitlistForm() {
       if (data?.dupe) {
         setStatus('dupe');
         setMessage('You’re already on the list — thanks for your enthusiasm!');
+        // Gentle 5s cooldown on dupe to avoid spam clicking
+        setCooldownUntil(Date.now() + 5000);
         return;
       }
       setStatus('ok');
       setMessage('You’re on the list! We’ll email your unique referral link soon.');
       (e.target as HTMLFormElement).reset();
       setLocked(true);
+      // Small cooldown after success to prevent accidental resubmits
+      setCooldownUntil(Date.now() + 5000);
     } catch {
       setStatus('error');
       setMessage('Something went wrong. Please try again or email hello@louhen.com');
+      // Small cooldown after error to deter rapid retries
+      setCooldownUntil(Date.now() + 5000);
     }
   }
 
@@ -253,8 +279,17 @@ function WaitlistForm() {
           <label htmlFor="consent" className="text-xs text-slate-600">I agree to receive early-access emails from Louhen and accept the <a href="/privacy" className="underline">Privacy Policy</a>. You can opt out anytime.</label>
         </div>
         <div className="sm:col-span-2">
-          <button type="submit" disabled={status==='loading' || locked} className="w-full rounded-xl bg-slate-900 text-white py-3 font-semibold hover:opacity-90 disabled:opacity-60">
-            {status === 'loading' ? 'Joining…' : 'Join the waitlist'}
+          <button
+            type="submit"
+            disabled={status==='loading' || locked || inCooldown}
+            className="w-full rounded-xl bg-slate-900 text-white py-3 font-semibold hover:opacity-90 disabled:opacity-60"
+            aria-disabled={status==='loading' || locked || inCooldown}
+          >
+            {status === 'loading'
+              ? 'Joining…'
+              : inCooldown
+              ? `Please wait… ${remainingSec}s`
+              : 'Join the waitlist'}
           </button>
           {message && (
             <p
