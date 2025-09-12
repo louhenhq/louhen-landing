@@ -108,6 +108,13 @@ export async function POST(req: Request) {
       }
     }
 
+    // Defaults for unsubscribe & preferences
+    const defaultPrefs = {
+      waitlistUpdates: true,
+      referrals: true,
+      launchNews: true,
+    } as const;
+
     const newDocRef = await db.collection('waitlist').add({
       email, emailLc,
       firstName: firstName ?? null,
@@ -122,7 +129,13 @@ export async function POST(req: Request) {
       createdAt: now,
       ua,
       ip,
-      source: 'landing:v1'
+      source: 'landing:v1',
+      // Unsubscribe / preferences (initialized for future use)
+      unsubscribed: false,
+      emailPrefs: defaultPrefs,
+      // (Optional) For future tokenized unsubscribe:
+      // unsubscribeToken: null,
+      // unsubscribeTokenExpiresAt: null,
     });
 
     if (refAccepted && referrerId) {
@@ -144,7 +157,11 @@ export async function POST(req: Request) {
     try {
       const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true';
       const RESEND_API_KEY = process.env.RESEND_API_KEY;
-      if (EMAIL_ENABLED && RESEND_API_KEY) {
+      // Re-fetch just-created doc to confirm unsubscribe flag (future-proof)
+      const createdSnap = await newDocRef.get();
+      const createdData = createdSnap.exists ? (createdSnap.data() as Record<string, unknown>) : undefined;
+      const isUnsub = createdData?.unsubscribed === true;
+      if (EMAIL_ENABLED && RESEND_API_KEY && !isUnsub) {
         const resend = new Resend(RESEND_API_KEY);
         const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://louhen-landing.vercel.app';
         const codeUpper = String(code).toUpperCase();
@@ -200,7 +217,7 @@ export async function POST(req: Request) {
         });
       } else {
         // eslint-disable-next-line no-console
-        console.warn('Email sending skipped (EMAIL_ENABLED not true or RESEND_API_KEY missing).');
+        console.warn('Email sending skipped (disabled, missing API key, or user unsubscribed).');
       }
     } catch (mailErr) {
       // eslint-disable-next-line no-console
