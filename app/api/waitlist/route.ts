@@ -6,6 +6,7 @@ import { initAdmin } from '@/lib/firebaseAdmin';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { getResend } from '@/lib/resendOptional';
 import { randomBytes } from 'crypto';
+import type { EmailPrefs, WaitlistDoc } from '@/types/waitlist';
 
 // --- Simple in-memory rate limit: 3 req / 60s per IP (per server instance) ---
 type Bucket = { count: number; resetAt: number };
@@ -111,7 +112,7 @@ export async function POST(req: Request) {
     }
 
     // Defaults for unsubscribe & preferences
-    const defaultPrefs = {
+    const defaultPrefs: EmailPrefs = {
       waitlistUpdates: true,
       referrals: true,
       launchNews: true,
@@ -165,7 +166,7 @@ export async function POST(req: Request) {
       const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true';
       // Re-fetch just-created doc to confirm unsubscribe flag (future-proof)
       const createdSnap = await newDocRef.get();
-      const createdData = createdSnap.exists ? (createdSnap.data() as Record<string, unknown>) : undefined;
+      const createdData = createdSnap.exists ? (createdSnap.data() as WaitlistDoc) : undefined;
       const isUnsub = createdData?.unsubscribed === true;
       if (EMAIL_ENABLED && !isUnsub) {
         const resend = await getResend();

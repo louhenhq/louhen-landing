@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { initAdmin } from '@/lib/firebaseAdmin';
 import { FieldValue } from 'firebase-admin/firestore';
+import type { WaitlistDoc } from '@/types/waitlist';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -18,11 +19,11 @@ export async function GET(req: Request) {
     if (snap.empty) return html('This unsubscribe link is invalid or already used.', 404);
 
     const doc = snap.docs[0];
-    const raw = doc.data() as FirebaseFirestore.DocumentData;
-    const expiresAt = raw?.unsubscribeTokenExpiresAt as FirebaseFirestore.Timestamp | undefined | null;
+    const raw = doc.data() as WaitlistDoc;
+    const expiresAt = raw.unsubscribeTokenExpiresAt ?? null;
     const expTs = expiresAt?.toMillis?.() ?? 0;
     if (expTs && Date.now() > expTs) return html('This unsubscribe link has expired.', 410);
-    if (Boolean(raw?.unsubscribed) === true) return html('You are already unsubscribed. 👍');
+    if (Boolean(raw.unsubscribed) === true) return html('You are already unsubscribed. 👍');
 
     await doc.ref.update({
       unsubscribed: true,
