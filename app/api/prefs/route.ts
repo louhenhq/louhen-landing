@@ -1,19 +1,8 @@
 import { NextResponse } from 'next/server';
 import { initAdmin } from '@/lib/firebaseAdmin';
+import type { EmailPrefs, WaitlistDoc } from '@/types/waitlist';
 
-type EmailPrefs = {
-  waitlistUpdates: boolean;
-  referrals: boolean;
-  launchNews: boolean;
-};
-
-type WaitlistDoc = {
-  email: string;
-  unsubscribed?: boolean;
-  emailPrefs?: Partial<EmailPrefs>;
-  unsubscribeToken?: string | null;
-  unsubscribeTokenExpiresAt?: FirebaseFirestore.Timestamp | null;
-};
+// (types now imported)
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
