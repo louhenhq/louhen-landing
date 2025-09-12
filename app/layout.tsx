@@ -33,11 +33,18 @@ export const metadata: Metadata = {
       'Fit-first shoe companion for kids 10 months to 6 years. Scan feet, get data-driven recommendations, and relax under our LouhenFit Guarantee.',
     images: ['/opengraph-image.png'],
   },
+  // Hint browsers for color theming (fallback if manifest isn't picked up yet)
+  themeColor: '#0f172a',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        {/* iOS PWA / status bar styling */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+      </head>
       <body>{children}</body>
     </html>
   )
