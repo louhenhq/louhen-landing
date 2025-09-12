@@ -1,5 +1,5 @@
 import './globals.css'
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://louhen-landing.vercel.app'),
@@ -33,7 +33,10 @@ export const metadata: Metadata = {
       'Fit-first shoe companion for kids 10 months to 6 years. Scan feet, get data-driven recommendations, and relax under our LouhenFit Guarantee.',
     images: ['/opengraph-image.png'],
   },
-  // Hint browsers for color theming (fallback if manifest isn't picked up yet)
+}
+
+// Move theme color to viewport for Next.js metadata API compatibility
+export const viewport: Viewport = {
   themeColor: '#0f172a',
 }
 

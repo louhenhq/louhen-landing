@@ -22,7 +22,10 @@ type OnboardState = {
 
 export const useOnboard = create<OnboardState>()(
   persist(
-    (set, get) => ({
+    (
+      set: (partial: Partial<OnboardState>) => void,
+      get: () => OnboardState
+    ): OnboardState => ({
       stepIndex: 0,
       account: {},
       profile: {},

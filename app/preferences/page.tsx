@@ -1,108 +1,118 @@
 'use client';
-
 import * as React from 'react';
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
-type Prefs = { waitlistUpdates: boolean; referrals: boolean; launchNews: boolean };
+// Force dynamic rendering (no prerender) to avoid static export errors
+export const dynamic = 'force-dynamic';
 
-export default function PreferencesPage() {
-  const params = useSearchParams();
-  const token = params.get('token') || '';
+function PrefsInner() {
+  const sp = useSearchParams(); // requires Suspense boundary
+  const token = sp.get('token') || '';
+
+  return (
+    <main className="mx-auto max-w-3xl px-4 py-10">
+      <h1 className="text-2xl font-bold tracking-tight">Email preferences</h1>
+      {!token ? (
+        <p className="mt-4 text-rose-600" role="alert">
+          Missing token. Please use the link from your email.
+        </p>
+      ) : (
+        <PrefsForm token={token} />
+      )}
+    </main>
+  );
+}
+
+function PrefsForm({ token }: { token: string }) {
   const [loading, setLoading] = React.useState(true);
-  const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState<string>('');
-  const [email, setEmail] = React.useState<string>('');
   const [unsubscribed, setUnsubscribed] = React.useState(false);
-  const [prefs, setPrefs] = React.useState<Prefs>({ waitlistUpdates: true, referrals: true, launchNews: true });
+  const [prefs, setPrefs] = React.useState<{ waitlistUpdates: boolean; referrals: boolean; launchNews: boolean }>({
+    waitlistUpdates: true,
+    referrals: true,
+    launchNews: true,
+  });
+  const [msg, setMsg] = React.useState('');
 
   React.useEffect(() => {
-    let alive = true;
-    async function load() {
-      if (!token) { setError('Missing token'); setLoading(false); return; }
+    let cancelled = false;
+    (async () => {
       try {
-        const res = await fetch(`/api/prefs?token=${encodeURIComponent(token)}`);
+        const res = await fetch(`/api/prefs?token=${encodeURIComponent(token)}`, { cache: 'no-store' });
+        if (!res.ok) throw new Error('Failed to load preferences');
         const data = await res.json();
-        if (!alive) return;
-        if (!res.ok || !data.ok) { setError(data?.error || 'Failed to load'); }
-        else {
-          setEmail(data.email || '');
-          setUnsubscribed(!!data.unsubscribed);
-          setPrefs(data.emailPrefs as Prefs);
+        if (!cancelled) {
+          setUnsubscribed(Boolean(data.unsubscribed));
+          setPrefs({
+            waitlistUpdates: Boolean(data?.emailPrefs?.waitlistUpdates),
+            referrals: Boolean(data?.emailPrefs?.referrals),
+            launchNews: Boolean(data?.emailPrefs?.launchNews),
+          });
         }
-      } catch {
-        if (alive) setError('Failed to load');
+      } catch (e) {
+        if (!cancelled) setError('Could not load preferences. The link may be expired.');
       } finally {
-        if (alive) setLoading(false);
+        if (!cancelled) setLoading(false);
       }
-    }
-    load();
-    return () => { alive = false; };
+    })();
+    return () => { cancelled = true; };
   }, [token]);
 
-  async function save() {
-    setSaving(true); setError('');
+  async function onSave(e: React.FormEvent) {
+    e.preventDefault();
+    setError('');
+    setMsg('');
     try {
       const res = await fetch(`/api/prefs?token=${encodeURIComponent(token)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ unsubscribed, emailPrefs: prefs }),
       });
-      const data = await res.json();
-      if (!res.ok || !data.ok) setError(data?.error || 'Failed to save');
+      if (!res.ok) throw new Error('Save failed');
+      setMsg('Preferences saved.');
     } catch {
-      setError('Failed to save');
-    } finally {
-      setSaving(false);
+      setError('Could not save preferences.');
     }
   }
 
-  if (loading) return <main className="mx-auto max-w-3xl px-4 py-16">Loading…</main>;
-  if (error) return <main className="mx-auto max-w-3xl px-4 py-16"><p className="text-rose-600">Error: {error}</p></main>;
+  if (loading) return <p className="mt-4 text-slate-600">Loading…</p>;
+  if (error) return <p className="mt-4 text-rose-600" role="alert">{error}</p>;
 
   return (
-    <main className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16">
-      <h1 className="text-3xl font-bold tracking-tight">Email preferences</h1>
-      <p className="mt-1 text-slate-600 text-sm">Managing: <span className="font-mono">{email}</span></p>
+    <form onSubmit={onSave} className="mt-6 grid gap-4 max-w-lg rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <label className="flex items-center gap-3">
+        <input type="checkbox" checked={!unsubscribed} onChange={(e)=>setUnsubscribed(!e.target.checked)} />
+        <span className="font-medium">Receive emails from Louhen</span>
+      </label>
 
-      <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
-        <label className="flex items-start gap-3">
-          <input type="checkbox" className="mt-1 h-4 w-4" checked={!unsubscribed} onChange={e => setUnsubscribed(!e.target.checked)} />
-          <div>
-            <div className="font-medium">Receive emails</div>
-            <div className="text-sm text-slate-600">Uncheck to unsubscribe from all messages.</div>
-          </div>
+      <fieldset className="grid gap-2 pl-6">
+        <label className="flex items-center gap-3">
+          <input type="checkbox" checked={prefs.waitlistUpdates} onChange={(e)=>setPrefs(p=>({ ...p, waitlistUpdates: e.target.checked }))} />
+          <span>Waitlist updates</span>
         </label>
-        <div className="mt-4 grid gap-3">
-          <label className="flex items-start gap-3 opacity-100">
-            <input type="checkbox" className="mt-1 h-4 w-4" checked={prefs.waitlistUpdates && !unsubscribed} onChange={e => setPrefs(p => ({ ...p, waitlistUpdates: e.target.checked }))} disabled={unsubscribed} />
-            <div>
-              <div className="font-medium">Waitlist updates</div>
-              <div className="text-sm text-slate-600">News and progress before launch.</div>
-            </div>
-          </label>
-          <label className="flex items-start gap-3">
-            <input type="checkbox" className="mt-1 h-4 w-4" checked={prefs.referrals && !unsubscribed} onChange={e => setPrefs(p => ({ ...p, referrals: e.target.checked }))} disabled={unsubscribed} />
-            <div>
-              <div className="font-medium">Referral reminders</div>
-              <div className="text-sm text-slate-600">Occasional nudges about your invite link.</div>
-            </div>
-          </label>
-          <label className="flex items-start gap-3">
-            <input type="checkbox" className="mt-1 h-4 w-4" checked={prefs.launchNews && !unsubscribed} onChange={e => setPrefs(p => ({ ...p, launchNews: e.target.checked }))} disabled={unsubscribed} />
-            <div>
-              <div className="font-medium">Launch news</div>
-              <div className="text-sm text-slate-600">Be first to know when we go live.</div>
-            </div>
-          </label>
-        </div>
+        <label className="flex items-center gap-3">
+          <input type="checkbox" checked={prefs.referrals} onChange={(e)=>setPrefs(p=>({ ...p, referrals: e.target.checked }))} />
+          <span>Referrals & rewards</span>
+        </label>
+        <label className="flex items-center gap-3">
+          <input type="checkbox" checked={prefs.launchNews} onChange={(e)=>setPrefs(p=>({ ...p, launchNews: e.target.checked }))} />
+          <span>Launch news</span>
+        </label>
+      </fieldset>
 
-        <div className="mt-6 flex gap-3">
-          <button onClick={save} disabled={saving} className="rounded-xl bg-slate-900 text-white px-4 py-2 font-semibold hover:opacity-90 disabled:opacity-60">
-            {saving ? 'Saving…' : 'Save preferences'}
-          </button>
-        </div>
+      <div className="flex items-center gap-3">
+        <button className="rounded-xl bg-slate-900 text-white px-4 py-2 font-semibold hover:opacity-90">Save</button>
+        {msg && <span className="text-emerald-700 text-sm" aria-live="polite">{msg}</span>}
       </div>
-    </main>
+    </form>
   );
 }
 
+export default function PreferencesPage() {
+  return (
+    <Suspense fallback={<main className="mx-auto max-w-3xl px-4 py-10"><p className="text-slate-600">Loading…</p></main>}>
+      <PrefsInner />
+    </Suspense>
+  );
+}
