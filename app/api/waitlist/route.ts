@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic';
 
 import { initAdmin, admin } from '@/lib/firebaseAdmin';
 import { Resend } from 'resend';
+import { randomBytes } from 'crypto';
 
 // --- Simple in-memory rate limit: 3 req / 60s per IP (per server instance) ---
 type Bucket = { count: number; resetAt: number };
@@ -115,6 +116,12 @@ export async function POST(req: Request) {
       launchNews: true,
     } as const;
 
+    // Create unsubscribe token (90 days expiry)
+    const unsubscribeToken = randomBytes(24).toString('base64url');
+    const unsubscribeTokenExpiresAt = admin.firestore.Timestamp.fromDate(
+      new Date(Date.now() + 1000 * 60 * 60 * 24 * 90)
+    );
+
     const newDocRef = await db.collection('waitlist').add({
       email, emailLc,
       firstName: firstName ?? null,
@@ -133,9 +140,8 @@ export async function POST(req: Request) {
       // Unsubscribe / preferences (initialized for future use)
       unsubscribed: false,
       emailPrefs: defaultPrefs,
-      // (Optional) For future tokenized unsubscribe:
-      // unsubscribeToken: null,
-      // unsubscribeTokenExpiresAt: null,
+      unsubscribeToken,
+      unsubscribeTokenExpiresAt,
     });
 
     if (refAccepted && referrerId) {
@@ -201,6 +207,11 @@ export async function POST(req: Request) {
           </p>
           <p style="margin:16px 0 0;color:#475569;font-size:12px;line-height:1.6;">
             You’re receiving this because you joined the Louhen waitlist. If this wasn’t you, simply ignore this email or contact us at hello@louhen.com.
+          </p>
+          <p style="margin:8px 0 0;color:#64748b;font-size:12px;">
+            <a href="${(() => { const u = new URL('/api/unsubscribe', base); u.searchParams.set('token', unsubscribeToken); return u.toString(); })()}" style="color:#0f172a;">Unsubscribe</a>
+            ·
+            <a href="${(() => { const u = new URL('/preferences', base); u.searchParams.set('token', unsubscribeToken); return u.toString(); })()}" style="color:#0f172a;margin-left:8px;">Manage preferences</a>
           </p>
         </td>
       </tr>
