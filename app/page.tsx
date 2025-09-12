@@ -2,6 +2,7 @@
 
 // app/page.tsx
 import * as React from 'react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 type NavigatorWithShare = Navigator & { share?: (data: ShareData) => Promise<void> };
 
@@ -19,6 +20,9 @@ export default function WaitlistLanding() {
             <a href="#how" className="hover:opacity-70">How it works</a>
             <a href="#story" className="hover:opacity-70">Founder story</a>
             <a href="#faq" className="hover:opacity-70">FAQ</a>
+            {process.env.NEXT_PUBLIC_ONBOARDING_ENABLED === 'true' && (
+              <Link href="/onboarding/account" className="hover:opacity-70">Onboarding</Link>
+            )}
           </nav>
         </div>
       </header>
@@ -319,17 +323,25 @@ function WaitlistForm() {
               : 'Join the waitlist'}
           </button>
           {message && (
-            <p
-              aria-live="polite"
-              className={`mt-3 text-sm ${
-                status==='ok' ? 'text-emerald-700'
-                : status==='dupe' ? 'text-slate-700'
-                : status==='rate' ? 'text-amber-700'
-                : 'text-rose-600'
-              }`}
-            >
-              {message}
-            </p>
+            <div className="mt-3" aria-live="polite">
+              <p
+                className={`text-sm ${
+                  status==='ok' ? 'text-emerald-700'
+                  : status==='dupe' ? 'text-slate-700'
+                  : status==='rate' ? 'text-amber-700'
+                  : 'text-rose-600'
+                }`}
+              >
+                {message}
+              </p>
+              {status==='ok' && process.env.NEXT_PUBLIC_ONBOARDING_ENABLED === 'true' && (
+                <div className="mt-3">
+                  <Link href="/onboarding/account" className="inline-block rounded-xl border border-slate-300 px-4 py-2 hover:bg-slate-50 text-sm">
+                    Continue onboarding
+                  </Link>
+                </div>
+              )}
+            </div>
           )}
           {status === 'ok' && shareLink && (
             <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-4">

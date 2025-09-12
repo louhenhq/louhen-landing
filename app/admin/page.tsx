@@ -2,6 +2,23 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 import { initAdmin } from '@/lib/firebaseAdmin';
+import type { WaitlistDoc } from '@/types/waitlist';
+
+function toIsoDate(input: unknown): string {
+  // Supports Firestore Timestamp, Date, ISO string, or undefined/null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const ts = input as any;
+  if (ts && typeof ts.toDate === 'function') {
+    const d: Date = ts.toDate();
+    return d.toISOString();
+  }
+  if (input instanceof Date) return input.toISOString();
+  if (typeof input === 'string') {
+    const d = new Date(input);
+    if (!Number.isNaN(d.getTime())) return d.toISOString();
+  }
+  return '';
+}
 
 function maskEmail(email: string) {
   const [user, domain] = email.split('@');
@@ -13,7 +30,9 @@ function maskEmail(email: string) {
   return `${maskedUser}@${domain}`;
 }
 
-export default async function AdminPage({ searchParams }: { searchParams: Record<string, string | string[] | undefined> }) {
+type SearchParams = Record<string, string | string[] | undefined>;
+
+export default async function AdminPage({ searchParams }: { searchParams: SearchParams }) {
   const keyFromUrl = typeof searchParams.key === 'string' ? searchParams.key : Array.isArray(searchParams.key) ? searchParams.key[0] : undefined;
   const adminKey = process.env.ADMIN_KEY;
   if (!adminKey || keyFromUrl !== adminKey) {
@@ -34,17 +53,26 @@ export default async function AdminPage({ searchParams }: { searchParams: Record
     email: string;
     code: string;
     count: number;
+    createdAt: string;
     country: string;
   };
 
   const rows: Row[] = snap.docs.map((d) => {
-    const data = d.data() as Record<string, unknown>;
+    const raw = d.data() as FirebaseFirestore.DocumentData;
+    const data: Partial<WaitlistDoc> = {
+      email: String(raw.email),
+      referralCode: String(raw.referralCode || ''),
+      referralCount: Number(raw.referralCount || 0),
+      createdAt: raw.createdAt,
+      country: raw.country || '',
+    };
     return {
       id: d.id,
-      email: String(data.email ?? ''),
-      code: String(data.referralCode ?? ''),
-      count: Number((data as Record<string, unknown>).referralCount ?? 0),
-      country: String(data.country ?? ''),
+      email: data.email || '',
+      code: data.referralCode || '',
+      count: data.referralCount || 0,
+      createdAt: toIsoDate(data.createdAt as unknown),
+      country: String(data.country || ''),
     };
   });
 
@@ -60,6 +88,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Record
               <th className="px-3 py-2 text-left">Email</th>
               <th className="px-3 py-2 text-left">Code</th>
               <th className="px-3 py-2 text-left">Referrals</th>
+              <th className="px-3 py-2 text-left">Created</th>
               <th className="px-3 py-2 text-left">Country</th>
             </tr>
           </thead>
@@ -70,12 +99,18 @@ export default async function AdminPage({ searchParams }: { searchParams: Record
                 <td className="px-3 py-2">{maskEmail(r.email)}</td>
                 <td className="px-3 py-2 font-mono">{r.code}</td>
                 <td className="px-3 py-2">{r.count}</td>
+                <td className="px-3 py-2 tabular-nums">
+                  {r.createdAt ? new Date(r.createdAt).toLocaleString(undefined, {
+                    year: 'numeric', month: 'short', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit'
+                  }) : '—'}
+                </td>
                 <td className="px-3 py-2">{r.country}</td>
               </tr>
             ))}
             {rows.length === 0 && (
               <tr>
-                <td className="px-3 py-4 text-slate-500" colSpan={5}>
+                <td className="px-3 py-4 text-slate-500" colSpan={6}>
                   No data yet.
                 </td>
               </tr>
@@ -86,4 +121,3 @@ export default async function AdminPage({ searchParams }: { searchParams: Record
     </main>
   );
 }
-

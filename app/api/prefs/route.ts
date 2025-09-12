@@ -25,7 +25,7 @@ export async function GET(req: Request) {
     if (!doc) return NextResponse.json({ ok: false, error: 'invalid_token' }, { status: 404 });
 
     const raw = doc.data() as FirebaseFirestore.DocumentData;
-    const data: WaitlistDoc = {
+    const data: Partial<WaitlistDoc> = {
       email: String(raw.email),
       unsubscribed: Boolean(raw.unsubscribed),
       emailPrefs: {
