@@ -3,57 +3,14 @@
 // app/page.tsx
 import * as React from 'react';
 import Link from 'next/link';
+import { SITE_NAME, LEGAL_ENTITY } from '@/constants/site';
 import { useSearchParams } from 'next/navigation';
 type NavigatorWithShare = Navigator & { share?: (data: ShareData) => Promise<void> };
 
 export default function WaitlistLanding() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 text-slate-900">
-      {/* Header */}
-      <header className="sticky top-0 z-30 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/50 border-b border-slate-200">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          {/* Brand */}
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-xl bg-slate-900" aria-hidden />
-            <span className="font-semibold tracking-tight">Louhen</span>
-          </div>
-
-          {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-6 text-sm">
-            <a href="#how" className="hover:opacity-70">How it works</a>
-            <a href="#story" className="hover:opacity-70">Founder story</a>
-            <a href="#faq" className="hover:opacity-70">FAQ</a>
-            {process.env.NEXT_PUBLIC_ONBOARDING_ENABLED === 'true' && (
-              <Link href="/onboarding/account" className="hover:opacity-70">Onboarding</Link>
-            )}
-          </nav>
-
-          {/* Mobile menu button */}
-          <button
-            type="button"
-            aria-label="Open menu"
-            className="md:hidden inline-flex items-center justify-center rounded-lg border border-slate-300 p-2"
-            onClick={() => {
-              const el = document.getElementById('mobile-menu');
-              if (el) el.classList.toggle('hidden');
-            }}
-          >
-            <span aria-hidden>☰</span>
-          </button>
-        </div>
-
-        {/* Mobile dropdown */}
-        <div id="mobile-menu" className="md:hidden hidden border-t border-slate-200 bg-white/90 backdrop-blur">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 flex flex-col gap-3 text-sm">
-            <a href="#how" className="hover:opacity-70">How it works</a>
-            <a href="#story" className="hover:opacity-70">Founder story</a>
-            <a href="#faq" className="hover:opacity-70">FAQ</a>
-            {process.env.NEXT_PUBLIC_ONBOARDING_ENABLED === 'true' && (
-              <Link href="/onboarding/account" className="hover:opacity-70">Onboarding</Link>
-            )}
-          </div>
-        </div>
-      </header>
+      {/* Header removed: now rendered globally via app/layout.tsx */}
 
       {/* Hero */}
       <section className="relative overflow-hidden">
@@ -66,7 +23,7 @@ export default function WaitlistLanding() {
               Perfect fit for growing feet.
             </h1>
             <p className="mt-4 text-lg leading-relaxed text-slate-600">
-              Louhen is a fit-first shoe companion for kids aged 10 months to 6 years. Scan feet, get data-driven recommendations, and relax under our LouhenFit Guarantee: if they don’t fit, we’ll make it right.
+              {SITE_NAME} is a fit-first shoe companion for kids aged 10 months to 6 years. Scan feet, get data-driven recommendations, and relax under our LouhenFit Guarantee: if they don’t fit, we’ll make it right.
             </p>
 
             <React.Suspense fallback={null}>
@@ -106,7 +63,7 @@ export default function WaitlistLanding() {
       {/* How it works */}
       <section id="how" className="bg-white border-y border-slate-200">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">How Louhen works</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">How {SITE_NAME} works</h2>
           <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <StepCard step="1" title="Scan or size">
               Use your phone to scan your child’s feet or enter simple measurements.
@@ -125,9 +82,9 @@ export default function WaitlistLanding() {
       <section id="story" className="bg-slate-50">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16">
           <div className="rounded-3xl bg-white border border-slate-200 p-6 sm:p-10 shadow-sm">
-            <h3 className="text-xl font-semibold">Why we’re building Louhen</h3>
+            <h3 className="text-xl font-semibold">Why we’re building {SITE_NAME}</h3>
             <p className="mt-4 text-slate-600 leading-relaxed">
-              The idea was born buying our twins’ first shoes: a crowded store, long waits, two options measured only by length & width. We found a decent pair, but the experience felt stressful and limited. Louhen lets parents shop at their own pace with confidence in fit and a wider choice of design and materials.
+              The idea was born buying our twins’ first shoes: a crowded store, long waits, two options measured only by length & width. We found a decent pair, but the experience felt stressful and limited. {SITE_NAME} lets parents shop at their own pace with confidence in fit and a wider choice of design and materials.
             </p>
           </div>
         </div>
@@ -149,14 +106,12 @@ export default function WaitlistLanding() {
       {/* Footer */}
       <footer className="bg-slate-50 border-t border-slate-200">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 text-sm text-slate-600 flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
-          <p>© {new Date().getFullYear()} Louhen GmbH (in formation)</p>
+          <p>© {new Date().getFullYear()} {LEGAL_ENTITY}</p>
+          {/* Legal links only — main navigation handled in SiteHeader */}
           <nav className="flex gap-6">
-            <a href="/privacy" className="hover:opacity-70">Privacy</a>
-            <a href="/terms" className="hover:opacity-70">Terms</a>
-            <a href="/imprint" className="hover:opacity-70">Imprint</a>
-            {process.env.NEXT_PUBLIC_ONBOARDING_ENABLED === 'true' && (
-              <Link href="/onboarding/account" className="hover:opacity-70">Onboarding</Link>
-            )}
+            <Link href="/privacy" prefetch={false} className="hover:opacity-70">Privacy</Link>
+            <Link href="/terms" prefetch={false} className="hover:opacity-70">Terms</Link>
+            <Link href="/imprint" prefetch={false} className="hover:opacity-70">Imprint</Link>
           </nav>
         </div>
       </footer>

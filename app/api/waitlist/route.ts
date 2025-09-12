@@ -6,6 +6,7 @@ import { initAdmin } from '@/lib/firebaseAdmin';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { getResend } from '@/lib/resendOptional';
 import { randomBytes } from 'crypto';
+import { SITE_NAME, LEGAL_ENTITY } from '@/constants/site';
 import type { EmailPrefs, WaitlistDoc } from '@/types/waitlist';
 
 // --- Simple in-memory rate limit: 3 req / 60s per IP (per server instance) ---
@@ -182,11 +183,11 @@ export async function POST(req: Request) {
           url.searchParams.set('utm_content', codeUpper);
           const referralLink = url.toString();
 
-          const from = process.env.RESEND_FROM || 'Louhen <hello@louhen.com>';
+          const from = process.env.RESEND_FROM || `${SITE_NAME} <hello@louhen.com>`;
           const to = String(email);
           const first = (firstName && String(firstName).trim()) || '';
 
-        const subject = 'Welcome to Louhen 👟 Your referral link inside';
+        const subject = `Welcome to ${SITE_NAME} 👟 Your referral link inside`;
         const preview = `Here’s your personal invite link: ${referralLink}`;
         const html = `<!doctype html>
 <html>
@@ -197,11 +198,11 @@ export async function POST(req: Request) {
         <td>
           <div style="display:flex;align-items:center;gap:12px;">
             <div style="width:28px;height:28px;border-radius:8px;background:#0f172a;display:inline-block;"></div>
-            <div style="font-weight:700;">Louhen</div>
+            <div style="font-weight:700;">${SITE_NAME}</div>
           </div>
           <h1 style="margin:20px 0 8px;font-size:20px;">Welcome${first ? `, ${first}` : ''}!</h1>
           <p style="margin:0 0 16px;line-height:1.6;">
-            Thanks for joining Louhen. Here’s your personal invite link — share it with friends and you’ll both earn credit when they place their first order:
+            Thanks for joining ${SITE_NAME}. Here’s your personal invite link — share it with friends and you’ll both earn credit when they place their first order:
           </p>
           <p style="margin:0 0 16px;">
             <a href="${referralLink}" style="color:#0f172a;text-decoration:underline;word-break:break-all;">${referralLink}</a>
@@ -210,12 +211,15 @@ export async function POST(req: Request) {
             Your referral code: <strong>${codeUpper}</strong>
           </p>
           <p style="margin:16px 0 0;color:#475569;font-size:12px;line-height:1.6;">
-            You’re receiving this because you joined the Louhen waitlist. If this wasn’t you, simply ignore this email or contact us at hello@louhen.com.
+            You’re receiving this because you joined the ${SITE_NAME} waitlist. If this wasn’t you, simply ignore this email or contact us at hello@louhen.com.
           </p>
           <p style="margin:8px 0 0;color:#64748b;font-size:12px;">
             <a href="${(() => { const u = new URL('/api/unsubscribe', base); u.searchParams.set('token', unsubscribeToken); return u.toString(); })()}" style="color:#0f172a;">Unsubscribe</a>
             ·
             <a href="${(() => { const u = new URL('/preferences', base); u.searchParams.set('token', unsubscribeToken); return u.toString(); })()}" style="color:#0f172a;margin-left:8px;">Manage preferences</a>
+          </p>
+          <p style="margin:12px 0 0;color:#94a3b8;font-size:11px;line-height:1.6;">
+            ${LEGAL_ENTITY}
           </p>
         </td>
       </tr>

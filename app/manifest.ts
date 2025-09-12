@@ -1,12 +1,12 @@
 import type { MetadataRoute } from 'next';
+import { SITE_NAME } from '@/constants/site';
 
 export default function manifest(): MetadataRoute.Manifest {
   const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://louhen-landing.vercel.app';
   return {
-    name: 'Louhen',
-    short_name: 'Louhen',
-    description:
-      'Fit-first shoe companion for kids 10 months to 6 years. Scan feet, get data-driven recommendations, and relax under our LouhenFit Guarantee.',
+    name: SITE_NAME,
+    short_name: SITE_NAME,
+    description: `${SITE_NAME} — Perfect fit for growing feet`,
     start_url: '/',
     scope: '/',
     display: 'standalone',
@@ -26,4 +26,3 @@ export default function manifest(): MetadataRoute.Manifest {
     prefer_related_applications: false,
   };
 }
-

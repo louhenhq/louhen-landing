@@ -1,4 +1,5 @@
-export const metadata = { title: 'Terms — Louhen' };
+import { SITE_NAME } from '@/constants/site';
+export const metadata = { title: `Terms — ${SITE_NAME}` };
 
 export default function TermsPage() {
   return (

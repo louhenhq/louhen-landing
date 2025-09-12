@@ -1,5 +1,6 @@
+import { SITE_NAME } from '@/constants/site';
 export const runtime = 'edge';
-export const alt = 'Louhen — Perfect fit for growing feet';
+export const alt = `${SITE_NAME} — Perfect fit for growing feet`;
 export const size = { width: 1200, height: 630 } as const;
 export const contentType = 'image/png';
 
@@ -35,7 +36,7 @@ export default function OG() {
               background: '#0f172a',
             }}
           />
-          <div style={{ fontSize: 28, fontWeight: 700, color: '#0f172a' }}>Louhen</div>
+          <div style={{ fontSize: 28, fontWeight: 700, color: '#0f172a' }}>{SITE_NAME}</div>
         </div>
         <div style={{ fontSize: 68, fontWeight: 800, color: '#0b1220', lineHeight: 1.1 }}>
           Perfect fit for growing feet.
@@ -48,4 +49,3 @@ export default function OG() {
     { ...size }
   );
 }
-
