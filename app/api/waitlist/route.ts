@@ -2,8 +2,9 @@ import { NextResponse } from 'next/server';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-import { initAdmin, admin } from '@/lib/firebaseAdmin';
-import { Resend } from 'resend';
+import { initAdmin } from '@/lib/firebaseAdmin';
+import { FieldValue, Timestamp } from 'firebase-admin/firestore';
+import { getResend } from '@/lib/resendOptional';
 import { randomBytes } from 'crypto';
 
 // --- Simple in-memory rate limit: 3 req / 60s per IP (per server instance) ---
@@ -83,7 +84,7 @@ export async function POST(req: Request) {
     if (!exists.empty) return NextResponse.json({ ok: true, dupe: true });
 
     const code = makeReferralCode();
-    const now = admin.firestore.FieldValue.serverTimestamp();
+    const now = FieldValue.serverTimestamp();
 
     // Resolve referrer (optional)
     let refAccepted = false;
@@ -118,7 +119,7 @@ export async function POST(req: Request) {
 
     // Create unsubscribe token (90 days expiry)
     const unsubscribeToken = randomBytes(24).toString('base64url');
-    const unsubscribeTokenExpiresAt = admin.firestore.Timestamp.fromDate(
+    const unsubscribeTokenExpiresAt = Timestamp.fromDate(
       new Date(Date.now() + 1000 * 60 * 60 * 24 * 90)
     );
 
@@ -146,7 +147,7 @@ export async function POST(req: Request) {
 
     if (refAccepted && referrerId) {
       const referrerRef = db.collection('waitlist').doc(referrerId);
-      await referrerRef.update({ referralCount: admin.firestore.FieldValue.increment(1) });
+      await referrerRef.update({ referralCount: FieldValue.increment(1) });
       await db.collection('referralEvents').add({
         type: 'signup_credit',
         referrerId,
@@ -162,25 +163,27 @@ export async function POST(req: Request) {
     // --- Send welcome email with referral link (best-effort, toggle with EMAIL_ENABLED) ---
     try {
       const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true';
-      const RESEND_API_KEY = process.env.RESEND_API_KEY;
       // Re-fetch just-created doc to confirm unsubscribe flag (future-proof)
       const createdSnap = await newDocRef.get();
       const createdData = createdSnap.exists ? (createdSnap.data() as Record<string, unknown>) : undefined;
       const isUnsub = createdData?.unsubscribed === true;
-      if (EMAIL_ENABLED && RESEND_API_KEY && !isUnsub) {
-        const resend = new Resend(RESEND_API_KEY);
-        const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://louhen-landing.vercel.app';
-        const codeUpper = String(code).toUpperCase();
-        const url = new URL(`/r/${codeUpper}`, base);
-        url.searchParams.set('utm_source', 'referral');
-        url.searchParams.set('utm_medium', 'waitlist');
-        url.searchParams.set('utm_campaign', 'prelaunch');
-        url.searchParams.set('utm_content', codeUpper);
-        const referralLink = url.toString();
+      if (EMAIL_ENABLED && !isUnsub) {
+        const resend = await getResend();
+        if (!resend) {
+          console.warn('Resend not installed; skipping email send.');
+        } else {
+          const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://louhen-landing.vercel.app';
+          const codeUpper = String(code).toUpperCase();
+          const url = new URL(`/r/${codeUpper}`, base);
+          url.searchParams.set('utm_source', 'referral');
+          url.searchParams.set('utm_medium', 'waitlist');
+          url.searchParams.set('utm_campaign', 'prelaunch');
+          url.searchParams.set('utm_content', codeUpper);
+          const referralLink = url.toString();
 
-        const from = process.env.RESEND_FROM || 'Louhen <hello@louhen.com>';
-        const to = String(email);
-        const first = (firstName && String(firstName).trim()) || '';
+          const from = process.env.RESEND_FROM || 'Louhen <hello@louhen.com>';
+          const to = String(email);
+          const first = (firstName && String(firstName).trim()) || '';
 
         const subject = 'Welcome to Louhen 👟 Your referral link inside';
         const preview = `Here’s your personal invite link: ${referralLink}`;
@@ -218,20 +221,18 @@ export async function POST(req: Request) {
     </table>
   </body>
 </html>`;
-
-        await resend.emails.send({
-          from,
-          to,
-          subject,
-          headers: { 'X-Entity-Ref-ID': newDocRef.id, 'X-Preheader': preview },
-          html,
-        });
+          await resend.emails.send({
+            from,
+            to,
+            subject,
+            headers: { 'X-Entity-Ref-ID': newDocRef.id, 'X-Preheader': preview },
+            html,
+          });
+        }
       } else {
-        // eslint-disable-next-line no-console
         console.warn('Email sending skipped (disabled, missing API key, or user unsubscribed).');
       }
     } catch (mailErr) {
-      // eslint-disable-next-line no-console
       console.error('Resend email send failed:', mailErr);
     }
 

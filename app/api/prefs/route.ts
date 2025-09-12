@@ -1,6 +1,20 @@
 import { NextResponse } from 'next/server';
 import { initAdmin } from '@/lib/firebaseAdmin';
 
+type EmailPrefs = {
+  waitlistUpdates: boolean;
+  referrals: boolean;
+  launchNews: boolean;
+};
+
+type WaitlistDoc = {
+  email: string;
+  unsubscribed?: boolean;
+  emailPrefs?: Partial<EmailPrefs>;
+  unsubscribeToken?: string | null;
+  unsubscribeTokenExpiresAt?: FirebaseFirestore.Timestamp | null;
+};
+
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
@@ -21,19 +35,27 @@ export async function GET(req: Request) {
     const doc = await getDocByToken(token);
     if (!doc) return NextResponse.json({ ok: false, error: 'invalid_token' }, { status: 404 });
 
-    const data = doc.data() as Record<string, unknown>;
+    const raw = doc.data() as FirebaseFirestore.DocumentData;
+    const data: WaitlistDoc = {
+      email: String(raw.email),
+      unsubscribed: Boolean(raw.unsubscribed),
+      emailPrefs: {
+        waitlistUpdates: Boolean(raw?.emailPrefs?.waitlistUpdates),
+        referrals: Boolean(raw?.emailPrefs?.referrals),
+        launchNews: Boolean(raw?.emailPrefs?.launchNews),
+      },
+    };
     return NextResponse.json({
       ok: true,
-      email: String(data.email ?? ''),
+      email: data.email,
       unsubscribed: Boolean(data.unsubscribed),
       emailPrefs: {
-        waitlistUpdates: Boolean((data as any)?.emailPrefs?.waitlistUpdates),
-        referrals: Boolean((data as any)?.emailPrefs?.referrals),
-        launchNews: Boolean((data as any)?.emailPrefs?.launchNews),
+        waitlistUpdates: Boolean(data.emailPrefs?.waitlistUpdates),
+        referrals: Boolean(data.emailPrefs?.referrals),
+        launchNews: Boolean(data.emailPrefs?.launchNews),
       },
     });
   } catch (e) {
-    // eslint-disable-next-line no-console
     console.error('Prefs GET error', e);
     return NextResponse.json({ ok: false, error: 'server_error' }, { status: 500 });
   }
@@ -45,9 +67,10 @@ export async function POST(req: Request) {
     const token = searchParams.get('token') || '';
     if (!token) return NextResponse.json({ ok: false, error: 'missing_token' }, { status: 400 });
 
-    const body = await req.json().catch(() => ({}));
-    const prefs = (body as Record<string, unknown>)?.emailPrefs as Record<string, unknown> | undefined;
-    const unsub = (body as Record<string, unknown>)?.unsubscribed as boolean | undefined;
+    type UpdateBody = { unsubscribed?: boolean; emailPrefs?: Partial<EmailPrefs> };
+    const body = (await req.json().catch(() => ({}))) as UpdateBody;
+    const prefs = body.emailPrefs;
+    const unsub = body.unsubscribed;
 
     const doc = await getDocByToken(token);
     if (!doc) return NextResponse.json({ ok: false, error: 'invalid_token' }, { status: 404 });
@@ -59,7 +82,7 @@ export async function POST(req: Request) {
         waitlistUpdates: Boolean(prefs.waitlistUpdates),
         referrals: Boolean(prefs.referrals),
         launchNews: Boolean(prefs.launchNews),
-      };
+      } as EmailPrefs;
     }
 
     if (Object.keys(updates).length === 0) {
@@ -69,9 +92,7 @@ export async function POST(req: Request) {
     await doc.ref.update(updates);
     return NextResponse.json({ ok: true });
   } catch (e) {
-    // eslint-disable-next-line no-console
     console.error('Prefs POST error', e);
     return NextResponse.json({ ok: false, error: 'server_error' }, { status: 500 });
   }
 }
-
