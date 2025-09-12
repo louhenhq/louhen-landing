@@ -140,10 +140,11 @@ export async function POST(req: Request) {
       });
     }
 
-    // --- Send welcome email with referral link (best-effort) ---
+    // --- Send welcome email with referral link (best-effort, toggle with EMAIL_ENABLED) ---
     try {
+      const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true';
       const RESEND_API_KEY = process.env.RESEND_API_KEY;
-      if (RESEND_API_KEY) {
+      if (EMAIL_ENABLED && RESEND_API_KEY) {
         const resend = new Resend(RESEND_API_KEY);
         const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://louhen-landing.vercel.app';
         const codeUpper = String(code).toUpperCase();
@@ -199,7 +200,7 @@ export async function POST(req: Request) {
         });
       } else {
         // eslint-disable-next-line no-console
-        console.warn('RESEND_API_KEY not set; skipping welcome email.');
+        console.warn('Email sending skipped (EMAIL_ENABLED not true or RESEND_API_KEY missing).');
       }
     } catch (mailErr) {
       // eslint-disable-next-line no-console
