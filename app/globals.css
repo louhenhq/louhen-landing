@@ -2,6 +2,5 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Global tweaks */
+/* Keep any plain CSS tweaks; avoid @apply here. */
 html, body { height: 100%; }
-body { @apply bg-white text-slate-900 antialiased; }

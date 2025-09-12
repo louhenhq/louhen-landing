@@ -50,7 +50,7 @@ function PrefsForm({ token }: { token: string }) {
             launchNews: Boolean(data?.emailPrefs?.launchNews),
           });
         }
-      } catch (e) {
+      } catch {
         if (!cancelled) setError('Could not load preferences. The link may be expired.');
       } finally {
         if (!cancelled) setLoading(false);
@@ -59,8 +59,8 @@ function PrefsForm({ token }: { token: string }) {
     return () => { cancelled = true; };
   }, [token]);
 
-  async function onSave(e: React.FormEvent) {
-    e.preventDefault();
+  async function onSave(_e: React.FormEvent) {
+    _e.preventDefault();
     setError('');
     setMsg('');
     try {

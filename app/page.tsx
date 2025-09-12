@@ -126,6 +126,9 @@ export default function WaitlistLanding() {
             <a href="/privacy" className="hover:opacity-70">Privacy</a>
             <a href="/terms" className="hover:opacity-70">Terms</a>
             <a href="/imprint" className="hover:opacity-70">Imprint</a>
+            {process.env.NEXT_PUBLIC_ONBOARDING_ENABLED === 'true' && (
+              <Link href="/onboarding/account" className="hover:opacity-70">Onboarding</Link>
+            )}
           </nav>
         </div>
       </footer>
