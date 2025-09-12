@@ -117,6 +117,8 @@ function StepAccount() {
   const { set, next, account } = useOnboard();
   const [email, setEmail] = React.useState(account.email || '');
   const [err, setErr] = React.useState<string>('');
+  const emailRef = React.useRef<HTMLInputElement>(null);
+  const [srMsg, setSrMsg] = React.useState<string>('');
   return (
     <Shell title="Create your account">
       <p className="mt-2 text-slate-600">We’ll use your email to save progress<Info text="Used only for onboarding and account setup." />.</p>
@@ -125,8 +127,15 @@ function StepAccount() {
         onSubmit={(e) => {
           e.preventDefault();
           const value = email.trim();
-          if (!isEmail(value)) { setErr('Please enter a valid email (e.g. name@example.com).'); return; }
+          if (!isEmail(value)) {
+            const msg = 'Please enter a valid email (e.g. name@example.com).';
+            setErr(msg);
+            setSrMsg(msg);
+            emailRef.current?.focus();
+            return;
+          }
           setErr('');
+          setSrMsg('');
           set('account', { email: value, created: true });
           next();
         }}
@@ -140,12 +149,15 @@ function StepAccount() {
             onChange={(e)=>setEmail(e.target.value)}
             aria-invalid={err ? 'true' : 'false'}
             aria-describedby={err ? 'acc-email-err' : 'acc-email-hint'}
+            ref={emailRef}
             className={`mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-900 ${
               err ? 'border-rose-400' : 'border-slate-300'
             }`}
           />
           <p id="acc-email-hint" className="mt-1 text-xs text-slate-500">We’ll never share your email.</p>
           {err && <p id="acc-email-err" className="mt-1 text-sm text-rose-600">{err}</p>}
+          {/* Screen-reader live region */}
+          <p className="sr-only" role="alert" aria-live="assertive">{srMsg}</p>
         </label>
         <div className="flex gap-3">
           <button className="rounded-xl bg-slate-900 text-white px-4 py-2 font-semibold hover:opacity-90">Continue</button>
@@ -164,6 +176,9 @@ function StepProfile() {
   const [size, setSize] = React.useState(profile.currentSize || '');
   const [message, setMessage] = React.useState('');
   const [errs, setErrs] = React.useState<{ dob?: string; size?: string }>({});
+  const dobRef = React.useRef<HTMLInputElement>(null);
+  const sizeRef = React.useRef<HTMLInputElement>(null);
+  const [srMsg, setSrMsg] = React.useState<string>('');
   return (
     <Shell title="Tell us about your child">
       <form
@@ -186,7 +201,13 @@ function StepProfile() {
             newErrs.size = 'Size looks off — try a format like “EU 25”.';
           }
           setErrs(newErrs);
-          if (Object.keys(newErrs).length) return;
+          if (Object.keys(newErrs).length) {
+            if (newErrs.dob) dobRef.current?.focus();
+            else if (newErrs.size) sizeRef.current?.focus();
+            setSrMsg(Object.values(newErrs).filter(Boolean).join(' '));
+            return;
+          }
+          setSrMsg('');
           set('profile', { childName: childName.trim(), dob, currentSize: size.trim() });
           set('xp', 10);
           setMessage('✅ +10 XP — First profile created');
@@ -207,6 +228,7 @@ function StepProfile() {
             onChange={(e)=>setDob(e.target.value)}
             aria-invalid={errs.dob ? 'true' : 'false'}
             aria-describedby={errs.dob ? 'prof-dob-err' : 'prof-dob-hint'}
+            ref={dobRef}
             className={`mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-900 ${
               errs.dob ? 'border-rose-400' : 'border-slate-300'
             }`}
@@ -221,6 +243,7 @@ function StepProfile() {
             onChange={(e)=>setSize(e.target.value)}
             aria-invalid={errs.size ? 'true' : 'false'}
             aria-describedby={errs.size ? 'prof-size-err' : 'prof-size-hint'}
+            ref={sizeRef}
             className={`mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-900 ${
               errs.size ? 'border-rose-400' : 'border-slate-300'
             }`}
@@ -228,6 +251,8 @@ function StepProfile() {
           />
           <p id="prof-size-hint" className="mt-1 text-xs text-slate-500">Optional. Example format: “EU 25”.</p>
           {errs.size && <p id="prof-size-err" className="mt-1 text-sm text-rose-600">{errs.size}</p>}
+          {/* Screen-reader live region */}
+          <p className="sr-only" role="alert" aria-live="assertive">{srMsg}</p>
         </label>
         <div className="flex gap-3">
           <button className="rounded-xl bg-slate-900 text-white px-4 py-2 font-semibold hover:opacity-90">Continue</button>
@@ -245,6 +270,8 @@ function StepSizing() {
   const [method, setMethod] = React.useState<'scan'|'manual'|'current'>(sizing.method || 'manual');
   const [mm, setMm] = React.useState<number>(sizing.footLengthMm || 150);
   const [err, setErr] = React.useState<string>('');
+  const mmRef = React.useRef<HTMLInputElement>(null);
+  const [srMsg, setSrMsg] = React.useState<string>('');
   return (
     <Shell title="Choose a sizing method">
       <div className="mt-6 grid gap-4 max-w-md">
@@ -275,12 +302,15 @@ function StepSizing() {
               onChange={(e)=>setMm(clamp(Number(e.target.value || '0'), 0, 9999))}
               aria-invalid={err ? 'true' : 'false'}
               aria-describedby={err ? 'sz-mm-err' : 'sz-mm-hint'}
+              ref={mmRef}
               className={`mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-900 ${
                 err ? 'border-rose-400' : 'border-slate-300'
               }`}
             />
             <p id="sz-mm-hint" className="mt-1 text-xs text-slate-500">Typical range: 110–200 mm for ages 1–6.</p>
             {err && <p id="sz-mm-err" className="mt-1 text-sm text-rose-600">{err}</p>}
+            {/* Screen-reader live region */}
+            <p className="sr-only" role="alert" aria-live="assertive">{srMsg}</p>
           </label>
         )}
 
@@ -288,11 +318,12 @@ function StepSizing() {
           <button
             onClick={() => {
               // Validate
-              if (!method) { setErr('Choose a sizing method.'); return; }
+              if (!method) { const m='Choose a sizing method.'; setErr(m); setSrMsg(m); return; }
               if (method === 'manual') {
-                if (Number.isNaN(mm) || mm < 80 || mm > 250) { setErr('Foot length must be between 80–250 mm.'); return; }
+                if (Number.isNaN(mm) || mm < 80 || mm > 250) { const m='Foot length must be between 80–250 mm.'; setErr(m); setSrMsg(m); mmRef.current?.focus(); return; }
               }
               setErr('');
+              setSrMsg('');
               set('sizing', { method, footLengthMm: method==='manual' ? mm : undefined });
               next();
             }}
