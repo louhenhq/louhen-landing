@@ -3,6 +3,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 import { initAdmin, admin } from '@/lib/firebaseAdmin';
+import { Resend } from 'resend';
 
 // --- Simple in-memory rate limit: 3 req / 60s per IP (per server instance) ---
 type Bucket = { count: number; resetAt: number };
@@ -137,6 +138,72 @@ export async function POST(req: Request) {
         ip,
         source: 'landing:v1'
       });
+    }
+
+    // --- Send welcome email with referral link (best-effort) ---
+    try {
+      const RESEND_API_KEY = process.env.RESEND_API_KEY;
+      if (RESEND_API_KEY) {
+        const resend = new Resend(RESEND_API_KEY);
+        const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://louhen-landing.vercel.app';
+        const codeUpper = String(code).toUpperCase();
+        const url = new URL(`/r/${codeUpper}`, base);
+        url.searchParams.set('utm_source', 'referral');
+        url.searchParams.set('utm_medium', 'waitlist');
+        url.searchParams.set('utm_campaign', 'prelaunch');
+        url.searchParams.set('utm_content', codeUpper);
+        const referralLink = url.toString();
+
+        const from = process.env.RESEND_FROM || 'Louhen <hello@louhen.com>';
+        const to = String(email);
+        const first = (firstName && String(firstName).trim()) || '';
+
+        const subject = 'Welcome to Louhen 👟 Your referral link inside';
+        const preview = `Here’s your personal invite link: ${referralLink}`;
+        const html = `<!doctype html>
+<html>
+  <body style="margin:0;padding:0;background:#ffffff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#0f172a;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;margin:0 auto;padding:24px;">
+      <tr><td style="font-size:0;line-height:0;height:8px;">&zwnj;</td></tr>
+      <tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:28px;height:28px;border-radius:8px;background:#0f172a;display:inline-block;"></div>
+            <div style="font-weight:700;">Louhen</div>
+          </div>
+          <h1 style="margin:20px 0 8px;font-size:20px;">Welcome${first ? `, ${first}` : ''}!</h1>
+          <p style="margin:0 0 16px;line-height:1.6;">
+            Thanks for joining Louhen. Here’s your personal invite link — share it with friends and you’ll both earn credit when they place their first order:
+          </p>
+          <p style="margin:0 0 16px;">
+            <a href="${referralLink}" style="color:#0f172a;text-decoration:underline;word-break:break-all;">${referralLink}</a>
+          </p>
+          <p style="margin:0 0 16px;line-height:1.6;">
+            Your referral code: <strong>${codeUpper}</strong>
+          </p>
+          <p style="margin:16px 0 0;color:#475569;font-size:12px;line-height:1.6;">
+            You’re receiving this because you joined the Louhen waitlist. If this wasn’t you, simply ignore this email or contact us at hello@louhen.com.
+          </p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
+
+        await resend.emails.send({
+          from,
+          to,
+          subject,
+          headers: { 'X-Entity-Ref-ID': newDocRef.id, 'X-Preheader': preview },
+          html,
+        });
+      } else {
+        // eslint-disable-next-line no-console
+        console.warn('RESEND_API_KEY not set; skipping welcome email.');
+      }
+    } catch (mailErr) {
+      // eslint-disable-next-line no-console
+      console.error('Resend email send failed:', mailErr);
     }
 
     return NextResponse.json({ ok: true, code, refAccepted });
