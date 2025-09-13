@@ -46,6 +46,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <head>
+        {/* Token CSS links injected at runtime from /public (guaranteed to load).
+            Do not @import these in globals.css; they must be served, not bundled. */}
+        <link rel="stylesheet" href="/tokens/tokens.css" />
+        <link rel="stylesheet" href="/tokens/tokens.dark.css" />
+        <link rel="stylesheet" href="/tokens/tokens.hc.css" />
         {/* iOS PWA / status bar styling */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />

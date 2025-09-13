@@ -29,6 +29,18 @@ const webCss = {
   ]
 };
 
+/** ---------- Public outputs (served by Next from repo root) ---------- */
+// NOTE: write to the REPO ROOT public/tokens/ (two levels up from this package)
+const webCssPublic = {
+  transformGroup: 'web',
+  buildPath: '../../public/tokens/',
+  files: [
+    { destination: 'tokens.css',      format: 'css/variables', options: { selector: ':root' } },
+    { destination: 'tokens.dark.css', format: 'css/variables', options: { selector: ':root[data-theme="dark"]' } },
+    { destination: 'tokens.hc.css',   format: 'css/variables', options: { selector: ':root[data-contrast="more"]' } }
+  ]
+};
+
 /** ---------- Flutter output (Dart) ---------- */
 StyleDictionary.registerFormat({
   name: 'custom/flutter-dart',
@@ -87,5 +99,5 @@ const flutterDart = {
 
 export default {
   source: ['tokens/**/*.json'],
-  platforms: { web: webCss, flutter: flutterDart }
+  platforms: { web: webCss, webCssPublic, flutter: flutterDart }
 };

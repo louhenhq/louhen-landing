@@ -3,9 +3,20 @@
 // app/page.tsx
 import * as React from 'react';
 import Link from 'next/link';
+import { useEffect } from 'react';
+import { getHeroVariant } from '@/lib/ab';
+import { track } from '@/lib/analytics';
 import { SITE_NAME, LEGAL_ENTITY } from '@/constants/site';
 
 export default function WaitlistLanding() {
+  const variant = typeof window !== 'undefined' ? getHeroVariant() : 'A';
+  useEffect(() => {
+    track({ name: 'page_view', path: '/', variant, ref: typeof document !== 'undefined' ? document.referrer || null : null });
+  }, [variant]);
+
+  const primaryLabel = variant === 'A' ? 'Join the waitlist' : 'Get early access';
+  const secondaryLabel = variant === 'A' ? 'How it works' : 'See how it works';
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 text-slate-900">
       {/* Header removed: now rendered globally via app/layout.tsx */}
@@ -19,11 +30,21 @@ export default function WaitlistLanding() {
           Smarter sizing, curated looks from your favorite brands, and fit feedback that improves with every try.
         </p>
         <div className="mt-8 flex items-center justify-center gap-3">
-          <Link href="/preferences" className="inline-flex items-center rounded-xl px-5 py-3 text-base font-medium bg-brand-primary text-white hover:opacity-90">
-            Join the waitlist
+          <Link
+            href="/preferences"
+            className="inline-flex items-center rounded-xl px-5 py-3 text-base font-medium bg-brand-primary text-white hover:opacity-90"
+            prefetch={false}
+            onClick={() => track({ name: 'cta_click', id: 'hero_primary', variant })}
+          >
+            {primaryLabel}
           </Link>
-          <Link href="/onboarding/intro" className="inline-flex items-center rounded-xl px-5 py-3 text-base font-medium border border-border hover:border-border-strong">
-            How it works
+          <Link
+            href="/onboarding/intro"
+            className="inline-flex items-center rounded-xl px-5 py-3 text-base font-medium border border-border hover:border-border-strong"
+            prefetch={false}
+            onClick={() => track({ name: 'how_it_works_click' })}
+          >
+            {secondaryLabel}
           </Link>
         </div>
       </section>
