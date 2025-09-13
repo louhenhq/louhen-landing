@@ -2,12 +2,14 @@
   "name": "louhen-landing",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "dev:tp": "next dev --turbopack",
+    "prebuild": "npm run -w @louhen/design-tokens build",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "next lint"
   },
   "dependencies": {
     "firebase-admin": "^13.5.0",
