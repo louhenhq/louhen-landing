@@ -1,6 +1,7 @@
 'use client';
 import * as React from 'react';
 import { Suspense } from 'react';
+import WaitlistForm from '@/components/WaitlistForm';
 import { useSearchParams } from 'next/navigation';
 
 // Force dynamic rendering (no prerender) to avoid static export errors
@@ -12,13 +13,19 @@ function PrefsInner() {
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
-      <h1 className="text-2xl font-bold tracking-tight">Email preferences</h1>
       {!token ? (
-        <p className="mt-4 text-rose-600" role="alert">
-          Missing token. Please use the link from your email.
-        </p>
+        <>
+          <h1 className="text-3xl font-semibold tracking-tight">Join the waitlist</h1>
+          <p className="mt-2 text-text-muted">Tell us a bit about your style and size. We’ll email you once you’re in.</p>
+          <div className="mt-6">
+            <WaitlistForm />
+          </div>
+        </>
       ) : (
-        <PrefsForm token={token} />
+        <>
+          <h1 className="text-2xl font-bold tracking-tight">Email preferences</h1>
+          <PrefsForm token={token} />
+        </>
       )}
     </main>
   );
