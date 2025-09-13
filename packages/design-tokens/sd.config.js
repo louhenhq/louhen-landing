@@ -13,17 +13,13 @@ const webCss = {
 /** ---------- Flutter output (Dart) ---------- */
 StyleDictionary.registerFormat({
   name: 'custom/flutter-dart',
-  formatter: ({ dictionary }) => {
+  // v4 expects `format`, not `formatter`
+  format: ({ dictionary }) => {
     const lines = [];
     lines.push('// GENERATED FILE – do not edit manually.');
     lines.push("import 'package:flutter/material.dart';");
     lines.push('');
     lines.push('class LouhenTokens {');
-
-    const toHex = (n) => {
-      const h = Number(n).toString(16).padStart(2, '0');
-      return h.toUpperCase();
-    };
 
     for (const t of dictionary.allTokens) {
       const name = t.name.replace(/-/g, '_');
@@ -32,8 +28,7 @@ StyleDictionary.registerFormat({
       // Hex color (#RRGGBB or #AARRGGBB)
       if (/^#([0-9a-f]{6}|[0-9a-f]{8})$/i.test(raw)) {
         const hex = raw.replace('#', '').toUpperCase();
-        // If #RRGGBB, assume FF alpha
-        const argb = hex.length === 6 ? `FF${hex}` : hex;
+        const argb = hex.length === 6 ? `FF${hex}` : hex; // assume FF alpha when missing
         lines.push(`  static const ${name} = Color(0x${argb});`);
         continue;
       }
@@ -49,7 +44,7 @@ StyleDictionary.registerFormat({
         continue;
       }
 
-      // Numeric tokens → as-is (spacing, radii, durations, etc.)
+      // Numeric tokens → as-is
       if (!Number.isNaN(Number(raw))) {
         lines.push(`  static const ${name} = ${raw};`);
         continue;
@@ -65,6 +60,7 @@ StyleDictionary.registerFormat({
 });
 
 const flutterDart = {
+  // Using js transforms is fine for our simple output
   transformGroup: 'js',
   buildPath: 'build/flutter/',
   files: [{ destination: 'tokens.g.dart', format: 'custom/flutter-dart' }]
