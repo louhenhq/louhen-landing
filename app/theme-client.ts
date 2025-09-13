@@ -18,7 +18,7 @@ export function getSavedContrast(): ContrastPref {
 
 export function setTheme(pref: ThemePref) {
   if (typeof document === 'undefined') return;
-  const el = document.documentElement;
+  const el = document.documentElement; // must be <html> for :root[...] selectors
   if (pref === 'system') {
     el.removeAttribute('data-theme');
     localStorage.removeItem(THEME_KEY);
@@ -30,7 +30,7 @@ export function setTheme(pref: ThemePref) {
 
 export function setContrast(pref: ContrastPref) {
   if (typeof document === 'undefined') return;
-  const el = document.documentElement;
+  const el = document.documentElement; // also on <html>
   if (pref === 'system' || pref === 'normal') {
     el.removeAttribute('data-contrast');
     if (pref === 'system') localStorage.removeItem(CONTRAST_KEY);
