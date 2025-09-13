@@ -34,3 +34,20 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Design Tokens (web + Flutter)
+
+This repo uses **Style Dictionary** to build brand tokens for both the landing site (CSS variables) and the Flutter app (Dart).
+
+- Source: `packages/design-tokens/tokens/`
+- Build outputs:
+  - Web: `packages/design-tokens/build/web/tokens.css` (imported by `app/globals.css`)
+  - Flutter: `packages/design-tokens/build/flutter/tokens.g.dart` (copy into the app repo)
+
+### Commands
+- Build tokens only:
+  `npm run -w @louhen/design-tokens build`
+- Site build (runs tokens build automatically via `prebuild`):
+  `npm run build`
+
+> Tokens also build automatically after `npm install` via `postinstall`.
