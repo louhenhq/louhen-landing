@@ -750,6 +750,36 @@ module.exports = {
         },
         path: ["color", "status", "onInfo"],
       },
+      danger: {
+        value: "#FF6B6B",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.brand.coral.value}",
+        },
+        name: "color-status-danger",
+        attributes: {
+          category: "color",
+          type: "status",
+          item: "danger",
+        },
+        path: ["color", "status", "danger"],
+      },
+      onDanger: {
+        value: "#FFFFFF",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "#FFFFFF",
+        },
+        name: "color-status-on-danger",
+        attributes: {
+          category: "color",
+          type: "status",
+          item: "onDanger",
+        },
+        path: ["color", "status", "onDanger"],
+      },
     },
   },
   gradient: {
@@ -1608,6 +1638,38 @@ module.exports = {
           },
           path: ["semantic", "color", "bg", "card"],
         },
+        raised: {
+          value: "#2B2D42",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.light.inverseSurface.value}",
+          },
+          name: "semantic-color-bg-raised",
+          attributes: {
+            category: "semantic",
+            type: "color",
+            item: "bg",
+            subitem: "raised",
+          },
+          path: ["semantic", "color", "bg", "raised"],
+        },
+        overlay: {
+          value: "rgba(0,0,0,0.5)",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "rgba(0,0,0,0.5)",
+          },
+          name: "semantic-color-bg-overlay",
+          attributes: {
+            category: "semantic",
+            type: "color",
+            item: "bg",
+            subitem: "overlay",
+          },
+          path: ["semantic", "color", "bg", "overlay"],
+        },
       },
       text: {
         body: {
@@ -1658,6 +1720,22 @@ module.exports = {
           },
           path: ["semantic", "color", "text", "inverse"],
         },
+        link: {
+          value: "#4A90E2",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.status.info.value}",
+          },
+          name: "semantic-color-text-link",
+          attributes: {
+            category: "semantic",
+            type: "color",
+            item: "text",
+            subitem: "link",
+          },
+          path: ["semantic", "color", "text", "link"],
+        },
       },
       border: {
         subtle: {
@@ -1675,6 +1753,38 @@ module.exports = {
             subitem: "subtle",
           },
           path: ["semantic", "color", "border", "subtle"],
+        },
+        strong: {
+          value: "#2B2D42",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.light.onSurfaceVar.value}",
+          },
+          name: "semantic-color-border-strong",
+          attributes: {
+            category: "semantic",
+            type: "color",
+            item: "border",
+            subitem: "strong",
+          },
+          path: ["semantic", "color", "border", "strong"],
+        },
+        focus: {
+          value: "#1A4E5F",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.light.primary.value}",
+          },
+          name: "semantic-color-border-focus",
+          attributes: {
+            category: "semantic",
+            type: "color",
+            item: "border",
+            subitem: "focus",
+          },
+          path: ["semantic", "color", "border", "focus"],
         },
       },
       status: {
@@ -1694,22 +1804,6 @@ module.exports = {
           },
           path: ["semantic", "color", "status", "success"],
         },
-        onSuccess: {
-          value: "#FFFFFF",
-          filePath: "tokens/tokens.json",
-          isSource: true,
-          original: {
-            value: "{color.status.onSuccess.value}",
-          },
-          name: "semantic-color-status-on-success",
-          attributes: {
-            category: "semantic",
-            type: "color",
-            item: "status",
-            subitem: "onSuccess",
-          },
-          path: ["semantic", "color", "status", "onSuccess"],
-        },
         warning: {
           value: "#F4B400",
           filePath: "tokens/tokens.json",
@@ -1725,22 +1819,6 @@ module.exports = {
             subitem: "warning",
           },
           path: ["semantic", "color", "status", "warning"],
-        },
-        onWarning: {
-          value: "#2B2D42",
-          filePath: "tokens/tokens.json",
-          isSource: true,
-          original: {
-            value: "{color.status.onWarning.value}",
-          },
-          name: "semantic-color-status-on-warning",
-          attributes: {
-            category: "semantic",
-            type: "color",
-            item: "status",
-            subitem: "onWarning",
-          },
-          path: ["semantic", "color", "status", "onWarning"],
         },
         info: {
           value: "#4A90E2",
@@ -1758,21 +1836,21 @@ module.exports = {
           },
           path: ["semantic", "color", "status", "info"],
         },
-        onInfo: {
-          value: "#FFFFFF",
+        danger: {
+          value: "#FF6B6B",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.status.onInfo.value}",
+            value: "{color.status.danger.value}",
           },
-          name: "semantic-color-status-on-info",
+          name: "semantic-color-status-danger",
           attributes: {
             category: "semantic",
             type: "color",
             item: "status",
-            subitem: "onInfo",
+            subitem: "danger",
           },
-          path: ["semantic", "color", "status", "onInfo"],
+          path: ["semantic", "color", "status", "danger"],
         },
       },
       button: {
@@ -1846,6 +1924,754 @@ module.exports = {
               state: "fg",
             },
             path: ["semantic", "color", "button", "secondary", "fg"],
+          },
+        },
+      },
+    },
+  },
+  semanticDark: {
+    color: {
+      bg: {
+        page: {
+          value: "#1B2130",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.dark.surface.value}",
+          },
+          name: "semantic-dark-color-bg-page",
+          attributes: {
+            category: "semanticDark",
+            type: "color",
+            item: "bg",
+            subitem: "page",
+          },
+          path: ["semanticDark", "color", "bg", "page"],
+        },
+        card: {
+          value: "#1B2130",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.dark.surface.value}",
+          },
+          name: "semantic-dark-color-bg-card",
+          attributes: {
+            category: "semanticDark",
+            type: "color",
+            item: "bg",
+            subitem: "card",
+          },
+          path: ["semanticDark", "color", "bg", "card"],
+        },
+        raised: {
+          value: "#FFFFFF",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.dark.inverseSurface.value}",
+          },
+          name: "semantic-dark-color-bg-raised",
+          attributes: {
+            category: "semanticDark",
+            type: "color",
+            item: "bg",
+            subitem: "raised",
+          },
+          path: ["semanticDark", "color", "bg", "raised"],
+        },
+        overlay: {
+          value: "rgba(0,0,0,0.7)",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "rgba(0,0,0,0.7)",
+          },
+          name: "semantic-dark-color-bg-overlay",
+          attributes: {
+            category: "semanticDark",
+            type: "color",
+            item: "bg",
+            subitem: "overlay",
+          },
+          path: ["semanticDark", "color", "bg", "overlay"],
+        },
+      },
+      text: {
+        body: {
+          value: "#FFFFFF",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.dark.onSurface.value}",
+          },
+          name: "semantic-dark-color-text-body",
+          attributes: {
+            category: "semanticDark",
+            type: "color",
+            item: "text",
+            subitem: "body",
+          },
+          path: ["semanticDark", "color", "text", "body"],
+        },
+        muted: {
+          value: "#FFFFFF",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.dark.onSurfaceVar.value}",
+          },
+          name: "semantic-dark-color-text-muted",
+          attributes: {
+            category: "semanticDark",
+            type: "color",
+            item: "text",
+            subitem: "muted",
+          },
+          path: ["semanticDark", "color", "text", "muted"],
+        },
+        inverse: {
+          value: "#2B2D42",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.dark.onInverseSurface.value}",
+          },
+          name: "semantic-dark-color-text-inverse",
+          attributes: {
+            category: "semanticDark",
+            type: "color",
+            item: "text",
+            subitem: "inverse",
+          },
+          path: ["semanticDark", "color", "text", "inverse"],
+        },
+        link: {
+          value: "#4A90E2",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.status.info.value}",
+          },
+          name: "semantic-dark-color-text-link",
+          attributes: {
+            category: "semanticDark",
+            type: "color",
+            item: "text",
+            subitem: "link",
+          },
+          path: ["semanticDark", "color", "text", "link"],
+        },
+      },
+      border: {
+        subtle: {
+          value: "#3F485A",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.dark.outline.value}",
+          },
+          name: "semantic-dark-color-border-subtle",
+          attributes: {
+            category: "semanticDark",
+            type: "color",
+            item: "border",
+            subitem: "subtle",
+          },
+          path: ["semanticDark", "color", "border", "subtle"],
+        },
+        strong: {
+          value: "#FFFFFF",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.dark.onSurfaceVar.value}",
+          },
+          name: "semantic-dark-color-border-strong",
+          attributes: {
+            category: "semanticDark",
+            type: "color",
+            item: "border",
+            subitem: "strong",
+          },
+          path: ["semanticDark", "color", "border", "strong"],
+        },
+        focus: {
+          value: "#93C6D0",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.dark.primary.value}",
+          },
+          name: "semantic-dark-color-border-focus",
+          attributes: {
+            category: "semanticDark",
+            type: "color",
+            item: "border",
+            subitem: "focus",
+          },
+          path: ["semanticDark", "color", "border", "focus"],
+        },
+      },
+      status: {
+        success: {
+          value: "#2BB673",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.status.success.value}",
+          },
+          name: "semantic-dark-color-status-success",
+          attributes: {
+            category: "semanticDark",
+            type: "color",
+            item: "status",
+            subitem: "success",
+          },
+          path: ["semanticDark", "color", "status", "success"],
+        },
+        onSuccess: {
+          value: "#FFFFFF",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.status.onSuccess.value}",
+          },
+          name: "semantic-dark-color-status-on-success",
+          attributes: {
+            category: "semanticDark",
+            type: "color",
+            item: "status",
+            subitem: "onSuccess",
+          },
+          path: ["semanticDark", "color", "status", "onSuccess"],
+        },
+        warning: {
+          value: "#F4B400",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.status.warning.value}",
+          },
+          name: "semantic-dark-color-status-warning",
+          attributes: {
+            category: "semanticDark",
+            type: "color",
+            item: "status",
+            subitem: "warning",
+          },
+          path: ["semanticDark", "color", "status", "warning"],
+        },
+        onWarning: {
+          value: "#2B2D42",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.status.onWarning.value}",
+          },
+          name: "semantic-dark-color-status-on-warning",
+          attributes: {
+            category: "semanticDark",
+            type: "color",
+            item: "status",
+            subitem: "onWarning",
+          },
+          path: ["semanticDark", "color", "status", "onWarning"],
+        },
+        info: {
+          value: "#4A90E2",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.status.info.value}",
+          },
+          name: "semantic-dark-color-status-info",
+          attributes: {
+            category: "semanticDark",
+            type: "color",
+            item: "status",
+            subitem: "info",
+          },
+          path: ["semanticDark", "color", "status", "info"],
+        },
+        onInfo: {
+          value: "#FFFFFF",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.status.onInfo.value}",
+          },
+          name: "semantic-dark-color-status-on-info",
+          attributes: {
+            category: "semanticDark",
+            type: "color",
+            item: "status",
+            subitem: "onInfo",
+          },
+          path: ["semanticDark", "color", "status", "onInfo"],
+        },
+        danger: {
+          value: "#FF6B6B",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.status.danger.value}",
+          },
+          name: "semantic-dark-color-status-danger",
+          attributes: {
+            category: "semanticDark",
+            type: "color",
+            item: "status",
+            subitem: "danger",
+          },
+          path: ["semanticDark", "color", "status", "danger"],
+        },
+      },
+      button: {
+        primary: {
+          bg: {
+            value: "#93C6D0",
+            filePath: "tokens/tokens.json",
+            isSource: true,
+            original: {
+              value: "{color.dark.primary.value}",
+            },
+            name: "semantic-dark-color-button-primary-bg",
+            attributes: {
+              category: "semanticDark",
+              type: "color",
+              item: "button",
+              subitem: "primary",
+              state: "bg",
+            },
+            path: ["semanticDark", "color", "button", "primary", "bg"],
+          },
+          fg: {
+            value: "#2B2D42",
+            filePath: "tokens/tokens.json",
+            isSource: true,
+            original: {
+              value: "{color.dark.onPrimary.value}",
+            },
+            name: "semantic-dark-color-button-primary-fg",
+            attributes: {
+              category: "semanticDark",
+              type: "color",
+              item: "button",
+              subitem: "primary",
+              state: "fg",
+            },
+            path: ["semanticDark", "color", "button", "primary", "fg"],
+          },
+        },
+        secondary: {
+          bg: {
+            value: "#84C3C9",
+            filePath: "tokens/tokens.json",
+            isSource: true,
+            original: {
+              value: "{color.dark.secondary.value}",
+            },
+            name: "semantic-dark-color-button-secondary-bg",
+            attributes: {
+              category: "semanticDark",
+              type: "color",
+              item: "button",
+              subitem: "secondary",
+              state: "bg",
+            },
+            path: ["semanticDark", "color", "button", "secondary", "bg"],
+          },
+          fg: {
+            value: "#FFFFFF",
+            filePath: "tokens/tokens.json",
+            isSource: true,
+            original: {
+              value: "{color.dark.onSecondary.value}",
+            },
+            name: "semantic-dark-color-button-secondary-fg",
+            attributes: {
+              category: "semanticDark",
+              type: "color",
+              item: "button",
+              subitem: "secondary",
+              state: "fg",
+            },
+            path: ["semanticDark", "color", "button", "secondary", "fg"],
+          },
+        },
+      },
+    },
+  },
+  semanticHc: {
+    color: {
+      bg: {
+        page: {
+          value: "#FFFFFF",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.light.surface.value}",
+          },
+          name: "semantic-hc-color-bg-page",
+          attributes: {
+            category: "semanticHc",
+            type: "color",
+            item: "bg",
+            subitem: "page",
+          },
+          path: ["semanticHc", "color", "bg", "page"],
+        },
+        card: {
+          value: "#FFFFFF",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.light.surface.value}",
+          },
+          name: "semantic-hc-color-bg-card",
+          attributes: {
+            category: "semanticHc",
+            type: "color",
+            item: "bg",
+            subitem: "card",
+          },
+          path: ["semanticHc", "color", "bg", "card"],
+        },
+        raised: {
+          value: "#2B2D42",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.light.inverseSurface.value}",
+          },
+          name: "semantic-hc-color-bg-raised",
+          attributes: {
+            category: "semanticHc",
+            type: "color",
+            item: "bg",
+            subitem: "raised",
+          },
+          path: ["semanticHc", "color", "bg", "raised"],
+        },
+        overlay: {
+          value: "rgba(0,0,0,0.6)",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "rgba(0,0,0,0.6)",
+          },
+          name: "semantic-hc-color-bg-overlay",
+          attributes: {
+            category: "semanticHc",
+            type: "color",
+            item: "bg",
+            subitem: "overlay",
+          },
+          path: ["semanticHc", "color", "bg", "overlay"],
+        },
+      },
+      text: {
+        body: {
+          value: "#2B2D42",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.light.onSurface.value}",
+          },
+          name: "semantic-hc-color-text-body",
+          attributes: {
+            category: "semanticHc",
+            type: "color",
+            item: "text",
+            subitem: "body",
+          },
+          path: ["semanticHc", "color", "text", "body"],
+        },
+        muted: {
+          value: "#2B2D42",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.light.onSurfaceVar.value}",
+          },
+          name: "semantic-hc-color-text-muted",
+          attributes: {
+            category: "semanticHc",
+            type: "color",
+            item: "text",
+            subitem: "muted",
+          },
+          path: ["semanticHc", "color", "text", "muted"],
+        },
+        inverse: {
+          value: "#F8F9FA",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.light.onInverseSurface.value}",
+          },
+          name: "semantic-hc-color-text-inverse",
+          attributes: {
+            category: "semanticHc",
+            type: "color",
+            item: "text",
+            subitem: "inverse",
+          },
+          path: ["semanticHc", "color", "text", "inverse"],
+        },
+        link: {
+          value: "#4A90E2",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.status.info.value}",
+          },
+          name: "semantic-hc-color-text-link",
+          attributes: {
+            category: "semanticHc",
+            type: "color",
+            item: "text",
+            subitem: "link",
+          },
+          path: ["semanticHc", "color", "text", "link"],
+        },
+      },
+      border: {
+        subtle: {
+          value: "#B8BDC6",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.light.outline.value}",
+          },
+          name: "semantic-hc-color-border-subtle",
+          attributes: {
+            category: "semanticHc",
+            type: "color",
+            item: "border",
+            subitem: "subtle",
+          },
+          path: ["semanticHc", "color", "border", "subtle"],
+        },
+        strong: {
+          value: "#2B2D42",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.light.onSurfaceVar.value}",
+          },
+          name: "semantic-hc-color-border-strong",
+          attributes: {
+            category: "semanticHc",
+            type: "color",
+            item: "border",
+            subitem: "strong",
+          },
+          path: ["semanticHc", "color", "border", "strong"],
+        },
+        focus: {
+          value: "#1A4E5F",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.light.primary.value}",
+          },
+          name: "semantic-hc-color-border-focus",
+          attributes: {
+            category: "semanticHc",
+            type: "color",
+            item: "border",
+            subitem: "focus",
+          },
+          path: ["semanticHc", "color", "border", "focus"],
+        },
+      },
+      status: {
+        success: {
+          value: "#2BB673",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.status.success.value}",
+          },
+          name: "semantic-hc-color-status-success",
+          attributes: {
+            category: "semanticHc",
+            type: "color",
+            item: "status",
+            subitem: "success",
+          },
+          path: ["semanticHc", "color", "status", "success"],
+        },
+        onSuccess: {
+          value: "#FFFFFF",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.status.onSuccess.value}",
+          },
+          name: "semantic-hc-color-status-on-success",
+          attributes: {
+            category: "semanticHc",
+            type: "color",
+            item: "status",
+            subitem: "onSuccess",
+          },
+          path: ["semanticHc", "color", "status", "onSuccess"],
+        },
+        warning: {
+          value: "#F4B400",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.status.warning.value}",
+          },
+          name: "semantic-hc-color-status-warning",
+          attributes: {
+            category: "semanticHc",
+            type: "color",
+            item: "status",
+            subitem: "warning",
+          },
+          path: ["semanticHc", "color", "status", "warning"],
+        },
+        onWarning: {
+          value: "#2B2D42",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.status.onWarning.value}",
+          },
+          name: "semantic-hc-color-status-on-warning",
+          attributes: {
+            category: "semanticHc",
+            type: "color",
+            item: "status",
+            subitem: "onWarning",
+          },
+          path: ["semanticHc", "color", "status", "onWarning"],
+        },
+        info: {
+          value: "#4A90E2",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.status.info.value}",
+          },
+          name: "semantic-hc-color-status-info",
+          attributes: {
+            category: "semanticHc",
+            type: "color",
+            item: "status",
+            subitem: "info",
+          },
+          path: ["semanticHc", "color", "status", "info"],
+        },
+        onInfo: {
+          value: "#FFFFFF",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.status.onInfo.value}",
+          },
+          name: "semantic-hc-color-status-on-info",
+          attributes: {
+            category: "semanticHc",
+            type: "color",
+            item: "status",
+            subitem: "onInfo",
+          },
+          path: ["semanticHc", "color", "status", "onInfo"],
+        },
+        danger: {
+          value: "#FF6B6B",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.status.danger.value}",
+          },
+          name: "semantic-hc-color-status-danger",
+          attributes: {
+            category: "semanticHc",
+            type: "color",
+            item: "status",
+            subitem: "danger",
+          },
+          path: ["semanticHc", "color", "status", "danger"],
+        },
+      },
+      button: {
+        primary: {
+          bg: {
+            value: "#1A4E5F",
+            filePath: "tokens/tokens.json",
+            isSource: true,
+            original: {
+              value: "{color.light.primary.value}",
+            },
+            name: "semantic-hc-color-button-primary-bg",
+            attributes: {
+              category: "semanticHc",
+              type: "color",
+              item: "button",
+              subitem: "primary",
+              state: "bg",
+            },
+            path: ["semanticHc", "color", "button", "primary", "bg"],
+          },
+          fg: {
+            value: "#F8F9FA",
+            filePath: "tokens/tokens.json",
+            isSource: true,
+            original: {
+              value: "{color.light.onPrimary.value}",
+            },
+            name: "semantic-hc-color-button-primary-fg",
+            attributes: {
+              category: "semanticHc",
+              type: "color",
+              item: "button",
+              subitem: "primary",
+              state: "fg",
+            },
+            path: ["semanticHc", "color", "button", "primary", "fg"],
+          },
+        },
+        secondary: {
+          bg: {
+            value: "#A8DADC",
+            filePath: "tokens/tokens.json",
+            isSource: true,
+            original: {
+              value: "{color.light.secondary.value}",
+            },
+            name: "semantic-hc-color-button-secondary-bg",
+            attributes: {
+              category: "semanticHc",
+              type: "color",
+              item: "button",
+              subitem: "secondary",
+              state: "bg",
+            },
+            path: ["semanticHc", "color", "button", "secondary", "bg"],
+          },
+          fg: {
+            value: "#FFFFFF",
+            filePath: "tokens/tokens.json",
+            isSource: true,
+            original: {
+              value: "{color.light.onSecondary.value}",
+            },
+            name: "semantic-hc-color-button-secondary-fg",
+            attributes: {
+              category: "semanticHc",
+              type: "color",
+              item: "button",
+              subitem: "secondary",
+              state: "fg",
+            },
+            path: ["semanticHc", "color", "button", "secondary", "fg"],
           },
         },
       },

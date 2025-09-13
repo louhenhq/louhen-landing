@@ -13,50 +13,36 @@ export default function WaitlistLanding() {
       {/* Header removed: now rendered globally via app/layout.tsx */}
 
       {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 lg:py-24 grid lg:grid-cols-2 gap-12 items-center">
-          <div>
-            <p className="inline-flex items-center gap-2 text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Pre-launch waitlist
-            </p>
-            <h1 className="mt-4 text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight">
-              Perfect fit for growing feet.
-            </h1>
-            <p className="mt-4 text-lg leading-relaxed text-slate-600">
-              {SITE_NAME} is a fit-first shoe companion for kids aged 10 months to 6 years. Scan feet, get data-driven recommendations, and relax under our LouhenFit Guarantee: if they don’t fit, we’ll make it right.
-            </p>
+      <section className="mx-auto max-w-3xl text-center py-16 md:py-24">
+        <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">
+          Personal style. Effortless fit.
+        </h1>
+        <p className="mt-4 text-lg text-text-muted">
+          Smarter sizing, curated looks from your favorite brands, and fit feedback that improves with every try.
+        </p>
+        <div className="mt-8 flex items-center justify-center gap-3">
+          <Link href="/preferences" className="inline-flex items-center rounded-xl px-5 py-3 text-base font-medium bg-brand-primary text-white hover:opacity-90">
+            Join the waitlist
+          </Link>
+          <Link href="/onboarding/intro" className="inline-flex items-center rounded-xl px-5 py-3 text-base font-medium border border-border hover:border-border-strong">
+            How it works
+          </Link>
+        </div>
+      </section>
 
-            <React.Suspense fallback={null}>
-              <WaitlistForm />
-            </React.Suspense>
-
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm text-slate-600">
-              <div className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" /> Podiatrist approved
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" /> LouhenFit Guarantee
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" /> GDPR-first data safety
-              </div>
-            </div>
-          </div>
-
-          {/* Visual */}
-          <div className="relative">
-            <div className="aspect-[4/5] rounded-3xl border border-slate-200 bg-white shadow-xl p-6 flex items-center justify-center">
-              <div className="grid grid-cols-2 gap-4 w-full">
-                <div className="h-40 rounded-2xl bg-slate-100" />
-                <div className="h-40 rounded-2xl bg-slate-100" />
-                <div className="col-span-2 h-40 rounded-2xl bg-slate-100" />
-              </div>
-            </div>
-            <div className="absolute -bottom-6 -left-6 rotate-[-2deg] rounded-2xl bg-white border border-slate-200 shadow-lg p-4 max-w-xs">
-              <p className="text-sm font-medium">“The in-store experience was stressful. Louhen was born to fix that.”</p>
-              <p className="mt-2 text-xs text-slate-500">— Martin, founder & twin dad</p>
-            </div>
-          </div>
+      {/* Value props */}
+      <section className="mx-auto max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-6 py-10">
+        <div className="rounded-2xl border border-border p-6 bg-bg-card">
+          <h3 className="text-lg font-semibold">Smart sizing</h3>
+          <p className="mt-2 text-text-muted">Your size across brands with zero guesswork.</p>
+        </div>
+        <div className="rounded-2xl border border-border p-6 bg-bg-card">
+          <h3 className="text-lg font-semibold">Curated looks</h3>
+          <p className="mt-2 text-text-muted">Outfits you’ll actually wear, sourced from your favorites.</p>
+        </div>
+        <div className="rounded-2xl border border-border p-6 bg-bg-card">
+          <h3 className="text-lg font-semibold">Better every time</h3>
+          <p className="mt-2 text-text-muted">Fit feedback improves recommendations with each try.</p>
         </div>
       </section>
 
@@ -106,7 +92,7 @@ export default function WaitlistLanding() {
       {/* Footer */}
       <footer className="bg-slate-50 border-t border-slate-200">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 text-sm text-slate-600 flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
-          <p>© {new Date().getFullYear()} {LEGAL_ENTITY}</p>
+          <p className="text-sm text-text-muted">© {new Date().getFullYear()} {LEGAL_ENTITY}. All rights reserved.</p>
           {/* Legal links only — main navigation handled in SiteHeader */}
           <nav className="flex gap-6">
             <Link href="/privacy" prefetch={false} className="hover:opacity-70">Privacy</Link>

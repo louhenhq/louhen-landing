@@ -2,67 +2,64 @@
 
 import * as React from 'react';
 import Link from 'next/link';
+import ThemeToggle from '@/components/ThemeToggle';
 import { SITE_NAME } from '@/constants/site';
 
-type SiteHeaderProps = {
+type Props = {
   onboardingEnabled?: boolean;
-  legalEntity?: string; // reserved for future use
+  legalEntity?: string;
 };
 
-export default function SiteHeader({ onboardingEnabled = false }: SiteHeaderProps) {
-  const [open, setOpen] = React.useState(false);
-
-  function closeMenu() {
-    setOpen(false);
-  }
-
+export default function SiteHeader({ onboardingEnabled = false }: Props) {
   return (
-    <header className="sticky top-0 z-30 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/50 border-b border-slate-200">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <header className="w-full border-b border-slate-200">
+      <div className="mx-auto max-w-6xl px-4 py-3 flex items-center gap-4">
         {/* Brand */}
-        <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-xl bg-slate-900" aria-hidden />
-          <span className="font-semibold tracking-tight">{SITE_NAME}</span>
+        <div className="flex items-center gap-2">
+          <Link href="/" className="font-semibold text-base md:text-lg">{SITE_NAME}</Link>
         </div>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-6 text-sm">
-          <a href="#how" className="hover:opacity-70">How it works</a>
-          <a href="#story" className="hover:opacity-70">Founder story</a>
-          <a href="#faq" className="hover:opacity-70">FAQ</a>
+        <nav className="ml-auto hidden md:flex items-center gap-4">
+          <Link href="/privacy" prefetch={false} className="text-sm hover:underline">Privacy</Link>
+          <Link href="/terms" prefetch={false} className="text-sm hover:underline">Terms</Link>
+          <Link href="/imprint" prefetch={false} className="text-sm hover:underline">Imprint</Link>
           {onboardingEnabled && (
-            <Link href="/onboarding/account" className="hover:opacity-70">Onboarding</Link>
-          )}
-        </nav>
-
-        {/* Mobile menu button */}
-        <button
-          type="button"
-          aria-label="Open menu"
-          aria-controls="mobile-menu"
-          aria-expanded={open ? 'true' : 'false'}
-          className="md:hidden inline-flex items-center justify-center rounded-lg border border-slate-300 p-2"
-          onClick={() => setOpen(o => !o)}
-        >
-          <span aria-hidden>☰</span>
-        </button>
-      </div>
-
-      {/* Mobile dropdown */}
-      <div
-        id="mobile-menu"
-        className={`md:hidden border-t border-slate-200 bg-white/90 backdrop-blur ${open ? '' : 'hidden'}`}
-      >
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 flex flex-col gap-3 text-sm">
-          <a href="#how" className="hover:opacity-70" onClick={closeMenu}>How it works</a>
-          <a href="#story" className="hover:opacity-70" onClick={closeMenu}>Founder story</a>
-          <a href="#faq" className="hover:opacity-70" onClick={closeMenu}>FAQ</a>
-          {onboardingEnabled && (
-            <Link href="/onboarding/account" className="hover:opacity-70" onClick={closeMenu}>
+            <Link href="/onboarding/account" prefetch={false} className="text-sm hover:underline">
               Onboarding
             </Link>
           )}
+          <Link href="/preferences" prefetch={false} className="hidden md:inline-flex rounded-xl px-4 py-2 bg-brand-primary text-white hover:opacity-90">
+            Join the waitlist
+          </Link>
+          {/* Theme toggle visible on desktop */}
+          <ThemeToggle />
+        </nav>
+
+        {/* Mobile menu button */}
+        <div className="ml-auto md:hidden">
+          {/* existing hamburger button */}
+          {/* ... */}
         </div>
+      </div>
+
+      {/* Mobile dropdown / sheet / panel */}
+      {/* Ensure your existing mobile panel renders nav links here */}
+      <div className="md:hidden border-t border-slate-200">
+        <nav className="px-4 py-3 flex flex-col gap-2">
+          <Link href="/privacy" prefetch={false} className="text-sm underline">Privacy</Link>
+          <Link href="/terms" prefetch={false} className="text-sm underline">Terms</Link>
+          <Link href="/imprint" prefetch={false} className="text-sm underline">Imprint</Link>
+          {onboardingEnabled && (
+            <Link href="/onboarding/account" prefetch={false} className="text-sm underline">
+              Onboarding
+            </Link>
+          )}
+          {/* Theme toggle also available on mobile */}
+          <div className="pt-2">
+            <ThemeToggle />
+          </div>
+        </nav>
       </div>
     </header>
   );
