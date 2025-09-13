@@ -80,6 +80,21 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
     <main className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-12">
       <h1 className="text-3xl font-bold tracking-tight">Top Referrers</h1>
       <p className="mt-2 text-slate-600 text-sm">Showing top 50 by referralCount. Use the secret ?key=… to access.</p>
+      <div className="mt-4 text-sm">
+        <a
+          href={`/api/admin/backfill-unsub?key=${encodeURIComponent(adminKey)}&dry=1&limit=50`}
+          className="underline"
+        >
+          Backfill unsubscribe tokens (dry-run)
+        </a>
+        <span className="mx-2">•</span>
+        <a
+          href={`/api/admin/backfill-unsub?key=${encodeURIComponent(adminKey)}&dry=0&limit=50`}
+          className="underline text-rose-600"
+        >
+          Execute backfill (50 per page)
+        </a>
+      </div>
       <div className="mt-6 overflow-x-auto rounded-xl border border-slate-200 bg-white">
         <table className="min-w-full text-sm">
           <thead className="bg-slate-50 text-slate-700">

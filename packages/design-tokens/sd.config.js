@@ -1,12 +1,31 @@
 import StyleDictionary from 'style-dictionary';
 
+// Emit a JSON file mapping CSS variable names to values
+StyleDictionary.registerFormat({
+  name: 'custom/json-css-variables',
+  format: ({ dictionary }) => {
+    const entries = dictionary.allTokens.map((t) => {
+      const name = `--${t.path.join('-')}`;
+      return [name, String(t.value)];
+    });
+    return JSON.stringify(Object.fromEntries(entries), null, 2);
+  },
+});
+
 /** ---------- Web outputs (CSS variables + TS export) ---------- */
 const webCss = {
   transformGroup: 'web',
   buildPath: 'build/web/',
   files: [
+    // Light / default variables
     { destination: 'tokens.css', format: 'css/variables', options: { selector: ':root' } },
-    { destination: 'tokens.ts',  format: 'javascript/module' }
+    { destination: 'tokens.ts',  format: 'javascript/module' },
+    // Dark theme variables (mounts under :root[data-theme="dark"]) 
+    { destination: 'tokens.dark.css', format: 'css/variables', options: { selector: ':root[data-theme="dark"]' } },
+    // High-contrast variables (mounts under :root[data-contrast="more"]) 
+    { destination: 'tokens.hc.css',   format: 'css/variables', options: { selector: ':root[data-contrast="more"]' } },
+    // JSON map of CSS variables (light defaults)
+    { destination: 'tokens.json', format: 'custom/json-css-variables' }
   ]
 };
 

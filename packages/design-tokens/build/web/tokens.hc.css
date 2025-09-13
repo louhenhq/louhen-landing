@@ -2,7 +2,7 @@
  * Do not edit directly, this file was auto-generated.
  */
 
-:root {
+:root[data-contrast="more"] {
   --color-brand-teal: #1A4E5F;
   --color-brand-mint: #A8DADC;
   --color-brand-coral: #FF6B6B;
