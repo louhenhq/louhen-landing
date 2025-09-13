@@ -1203,5 +1203,652 @@ module.exports = {
         path: ["typography", "weight", "bold"],
       },
     },
+    size: {
+      xs: {
+        value: 12,
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: 12,
+        },
+        name: "typography-size-xs",
+        attributes: {
+          category: "typography",
+          type: "size",
+          item: "xs",
+        },
+        path: ["typography", "size", "xs"],
+      },
+      sm: {
+        value: 14,
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: 14,
+        },
+        name: "typography-size-sm",
+        attributes: {
+          category: "typography",
+          type: "size",
+          item: "sm",
+        },
+        path: ["typography", "size", "sm"],
+      },
+      md: {
+        value: 16,
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: 16,
+        },
+        name: "typography-size-md",
+        attributes: {
+          category: "typography",
+          type: "size",
+          item: "md",
+        },
+        path: ["typography", "size", "md"],
+      },
+      lg: {
+        value: 18,
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: 18,
+        },
+        name: "typography-size-lg",
+        attributes: {
+          category: "typography",
+          type: "size",
+          item: "lg",
+        },
+        path: ["typography", "size", "lg"],
+      },
+      xl: {
+        value: 20,
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: 20,
+        },
+        name: "typography-size-xl",
+        attributes: {
+          category: "typography",
+          type: "size",
+          item: "xl",
+        },
+        path: ["typography", "size", "xl"],
+      },
+      "2xl": {
+        value: 24,
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: 24,
+        },
+        name: "typography-size-2xl",
+        attributes: {
+          category: "typography",
+          type: "size",
+          item: "2xl",
+        },
+        path: ["typography", "size", "2xl"],
+      },
+      "3xl": {
+        value: 32,
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: 32,
+        },
+        name: "typography-size-3xl",
+        attributes: {
+          category: "typography",
+          type: "size",
+          item: "3xl",
+        },
+        path: ["typography", "size", "3xl"],
+      },
+    },
+    lineHeight: {
+      tight: {
+        value: 1.2,
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: 1.2,
+        },
+        name: "typography-line-height-tight",
+        attributes: {
+          category: "typography",
+          type: "lineHeight",
+          item: "tight",
+        },
+        path: ["typography", "lineHeight", "tight"],
+      },
+      snug: {
+        value: 1.3,
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: 1.3,
+        },
+        name: "typography-line-height-snug",
+        attributes: {
+          category: "typography",
+          type: "lineHeight",
+          item: "snug",
+        },
+        path: ["typography", "lineHeight", "snug"],
+      },
+      normal: {
+        value: 1.5,
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: 1.5,
+        },
+        name: "typography-line-height-normal",
+        attributes: {
+          category: "typography",
+          type: "lineHeight",
+          item: "normal",
+        },
+        path: ["typography", "lineHeight", "normal"],
+      },
+      relaxed: {
+        value: 1.65,
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: 1.65,
+        },
+        name: "typography-line-height-relaxed",
+        attributes: {
+          category: "typography",
+          type: "lineHeight",
+          item: "relaxed",
+        },
+        path: ["typography", "lineHeight", "relaxed"],
+      },
+    },
+    letterSpacing: {
+      tight: {
+        value: -0.01,
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: -0.01,
+        },
+        name: "typography-letter-spacing-tight",
+        attributes: {
+          category: "typography",
+          type: "letterSpacing",
+          item: "tight",
+        },
+        path: ["typography", "letterSpacing", "tight"],
+      },
+      none: {
+        value: 0,
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: 0,
+        },
+        name: "typography-letter-spacing-none",
+        attributes: {
+          category: "typography",
+          type: "letterSpacing",
+          item: "none",
+        },
+        path: ["typography", "letterSpacing", "none"],
+      },
+      wide: {
+        value: 0.02,
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: 0.02,
+        },
+        name: "typography-letter-spacing-wide",
+        attributes: {
+          category: "typography",
+          type: "letterSpacing",
+          item: "wide",
+        },
+        path: ["typography", "letterSpacing", "wide"],
+      },
+    },
+  },
+  motion: {
+    dur: {
+      fast: {
+        value: 120,
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: 120,
+        },
+        name: "motion-dur-fast",
+        attributes: {
+          category: "motion",
+          type: "dur",
+          item: "fast",
+        },
+        path: ["motion", "dur", "fast"],
+      },
+      normal: {
+        value: 200,
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: 200,
+        },
+        name: "motion-dur-normal",
+        attributes: {
+          category: "motion",
+          type: "dur",
+          item: "normal",
+        },
+        path: ["motion", "dur", "normal"],
+      },
+      slow: {
+        value: 300,
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: 300,
+        },
+        name: "motion-dur-slow",
+        attributes: {
+          category: "motion",
+          type: "dur",
+          item: "slow",
+        },
+        path: ["motion", "dur", "slow"],
+      },
+    },
+    easing: {
+      emphasized: {
+        value: "cubic-bezier(0.2, 0, 0, 1)",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "cubic-bezier(0.2, 0, 0, 1)",
+        },
+        name: "motion-easing-emphasized",
+        attributes: {
+          category: "motion",
+          type: "easing",
+          item: "emphasized",
+        },
+        path: ["motion", "easing", "emphasized"],
+      },
+      standard: {
+        value: "cubic-bezier(0.2, 0, 0, 1)",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "cubic-bezier(0.2, 0, 0, 1)",
+        },
+        name: "motion-easing-standard",
+        attributes: {
+          category: "motion",
+          type: "easing",
+          item: "standard",
+        },
+        path: ["motion", "easing", "standard"],
+      },
+    },
+  },
+  zIndex: {
+    base: {
+      value: 0,
+      filePath: "tokens/tokens.json",
+      isSource: true,
+      original: {
+        value: 0,
+      },
+      name: "z-index-base",
+      attributes: {
+        category: "zIndex",
+        type: "base",
+      },
+      path: ["zIndex", "base"],
+    },
+    header: {
+      value: 100,
+      filePath: "tokens/tokens.json",
+      isSource: true,
+      original: {
+        value: 100,
+      },
+      name: "z-index-header",
+      attributes: {
+        category: "zIndex",
+        type: "header",
+      },
+      path: ["zIndex", "header"],
+    },
+    dropdown: {
+      value: 1000,
+      filePath: "tokens/tokens.json",
+      isSource: true,
+      original: {
+        value: 1000,
+      },
+      name: "z-index-dropdown",
+      attributes: {
+        category: "zIndex",
+        type: "dropdown",
+      },
+      path: ["zIndex", "dropdown"],
+    },
+    modal: {
+      value: 1100,
+      filePath: "tokens/tokens.json",
+      isSource: true,
+      original: {
+        value: 1100,
+      },
+      name: "z-index-modal",
+      attributes: {
+        category: "zIndex",
+        type: "modal",
+      },
+      path: ["zIndex", "modal"],
+    },
+    toast: {
+      value: 1200,
+      filePath: "tokens/tokens.json",
+      isSource: true,
+      original: {
+        value: 1200,
+      },
+      name: "z-index-toast",
+      attributes: {
+        category: "zIndex",
+        type: "toast",
+      },
+      path: ["zIndex", "toast"],
+    },
+  },
+  semantic: {
+    color: {
+      bg: {
+        page: {
+          value: "#FFFFFF",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.light.surface.value}",
+          },
+          name: "semantic-color-bg-page",
+          attributes: {
+            category: "semantic",
+            type: "color",
+            item: "bg",
+            subitem: "page",
+          },
+          path: ["semantic", "color", "bg", "page"],
+        },
+        card: {
+          value: "#FFFFFF",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.light.surface.value}",
+          },
+          name: "semantic-color-bg-card",
+          attributes: {
+            category: "semantic",
+            type: "color",
+            item: "bg",
+            subitem: "card",
+          },
+          path: ["semantic", "color", "bg", "card"],
+        },
+      },
+      text: {
+        body: {
+          value: "#2B2D42",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.light.onSurface.value}",
+          },
+          name: "semantic-color-text-body",
+          attributes: {
+            category: "semantic",
+            type: "color",
+            item: "text",
+            subitem: "body",
+          },
+          path: ["semantic", "color", "text", "body"],
+        },
+        muted: {
+          value: "#2B2D42",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.light.onSurfaceVar.value}",
+          },
+          name: "semantic-color-text-muted",
+          attributes: {
+            category: "semantic",
+            type: "color",
+            item: "text",
+            subitem: "muted",
+          },
+          path: ["semantic", "color", "text", "muted"],
+        },
+        inverse: {
+          value: "#F8F9FA",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.light.onInverseSurface.value}",
+          },
+          name: "semantic-color-text-inverse",
+          attributes: {
+            category: "semantic",
+            type: "color",
+            item: "text",
+            subitem: "inverse",
+          },
+          path: ["semantic", "color", "text", "inverse"],
+        },
+      },
+      border: {
+        subtle: {
+          value: "#B8BDC6",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.light.outline.value}",
+          },
+          name: "semantic-color-border-subtle",
+          attributes: {
+            category: "semantic",
+            type: "color",
+            item: "border",
+            subitem: "subtle",
+          },
+          path: ["semantic", "color", "border", "subtle"],
+        },
+      },
+      status: {
+        success: {
+          value: "#2BB673",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.status.success.value}",
+          },
+          name: "semantic-color-status-success",
+          attributes: {
+            category: "semantic",
+            type: "color",
+            item: "status",
+            subitem: "success",
+          },
+          path: ["semantic", "color", "status", "success"],
+        },
+        onSuccess: {
+          value: "#FFFFFF",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.status.onSuccess.value}",
+          },
+          name: "semantic-color-status-on-success",
+          attributes: {
+            category: "semantic",
+            type: "color",
+            item: "status",
+            subitem: "onSuccess",
+          },
+          path: ["semantic", "color", "status", "onSuccess"],
+        },
+        warning: {
+          value: "#F4B400",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.status.warning.value}",
+          },
+          name: "semantic-color-status-warning",
+          attributes: {
+            category: "semantic",
+            type: "color",
+            item: "status",
+            subitem: "warning",
+          },
+          path: ["semantic", "color", "status", "warning"],
+        },
+        onWarning: {
+          value: "#2B2D42",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.status.onWarning.value}",
+          },
+          name: "semantic-color-status-on-warning",
+          attributes: {
+            category: "semantic",
+            type: "color",
+            item: "status",
+            subitem: "onWarning",
+          },
+          path: ["semantic", "color", "status", "onWarning"],
+        },
+        info: {
+          value: "#4A90E2",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.status.info.value}",
+          },
+          name: "semantic-color-status-info",
+          attributes: {
+            category: "semantic",
+            type: "color",
+            item: "status",
+            subitem: "info",
+          },
+          path: ["semantic", "color", "status", "info"],
+        },
+        onInfo: {
+          value: "#FFFFFF",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.status.onInfo.value}",
+          },
+          name: "semantic-color-status-on-info",
+          attributes: {
+            category: "semantic",
+            type: "color",
+            item: "status",
+            subitem: "onInfo",
+          },
+          path: ["semantic", "color", "status", "onInfo"],
+        },
+      },
+      button: {
+        primary: {
+          bg: {
+            value: "#1A4E5F",
+            filePath: "tokens/tokens.json",
+            isSource: true,
+            original: {
+              value: "{color.light.primary.value}",
+            },
+            name: "semantic-color-button-primary-bg",
+            attributes: {
+              category: "semantic",
+              type: "color",
+              item: "button",
+              subitem: "primary",
+              state: "bg",
+            },
+            path: ["semantic", "color", "button", "primary", "bg"],
+          },
+          fg: {
+            value: "#F8F9FA",
+            filePath: "tokens/tokens.json",
+            isSource: true,
+            original: {
+              value: "{color.light.onPrimary.value}",
+            },
+            name: "semantic-color-button-primary-fg",
+            attributes: {
+              category: "semantic",
+              type: "color",
+              item: "button",
+              subitem: "primary",
+              state: "fg",
+            },
+            path: ["semantic", "color", "button", "primary", "fg"],
+          },
+        },
+        secondary: {
+          bg: {
+            value: "#A8DADC",
+            filePath: "tokens/tokens.json",
+            isSource: true,
+            original: {
+              value: "{color.light.secondary.value}",
+            },
+            name: "semantic-color-button-secondary-bg",
+            attributes: {
+              category: "semantic",
+              type: "color",
+              item: "button",
+              subitem: "secondary",
+              state: "bg",
+            },
+            path: ["semantic", "color", "button", "secondary", "bg"],
+          },
+          fg: {
+            value: "#FFFFFF",
+            filePath: "tokens/tokens.json",
+            isSource: true,
+            original: {
+              value: "{color.light.onSecondary.value}",
+            },
+            name: "semantic-color-button-secondary-fg",
+            attributes: {
+              category: "semantic",
+              type: "color",
+              item: "button",
+              subitem: "secondary",
+              state: "fg",
+            },
+            path: ["semantic", "color", "button", "secondary", "fg"],
+          },
+        },
+      },
+    },
   },
 };
