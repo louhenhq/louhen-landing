@@ -2,15 +2,12 @@
   "name": "louhen-landing",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
   "scripts": {
     "dev": "next dev",
     "dev:tp": "next dev --turbopack",
-    "prebuild": "npm run -w @louhen/design-tokens build",
-    "postinstall": "npm run -w @louhen/design-tokens build",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint"
   },
   "dependencies": {
     "firebase-admin": "^13.5.0",
@@ -31,8 +28,5 @@
     "eslint-config-next": "15.5.3",
     "tailwindcss": "^4.1.13",
     "typescript": "^5"
-  },
-  "workspaces": [
-    "packages/*"
-  ]
+  }
 }
