@@ -3,15 +3,27 @@
 // app/page.tsx
 import * as React from 'react';
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { getHeroVariant } from '@/lib/ab';
 import { track } from '@/lib/analytics';
 import { SITE_NAME, LEGAL_ENTITY } from '@/constants/site';
+import { joinWaitlist } from '@/lib/waitlist';
+import { useRouter } from 'next/navigation';
 
 export default function WaitlistLanding() {
   const variant = typeof window !== 'undefined' ? getHeroVariant() : 'A';
+  const [open, setOpen] = useState(false);
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
   useEffect(() => {
-    track({ name: 'page_view', path: '/', variant, ref: typeof document !== 'undefined' ? document.referrer || null : null });
+    track({
+      name: 'page_view',
+      path: typeof window !== 'undefined' ? window.location.href : '/',
+      variant,
+      ref: typeof document !== 'undefined' ? document.referrer || null : null,
+    });
   }, [variant]);
 
   const primaryLabel = variant === 'A' ? 'Join the waitlist' : 'Get early access';
@@ -30,14 +42,12 @@ export default function WaitlistLanding() {
           Smarter sizing, curated looks from your favorite brands, and fit feedback that improves with every try.
         </p>
         <div className="mt-8 flex items-center justify-center gap-3">
-          <Link
-            href="/preferences"
+          <button
             className="inline-flex items-center rounded-xl px-5 py-3 text-base font-medium bg-brand-primary text-white hover:opacity-90"
-            prefetch={false}
-            onClick={() => track({ name: 'cta_click', id: 'hero_primary', variant })}
+            onClick={() => { track({ name: 'cta_click', id: 'hero_primary', variant }); setOpen(true); }}
           >
             {primaryLabel}
-          </Link>
+          </button>
           <Link
             href="/onboarding/intro"
             className="inline-flex items-center rounded-xl px-5 py-3 text-base font-medium border border-border hover:border-border-strong"
@@ -48,6 +58,49 @@ export default function WaitlistLanding() {
           </Link>
         </div>
       </section>
+      {open && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4" role="dialog" aria-modal="true">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl border border-slate-200">
+            <div className="flex items-start justify-between gap-4">
+              <h2 className="text-lg font-semibold">Join the waitlist</h2>
+              <button className="text-slate-500 hover:text-slate-700" onClick={() => setOpen(false)}>✕</button>
+            </div>
+            <form
+              className="mt-4 space-y-2"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setError(null);
+                setLoading(true);
+                const res = await joinWaitlist(email);
+                setLoading(false);
+                if (res?.ok && res.code) {
+                  setOpen(false);
+                  router.push(`/thanks?code=${encodeURIComponent(res.code)}`);
+                } else {
+                  setError(res?.error || 'Something went wrong');
+                }
+              }}
+            >
+              <input
+                type="email"
+                required
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full border rounded-xl px-3 py-2"
+              />
+              <p className="text-xs text-slate-500">Covered by GDPR. We store your email and a hashed IP to prevent abuse.</p>
+              {error && <p className="text-sm text-rose-700">{error}</p>}
+              <div className="mt-3 flex gap-3">
+                <button type="submit" disabled={loading} className="inline-flex items-center rounded-xl px-4 py-2 bg-slate-900 text-white">
+                  {loading ? 'Joining…' : 'Join'}
+                </button>
+                <button type="button" className="px-3 py-2" onClick={() => setOpen(false)}>Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Value props */}
       <section className="mx-auto max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-6 py-10">
