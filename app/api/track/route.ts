@@ -1,25 +1,45 @@
 import { NextRequest, NextResponse } from 'next/server';
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
-/**
- * Minimal event capture.
- * If Firestore env is available, you can wire up Firestore writes (commented scaffold below).
- * Otherwise, this returns 200 OK and logs to server—keeps it safe & deployable immediately.
- */
+import { initAdmin } from '@/lib/firebaseAdmin';
+import { FieldValue } from 'firebase-admin/firestore';
+import { hashIp } from '@/lib/crypto/ipHash';
 
-// ---- Optional Firestore wiring (uncomment + add deps & envs to persist) ----
-// import { initializeApp, cert, ServiceAccount } from 'firebase-admin/app';
-// import { getFirestore } from 'firebase-admin/firestore';
-// let db: ReturnType<typeof getFirestore> | null = null;
-// function ensureDb() {
-//   if (db) return db;
-//   const projectId = process.env.FIREBASE_PROJECT_ID;
-//   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-//   const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\n/g, '\n');
-//   if (!projectId || !clientEmail || !privateKey) return null;
-//   initializeApp({ credential: cert({ projectId, clientEmail, privateKey } as ServiceAccount) });
-//   db = getFirestore();
-//   return db;
-// }
+function getIp(req: NextRequest): string | null {
+  // Prefer Next.js provided ip, fallback to header
+  const fromNext = (req as unknown as { ip?: string | null }).ip ?? null;
+  if (fromNext) return fromNext;
+  const fwd = req.headers.get('x-forwarded-for') || '';
+  const ip = fwd.split(',')[0].trim();
+  return ip || null;
+}
+
+function parseUrl(input: unknown): URL | null {
+  if (!input) return null;
+  if (typeof input !== 'string') return null;
+  try {
+    // If path-only was sent (e.g., "/"), construct from site URL
+    if (input.startsWith('/')) {
+      const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://louhen-landing.vercel.app';
+      return new URL(input, base);
+    }
+    return new URL(input);
+  } catch {
+    return null;
+  }
+}
+
+function parseUtm(u: URL | null) {
+  const p = u?.searchParams;
+  return {
+    utm_source: p?.get('utm_source') || null,
+    utm_medium: p?.get('utm_medium') || null,
+    utm_campaign: p?.get('utm_campaign') || null,
+    utm_content: p?.get('utm_content') || null,
+    utm_term: p?.get('utm_term') || null,
+  } as const;
+}
 
 export async function POST(req: NextRequest) {
   const data = await req.json().catch(() => null);
@@ -38,16 +58,39 @@ export async function POST(req: NextRequest) {
     ts: data.ts,
   });
 
-  // ---- Optional Firestore persist ----
-  // const store = ensureDb();
-  // if (store) {
-  //   await store.collection('events').add({
-  //     ...data,
-  //     ts: data.ts ?? Date.now(),
-  //     ip: req.ip ?? null,
-  //   });
-  // }
+  // ---- Persist to Firestore if service account is configured ----
+  try {
+    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+      const app = initAdmin();
+      const db = app.firestore();
+      const fromPath = parseUrl(typeof data.path === 'string' ? data.path : null);
+      const fromHeader = parseUrl(req.headers.get('referer'));
+      const utm = parseUtm(fromPath || fromHeader);
+      // Normalize fields
+      const name = String(data.name || '').trim();
+      const variant = typeof data.variant === 'string' ? String(data.variant).trim().toUpperCase() : undefined;
+      const ipRaw = getIp(req);
+      const ip_hash = hashIp(ipRaw);
+      const storeIp = typeof process.env.ANALYTICS_STORE_IP === 'string' && process.env.ANALYTICS_STORE_IP.trim().toLowerCase() === 'true';
+      await db.collection('events').add({
+        ...data,
+        name,
+        variant,
+        ts: typeof data.ts === 'number' ? data.ts : Date.now(),
+        ua: typeof data.ua === 'string' ? data.ua : null,
+        ip: storeIp ? ipRaw : undefined,
+        ip_hash,
+        ref: typeof data.ref === 'string' ? data.ref : null,
+        referrer: req.headers.get('referer') || null,
+        ...utm,
+        createdAt: FieldValue.serverTimestamp(),
+        source: 'landing:v1',
+      });
+    }
+  } catch (e) {
+    // Best-effort: never fail the request on analytics write
+    console.error('analytics persist failed:', e);
+  }
 
   return NextResponse.json({ ok: true });
 }
-
