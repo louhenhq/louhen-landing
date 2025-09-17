@@ -87,9 +87,10 @@ export async function POST(req: NextRequest) {
         source: 'landing:v1',
       });
     }
-  } catch (e) {
+  } catch (_e) {
     // Best-effort: never fail the request on analytics write
-    console.error('analytics persist failed:', e);
+    // eslint-disable-next-line no-console
+    console.error('analytics persist failed');
   }
 
   return NextResponse.json({ ok: true });

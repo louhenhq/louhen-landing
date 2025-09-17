@@ -2,13 +2,13 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 import { getEvents } from '@/lib/admin/eventsQuery';
+import type { EventRow } from '@/lib/admin/eventsQuery';
+import type { Timestamp } from 'firebase-admin/firestore';
 
 function toIso(input: unknown): string {
-  // Supports Firestore Timestamp, Date, ISO string, or undefined/null
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const ts = input as any;
-  if (ts && typeof ts.toDate === 'function') {
-    const d: Date = ts.toDate();
+  if (input && typeof input === 'object' && 'toDate' in (input as Record<string, unknown>)) {
+    const ts = input as Timestamp;
+    const d = ts.toDate();
     return d.toISOString();
   }
   if (input instanceof Date) return input.toISOString();
@@ -110,8 +110,8 @@ export default async function EventsAdminPage({ searchParams }: { searchParams: 
             </tr>
           </thead>
           <tbody>
-            {rows.map((r) => {
-              const createdIso = r.createdAt ? toIso(r.createdAt as unknown) : (r.ts ? new Date(r.ts).toISOString() : '');
+            {(rows as EventRow[]).map((r: EventRow) => {
+              const createdIso = r.createdAt ? toIso(r.createdAt) : (r.ts ? new Date(r.ts).toISOString() : '');
               return (
                 <tr key={r.id} className="border-t border-slate-100 align-top">
                   <td className="px-3 py-2 whitespace-nowrap tabular-nums">{createdIso ? new Date(createdIso).toLocaleString() : '—'}</td>
@@ -121,7 +121,7 @@ export default async function EventsAdminPage({ searchParams }: { searchParams: 
                   <td className="px-3 py-2 font-mono text-[11px] sm:text-xs">{r.id2 || '—'}</td>
                   <td className="px-3 py-2">{r.ok === undefined ? '—' : r.ok ? 'yes' : 'no'}</td>
                   <td className="px-3 py-2 text-rose-700">{r.error || '—'}</td>
-                  <td className="px-3 py-2 font-mono text-[11px] sm:text-xs">{(r as any).ip_hash || r.ip || '—'}</td>
+                  <td className="px-3 py-2 font-mono text-[11px] sm:text-xs">{r.ip_hash || '—'}</td>
                   <td className="px-3 py-2">
                     <div className="text-[11px] sm:text-xs text-slate-600">
                       {r.utm_source || r.utm_medium || r.utm_campaign || r.utm_content || r.utm_term ? (

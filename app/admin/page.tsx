@@ -3,13 +3,12 @@ export const dynamic = 'force-dynamic';
 
 import { initAdmin } from '@/lib/firebaseAdmin';
 import type { WaitlistDoc } from '@/types/waitlist';
+import type { Timestamp } from 'firebase-admin/firestore';
 
 function toIsoDate(input: unknown): string {
-  // Supports Firestore Timestamp, Date, ISO string, or undefined/null
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const ts = input as any;
-  if (ts && typeof ts.toDate === 'function') {
-    const d: Date = ts.toDate();
+  if (input && typeof input === 'object' && 'toDate' in (input as Record<string, unknown>)) {
+    const ts = input as Timestamp;
+    const d = ts.toDate();
     return d.toISOString();
   }
   if (input instanceof Date) return input.toISOString();

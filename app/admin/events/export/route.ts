@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getEvents } from '@/lib/admin/eventsQuery';
+import type { EventRow } from '@/lib/admin/eventsQuery';
+import type { Timestamp } from 'firebase-admin/firestore';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -26,9 +28,9 @@ export async function GET(req: Request) {
       'id','createdAt','name','path','variant','event_id','ok','error','ip_hash','ref','referrer','utm_source','utm_medium','utm_campaign','utm_content','utm_term','ua'
     ];
     const csv = [headers.join(',')].concat(
-      rows.map((r) => {
-        const createdIso = r.createdAt ? (r.createdAt as any).toDate().toISOString() : (r.ts ? new Date(r.ts).toISOString() : '');
-        const ip_hash = (r as any).ip_hash || '';
+      (rows as EventRow[]).map((r: EventRow) => {
+        const createdIso = r.createdAt ? (r.createdAt as Timestamp).toDate().toISOString() : (r.ts ? new Date(r.ts).toISOString() : '');
+        const ip_hash = r.ip_hash || '';
         const vals = [
           r.id,
           createdIso,
@@ -68,4 +70,3 @@ export async function GET(req: Request) {
 
   return NextResponse.json({ ok: true, nextCursor, rows });
 }
-
