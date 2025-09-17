@@ -3,10 +3,12 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 import { initAdmin } from '@/lib/firebaseAdmin';
-import { FieldValue } from 'firebase-admin/firestore';
+import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import type { WaitlistRecord } from '@/types/waitlist';
 import { emailHash } from '@/lib/crypto/emailHash';
 import { hashIp } from '@/lib/crypto/ipHash';
+import { randomTokenBase64Url, sha256Hex } from '@/lib/crypto/token';
+import { sendWaitlistConfirmEmail } from '@/lib/email/send';
 
 // --- Simple in-memory rate limit: 3 req / 60s per IP (per server instance) ---
 type Bucket = { count: number; resetAt: number };
@@ -51,19 +53,17 @@ function parseUrlSafe(input?: string | null): URL | null {
   try { return new URL(input); } catch { return null; }
 }
 
-function parseUtm(u: URL | null) {
-  if (!u) return null;
-  const get = (k: string) => {
+function parseUtm(u: URL | null):
+  | { utm_source?: string; utm_medium?: string; utm_campaign?: string; utm_content?: string; utm_term?: string }
+  | undefined {
+  if (!u) return undefined;
+  const keys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'] as const;
+  const out: Record<string, string> = {};
+  for (const k of keys) {
     const v = u.searchParams.get(k);
-    return v ? v.trim() : undefined;
-  };
-  return {
-    utm_source: get('utm_source'),
-    utm_medium: get('utm_medium'),
-    utm_campaign: get('utm_campaign'),
-    utm_content: get('utm_content'),
-    utm_term: get('utm_term'),
-  };
+    if (v && v.trim() !== '') out[k] = v.trim();
+  }
+  return Object.keys(out).length ? (out as any) : undefined;
 }
 
 function refCodeFromId(idHex: string) {
@@ -151,8 +151,6 @@ export async function POST(req: Request) {
       email,
       emailLc,
       href: href || null,
-      referrer: refUrl ? { host: refUrl.host, path: refUrl.pathname } : null,
-      utm: utm || null,
       ip_hash: ip_hash || null,
       refCode,
       referredBy: referredBy || null,
@@ -160,6 +158,9 @@ export async function POST(req: Request) {
     };
 
     let created = false;
+    // Helper to sanitize referrer object
+    const refObj = refUrl && refUrl.host && refUrl.pathname ? { host: refUrl.host, path: refUrl.pathname } : undefined;
+
     if (snap.exists) {
       const prev = snap.data() as Partial<WaitlistRecord>;
       await userRef.set(
@@ -170,6 +171,9 @@ export async function POST(req: Request) {
           updatedAt: now,
           // IP storage policy on update
           ...(storeRawIp ? { ip: ip } : { ip: FieldValue.delete() }),
+          // UTM/referrer policy on update
+          ...(utm ? { utm } : { utm: FieldValue.delete() }),
+          ...(refObj ? { referrer: refObj } : { referrer: FieldValue.delete() }),
         },
         { merge: true }
       );
@@ -182,6 +186,9 @@ export async function POST(req: Request) {
         updatedAt: now,
         // IP storage policy on create
         ...(storeRawIp ? { ip } : {}),
+        // UTM/referrer policy on create
+        ...(utm ? { utm } : { utm: null }),
+        ...(refObj ? { referrer: refObj } : { referrer: null }),
       } as Partial<WaitlistRecord>);
     }
 
@@ -201,6 +208,28 @@ export async function POST(req: Request) {
           await db.collection('waitlist').doc(inviterId).set({ refCount: FieldValue.increment(1) }, { merge: true });
         }
       }
+    }
+
+    // Generate and email confirmation token (best-effort)
+    try {
+      const ttlDays = Number(process.env.WAITLIST_CONFIRM_TTL_DAYS || '7');
+      const token = randomTokenBase64Url(32);
+      const tokenHash = sha256Hex(token);
+      const expDate = new Date(Date.now() + ttlDays * 24 * 60 * 60 * 1000);
+      await userRef.set(
+        {
+          confirmTokenHash: tokenHash,
+          confirmSentAt: now,
+          confirmExpiresAt: Timestamp.fromDate(expDate),
+        },
+        { merge: true }
+      );
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://louhen-landing.vercel.app';
+      const confirmUrl = new URL('/api/waitlist/confirm', baseUrl);
+      confirmUrl.searchParams.set('token', token);
+      await sendWaitlistConfirmEmail({ to: email, confirmUrl: confirmUrl.toString() });
+    } catch (mailErr) {
+      console.error('confirm email send failed:', mailErr);
     }
 
     // Best-effort analytics event

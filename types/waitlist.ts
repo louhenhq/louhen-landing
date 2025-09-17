@@ -46,4 +46,8 @@ export type WaitlistRecord = {
   referredBy?: string | null;
   refCount: number;
   status: 'joined' | 'confirmed';
+  confirmedAt?: FirebaseFirestore.Timestamp | null;
+  confirmTokenHash?: string | null;
+  confirmSentAt?: FirebaseFirestore.Timestamp | null;
+  confirmExpiresAt?: FirebaseFirestore.Timestamp | null;
 };

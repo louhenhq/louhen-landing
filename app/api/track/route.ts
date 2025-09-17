@@ -30,15 +30,17 @@ function parseUrl(input: unknown): URL | null {
   }
 }
 
-function parseUtm(u: URL | null) {
-  const p = u?.searchParams;
-  return {
-    utm_source: p?.get('utm_source') || null,
-    utm_medium: p?.get('utm_medium') || null,
-    utm_campaign: p?.get('utm_campaign') || null,
-    utm_content: p?.get('utm_content') || null,
-    utm_term: p?.get('utm_term') || null,
-  } as const;
+function parseUtm(u: URL | null):
+  | { utm_source?: string; utm_medium?: string; utm_campaign?: string; utm_content?: string; utm_term?: string }
+  | undefined {
+  if (!u) return undefined;
+  const keys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'] as const;
+  const out: Record<string, string> = {};
+  for (const k of keys) {
+    const v = u.searchParams.get(k);
+    if (v && v.trim() !== '') out[k] = v.trim();
+  }
+  return Object.keys(out).length ? (out as any) : undefined;
 }
 
 export async function POST(req: NextRequest) {
@@ -72,7 +74,7 @@ export async function POST(req: NextRequest) {
       const ipRaw = getIp(req);
       const ip_hash = hashIp(ipRaw);
       const storeIp = typeof process.env.ANALYTICS_STORE_IP === 'string' && process.env.ANALYTICS_STORE_IP.trim().toLowerCase() === 'true';
-      await db.collection('events').add({
+      const eventDoc: Record<string, unknown> = {
         ...data,
         name,
         variant,
@@ -81,11 +83,19 @@ export async function POST(req: NextRequest) {
         ip: storeIp ? ipRaw : undefined,
         ip_hash,
         ref: typeof data.ref === 'string' ? data.ref : null,
-        referrer: req.headers.get('referer') || null,
-        ...utm,
+        ...(utm ? utm : {}),
+        referrer: (() => {
+          const r = req.headers.get('referer') || '';
+          try {
+            const u = new URL(r);
+            if (u.host && u.pathname) return r;
+          } catch {}
+          return undefined;
+        })(),
         createdAt: FieldValue.serverTimestamp(),
         source: 'landing:v1',
-      });
+      };
+      await db.collection('events').add(eventDoc);
     }
   } catch (_e) {
     // Best-effort: never fail the request on analytics write
