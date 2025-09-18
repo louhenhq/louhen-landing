@@ -19,16 +19,15 @@ const tokenValues = tokens as Record<string, unknown> & {
 const THEME_COLOR_LIGHT =
   (tokenValues.color?.background?.canvas?.value as string | undefined) ||
   (tokenValues.color?.background?.surface?.value as string | undefined) ||
-  (tokenValues['--semantic-color-bg-page'] as string | undefined) ||
-  (tokenValues['--semantic-color-bg-card'] as string | undefined) ||
   (tokenValues['--color-light-surface'] as string | undefined) ||
+  (tokenValues['--semantic-color-bg-page'] as string | undefined) ||
   'currentColor';
 
 const THEME_COLOR_DARK =
   (tokenValues.color?.background?.canvasDark?.value as string | undefined) ||
   (tokenValues.color?.background?.surfaceDark?.value as string | undefined) ||
-  (tokenValues['--semanticDark-color-bg-page'] as string | undefined) ||
   (tokenValues['--color-dark-surface'] as string | undefined) ||
+  (tokenValues['--semanticDark-color-bg-page'] as string | undefined) ||
   THEME_COLOR_LIGHT;
 
 export const metadata: Metadata = {
@@ -79,8 +78,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body
         className="min-h-screen antialiased font-sans"
         style={{
-          background: 'var(--semantic-color-bg-page)',
-          color: 'var(--semantic-color-text-body)',
+          background: 'var(--color-background-canvas, var(--semantic-color-bg-page))',
+          color: 'var(--color-text-default, var(--semantic-color-text-body))',
         }}
       >
         {/* Apply theme/contrast on first paint + react to system changes */}
