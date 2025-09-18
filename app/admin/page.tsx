@@ -95,6 +95,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
         </a>
         <span className="mx-2">•</span>
         <a href={`/admin/events?key=${encodeURIComponent(adminKey)}`} className="underline">View recent events</a>
+        <span className="mx-2">•</span>
+        <a href={`/admin/metrics?key=${encodeURIComponent(adminKey)}`} className="underline">Metrics dashboard</a>
       </div>
       <div className="mt-6 overflow-x-auto rounded-xl border border-slate-200 bg-white">
         <table className="min-w-full text-sm">

@@ -1,0 +1,29 @@
+name: ci-guards
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  no-hex-outside-tokens:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ensure no hardcoded hex colours are committed
+        run: |
+          # Look for hex codes like #fff, #ffffff, #ffffffff
+          # Exclude generated token outputs and node_modules
+          if grep -RInE "#[0-9a-fA-F]{3,8}\\b" \
+            --exclude-dir=node_modules \
+            --exclude-dir=.next \
+            --exclude-dir=public/tokens \
+            --exclude-dir=packages \
+            --exclude-dir=dist \
+            app lib components; then
+            echo "❌ Hardcoded hex colour(s) found outside tokens."
+            exit 1
+          else
+            echo "✅ No hardcoded hex colours detected."
+          fi

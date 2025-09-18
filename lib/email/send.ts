@@ -6,22 +6,22 @@ export async function sendWaitlistConfirmEmail(opts: { to: string; confirmUrl: s
   const preview = 'Tap to confirm your email and join the waitlist.';
   const html = `<!doctype html>
 <html>
-  <body style="margin:0;padding:0;background:#ffffff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#0f172a;">
+  <body style="margin:0;padding:0;background:var(--semantic-color-bg-page);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--semantic-color-text-body);">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;margin:0 auto;padding:24px;">
       <tr><td style="font-size:0;line-height:0;height:8px;">&zwnj;</td></tr>
       <tr>
         <td>
-          <h1 style="margin:20px 0 8px;font-size:20px;">Confirm your email</h1>
+          <h1 style="margin:20px 0 8px;font-size:20px;color:var(--semantic-color-text-body);">Confirm your email</h1>
           <p style="margin:0 0 16px;line-height:1.6;">
             Thanks for joining Louhen. Please confirm your email to complete your signup:
           </p>
           <p style="margin:0 0 16px;">
-            <a href="${opts.confirmUrl}" style="display:inline-block;padding:10px 14px;border-radius:10px;background:#0f172a;color:#ffffff;text-decoration:none;">Confirm email</a>
+            <a href="${opts.confirmUrl}" style="display:inline-block;padding:10px 14px;border-radius:10px;background:var(--color-light-primary);color:var(--semantic-color-text-inverse);text-decoration:none;">Confirm email</a>
           </p>
           <p style="margin:0 0 16px;line-height:1.6;">
             Or copy and paste this link:
             <br/>
-            <a href="${opts.confirmUrl}" style="color:#0f172a;word-break:break-all;">${opts.confirmUrl}</a>
+            <a href="${opts.confirmUrl}" style="color:var(--semantic-color-text-body);word-break:break-all;">${opts.confirmUrl}</a>
           </p>
         </td>
       </tr>

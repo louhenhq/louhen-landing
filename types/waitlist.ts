@@ -50,4 +50,5 @@ export type WaitlistRecord = {
   confirmTokenHash?: string | null;
   confirmSentAt?: FirebaseFirestore.Timestamp | null;
   confirmExpiresAt?: FirebaseFirestore.Timestamp | null;
+  creditDelayed?: boolean | null;
 };

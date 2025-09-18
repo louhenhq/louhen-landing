@@ -3,12 +3,13 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 import { initAdmin } from '@/lib/firebaseAdmin';
-import { FieldValue, Timestamp } from 'firebase-admin/firestore';
+import { FieldValue, Timestamp, type Firestore } from 'firebase-admin/firestore';
 import type { WaitlistRecord } from '@/types/waitlist';
 import { emailHash } from '@/lib/crypto/emailHash';
 import { hashIp } from '@/lib/crypto/ipHash';
 import { randomTokenBase64Url, sha256Hex } from '@/lib/crypto/token';
 import { sendWaitlistConfirmEmail } from '@/lib/email/send';
+import { getWaitlistConfirmTtlMs } from '@/lib/waitlistConfirmTtl';
 
 // --- Simple in-memory rate limit: 3 req / 60s per IP (per server instance) ---
 type Bucket = { count: number; resetAt: number };
@@ -18,10 +19,33 @@ const BUCKETS = rlGlobal.__waitlistBuckets;
 const RATE_WINDOW_MS = 60_000;
 const RATE_MAX = 3;
 
+type ReferralBucket = { count: number; resetAt: number };
+const refGlobal = (globalThis as unknown as { __waitlistReferralBuckets?: Map<string, ReferralBucket> });
+if (!refGlobal.__waitlistReferralBuckets) refGlobal.__waitlistReferralBuckets = new Map();
+const REFERRAL_BUCKETS = refGlobal.__waitlistReferralBuckets;
+const REFERRAL_WINDOW_MS = 60 * 60 * 1000;
+const REFERRAL_MAX = 10;
+
 function getIp(req: Request): string {
   const fwd = req.headers.get('x-forwarded-for') || '';
   const ip = fwd.split(',')[0].trim() || 'unknown';
   return ip;
+}
+
+async function logReferralBlocked(db: Firestore, params: { reason: 'ip_cap' | 'self'; ref: string; storeRawIp: boolean; ip: string; ip_hash: string | null }) {
+  try {
+    await db.collection('events').add({
+      name: 'wl_referral_blocked',
+      reason: params.reason,
+      ref: params.ref,
+      ip_hash: params.ip_hash || null,
+      ...(params.storeRawIp ? { ip: params.ip } : {}),
+      createdAt: FieldValue.serverTimestamp(),
+      source: 'landing:v1',
+    });
+  } catch (err) {
+    console.error('referral block event failed', err);
+  }
 }
 
 export async function GET() {
@@ -144,6 +168,22 @@ export async function POST(req: Request) {
     const db = app.firestore();
 
     const userRef = db.collection('waitlist').doc(docId);
+    if (referredBy) {
+      const bucket = REFERRAL_BUCKETS.get(ip);
+      if (!bucket || nowMs > bucket.resetAt) {
+        REFERRAL_BUCKETS.set(ip, { count: 1, resetAt: nowMs + REFERRAL_WINDOW_MS });
+      } else if (bucket.count >= REFERRAL_MAX) {
+        const retryAfterMs = Math.max(0, bucket.resetAt - nowMs);
+        await logReferralBlocked(db, { reason: 'ip_cap', ref: referredBy, storeRawIp, ip, ip_hash });
+        return NextResponse.json(
+          { ok: false, error: 'referral_rate_limit', retryAfterMs },
+          { status: 429, headers: { 'Retry-After': String(Math.ceil(retryAfterMs / 1000)) } }
+        );
+      } else {
+        bucket.count += 1;
+      }
+    }
+
     const snap = await userRef.get();
     const now = FieldValue.serverTimestamp();
 
@@ -158,6 +198,10 @@ export async function POST(req: Request) {
     };
 
     let created = false;
+    let referralAccepted = false;
+    let creditDelayed = false;
+    let isSelfReferral = false;
+    let inviterId: string | null = null;
     // Helper to sanitize referrer object
     const refObj = refUrl && refUrl.host && refUrl.pathname ? { host: refUrl.host, path: refUrl.pathname } : undefined;
 
@@ -198,24 +242,53 @@ export async function POST(req: Request) {
     if (!refMapSnap.exists) {
       await refMapRef.set({ userId: docId, createdAt: now });
     }
-
-    // Credit inviter on initial create only, if valid and not self
-    if (created && referredBy && referredBy !== refCode) {
-      const inviterMap = await db.collection('waitlist_referrals').doc(referredBy).get();
-      if (inviterMap.exists) {
-        const inviterId = String(inviterMap.get('userId') || '');
-        if (inviterId && inviterId !== docId) {
-          await db.collection('waitlist').doc(inviterId).set({ refCount: FieldValue.increment(1) }, { merge: true });
+    if (referredBy) {
+      if (referredBy === refCode) {
+        isSelfReferral = true;
+      } else {
+        const inviterMap = await db.collection('waitlist_referrals').doc(referredBy).get();
+        if (inviterMap.exists) {
+          inviterId = String(inviterMap.get('userId') || '');
+          if (inviterId) {
+            const inviterDoc = await db.collection('waitlist').doc(inviterId).get();
+          if (inviterDoc.exists) {
+            const inviterEmailLc = String(inviterDoc.get('emailLc') || '').toLowerCase();
+            const ownerDomain = inviterEmailLc.split('@')[1] || '';
+            const subscriberDomain = emailLc.split('@')[1] || '';
+            if (inviterEmailLc === emailLc || (ownerDomain && ownerDomain === subscriberDomain)) {
+              isSelfReferral = true;
+            }
+            } else {
+              creditDelayed = true;
+            }
+          } else {
+            creditDelayed = true;
+          }
+        } else {
+          creditDelayed = true;
         }
+      }
+
+      if (isSelfReferral) {
+        creditDelayed = true;
+        await logReferralBlocked(db, { reason: 'self', ref: referredBy, storeRawIp, ip, ip_hash });
+      } else if (!creditDelayed && created && inviterId && inviterId !== docId) {
+        await db.collection('waitlist').doc(inviterId).set({ refCount: FieldValue.increment(1) }, { merge: true });
+        referralAccepted = true;
       }
     }
 
+    await userRef.set(
+      creditDelayed ? { creditDelayed: true } : { creditDelayed: FieldValue.delete() },
+      { merge: true }
+    );
+
     // Generate and email confirmation token (best-effort)
     try {
-      const ttlDays = Number(process.env.WAITLIST_CONFIRM_TTL_DAYS || '7');
+      const ttlMs = getWaitlistConfirmTtlMs();
       const token = randomTokenBase64Url(32);
       const tokenHash = sha256Hex(token);
-      const expDate = new Date(Date.now() + ttlDays * 24 * 60 * 60 * 1000);
+      const expDate = new Date(Date.now() + ttlMs);
       await userRef.set(
         {
           confirmTokenHash: tokenHash,
@@ -244,10 +317,13 @@ export async function POST(req: Request) {
         ...(storeRawIp ? { ip } : {}),
         createdAt: now,
         source: 'landing:v1',
+        refAccepted: referralAccepted,
+        creditDelayed,
+        selfReferral: isSelfReferral,
       });
     } catch {}
 
-    return NextResponse.json({ ok: true, code: refCode });
+    return NextResponse.json({ ok: true, code: refCode, refAccepted: referralAccepted, creditDelayed });
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : String(e);
     console.error('POST /api/waitlist error:', e);

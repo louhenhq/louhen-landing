@@ -2,11 +2,13 @@
 
 import * as React from 'react';
 import Link from 'next/link';
+import { useLocale } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 
 type NavigatorWithShare = Navigator & { share?: (data: ShareData) => Promise<void> };
 
 export default function WaitlistForm() {
+  const locale = useLocale();
   const [status, setStatus] = React.useState<'idle' | 'loading' | 'ok' | 'error' | 'dupe' | 'rate'>('idle');
   const [message, setMessage] = React.useState<string>('');
   const [locked, setLocked] = React.useState<boolean>(false);
@@ -144,7 +146,13 @@ export default function WaitlistForm() {
         </div>
         <div className="sm:col-span-2 flex items-start gap-3">
           <input id="consent" name="consent" type="checkbox" className="mt-1 h-4 w-4 rounded border-border" />
-          <label htmlFor="consent" className="text-xs text-text-muted">I agree to receive early-access emails from Louhen and accept the <a href="/privacy" className="underline">Privacy Policy</a>. You can opt out anytime.</label>
+          <label htmlFor="consent" className="text-xs text-text-muted">
+            I agree to receive early-access emails from Louhen and accept the{' '}
+            <Link href={`/${locale}/privacy`} className="underline" prefetch={false}>
+              Privacy Policy
+            </Link>
+            . You can opt out anytime.
+          </label>
         </div>
         <div className="sm:col-span-2">
           <button
@@ -214,4 +222,3 @@ export default function WaitlistForm() {
     </form>
   );
 }
-

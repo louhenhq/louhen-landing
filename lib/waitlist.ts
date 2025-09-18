@@ -20,7 +20,7 @@ export async function joinWaitlist(email: string) {
     });
     const json = await res.json();
     return json;
-  } catch (_e) {
+  } catch {
     return { ok: false, error: 'network_error' };
   }
 }

@@ -71,6 +71,16 @@ export default async function EventsAdminPage({ searchParams }: { searchParams: 
             <option value="cta_click">cta_click</option>
             <option value="waitlist_submit">waitlist_submit</option>
             <option value="how_it_works_click">how_it_works_click</option>
+            <option value="wl_view">wl_view</option>
+            <option value="wl_submit">wl_submit</option>
+            <option value="wl_confirm_success">wl_confirm_success</option>
+            <option value="wl_confirm_expired">wl_confirm_expired</option>
+            <option value="wl_resend">wl_resend</option>
+            <option value="wl_share_view">wl_share_view</option>
+            <option value="wl_share_copy_link">wl_share_copy_link</option>
+            <option value="wl_share_copy_code">wl_share_copy_code</option>
+            <option value="wl_share_native">wl_share_native</option>
+            <option value="wl_referral_applied">wl_referral_applied</option>
           </select>
         </div>
         <div>

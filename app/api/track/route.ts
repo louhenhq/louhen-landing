@@ -6,6 +6,9 @@ import { initAdmin } from '@/lib/firebaseAdmin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { hashIp } from '@/lib/crypto/ipHash';
 
+type AnalyticsPayload = { name: string } & Record<string, unknown>;
+type UTMKey = 'utm_source' | 'utm_medium' | 'utm_campaign' | 'utm_content' | 'utm_term';
+
 function getIp(req: NextRequest): string | null {
   // Prefer Next.js provided ip, fallback to header
   const fromNext = (req as unknown as { ip?: string | null }).ip ?? null;
@@ -30,24 +33,33 @@ function parseUrl(input: unknown): URL | null {
   }
 }
 
-function parseUtm(u: URL | null):
-  | { utm_source?: string; utm_medium?: string; utm_campaign?: string; utm_content?: string; utm_term?: string }
-  | undefined {
+function parseUtm(u: URL | null): Partial<Record<UTMKey, string>> | undefined {
   if (!u) return undefined;
-  const keys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'] as const;
-  const out: Record<string, string> = {};
+  const keys: UTMKey[] = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
+  const out: Partial<Record<UTMKey, string>> = {};
+  let hasValue = false;
   for (const k of keys) {
     const v = u.searchParams.get(k);
-    if (v && v.trim() !== '') out[k] = v.trim();
+    if (v && v.trim() !== '') {
+      out[k] = v.trim();
+      hasValue = true;
+    }
   }
-  return Object.keys(out).length ? (out as any) : undefined;
+  return hasValue ? out : undefined;
+}
+
+function isAnalyticsPayload(value: unknown): value is AnalyticsPayload {
+  if (typeof value !== 'object' || value === null) return false;
+  const maybe = value as { name?: unknown };
+  return typeof maybe.name === 'string';
 }
 
 export async function POST(req: NextRequest) {
-  const data = await req.json().catch(() => null);
-  if (!data || typeof data.name !== 'string') {
+  const raw = (await req.json().catch(() => null)) as unknown;
+  if (!isAnalyticsPayload(raw)) {
     return NextResponse.json({ ok: false, error: 'bad_request' }, { status: 400 });
   }
+  const data = raw;
 
   // Safe log for now
   console.log('[track]', {
@@ -97,10 +109,9 @@ export async function POST(req: NextRequest) {
       };
       await db.collection('events').add(eventDoc);
     }
-  } catch (_e) {
+  } catch (error) {
     // Best-effort: never fail the request on analytics write
-    // eslint-disable-next-line no-console
-    console.error('analytics persist failed');
+    console.error('analytics persist failed', error);
   }
 
   return NextResponse.json({ ok: true });

@@ -1,8 +1,35 @@
 import './globals.css'
+import './styles/tokens.css'
 import type { Metadata, Viewport } from 'next'
 import ThemeInit from '@/components/ThemeInit';
-import SiteHeader from '@/components/SiteHeader';
-import { SITE_NAME, LEGAL_ENTITY } from '@/constants/site';
+import { SITE_NAME } from '@/constants/site';
+import tokens from '@louhen/design-tokens/build/web/tokens.json' assert { type: 'json' };
+
+const tokenValues = tokens as Record<string, unknown> & {
+  color?: {
+    background?: {
+      canvas?: { value?: string };
+      surface?: { value?: string };
+      canvasDark?: { value?: string };
+      surfaceDark?: { value?: string };
+    };
+  };
+};
+
+const THEME_COLOR_LIGHT =
+  (tokenValues.color?.background?.canvas?.value as string | undefined) ||
+  (tokenValues.color?.background?.surface?.value as string | undefined) ||
+  (tokenValues['--semantic-color-bg-page'] as string | undefined) ||
+  (tokenValues['--semantic-color-bg-card'] as string | undefined) ||
+  (tokenValues['--color-light-surface'] as string | undefined) ||
+  'currentColor';
+
+const THEME_COLOR_DARK =
+  (tokenValues.color?.background?.canvasDark?.value as string | undefined) ||
+  (tokenValues.color?.background?.surfaceDark?.value as string | undefined) ||
+  (tokenValues['--semanticDark-color-bg-page'] as string | undefined) ||
+  (tokenValues['--color-dark-surface'] as string | undefined) ||
+  THEME_COLOR_LIGHT;
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://louhen-landing.vercel.app'),
@@ -32,33 +59,32 @@ export const metadata: Metadata = {
   },
 }
 
-// Move theme color to viewport for Next.js metadata API compatibility
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#0b1220' },
+    { media: '(prefers-color-scheme: light)', color: THEME_COLOR_LIGHT },
+    { media: '(prefers-color-scheme: dark)', color: THEME_COLOR_DARK },
   ],
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  // Normalize env flag to avoid whitespace/case pitfalls
-  const onboardingEnabled = ((process.env.NEXT_PUBLIC_ONBOARDING_ENABLED ?? '').trim().toLowerCase() === 'true');
   return (
     <html lang="en">
       <head>
-        {/* Token CSS links injected at runtime from /public (guaranteed to load).
-            Do not @import these in globals.css; they must be served, not bundled. */}
-        <link rel="stylesheet" href="/tokens/tokens.css" />
-        <link rel="stylesheet" href="/tokens/tokens.dark.css" />
-        <link rel="stylesheet" href="/tokens/tokens.hc.css" />
         {/* iOS PWA / status bar styling */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="theme-color" content={THEME_COLOR_LIGHT} media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content={THEME_COLOR_DARK} media="(prefers-color-scheme: dark)" />
       </head>
-      <body className="min-h-screen bg-white text-slate-900 antialiased font-sans">
+      <body
+        className="min-h-screen antialiased font-sans"
+        style={{
+          background: 'var(--semantic-color-bg-page)',
+          color: 'var(--semantic-color-text-body)',
+        }}
+      >
         {/* Apply theme/contrast on first paint + react to system changes */}
         <ThemeInit />
-        <SiteHeader onboardingEnabled={onboardingEnabled} legalEntity={LEGAL_ENTITY} />
         {children}
       </body>
     </html>

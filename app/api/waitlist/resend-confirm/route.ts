@@ -4,6 +4,7 @@ import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { emailHash } from '@/lib/crypto/emailHash';
 import { randomTokenBase64Url, sha256Hex } from '@/lib/crypto/token';
 import { sendWaitlistConfirmEmail } from '@/lib/email/send';
+import { getWaitlistConfirmTtlMs } from '@/lib/waitlistConfirmTtl';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -23,10 +24,10 @@ export async function POST(req: Request) {
     const data = snap.data() as Record<string, any>;
     if (data.confirmedAt) return NextResponse.json({ ok: true });
 
-    const ttlDays = Number(process.env.WAITLIST_CONFIRM_TTL_DAYS || '7');
+    const ttlMs = getWaitlistConfirmTtlMs();
     const token = randomTokenBase64Url(32);
     const tokenHash = sha256Hex(token);
-    const expDate = new Date(Date.now() + ttlDays * 24 * 60 * 60 * 1000);
+    const expDate = new Date(Date.now() + ttlMs);
     await ref.set(
       { confirmTokenHash: tokenHash, confirmSentAt: FieldValue.serverTimestamp(), confirmExpiresAt: Timestamp.fromDate(expDate) },
       { merge: true }
@@ -41,4 +42,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   }
 }
-
