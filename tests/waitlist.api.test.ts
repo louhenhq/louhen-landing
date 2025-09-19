@@ -1,17 +1,20 @@
-import { describe, expect, it, beforeEach, vi } from 'vitest';
-
-vi.mock('@/lib/email/send', () => ({
-  sendWaitlistConfirmEmail: vi.fn(async () => ({})),
-}));
+import { createHash } from 'crypto';
+import { NextRequest } from 'next/server';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const firestoreModule = vi.hoisted(() => {
-  let instance: any;
+  let instance: ReturnType<typeof createFirestoreFixture> | null = null;
   return {
-    set(instanceRef: any) {
-      instance = instanceRef;
+    set(fixture: ReturnType<typeof createFirestoreFixture>) {
+      instance = fixture;
     },
     get() {
-      return instance;
+      if (!instance) throw new Error('Firestore fixture not initialised');
+      return instance.firestore;
+    },
+    data() {
+      if (!instance) throw new Error('Firestore fixture not initialised');
+      return instance.data;
     },
   };
 });
@@ -20,27 +23,23 @@ vi.mock('@/lib/firebaseAdmin', () => ({
   initAdmin: () => ({ firestore: () => firestoreModule.get() }),
 }));
 
-vi.mock('@/lib/crypto/token', () => ({
-  randomTokenBase64Url: () => 'mock-token',
-  sha256Hex: () => 'mock-hash',
+vi.mock('@/lib/waitlist/email', () => ({
+  sendWaitlistConfirmEmail: vi.fn(async () => {}),
+  sendWaitlistWelcomeEmail: vi.fn(async () => {}),
+}));
+
+vi.mock('@/lib/analytics', () => ({
+  logAnalyticsEvent: vi.fn(async () => {}),
 }));
 
 vi.mock('@/lib/crypto/emailHash', () => ({
   emailHash: (email: string) => `hash_${email}`,
 }));
 
-const deleteSentinel = Symbol('delete');
-
 vi.mock('firebase-admin/firestore', async () => {
   class MockFieldValue {
     static serverTimestamp() {
       return { __type: 'timestamp', value: new Date() };
-    }
-    static increment(value: number) {
-      return { __type: 'increment', value };
-    }
-    static delete() {
-      return { __type: 'delete', value: deleteSentinel };
     }
   }
 
@@ -52,164 +51,295 @@ vi.mock('firebase-admin/firestore', async () => {
     static fromDate(date: Date) {
       return new Timestamp(date);
     }
+    toMillis() {
+      return this.date.getTime();
+    }
     toDate() {
       return this.date;
     }
   }
 
-  return { FieldValue: MockFieldValue, Timestamp };
+  return {
+    FieldValue: MockFieldValue,
+    Timestamp,
+  };
 });
 
 type CollectionData = Map<string, Record<string, any>>;
 
 function createFirestoreFixture() {
   const waitlist: CollectionData = new Map();
-  const referrals: CollectionData = new Map();
-  const events: any[] = [];
 
-  const collections: Record<string, CollectionData | any[]> = {
-    waitlist,
-    waitlist_referrals: referrals,
-    events,
-  };
-
-  const applySentinel = (target: Record<string, any>, key: string, value: any) => {
-    if (value && typeof value === 'object' && value.__type) {
-      switch (value.__type) {
-        case 'timestamp':
-          target[key] = new Date(value.value);
-          break;
-        case 'increment':
-          target[key] = (target[key] || 0) + value.value;
-          break;
-        case 'delete':
-          delete target[key];
-          break;
-        default:
-          target[key] = value;
-      }
-    } else {
-      target[key] = value;
+  function applySentinel(target: Record<string, any>, key: string, value: any) {
+    if (value && typeof value === 'object' && value.__type === 'timestamp') {
+      target[key] = value.value instanceof Date ? value.value : new Date(value.value);
+      return;
     }
-  };
+    target[key] = value;
+  }
 
-  const db = {
+  const firestore = {
     collection(name: string) {
-      const store = collections[name];
-      if (!store) throw new Error(`Unknown collection: ${name}`);
-
-      if (Array.isArray(store)) {
+      if (name === 'waitlist') {
         return {
-          add: async (data: Record<string, any>) => {
-            store.push(data);
+          doc(id: string) {
+            return {
+              async get() {
+                const data = waitlist.get(id);
+                return {
+                  exists: Boolean(data),
+                  data: () => data,
+                  get(field: string) {
+                    return data?.[field];
+                  },
+                  ref: this,
+                };
+              },
+              async set(data: Record<string, any>, options?: { merge?: boolean }) {
+                const existing = waitlist.get(id) || {};
+                if (options?.merge) {
+                  const merged = { ...existing };
+                  for (const [key, value] of Object.entries(data)) {
+                    applySentinel(merged, key, value);
+                  }
+                  waitlist.set(id, merged);
+                } else {
+                  const fresh: Record<string, any> = {};
+                  for (const [key, value] of Object.entries(data)) {
+                    applySentinel(fresh, key, value);
+                  }
+                  waitlist.set(id, fresh);
+                }
+              },
+            };
+          },
+          where(field: string, op: string, value: unknown) {
+            if (field !== 'confirmToken' || op !== '==') {
+              throw new Error('Unsupported query in test fixture');
+            }
+            return {
+              limit() {
+                return this;
+              },
+              async get() {
+                const matches = Array.from(waitlist.entries())
+                  .filter(([, data]) => data[field] === value)
+                  .map(([id, data]) => ({
+                    id,
+                    data: () => data,
+                    ref: {
+                      set: async (update: Record<string, any>, options?: { merge?: boolean }) => {
+                        const doc = waitlist.get(id) || {};
+                        if (options?.merge) {
+                          const merged = { ...doc };
+                          for (const [key, val] of Object.entries(update)) {
+                            applySentinel(merged, key, val);
+                          }
+                          waitlist.set(id, merged);
+                        } else {
+                          const replacement: Record<string, any> = {};
+                          for (const [key, val] of Object.entries(update)) {
+                            applySentinel(replacement, key, val);
+                          }
+                          waitlist.set(id, replacement);
+                        }
+                      },
+                    },
+                  }));
+                return { empty: matches.length === 0, docs: matches };
+              },
+            };
           },
         };
       }
 
-      return {
-        doc(id: string) {
-          return {
-            async get() {
-              const data = store.get(id);
-              return {
-                exists: Boolean(data),
-                data: () => data,
-                get: (field: string) => data?.[field],
-              };
-            },
-            async set(data: Record<string, any>, options?: { merge?: boolean }) {
-              const existing = store.get(id) || {};
-              if (options?.merge) {
-                const merged = { ...existing };
-                Object.entries(data).forEach(([key, value]) => applySentinel(merged, key, value));
-                store.set(id, merged);
-              } else {
-                const replaced: Record<string, any> = {};
-                Object.entries(data).forEach(([key, value]) => applySentinel(replaced, key, value));
-                store.set(id, replaced);
-              }
-            },
-          };
-        },
-      };
+      throw new Error(`Unexpected collection: ${name}`);
     },
   };
 
   return {
-    firestore: db,
-    data: { waitlist, referrals, events },
+    firestore,
+    data: { waitlist },
   };
 }
 
-async function invokeWaitlist(payload: Record<string, unknown>) {
-  const body = JSON.stringify(payload);
-  const request = new Request('https://example.com/api/waitlist', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', 'x-forwarded-for': payload.ip || '1.1.1.1' },
-    body,
-  });
-  const module = await import('@/app/api/waitlist/route');
-  return module.POST(request);
-}
-
-describe('/api/waitlist referral protections', () => {
+describe('/api/waitlist', () => {
   beforeEach(() => {
+    vi.resetModules();
     vi.clearAllMocks();
-  });
-
-  it('accepts a valid referral and marks as accepted', async () => {
     const fixture = createFirestoreFixture();
-    const inviterId = 'hash_owner@louhen.com';
-    fixture.data.waitlist.set(inviterId, {
-      email: 'owner@louhen.com',
-      emailLc: 'owner@louhen.com',
-      refCode: 'INVITER',
-    });
-    fixture.data.referrals.set('INVITER', { userId: inviterId });
-    firestoreModule.set(fixture.firestore);
-
-    const response = await invokeWaitlist({ email: 'new@guest.org', referredBy: 'INVITER' });
-    const json = await response.json();
-    expect(response.status).toBe(200);
-    expect(json.ok).toBe(true);
-    expect(json.refAccepted).toBe(true);
-    expect(fixture.data.events.some((event) => event.name === 'wl_referral_blocked')).toBe(false);
-  });
-
-  it('flags self-referral and delays credit', async () => {
-    const fixture = createFirestoreFixture();
-    const ownerId = 'hash_owner@louhen.com';
-    fixture.data.waitlist.set(ownerId, { emailLc: 'owner@example.com', refCode: 'OWNER123' });
-    fixture.data.referrals.set('OWNER123', { userId: ownerId });
-    firestoreModule.set(fixture.firestore);
-
-    const response = await invokeWaitlist({ email: 'owner@louhen.com', referredBy: 'OWNER123' });
-    const json = await response.json();
-    expect(response.status).toBe(200);
-    expect(json.creditDelayed).toBe(true);
-    expect(fixture.data.events.some((event) => event.name === 'wl_referral_blocked' && event.reason === 'self')).toBe(true);
-  });
-
-  it('enforces ip cap for referrals', async () => {
-    const fixture = createFirestoreFixture();
-    const inviterId = 'hash_friend@example.com';
-    fixture.data.waitlist.set(inviterId, { emailLc: 'friend@example.com', refCode: 'FRREF' });
-    fixture.data.referrals.set('FRREF', { userId: inviterId });
+    firestoreModule.set(fixture);
+    process.env.HCAPTCHA_SECRET = 'test-secret';
+    process.env.APP_BASE_URL = 'https://louhen.example';
     ((globalThis as any).__waitlistBuckets as Map<string, any>)?.clear?.();
-    ((globalThis as any).__waitlistReferralBuckets as Map<string, any>)?.clear?.();
-    firestoreModule.set(fixture.firestore);
+    globalThis.fetch = vi.fn(async () => ({
+      json: async () => ({ success: true }),
+    })) as unknown as typeof fetch;
+  });
 
-    let lastResponse: Response | null = null;
-    for (let i = 0; i < 12; i++) {
-      lastResponse = await invokeWaitlist({ email: `user${i}@example.com`, referredBy: 'FRREF', ip: '2.2.2.2' });
-      const bucket = ((globalThis as any).__waitlistBuckets as Map<string, any>)?.get?.('2.2.2.2');
-      if (bucket) bucket.count = 0;
-      if (lastResponse.status === 429) break;
-    }
-    if (!lastResponse) throw new Error('No response captured');
-    expect(lastResponse.status).toBe(429);
-    const json = await lastResponse.json();
-    expect(json.error).toBe('referral_rate_limit');
-    expect(fixture.data.events.some((event) => event.name === 'wl_referral_blocked' && event.reason === 'ip_cap')).toBe(true);
+  it('stores a pending waitlist entry and sends confirmation email', async () => {
+    const { POST } = await import('@/app/api/waitlist/route');
+    const request = new Request('https://test.local/api/waitlist', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-forwarded-for': '203.0.113.10',
+      },
+      body: JSON.stringify({
+        email: 'test@example.com',
+        locale: 'en',
+        captchaToken: 'captcha-token',
+        gdprConsent: true,
+      }),
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.ok).toBe(true);
+
+    const fixtureData = firestoreModule.data();
+    const record = fixtureData.waitlist.get('hash_test@example.com');
+    expect(record).toBeDefined();
+    expect(record.status).toBe('pending');
+    expect(typeof record.confirmToken).toBe('string');
+    expect(record.gdprConsent).toBe(true);
+
+    const emailModule = await import('@/lib/waitlist/email');
+    expect(emailModule.sendWaitlistConfirmEmail).toHaveBeenCalledTimes(1);
+
+    const analyticsModule = await import('@/lib/analytics');
+    expect(analyticsModule.logAnalyticsEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'waitlist_signup_submitted' })
+    );
+    expect(analyticsModule.logAnalyticsEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'waitlist_signup_accepted' })
+    );
+  });
+
+  it('rejects invalid captcha with 429', async () => {
+    globalThis.fetch = vi.fn(async () => ({
+      json: async () => ({ success: false }),
+    })) as unknown as typeof fetch;
+    const { POST } = await import('@/app/api/waitlist/route');
+    const request = new Request('https://test.local/api/waitlist', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-forwarded-for': '203.0.113.11',
+      },
+      body: JSON.stringify({
+        email: 'blocked@example.com',
+        locale: 'en',
+        captchaToken: 'bad-token',
+        gdprConsent: true,
+      }),
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(429);
+    const body = await response.json();
+    expect(body).toMatchObject({ ok: false, code: 'captcha_failed' });
+
+    const emailModule = await import('@/lib/waitlist/email');
+    expect(emailModule.sendWaitlistConfirmEmail).not.toHaveBeenCalled();
+  });
+
+  it('returns informative message when email already confirmed', async () => {
+    const fixtureData = firestoreModule.data();
+    fixtureData.waitlist.set('hash_test@example.com', {
+      email: 'test@example.com',
+      locale: 'en',
+      status: 'confirmed',
+    });
+
+    const { POST } = await import('@/app/api/waitlist/route');
+    const request = new Request('https://test.local/api/waitlist', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-forwarded-for': '203.0.113.12',
+      },
+      body: JSON.stringify({
+        email: 'test@example.com',
+        locale: 'en',
+        captchaToken: 'token',
+        gdprConsent: true,
+      }),
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body).toMatchObject({ ok: true, message: 'This email has already been confirmed.' });
+  });
+});
+
+describe('/api/waitlist/confirm', () => {
+  beforeEach(() => {
+    vi.resetModules();
+    vi.clearAllMocks();
+    const fixture = createFirestoreFixture();
+    firestoreModule.set(fixture);
+    process.env.APP_BASE_URL = 'https://louhen.example';
+  });
+
+  it('confirms a valid token and sends welcome email', async () => {
+    const { Timestamp } = await import('firebase-admin/firestore');
+    const fixture = firestoreModule.data();
+    const token = 'valid-confirm-token-123456';
+    const tokenHash = createHash('sha256').update(token).digest('hex');
+    fixture.waitlist.set('hash_user@example.com', {
+      email: 'user@example.com',
+      locale: 'en',
+      status: 'pending',
+      confirmToken: tokenHash,
+      confirmExpiresAt: Timestamp.fromDate(new Date(Date.now() + 60 * 60 * 1000)),
+    });
+
+    const { GET } = await import('@/app/api/waitlist/confirm/route');
+    const request = new NextRequest(`https://test.local/api/waitlist/confirm?token=${token}`);
+    const response = await GET(request);
+
+    expect(response.status).toBe(303);
+    expect(response.headers.get('location')).toBe('https://test.local/waitlist/success?status=confirmed');
+
+    const updated = fixture.waitlist.get('hash_user@example.com');
+    expect(updated.status).toBe('confirmed');
+    expect(updated.confirmToken).toBeNull();
+
+    const emailModule = await import('@/lib/waitlist/email');
+    expect(emailModule.sendWaitlistWelcomeEmail).toHaveBeenCalledWith({ to: 'user@example.com' });
+
+    const analyticsModule = await import('@/lib/analytics');
+    expect(analyticsModule.logAnalyticsEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'waitlist_confirmed' })
+    );
+  });
+
+  it('returns 410 for expired tokens and logs event', async () => {
+    const { Timestamp } = await import('firebase-admin/firestore');
+    const fixture = firestoreModule.data();
+    const token = 'expired-token-123456';
+    const tokenHash = createHash('sha256').update(token).digest('hex');
+    fixture.waitlist.set('hash_user@example.com', {
+      email: 'user@example.com',
+      locale: 'en',
+      status: 'pending',
+      confirmToken: tokenHash,
+      confirmExpiresAt: Timestamp.fromDate(new Date(Date.now() - 5 * 60 * 1000)),
+    });
+
+    const { GET } = await import('@/app/api/waitlist/confirm/route');
+    const request = new NextRequest(`https://test.local/api/waitlist/confirm?token=${token}`);
+    const response = await GET(request);
+
+    expect(response.status).toBe(303);
+    expect(response.headers.get('location')).toBe('https://test.local/waitlist/expired');
+
+    const analyticsModule = await import('@/lib/analytics');
+    expect(analyticsModule.logAnalyticsEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'waitlist_expired' })
+    );
   });
 });

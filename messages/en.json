@@ -101,28 +101,98 @@
       "lead": "Add your email and we’ll send a confirmation within seconds.",
       "labels": {
         "email": "Email",
-        "firstName": "First name (optional)",
-        "country": "Country",
-        "consent": "I agree to receive waitlist updates and product emails."
+        "consent": "I agree to receive waitlist updates from Louhen and accept the",
+        "captcha": "Prove you’re human"
       },
       "placeholders": {
-        "email": "you@example.com",
-        "firstName": "Olivia",
-        "country": "Select a country"
+        "email": "you@example.com"
       },
       "submit": "Join waitlist",
       "inflight": "Joining…",
-      "success": "Check your email to confirm — you’re almost in!",
-      "privacyLinkLabel": "Read our Privacy Policy",
-      "trustNote": "LouhenFit guarantee: free returns if the first pair misses.",
-      "consentPrefix": "I agree to receive early-access emails from Louhen and accept the ",
-      "consentSuffix": ". You can opt out anytime.",
+      "privacyLinkLabel": "Privacy Policy",
+      "success": {
+        "title": "Check your inbox",
+        "body": "We just sent a confirmation email to finish your signup.",
+        "followUp": "Didn’t get it? Look for \u201cLouhen\u201d in your spam or Promotions tab, then add us to your contacts."
+      },
+      "warnings": {
+        "captchaMissing": "hCaptcha is not configured. Set NEXT_PUBLIC_HCAPTCHA_SITE_KEY to enable confirmations."
+      },
       "errors": {
         "default": "Something went wrong. Please try again.",
         "rateLimited": "You’ve tried a few times. Please wait a minute and retry.",
-        "already": "This email is already on the waitlist.",
-        "missingConsent": "Please accept the consent to continue."
+        "captcha": "Captcha verification failed. Please try again.",
+        "expired": "This confirmation link has expired. Please sign up again.",
+        "invalid": "We couldn’t process that email. Check the spelling and try again.",
+        "network": "We couldn’t reach the server. Check your connection and retry."
       }
+    },
+    "toast": {
+      "confirmed": {
+        "title": "You’re confirmed!",
+        "body": "Thanks for joining Louhen. We’ll drop early updates straight to your inbox.",
+        "dismiss": "Dismiss"
+      }
+    },
+    "index": {
+      "title": "Get early access with Louhen",
+      "body": "Join the waitlist to receive curated drops, styling guidance, and the LouhenFit guarantee before anyone else.",
+      "steps": [
+        "Share the email you check most.",
+        "Confirm the link we send right away.",
+        "Enjoy early product releases and tailored updates."
+      ],
+      "cta": {
+        "join": "Join the waitlist",
+        "privacy": "Privacy policy",
+        "faq": "Read the FAQ"
+      },
+      "meta": {
+        "title": "Louhen waitlist",
+        "description": "Discover how to join the Louhen waitlist and secure early access in minutes."
+      }
+    },
+    "success": {
+      "title": {
+        "pending": "Check your inbox \u2709\ufe0f",
+        "confirmed": "You’re in! \ud83c\udf89"
+      },
+      "body": {
+        "pending": "Open the confirmation email we just sent to finish joining the waitlist.",
+        "confirmed": "Thanks for confirming. Your Louhen waitlist spot is saved—watch your inbox for invites and styling updates."
+      },
+      "cta": {
+        "home": "Return home",
+        "preferences": "Manage email preferences"
+      },
+      "meta": {
+        "title": "Louhen waitlist – confirmation",
+        "description": "Your Louhen waitlist place is confirmed. Expect curated updates and early access soon."
+      }
+    },
+    "expired": {
+      "title": "Link expired",
+      "body": "The confirmation link you opened has expired. Request a new email below to finish signing up.",
+      "cta": {
+        "resend": "Back to waitlist"
+      },
+      "meta": {
+        "title": "Louhen waitlist – link expired",
+        "description": "Your Louhen waitlist link has expired. Request a new confirmation email in seconds."
+      }
+    },
+    "resend": {
+      "title": "Need another email?",
+      "description": "Enter your waitlist email and we’ll send a fresh confirmation link right away.",
+      "email": {
+        "label": "Email address",
+        "placeholder": "you@example.com"
+      },
+      "submit": "Resend confirmation",
+      "success": "If that address is on the waitlist, a new confirmation email is already on its way.",
+      "error": "We couldn’t resend the email just now. Please try again shortly.",
+      "rateLimited": "Too many requests. Please wait a moment before trying again.",
+      "invalid": "Please enter a valid email address."
     }
   },
   "confirm": {

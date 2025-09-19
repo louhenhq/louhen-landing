@@ -29,26 +29,15 @@ export type WaitlistDoc = {
 // New consolidated schema for waitlist records
 export type WaitlistRecord = {
   email: string;
-  emailLc: string;
+  locale: string;
+  status: 'pending' | 'confirmed' | 'expired';
+  confirmToken: string | null;
+  confirmExpiresAt: FirebaseFirestore.Timestamp | null;
+  confirmSentAt?: FirebaseFirestore.Timestamp | null;
+  confirmedAt?: FirebaseFirestore.Timestamp | null;
   createdAt: FirebaseFirestore.Timestamp;
   updatedAt: FirebaseFirestore.Timestamp;
-  href?: string | null;
-  referrer?: { host: string; path: string } | null;
-  utm?: {
-    utm_source?: string;
-    utm_medium?: string;
-    utm_campaign?: string;
-    utm_content?: string;
-    utm_term?: string;
-  } | null;
-  ip_hash?: string | null;
-  refCode: string;
-  referredBy?: string | null;
-  refCount: number;
-  status: 'joined' | 'confirmed';
-  confirmedAt?: FirebaseFirestore.Timestamp | null;
-  confirmTokenHash?: string | null;
-  confirmSentAt?: FirebaseFirestore.Timestamp | null;
-  confirmExpiresAt?: FirebaseFirestore.Timestamp | null;
-  creditDelayed?: boolean | null;
+  gdprConsent: boolean;
+  gdprConsentAt?: FirebaseFirestore.Timestamp | null;
+  lastSignupIpHash?: string | null;
 };

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type { SupportedLocale } from '@/next-intl.locales';
-import { track } from '@/lib/analytics';
+import { track } from '@/lib/clientAnalytics';
 import { buttons, cn, text } from '@/app/(site)/_lib/ui';
 
 type ShareCopy = {

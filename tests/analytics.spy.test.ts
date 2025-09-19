@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
-import { track } from '@/lib/analytics';
+import { track } from '@/lib/clientAnalytics';
 
 describe('analytics track helper', () => {
   beforeEach(() => {

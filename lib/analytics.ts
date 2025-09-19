@@ -1,37 +1,46 @@
-import { getConsent } from '@/app/(site)/_lib/consent';
+import { FieldValue } from 'firebase-admin/firestore';
+import { initAdmin } from '@/lib/firebaseAdmin';
 
-export type AnalyticsEvent =
-  | { name: 'page_view'; path: string; variant?: string; ref?: string | null }
-  | { name: 'cta_click'; id: 'hero_primary' | 'hero_secondary'; variant?: string }
-  | { name: 'waitlist_submit'; ok: boolean; error?: string }
-  | { name: 'how_it_works_click' }
-  | { name: 'wl_view'; locale?: string; path?: string; ref?: string | null }
-  | { name: 'wl_submit'; status: 'ok' | 'error'; code?: string; selfReferralSuspect?: boolean }
-  | { name: 'wl_confirm_success'; token_status: 'valid' }
-  | { name: 'wl_confirm_expired'; token_status: 'expired' }
-  | { name: 'wl_resend'; status: 'ok' | 'error' }
-  | { name: 'wl_share_view' }
-  | { name: 'wl_share_copy_link'; method: string }
-  | { name: 'wl_share_copy_code'; method: string }
-  | { name: 'wl_share_native'; supported: boolean }
-  | { name: 'wl_referral_applied'; ref: string };
+export type WaitlistAnalyticsEventName =
+  | 'waitlist_signup_submitted'
+  | 'waitlist_signup_accepted'
+  | 'waitlist_confirmed'
+  | 'waitlist_expired'
+  | 'waitlist_bounced';
 
-export async function track(evt: AnalyticsEvent) {
-  if (typeof window === 'undefined') return;
-  const consent = getConsent();
-  if (!consent?.analytics) return;
+export type WaitlistAnalyticsEvent = {
+  name: WaitlistAnalyticsEventName;
+  data?: Record<string, unknown>;
+};
+
+const SOURCE = 'api:waitlist';
+
+function buildPayload(event: WaitlistAnalyticsEvent): Record<string, unknown> {
+  const data: Record<string, unknown> = { name: event.name, source: SOURCE };
+  const extras = event.data ?? {};
+  for (const [key, value] of Object.entries(extras)) {
+    if (value !== undefined) data[key] = value;
+  }
+  return data;
+}
+
+export async function logAnalyticsEvent(event: WaitlistAnalyticsEvent) {
+  const payload = buildPayload(event);
+
+  if (process.env.NODE_ENV !== 'production') {
+    console.info('[analytics]', payload);
+    return;
+  }
+
   try {
-    await fetch('/api/track', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        ...evt,
-        ts: Date.now(),
-        ua: typeof navigator !== 'undefined' ? navigator.userAgent : 'server',
-      }),
-      keepalive: true,
+    const app = initAdmin();
+    const db = app.firestore();
+    await db.collection('events').add({
+      ...payload,
+      createdAt: FieldValue.serverTimestamp(),
     });
-  } catch {
-    // swallow
+  } catch (error) {
+    console.error('logAnalyticsEvent failed', { event: event.name, error });
   }
 }
+

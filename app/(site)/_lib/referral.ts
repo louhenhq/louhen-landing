@@ -1,6 +1,6 @@
 'use client';
 
-import { track } from '@/lib/analytics';
+import { track } from '@/lib/clientAnalytics';
 
 const COOKIE_NAME = 'wl_ref';
 const APPLIED_COOKIE_NAME = 'wl_ref_applied_at';

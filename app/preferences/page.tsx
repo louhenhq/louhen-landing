@@ -1,8 +1,8 @@
 'use client';
 import * as React from 'react';
 import { Suspense } from 'react';
-import WaitlistForm from '@/components/WaitlistForm';
 import { useSearchParams } from 'next/navigation';
+import WaitlistForm from '@/components/waitlist/WaitlistForm';
 
 // Force dynamic rendering (no prerender) to avoid static export errors
 export const dynamic = 'force-dynamic';
@@ -10,17 +10,13 @@ export const dynamic = 'force-dynamic';
 function PrefsInner() {
   const sp = useSearchParams(); // requires Suspense boundary
   const token = sp.get('token') || '';
+  const defaultEmail = sp.get('email') || undefined;
+  const source = sp.get('utm_source') || sp.get('source') || null;
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
       {!token ? (
-        <>
-          <h1 className="text-3xl font-semibold tracking-tight">Join the waitlist</h1>
-          <p className="mt-2 text-text-muted">Tell us a bit about your style and size. We’ll email you once you’re in.</p>
-          <div className="mt-6">
-            <WaitlistForm />
-          </div>
-        </>
+        <WaitlistForm defaultEmail={defaultEmail} source={source} />
       ) : (
         <>
           <h1 className="text-2xl font-bold tracking-tight">Email preferences</h1>

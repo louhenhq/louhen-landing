@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { buttons, cn } from '@/app/(site)/_lib/ui';
-import { track } from '@/lib/analytics';
+import { track } from '@/lib/clientAnalytics';
 
 export default function ConfirmResendForm() {
   const t = useTranslations('confirm.resend');

@@ -51,3 +51,20 @@ This repo uses **Style Dictionary** to build brand tokens for both the landing s
   `npm run build`
 
 > Tokens also build automatically after `npm install` via `postinstall`.
+
+## Waitlist
+
+The marketing waitlist relies on Firebase, Resend, and hCaptcha. Configure these environment variables (server-side unless noted):
+
+- `NEXT_PUBLIC_HCAPTCHA_SITE_KEY` (client) and `HCAPTCHA_SECRET`
+- `APP_BASE_URL` – e.g. `https://louhen.com`
+- `RESEND_API_KEY`, `RESEND_FROM`, `RESEND_REPLY_TO`
+- `FIREBASE_ADMIN_SA_B64` (base64 encoded service account JSON)
+- `FIREBASE_PROJECT_ID`, `FIREBASE_DB_REGION`
+- `WAITLIST_CONFIRM_TTL_DAYS` (optional override for confirmation expiration)
+
+Local development notes:
+
+- The waitlist form renders without hCaptcha if `NEXT_PUBLIC_HCAPTCHA_SITE_KEY` is missing and shows a non-blocking warning banner. Submissions will still require a valid site key + secret to succeed against the API.
+- After confirmation, users are redirected to `/waitlist/success` (with optional `status` query) and expired links redirect to `/waitlist/expired`.
+- Run `npm run test:unit -- tests/waitlist.api.test.ts` for API coverage and `npm run test:unit -- __tests__/waitlist.form.test.tsx` for the client form behaviour.

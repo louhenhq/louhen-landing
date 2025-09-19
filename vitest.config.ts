@@ -8,10 +8,10 @@ export default defineConfig({
     },
   },
   test: {
-    include: ['tests/**/*.test.ts'],
+    include: ['tests/**/*.test.ts', 'tests/**/*.test.tsx', '__tests__/**/*.test.ts', '__tests__/**/*.test.tsx'],
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],
-    globals: false,
+    globals: true,
     coverage: {
       enabled: false,
     },
