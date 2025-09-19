@@ -8,7 +8,8 @@ import type { ComponentProps, ForwardRefExoticComponent, RefAttributes } from 'r
 import { buttons, cn, layout, text } from '@/app/(site)/_lib/ui';
 import { track } from '@/lib/clientAnalytics';
 
-type HCaptchaComponent = typeof import('@hcaptcha/react-hcaptcha').default;
+type HCaptchaModule = typeof import('@hcaptcha/react-hcaptcha');
+type HCaptchaComponent = HCaptchaModule extends { default: infer T } ? T : HCaptchaModule;
 type HCaptchaProps = ComponentProps<HCaptchaComponent>;
 type HCaptchaRef = {
   resetCaptcha: () => void;
@@ -16,7 +17,14 @@ type HCaptchaRef = {
 
 type HCaptchaForwardRef = ForwardRefExoticComponent<HCaptchaProps & RefAttributes<HCaptchaRef>>;
 
-const HCaptcha = dynamic(async () => (await import('@hcaptcha/react-hcaptcha')).default, { ssr: false }) as unknown as HCaptchaForwardRef;
+async function loadHCaptcha(): Promise<HCaptchaComponent> {
+  const mod = (await import('@hcaptcha/react-hcaptcha')) as HCaptchaModule & {
+    default?: HCaptchaComponent;
+  };
+  return mod.default ?? (mod as unknown as HCaptchaComponent);
+}
+
+const HCaptcha = dynamic(async () => loadHCaptcha(), { ssr: false }) as unknown as HCaptchaForwardRef;
 
 type SubmitState = 'idle' | 'loading' | 'success' | 'error';
 

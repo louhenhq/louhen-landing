@@ -42,7 +42,7 @@ export async function sendWaitlistConfirmEmail(options: ConfirmEmailOptions) {
       appName,
       supportEmail: supportEmail || replyTo,
     }),
-    reply_to: replyTo,
+    replyTo,
     text: buildConfirmTextBody({ appName, confirmUrl }),
   });
 }
@@ -64,7 +64,7 @@ export async function sendWaitlistWelcomeEmail(options: WelcomeEmailOptions) {
       supportEmail: supportEmail || replyTo,
       preferencesUrl,
     }),
-    reply_to: replyTo,
+    replyTo,
     text: buildWelcomeTextBody({ appName, preferencesUrl }),
   });
 }

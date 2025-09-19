@@ -3,27 +3,40 @@ import type { Metadata } from 'next';
 import { cookies, headers } from 'next/headers';
 import StateCard from '@/components/marketing/StateCard';
 import TrackView from '@/components/marketing/TrackView';
-import { extractLocaleFromCookies } from '@/lib/intl/getLocale';
+import { extractLocaleFromCookies, resolveLocale as resolveLocaleValue } from '@/lib/intl/getLocale';
 import { loadMessages } from '@/lib/intl/loadMessages';
+import type { PageProps, SearchParams } from '@/lib/nextTypes';
 import type { SupportedLocale } from '@/next-intl.locales';
 
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
 
-type PageProps = {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
+type WaitlistSuccessSearchParams = SearchParams & {
+  status?: string | string[];
 };
+
+type UnknownRecord = Record<string, unknown>;
+
+type StatusKey = 'confirmed' | 'pending';
+
+function isRecord(value: unknown): value is UnknownRecord {
+  return typeof value === 'object' && value !== null;
+}
+
+function getString(value: unknown, fallback: string): string {
+  return typeof value === 'string' && value.trim().length > 0 ? value : fallback;
+}
 
 async function resolveLocale(): Promise<SupportedLocale> {
   const cookieStore = await cookies();
-  const cookieLocale = cookieStore.get('NEXT_LOCALE')?.value;
-  const headerLocale = extractLocaleFromCookies(headers().get('cookie'));
-  const candidate = (cookieLocale as SupportedLocale | undefined) ?? headerLocale;
-  return (candidate ?? 'en') as SupportedLocale;
+  const cookieLocale = resolveLocaleValue(cookieStore.get('NEXT_LOCALE')?.value ?? null);
+  const headerList = await headers();
+  const headerLocale = extractLocaleFromCookies(headerList.get('cookie'));
+  return cookieLocale ?? headerLocale ?? 'en';
 }
 
 async function getMessages(locale: SupportedLocale) {
-  return (await loadMessages(locale)) as Record<string, any>;
+  return (await loadMessages(locale)) as UnknownRecord;
 }
 
 function baseUrl() {
@@ -33,9 +46,15 @@ function baseUrl() {
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await resolveLocale();
   const messages = await getMessages(locale);
-  const meta = ((messages.waitlist?.success?.meta) ?? {}) as Record<string, string>;
-  const title = meta.title || 'Louhen waitlist – confirmation';
-  const description = meta.description || 'Thanks for confirming your Louhen waitlist spot. We’ll reach out with curated updates soon.';
+  const waitlist = isRecord(messages.waitlist) ? (messages.waitlist as UnknownRecord) : {};
+  const success = isRecord(waitlist.success) ? (waitlist.success as UnknownRecord) : {};
+  const meta = isRecord(success.meta) ? (success.meta as UnknownRecord) : {};
+
+  const title = getString(meta.title, 'Louhen waitlist – confirmation');
+  const description = getString(
+    meta.description,
+    'Your Louhen waitlist place is confirmed. Expect curated updates and early access soon.'
+  );
   const url = `${baseUrl()}/waitlist/success`;
 
   return {
@@ -52,34 +71,50 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-function titleForStatus(messages: any, status: string | null) {
-  if (status === 'confirmed') return messages.waitlist?.success?.title?.confirmed ?? 'You’re in! 🎉';
-  return messages.waitlist?.success?.title?.pending ?? 'Check your inbox ✉️';
+function pickStatus(searchParams?: WaitlistSuccessSearchParams | undefined): StatusKey {
+  const raw = searchParams?.status;
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  return value === 'confirmed' ? 'confirmed' : 'pending';
 }
 
-function bodyForStatus(messages: any, status: string | null) {
-  if (status === 'confirmed') return messages.waitlist?.success?.body?.confirmed ?? 'We just unlocked your spot. Welcome aboard!';
-  return messages.waitlist?.success?.body?.pending ?? 'We sent you a confirmation email. Follow the link to finish joining.';
+function titleForStatus(successMessages: UnknownRecord, status: StatusKey): string {
+  const titles = isRecord(successMessages.title) ? (successMessages.title as UnknownRecord) : {};
+  return getString(
+    titles[status],
+    status === 'confirmed' ? 'You’re in! 🎉' : 'Check your inbox ✉️'
+  );
 }
 
-export default async function WaitlistSuccessPage({ searchParams }: PageProps) {
-  const resolvedSearchParams = await searchParams;
-  const statusParam = typeof resolvedSearchParams.status === 'string' ? resolvedSearchParams.status : null;
+function bodyForStatus(successMessages: UnknownRecord, status: StatusKey): string {
+  const bodies = isRecord(successMessages.body) ? (successMessages.body as UnknownRecord) : {};
+  return getString(
+    bodies[status],
+    status === 'confirmed'
+      ? 'Thanks for confirming. Your Louhen waitlist spot is saved—watch your inbox for invites and styling updates.'
+      : 'Open the confirmation email we just sent to finish joining the waitlist.'
+  );
+}
+
+export default async function WaitlistSuccessPage({ searchParams }: PageProps<WaitlistSuccessSearchParams>) {
+  const status = pickStatus(searchParams);
   const locale = await resolveLocale();
   const messages = await getMessages(locale);
-  const successMessages = (messages.waitlist as any)?.success ?? {};
+  const waitlist = isRecord(messages.waitlist) ? (messages.waitlist as UnknownRecord) : {};
+  const successMessages = isRecord(waitlist.success) ? (waitlist.success as UnknownRecord) : {};
+  const ctaMessages = isRecord(successMessages.cta) ? (successMessages.cta as UnknownRecord) : {};
 
-  const title = titleForStatus(messages, statusParam);
-  const body = bodyForStatus(messages, statusParam);
+  const title = titleForStatus(successMessages, status);
+  const body = bodyForStatus(successMessages, status);
+
   const ctas = [
     {
       href: `/${locale}`,
-      label: successMessages.cta?.home || 'Return home',
+      label: getString(ctaMessages.home, 'Return home'),
       kind: 'primary' as const,
     },
     {
       href: '/preferences',
-      label: successMessages.cta?.preferences || 'Manage preferences',
+      label: getString(ctaMessages.preferences, 'Manage email preferences'),
       kind: 'secondary' as const,
     },
   ];
@@ -87,7 +122,7 @@ export default async function WaitlistSuccessPage({ searchParams }: PageProps) {
   return (
     <>
       <TrackView event="waitlist_landing_success_view" />
-      <StateCard icon={statusParam === 'confirmed' ? '🎉' : '✉️'} title={title} body={body} ctas={ctas} />
+      <StateCard icon={status === 'confirmed' ? '🎉' : '✉️'} title={title} body={body} ctas={ctas} />
     </>
   );
 }

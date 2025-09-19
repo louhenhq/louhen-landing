@@ -3,29 +3,36 @@ import type { Metadata } from 'next';
 import { cookies, headers } from 'next/headers';
 import StateCard from '@/components/marketing/StateCard';
 import TrackView from '@/components/marketing/TrackView';
-import ResendConfirmForm from '@/components/waitlist/ResendConfirmForm';
-import { extractLocaleFromCookies } from '@/lib/intl/getLocale';
+import ResendConfirmForm, { type ResendConfirmStrings } from '@/components/waitlist/ResendConfirmForm';
+import { cn, layout } from '@/app/(site)/_lib/ui';
+import type { PageProps } from '@/lib/nextTypes';
+import { extractLocaleFromCookies, resolveLocale as resolveLocaleValue } from '@/lib/intl/getLocale';
 import { loadMessages } from '@/lib/intl/loadMessages';
 import type { SupportedLocale } from '@/next-intl.locales';
-import { cn, layout } from '@/app/(site)/_lib/ui';
 
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
 
-type WaitlistMessages = Record<string, unknown> & {
-  waitlist?: Record<string, unknown>;
-};
+type UnknownRecord = Record<string, unknown>;
+
+function isRecord(value: unknown): value is UnknownRecord {
+  return typeof value === 'object' && value !== null;
+}
+
+function getString(value: unknown, fallback: string): string {
+  return typeof value === 'string' && value.trim().length > 0 ? value : fallback;
+}
 
 async function resolveLocale(): Promise<SupportedLocale> {
   const cookieStore = await cookies();
-  const cookieLocale = cookieStore.get('NEXT_LOCALE')?.value;
-  const headerLocale = extractLocaleFromCookies(headers().get('cookie'));
-  const candidate = (cookieLocale as SupportedLocale | undefined) ?? headerLocale;
-  return (candidate ?? 'en') as SupportedLocale;
+  const cookieLocale = resolveLocaleValue(cookieStore.get('NEXT_LOCALE')?.value ?? null);
+  const headerList = await headers();
+  const headerLocale = extractLocaleFromCookies(headerList.get('cookie'));
+  return cookieLocale ?? headerLocale ?? 'en';
 }
 
 async function getMessages(locale: SupportedLocale) {
-  return (await loadMessages(locale)) as WaitlistMessages;
+  return (await loadMessages(locale)) as UnknownRecord;
 }
 
 function baseUrl() {
@@ -35,9 +42,15 @@ function baseUrl() {
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await resolveLocale();
   const messages = await getMessages(locale);
-  const meta = ((messages.waitlist as any)?.expired?.meta ?? {}) as Record<string, string>;
-  const title = meta.title || 'Louhen waitlist – link expired';
-  const description = meta.description || 'Your waitlist confirmation link expired. Request a new email to finish joining Louhen.';
+  const waitlist = isRecord(messages.waitlist) ? (messages.waitlist as UnknownRecord) : {};
+  const expired = isRecord(waitlist.expired) ? (waitlist.expired as UnknownRecord) : {};
+  const meta = isRecord(expired.meta) ? (expired.meta as UnknownRecord) : {};
+
+  const title = getString(meta.title, 'Louhen waitlist – link expired');
+  const description = getString(
+    meta.description,
+    'Your waitlist confirmation link expired. Request a new confirmation email in seconds.'
+  );
   const url = `${baseUrl()}/waitlist/expired`;
 
   return {
@@ -54,31 +67,43 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function WaitlistExpiredPage() {
+function buildResendStrings(waitlist: UnknownRecord): ResendConfirmStrings {
+  const resend = isRecord(waitlist.resend) ? (waitlist.resend as UnknownRecord) : {};
+  const form = isRecord(waitlist.form) ? (waitlist.form as UnknownRecord) : {};
+  const placeholders = isRecord(form.placeholders) ? (form.placeholders as UnknownRecord) : {};
+
+  return {
+    title: getString(resend.title, 'Need another email?'),
+    description: getString(resend.description, 'Enter your email and we’ll send a fresh confirmation link right away.'),
+    email: {
+      label: getString(resend.email && isRecord(resend.email) ? (resend.email as UnknownRecord).label : undefined, 'Email address'),
+      placeholder: getString(
+        resend.email && isRecord(resend.email) ? (resend.email as UnknownRecord).placeholder : undefined,
+        getString(placeholders.email, 'you@example.com')
+      ),
+    },
+    submit: getString(resend.submit, 'Resend confirmation'),
+    success: getString(resend.success, 'If that address is on the waitlist, a new confirmation email is already on its way.'),
+    error: getString(resend.error, 'We couldn’t resend the email just now. Please try again shortly.'),
+    rateLimited: getString(resend.rateLimited, 'Too many requests. Please wait a moment before trying again.'),
+    invalid: getString(resend.invalid, 'Please enter a valid email address.'),
+  };
+}
+
+export default async function WaitlistExpiredPage({}: PageProps) {
   const locale = await resolveLocale();
   const messages = await getMessages(locale);
-  const waitlistMessages = (messages.waitlist as any) ?? {};
-  const expiredMessages = waitlistMessages.expired ?? {};
-  const resendMessages = waitlistMessages.resend ?? {};
-  const placeholders = waitlistMessages.form?.placeholders ?? {};
+  const waitlist = isRecord(messages.waitlist) ? (messages.waitlist as UnknownRecord) : {};
+  const expired = isRecord(waitlist.expired) ? (waitlist.expired as UnknownRecord) : {};
 
-  const title = expiredMessages.title || 'Link expired';
-  const body = expiredMessages.body || 'The confirmation link is no longer valid. Please submit the waitlist form again.';
-  const primaryCta = expiredMessages.cta?.resend || 'Back to waitlist';
+  const title = getString(expired.title, 'Link expired');
+  const body = getString(
+    expired.body,
+    'The confirmation link you opened has expired. Request a new email below to finish signing up.'
+  );
+  const primaryCta = getString(expired.cta && isRecord(expired.cta) ? (expired.cta as UnknownRecord).resend : undefined, 'Back to waitlist');
 
-  const resendStrings = {
-    title: resendMessages.title || 'Need another email?',
-    description: resendMessages.description || 'Enter your email and we’ll send a new confirmation link right away.',
-    email: {
-      label: resendMessages.email?.label || 'Email',
-      placeholder: resendMessages.email?.placeholder || placeholders.email || 'you@example.com',
-    },
-    submit: resendMessages.submit || 'Resend confirmation',
-    success: resendMessages.success || 'If that email is on the waitlist, a fresh confirmation link is on the way.',
-    error: resendMessages.error || 'We couldn’t resend the email. Please try again in a moment.',
-    rateLimited: resendMessages.rateLimited || 'Too many requests. Please wait before trying again.',
-    invalid: resendMessages.invalid || 'Please enter a valid email address.',
-  };
+  const resendStrings = buildResendStrings(waitlist);
 
   return (
     <>

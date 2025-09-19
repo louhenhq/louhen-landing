@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, type ChangeEvent, type FormEvent } from 'react';
 import { buttons, cn, layout, text } from '@/app/(site)/_lib/ui';
 import { track } from '@/lib/clientAnalytics';
 
-type ResendStrings = {
+export type ResendConfirmStrings = {
   title: string;
   description: string;
   email: {
@@ -19,7 +19,7 @@ type ResendStrings = {
 };
 
 type ResendConfirmFormProps = {
-  strings: ResendStrings;
+  strings: ResendConfirmStrings;
 };
 
 type Status = 'idle' | 'loading' | 'success' | 'error';
@@ -29,7 +29,7 @@ export function ResendConfirmForm({ strings }: ResendConfirmFormProps) {
   const [status, setStatus] = useState<Status>('idle');
   const [message, setMessage] = useState('');
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!email.trim() || status === 'loading') return;
 
@@ -80,7 +80,7 @@ export function ResendConfirmForm({ strings }: ResendConfirmFormProps) {
             type="email"
             required
             value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
             className="rounded-2xl border border-border bg-bg px-md py-sm text-base text-text shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
             placeholder={strings.email.placeholder}
           />

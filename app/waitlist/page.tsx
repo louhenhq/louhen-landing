@@ -2,8 +2,9 @@ import React from 'react';
 import type { Metadata } from 'next';
 import { cookies, headers } from 'next/headers';
 import StateCard from '@/components/marketing/StateCard';
-import { extractLocaleFromCookies } from '@/lib/intl/getLocale';
+import { extractLocaleFromCookies, resolveLocale as resolveLocaleValue } from '@/lib/intl/getLocale';
 import { loadMessages } from '@/lib/intl/loadMessages';
+import type { PageProps } from '@/lib/nextTypes';
 import type { SupportedLocale } from '@/next-intl.locales';
 
 export const revalidate = 0;
@@ -11,14 +12,29 @@ export const dynamic = 'force-dynamic';
 
 async function resolveLocale(): Promise<SupportedLocale> {
   const cookieStore = await cookies();
-  const cookieLocale = cookieStore.get('NEXT_LOCALE')?.value;
-  const headerLocale = extractLocaleFromCookies(headers().get('cookie'));
-  const candidate = (cookieLocale as SupportedLocale | undefined) ?? headerLocale;
-  return (candidate ?? 'en') as SupportedLocale;
+  const cookieLocale = resolveLocaleValue(cookieStore.get('NEXT_LOCALE')?.value ?? null);
+  const headerList = await headers();
+  const headerLocale = extractLocaleFromCookies(headerList.get('cookie'));
+  return cookieLocale ?? headerLocale ?? 'en';
+}
+
+type UnknownRecord = Record<string, unknown>;
+
+function isRecord(value: unknown): value is UnknownRecord {
+  return typeof value === 'object' && value !== null;
+}
+
+function getString(value: unknown, fallback: string): string {
+  return typeof value === 'string' && value.trim().length > 0 ? value : fallback;
+}
+
+function getStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is string => typeof item === 'string' && item.trim().length > 0);
 }
 
 async function getMessages(locale: SupportedLocale) {
-  return (await loadMessages(locale)) as Record<string, any>;
+  return (await loadMessages(locale)) as UnknownRecord;
 }
 
 function baseUrl() {
@@ -28,9 +44,15 @@ function baseUrl() {
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await resolveLocale();
   const messages = await getMessages(locale);
-  const meta = ((messages.waitlist?.index?.meta) ?? {}) as Record<string, string>;
-  const title = meta.title || 'Louhen waitlist';
-  const description = meta.description || 'See how the Louhen waitlist works and confirm your spot in minutes.';
+  const waitlist = isRecord(messages.waitlist) ? (messages.waitlist as UnknownRecord) : {};
+  const index = isRecord(waitlist.index) ? (waitlist.index as UnknownRecord) : {};
+  const meta = isRecord(index.meta) ? (index.meta as UnknownRecord) : {};
+
+  const title = getString(meta.title, 'Louhen waitlist');
+  const description = getString(
+    meta.description,
+    'Discover how to join the Louhen waitlist and secure early access in minutes.'
+  );
   const url = `${baseUrl()}/waitlist`;
 
   return {
@@ -47,15 +69,17 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function WaitlistIndexPage() {
+export default async function WaitlistIndexPage({}: PageProps) {
   const locale = await resolveLocale();
   const messages = await getMessages(locale);
-  const indexMessages = messages.waitlist?.index ?? {};
-  const steps: string[] = Array.isArray(indexMessages.steps) ? indexMessages.steps : [];
+  const waitlist = isRecord(messages.waitlist) ? (messages.waitlist as UnknownRecord) : {};
+  const index = isRecord(waitlist.index) ? (waitlist.index as UnknownRecord) : {};
+  const cta = isRecord(index.cta) ? (index.cta as UnknownRecord) : {};
+  const steps = getStringArray(index.steps);
 
   const body = (
     <div className="flex flex-col gap-md text-left">
-      <p>{indexMessages.body || 'Three simple steps are all it takes to secure early access.'}</p>
+      <p>{getString(index.body, 'Join the waitlist to receive curated drops, styling guidance, and the LouhenFit guarantee before anyone else.')}</p>
       {steps.length ? (
         <ul className="list-disc list-inside flex flex-col gap-xs text-left">
           {steps.map((step) => (
@@ -69,23 +93,23 @@ export default async function WaitlistIndexPage() {
   return (
     <StateCard
       icon="🪄"
-      title={indexMessages.title || 'Join the Louhen waitlist'}
+      title={getString(index.title, 'Get early access with Louhen')}
       body={body}
       align="start"
       ctas={[
         {
           href: `/${locale}#waitlist-form`,
-          label: indexMessages.cta?.join || 'Join the waitlist',
+          label: getString(cta.join, 'Join the waitlist'),
           kind: 'primary',
         },
         {
           href: `/${locale}/privacy`,
-          label: indexMessages.cta?.privacy || 'Privacy',
+          label: getString(cta.privacy, 'Privacy policy'),
           kind: 'secondary',
         },
         {
           href: `/${locale}#faq`,
-          label: indexMessages.cta?.faq || 'FAQ',
+          label: getString(cta.faq, 'Read the FAQ'),
           kind: 'secondary',
         },
       ]}
