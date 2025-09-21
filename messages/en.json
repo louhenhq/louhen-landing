@@ -23,7 +23,11 @@
     "sub": "Louhen pairs smart sizing with curated pieces so every outfit just works.",
     "cta": "Join the waitlist",
     "secondary": "See how it works",
-    "trust": "LouhenFit protects every order — free returns until it fits."
+    "trust": "LouhenFit protects every order — free returns until it fits.",
+    "badge": {
+      "label": "Special gift for twin parents — scroll down",
+      "aria": "Scroll to twin parent voucher"
+    }
   },
   "trust": {
     "badges": {
@@ -40,31 +44,67 @@
       "badge": "LouhenFit guarantee",
       "title": "Fit guaranteed with LouhenFit",
       "body": "If the first pair misses, returns are free and we fast-track a better fit using detailed fit feedback."
+    },
+    "bar": {
+      "aria": "Featured logos",
+      "logoAria": "Read about Louhen on {brand}"
+    },
+    "podiatristCard": {
+      "title": "Backed by podiatrists",
+      "body": "Our fit logic is developed with podiatrist insights so healthy feet come first.",
+      "cta": "Learn how we fit"
+    },
+    "testimonials": {
+      "title": "Parents who tried Louhen",
+      "items": [
+        { "name": "Sophie", "meta": "Emma, 3", "quote": "Sizing was spot-on and the styles hit the mark. No more returns." },
+        { "name": "Jonas", "meta": "Mila, 5", "quote": "Scan took a minute and the recommendations actually fit. Stress-free." },
+        { "name": "Lea", "meta": "Noah, 2", "quote": "We finally stopped guessing. He wore them all day without complaints." }
+      ]
+    },
+    "privacy": {
+      "body": "We never sell your data. You control your child’s profile.",
+      "cta": "Read our privacy policy"
     }
   },
   "founder": {
     "title": "Why we started Louhen",
     "body": "Our twins needed their first shoes, but the store had long queues, rushed fittings, and only length and width to go by. We wanted parents to know how a shoe will feel before checkout, to compare styles side-by-side, and to shop when it fits their schedule. Louhen brings precise measurements, LouhenFit coverage, and curated looks so every pair feels like it was made for your child.",
     "more": "Read more",
-    "less": "Show less"
+    "less": "Show less",
+    "headline": "Our story began with twins",
+    "p1": "When our twin boys, Louis and Henry, took their first steps, we wanted to find them the perfect shoes. A physiotherapist recommended a small local store, and while the owners were kind, the experience was stressful: long waits with impatient kids, just two shoe options, and only basic measurements of length and width.",
+    "p2": "That day we realized how much guesswork parents face when shopping for children’s shoes. We thought: there must be a better way — one that makes fit effortless and choice inspiring.",
+    "p3": "That’s why we built Louhen: an app designed by parents, for parents — where every recommendation feels thoughtfully tailored, healthy feet are always the priority, and shopping is calm instead of chaotic. To honor our beginnings, we created the Twins Welcome Voucher: 5% off every order for twin parents.",
+    "voucher": {
+      "badge": "Twins Welcome Voucher",
+      "headline": "A little extra help for twin parents",
+      "body": "Every twin family gets 5% off in the Louhen app — every time. Because every little help matters when the journey is double.",
+      "hint": "Redeem in-app at checkout",
+      "cta": "Join the waitlist",
+      "tc": "Always available for twin parents. 5% off per order. Non-stackable. Terms may apply.",
+      "copyAria": "Copy voucher code TWINS5",
+      "copied": "Copied"
+    }
   },
   "how": {
-    "title": "How Louhen works",
-    "steps": {
-      "measure": {
-        "title": "Measure in minutes",
-        "body": "Scan feet with your phone or enter quick measurements."
-      },
-      "matches": {
-        "title": "See perfect matches",
-        "body": "LouhenFit compares inner shoe dimensions, volume, and shape."
-      },
-      "confidence": {
-        "title": "Order with confidence",
-        "body": "Free returns and LouhenFit protection if the first pair misses."
-      }
+    "headline": "How Louhen Works",
+    "intro": "From first steps to growing feet — here’s how we make finding the perfect pair effortless.",
+    "stepLabel": "Step {step}",
+    "scan": {
+      "title": "Capture your child’s feet",
+      "body": "Use our guided foot scan or quick manual input. Accurate sizing means healthy steps from the start."
     },
-    "trust": "Our sizing guidance is checked with European podiatrists for healthy foot development."
+    "recommend": {
+      "title": "Smart fit-matching",
+      "body": "Our AI combines podiatrist insights with your child’s profile to recommend shoes that truly fit.",
+      "trust": "Backed by podiatrists"
+    },
+    "fit": {
+      "title": "Style meets confidence",
+      "body": "Explore designs your child will love — always in the right size, always backed by the LouhenFit Guarantee."
+    },
+    "cta": "Join the waitlist"
   },
   "faq": {
     "title": "Frequently asked questions",
@@ -113,7 +153,7 @@
       "success": {
         "title": "Check your inbox",
         "body": "We just sent a confirmation email to finish your signup.",
-        "followUp": "Didn’t get it? Look for \u201cLouhen\u201d in your spam or Promotions tab, then add us to your contacts."
+        "followUp": "Didn’t get it? Look for “Louhen” in your spam or Promotions tab, then add us to your contacts."
       },
       "warnings": {
         "captchaMissing": "hCaptcha is not configured. Set NEXT_PUBLIC_HCAPTCHA_SITE_KEY to enable confirmations."
@@ -154,8 +194,8 @@
     },
     "success": {
       "title": {
-        "pending": "Check your inbox \u2709\ufe0f",
-        "confirmed": "You’re in! \ud83c\udf89"
+        "pending": "Check your inbox ✉️",
+        "confirmed": "You’re in! 🎉"
       },
       "body": {
         "pending": "Open the confirmation email we just sent to finish joining the waitlist.",
@@ -304,5 +344,12 @@
   },
   "common": {
     "learnMore": "Learn more"
+  },
+  "voucher": {
+    "share": {
+      "cta": "Share with a twin parent",
+      "aria": "Share the twin voucher",
+      "message": "Hey 👋 I found Louhen — an app that nails kids’ shoe fit.\nTwin parents get 5% off every order with code TWINS5. 🎉\nCheck it out → {url}"
+    }
   }
 }

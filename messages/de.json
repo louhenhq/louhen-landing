@@ -23,7 +23,11 @@
     "sub": "[DE] Louhen pairs smart sizing with curated pieces so every outfit just works.",
     "cta": "[DE] Join the waitlist",
     "secondary": "[DE] See how it works",
-    "trust": "[DE] LouhenFit protects every order — free returns until it fits."
+    "trust": "[DE] LouhenFit protects every order — free returns until it fits.",
+    "badge": {
+      "label": "Besonderes Geschenk für Zwillingseltern — nach unten scrollen",
+      "aria": "Zum Gutschein für Zwillingseltern scrollen"
+    }
   },
   "trust": {
     "badges": {
@@ -40,31 +44,67 @@
       "badge": "[DE] LouhenFit guarantee",
       "title": "[DE] Fit guaranteed with LouhenFit",
       "body": "[DE] If the first pair misses, returns are free and we fast-track a better fit using detailed fit feedback."
+    },
+    "bar": {
+      "aria": "Ausgewählte Partnerlogos",
+      "logoAria": "Mehr über Louhen bei {brand}"
+    },
+    "podiatristCard": {
+      "title": "Unterstützt von Podologen",
+      "body": "Unsere Passform-Logik entsteht zusammen mit podologischen Insights – für gesunde Kinderfüße an erster Stelle.",
+      "cta": "So passen wir an"
+    },
+    "testimonials": {
+      "title": "Eltern über Louhen",
+      "items": [
+        { "name": "Sophie", "meta": "Emma, 3", "quote": "Die Größenempfehlung hat sofort gepasst und die Styles kamen super an. Keine Rücksendungen mehr." },
+        { "name": "Jonas", "meta": "Mila, 5", "quote": "Der Scan dauerte eine Minute und die Vorschläge haben wirklich gepasst. Stressfrei einkaufen." },
+        { "name": "Lea", "meta": "Noah, 2", "quote": "Wir raten endlich nicht mehr. Er hat die Schuhe den ganzen Tag gern getragen." }
+      ]
+    },
+    "privacy": {
+      "body": "Wir verkaufen deine Daten nie. Du behältst die Kontrolle über das Profil deines Kindes.",
+      "cta": "Zur Datenschutzerklärung"
     }
   },
   "founder": {
     "title": "[DE] Why we started Louhen",
     "body": "[DE] Founder story placeholder text.",
     "more": "[DE] Read more",
-    "less": "[DE] Show less"
+    "less": "[DE] Show less",
+    "headline": "Unsere Geschichte begann mit Zwillingen",
+    "p1": "Als unsere Zwillingsjungen, Louis und Henry, ihre ersten Schritte machten, wollten wir die perfekten Schuhe finden. Eine Physiotherapeutin empfahl ein kleines Fachgeschäft – die Besitzer waren freundlich, aber die Erfahrung war stressig: lange Wartezeiten, nur zwei Modelle, gemessen wurden nur Länge und Breite.",
+    "p2": "Uns wurde klar, wie viel Rätselraten Eltern beim Schuhkauf haben. Wir dachten: Es muss einen besseren Weg geben – einer, der Passform mühelos macht und die Auswahl inspiriert.",
+    "p3": "Deshalb haben wir Louhen gebaut: eine App von Eltern für Eltern – mit durchdachten Empfehlungen, bei denen gesunde Kinderfüße im Mittelpunkt stehen und Einkaufen ruhig statt chaotisch ist. Aus unseren Anfängen entstand der Twins Welcome Voucher: 5% Rabatt auf jede Bestellung für Zwillingseltern.",
+    "voucher": {
+      "badge": "Twins Welcome Voucher",
+      "headline": "Eine kleine Hilfe für Zwillingseltern",
+      "body": "Jede Zwillingsfamilie erhält 5% Rabatt in der Louhen-App — bei jeder Bestellung. Denn jede kleine Hilfe zählt, wenn der Weg doppelt ist.",
+      "hint": "Im Checkout in der App einlösen",
+      "cta": "Warteliste beitreten",
+      "tc": "Dauerhaft für Zwillingseltern verfügbar. 5% Rabatt pro Bestellung. Nicht kombinierbar. Es können Bedingungen gelten.",
+      "copyAria": "Gutscheincode TWINS5 kopieren",
+      "copied": "Kopiert"
+    }
   },
   "how": {
-    "title": "[DE] How Louhen works",
-    "steps": {
-      "measure": {
-        "title": "[DE] Measure in minutes",
-        "body": "[DE] Scan feet with your phone or enter quick measurements."
-      },
-      "matches": {
-        "title": "[DE] See perfect matches",
-        "body": "[DE] LouhenFit compares inner shoe dimensions, volume, and shape."
-      },
-      "confidence": {
-        "title": "[DE] Order with confidence",
-        "body": "[DE] Free returns and LouhenFit protection if the first pair misses."
-      }
+    "headline": "So funktioniert Louhen",
+    "intro": "Von den ersten Schritten bis zu wachsenden Füßen — so wird die Suche nach dem perfekten Paar ganz leicht.",
+    "stepLabel": "Schritt {step}",
+    "scan": {
+      "title": "Die Füße deines Kindes erfassen",
+      "body": "Geführter Fußscan oder schnelle manuelle Eingabe. Genaues Messen bedeutet gesunde Schritte von Anfang an."
     },
-    "trust": "[DE] Our sizing guidance is checked with European podiatrists for healthy foot development."
+    "recommend": {
+      "title": "Intelligentes Passform-Matching",
+      "body": "Unsere KI kombiniert podiatrische Erkenntnisse mit dem Profil deines Kindes, um Schuhe zu empfehlen, die wirklich passen.",
+      "trust": "Unterstützt von Podologen"
+    },
+    "fit": {
+      "title": "Stil trifft Sicherheit",
+      "body": "Entdecke Designs, die dein Kind liebt — immer in der richtigen Größe, immer mit der LouhenFit-Garantie."
+    },
+    "cta": "Warteliste beitreten"
   },
   "faq": {
     "title": "[DE] Frequently asked questions",
@@ -304,5 +344,12 @@
   },
   "common": {
     "learnMore": "[DE] Learn more"
+  },
+  "voucher": {
+    "share": {
+      "cta": "Mit Zwillingseltern teilen",
+      "aria": "Zwillings-Gutschein teilen",
+      "message": "Hey 👋 Schau dir Louhen an — eine App für perfekt passende Kinderschuhe.\nZwillingseltern bekommen 5% Rabatt auf jede Bestellung mit dem Code TWINS5. 🎉\nHier entlang → {url}"
+    }
   }
 }

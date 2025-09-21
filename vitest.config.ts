@@ -8,13 +8,20 @@ export default defineConfig({
     },
   },
   test: {
-    include: ['tests/**/*.test.ts', 'tests/**/*.test.tsx', '__tests__/**/*.test.ts', '__tests__/**/*.test.tsx'],
+    include: [
+      'tests/**/*.test.ts',
+      'tests/**/*.test.tsx',
+      'tests/**/*.spec.ts',
+      'tests/**/*.spec.tsx',
+      '__tests__/**/*.test.ts',
+      '__tests__/**/*.test.tsx',
+    ],
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],
     globals: true,
     coverage: {
       enabled: false,
     },
-    exclude: ['e2e/**', 'playwright.config.ts'],
+    exclude: ['e2e/**', 'playwright.config.ts', 'tests/landing.spec.ts'],
   },
 });

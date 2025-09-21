@@ -4,7 +4,6 @@ import { cookies, headers } from 'next/headers';
 import StateCard from '@/components/marketing/StateCard';
 import { extractLocaleFromCookies, resolveLocale as resolveLocaleValue } from '@/lib/intl/getLocale';
 import { loadMessages } from '@/lib/intl/loadMessages';
-import type { PageProps } from '@/lib/nextTypes';
 import type { SupportedLocale } from '@/next-intl.locales';
 
 export const revalidate = 0;
@@ -69,7 +68,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function WaitlistIndexPage({}: PageProps) {
+export default async function WaitlistIndexPage() {
   const locale = await resolveLocale();
   const messages = await getMessages(locale);
   const waitlist = isRecord(messages.waitlist) ? (messages.waitlist as UnknownRecord) : {};

@@ -24,9 +24,37 @@ const eslintConfig = [
   // Discourage raw hex colors in client TS/TSX; exclude server-only files
   {
     files: ["**/*.{ts,tsx}"],
+    ignores: ['lib/clientAnalytics.ts'],
     rules: {
       'no-restricted-syntax': [
-        'warn',
+        'error',
+        {
+          selector: "Literal[value=/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/]",
+          message:
+            'Use design tokens (Tailwind classes or CSS variables) instead of hex colors.',
+        },
+        {
+          selector: "TemplateElement[value.raw=/#[0-9a-fA-F]{3,8}\\b/]",
+          message:
+            'Use design tokens (Tailwind classes or CSS variables) instead of hex colors.',
+        },
+        {
+          selector: "CallExpression[callee.name='fetch'] Literal[value='/api/track']",
+          message: "Use clientAnalytics.track instead of fetch('/api/track').",
+        },
+        {
+          selector:
+            "CallExpression[callee.name='fetch'] TemplateLiteral[quasis.length=1][quasis.0.value.raw='/api/track']",
+          message: "Use clientAnalytics.track instead of fetch('/api/track').",
+        },
+      ],
+    },
+  },
+  {
+    files: ['lib/clientAnalytics.ts'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
         {
           selector: "Literal[value=/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/]",
           message:

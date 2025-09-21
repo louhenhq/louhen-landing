@@ -5,7 +5,6 @@ import StateCard from '@/components/marketing/StateCard';
 import TrackView from '@/components/marketing/TrackView';
 import ResendConfirmForm, { type ResendConfirmStrings } from '@/components/waitlist/ResendConfirmForm';
 import { cn, layout } from '@/app/(site)/_lib/ui';
-import type { PageProps } from '@/lib/nextTypes';
 import { extractLocaleFromCookies, resolveLocale as resolveLocaleValue } from '@/lib/intl/getLocale';
 import { loadMessages } from '@/lib/intl/loadMessages';
 import type { SupportedLocale } from '@/next-intl.locales';
@@ -90,7 +89,7 @@ function buildResendStrings(waitlist: UnknownRecord): ResendConfirmStrings {
   };
 }
 
-export default async function WaitlistExpiredPage({}: PageProps) {
+export default async function WaitlistExpiredPage() {
   const locale = await resolveLocale();
   const messages = await getMessages(locale);
   const waitlist = isRecord(messages.waitlist) ? (messages.waitlist as UnknownRecord) : {};

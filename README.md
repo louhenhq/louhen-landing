@@ -1,3 +1,5 @@
+[![CI](https://github.com/Martin/louhen-landing/actions/workflows/ci.yml/badge.svg)](https://github.com/Martin/louhen-landing/actions/workflows/ci.yml)
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
@@ -68,3 +70,27 @@ Local development notes:
 - The waitlist form renders without hCaptcha if `NEXT_PUBLIC_HCAPTCHA_SITE_KEY` is missing and shows a non-blocking warning banner. Submissions will still require a valid site key + secret to succeed against the API.
 - After confirmation, users are redirected to `/waitlist/success` (with optional `status` query) and expired links redirect to `/waitlist/expired`.
 - Run `npm run test:unit -- tests/waitlist.api.test.ts` for API coverage and `npm run test:unit -- __tests__/waitlist.form.test.tsx` for the client form behaviour.
+
+## Analytics
+
+Client-side events are dispatched exclusively through `lib/clientAnalytics.ts`. The helper automatically:
+
+- Respects consent (buffers until analytics consent is granted).
+- Adds page context, UTM parameters, and the current app version to each payload.
+- Retries using `navigator.sendBeacon()` and falls back to `fetch` with exponential backoff.
+- Deduplicates identical events fired within one second.
+
+Dev flags (set in `.env.local`):
+
+```bash
+NEXT_PUBLIC_COMMIT_SHA=<git short sha>
+NEXT_PUBLIC_ANALYTICS_DEBUG=1   # verbose console logging
+NEXT_PUBLIC_ANALYTICS_DISABLED=1 # disable outbound events
+```
+
+Consent sources:
+
+- `window.__LOUHEN_CONSENT__ = { analytics: true|false }`
+- Cookie `louhen_consent=analytics:granted|denied`
+
+Dispatch the custom event `louhen:consent` with `{ detail: { analytics: true } }` to grant analytics at runtime; buffered events flush immediately.

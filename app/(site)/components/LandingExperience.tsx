@@ -5,12 +5,20 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import Header from '@/app/(site)/components/Header';
 import Hero from '@/app/(site)/components/Hero';
-import FounderStory from '@/app/(site)/components/FounderStory';
-import HowItWorks from '@/app/(site)/components/HowItWorks';
 import FAQ from '@/app/(site)/components/FAQ';
 import Footer from '@/app/(site)/components/Footer';
+import SectionViewTracker from '@/components/SectionViewTracker';
+import FounderStoryWithVoucher from '@/components/FounderStoryWithVoucher';
+import FaqTwinsVoucherSchema from '@/components/FaqTwinsVoucherSchema';
+import HowItWorks from '@/components/HowItWorks';
+import FounderPhoto from '@/components/FounderPhoto';
+import PodiatristBadge from '@/components/PodiatristBadge';
+import TrustBar from '@/components/TrustBar';
+import TestimonialCards from '@/components/TestimonialCards';
+import PrivacyRibbon from '@/components/PrivacyRibbon';
+import TrustSchema from '@/components/TrustSchema';
 import WaitlistForm from '@/components/waitlist/WaitlistForm';
-import { layout } from '@/app/(site)/_lib/ui';
+import { layout, surfaces } from '@/app/(site)/_lib/ui';
 import { track } from '@/lib/clientAnalytics';
 
 export default function LandingExperience() {
@@ -53,6 +61,7 @@ export default function LandingExperience() {
     <div className={layout.page}>
       <Header onCta={scrollToForm} />
       <main>
+        <SectionViewTracker />
         {showToast ? (
           <div className="mx-auto mb-lg w-full max-w-3xl px-gutter" role="status" aria-live="polite">
             <div className="rounded-2xl border border-status-success bg-status-success/10 px-md py-sm text-sm text-status-success shadow-card">
@@ -74,9 +83,22 @@ export default function LandingExperience() {
         ) : null}
         <Hero onJoinClick={scrollToForm} />
         <WaitlistForm source={source ?? undefined} />
+        <section className={`${layout.section} ${surfaces.subtle}`}>
+          <div className={`${layout.container} grid gap-8 md:grid-cols-2 md:items-start`}>
+            <div className="overflow-hidden rounded-2xl">
+              <FounderPhoto />
+            </div>
+            <FounderStoryWithVoucher />
+          </div>
+        </section>
         <HowItWorks />
-        <FounderStory />
+        <PodiatristBadge />
+        <TrustBar />
+        <TestimonialCards />
+        <PrivacyRibbon />
         <FAQ />
+        <TrustSchema />
+        <FaqTwinsVoucherSchema />
       </main>
       <Footer />
     </div>

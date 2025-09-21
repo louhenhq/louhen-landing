@@ -71,6 +71,16 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+async function resolveSearchParamsValue(
+  searchParams?: WaitlistSuccessSearchParams | Promise<WaitlistSuccessSearchParams>
+): Promise<WaitlistSuccessSearchParams | undefined> {
+  if (!searchParams) return undefined;
+  if (typeof (searchParams as unknown as Promise<unknown>).then === 'function') {
+    return (await searchParams) ?? undefined;
+  }
+  return searchParams;
+}
+
 function pickStatus(searchParams?: WaitlistSuccessSearchParams | undefined): StatusKey {
   const raw = searchParams?.status;
   const value = Array.isArray(raw) ? raw[0] : raw;
@@ -96,7 +106,8 @@ function bodyForStatus(successMessages: UnknownRecord, status: StatusKey): strin
 }
 
 export default async function WaitlistSuccessPage({ searchParams }: PageProps<WaitlistSuccessSearchParams>) {
-  const status = pickStatus(searchParams);
+  const resolvedSearchParams = await resolveSearchParamsValue(searchParams);
+  const status = pickStatus(resolvedSearchParams);
   const locale = await resolveLocale();
   const messages = await getMessages(locale);
   const waitlist = isRecord(messages.waitlist) ? (messages.waitlist as UnknownRecord) : {};

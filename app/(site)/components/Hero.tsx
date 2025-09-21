@@ -3,6 +3,7 @@
 import type { MouseEventHandler } from 'react';
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
+import HeroTwinBadge from '@/components/HeroTwinBadge';
 import { buttons, cn, layout, text } from '@/app/(site)/_lib/ui';
 import PodiatristBadge, { LouhenFitBadge } from '@/app/(site)/components/PodiatristBadge';
 
@@ -38,6 +39,7 @@ export default function Hero({ onJoinClick }: HeroProps) {
             {t('secondary')}
           </a>
         </div>
+        <HeroTwinBadge />
         <div className="flex flex-col items-center gap-sm">
           <span className="text-sm text-text-muted">{t('trust')}</span>
           <div className="flex flex-wrap items-center justify-center gap-sm text-xs uppercase tracking-wide text-text-muted">
