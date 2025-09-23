@@ -5,6 +5,7 @@ import { expect, test } from '@playwright/test';
 const STATUS_USER = process.env.STATUS_USER ?? '';
 const STATUS_PASS = process.env.STATUS_PASS ?? '';
 const HAS_CREDS = Boolean(STATUS_USER && STATUS_PASS);
+const AUTH_HEADER = `Basic ${Buffer.from(`${STATUS_USER}:${STATUS_PASS}`).toString('base64')}`;
 
 test.describe('status diagnostics API', () => {
   test('returns 401 without auth', async ({ request }) => {
@@ -20,10 +21,9 @@ test.describe('status diagnostics API', () => {
       test.skip('STATUS credentials missing');
     }
 
-    const header = `Basic ${Buffer.from(`${STATUS_USER}:${STATUS_PASS}`).toString('base64')}`;
     const response = await request.get('/api/status', {
       headers: {
-        Authorization: header,
+        Authorization: AUTH_HEADER,
         Accept: 'application/json',
       },
     });
@@ -40,14 +40,16 @@ test.describe('status diagnostics API', () => {
 
 test.describe('status diagnostics page', () => {
   test.skip(!HAS_CREDS, 'STATUS credentials missing');
-  test.use({
-    httpCredentials: {
-      username: STATUS_USER,
-      password: STATUS_PASS,
-    },
-  });
 
   test('renders key fields after auth', async ({ page }) => {
+    await page.route('**/api/status', (route) => {
+      const headers = {
+        ...route.request().headers(),
+        authorization: AUTH_HEADER,
+      };
+      route.continue({ headers });
+    });
+
     await page.goto('/status');
     await expect(page.getByRole('heading', { name: /Operational diagnostics/i })).toBeVisible();
     await expect(page.getByText(/CSP nonce/i)).toBeVisible();

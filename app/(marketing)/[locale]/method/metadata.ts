@@ -13,6 +13,7 @@ export async function generateMetadata({ params }: MethodPageProps): Promise<Met
   const title = t('seo.title');
   const description = t('seo.description');
   const canonicalPath = '/method';
+  const localizedPath = `/${locale}/method`;
 
   return {
     title,
@@ -23,8 +24,9 @@ export async function generateMetadata({ params }: MethodPageProps): Promise<Met
     openGraph: {
       title,
       description,
-      url: canonicalPath,
-      type: 'website',
+      url: localizedPath,
+      locale,
+      type: 'article',
       images: ['/opengraph-image.png'],
     },
     twitter: {

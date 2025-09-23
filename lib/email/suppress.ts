@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { FieldValue } from 'firebase-admin/firestore';
 
 import { initAdmin } from '@/lib/firebaseAdmin';
+import { isTestMode } from '@/lib/testMode';
 
 export type SuppressionScope = 'transactional' | 'marketing' | 'all';
 
@@ -15,11 +16,14 @@ export type SuppressionRecord = {
 };
 
 function getSalt(): string {
-  const salt = process.env.SUPPRESSION_SALT?.trim();
-  if (!salt) {
+  const raw = process.env.SUPPRESSION_SALT?.trim();
+  if (isTestMode()) {
+    return raw && raw.length > 0 ? raw : 'test-mode-salt';
+  }
+  if (!raw) {
     throw new Error('Missing SUPPRESSION_SALT');
   }
-  return salt;
+  return raw;
 }
 
 export function normalizeEmail(email: string): string {
@@ -39,9 +43,19 @@ function mapScope(value?: string): SuppressionScope {
 }
 
 const COLLECTION = 'suppressions';
+const MEMORY_SUPPRESSIONS = new Map<string, SuppressionRecord>();
 
 export async function isSuppressed(email: string, scope: SuppressionScope): Promise<{ suppressed: boolean; record?: SuppressionRecord }>
 {
+  if (isTestMode()) {
+    const emailHash = hashEmail(email);
+    const record = MEMORY_SUPPRESSIONS.get(emailHash);
+    if (!record) {
+      return { suppressed: false };
+    }
+    const suppressed = record.scope === 'all' || record.scope === scope;
+    return { suppressed, record };
+  }
   const db = initAdmin().firestore();
   const emailHash = hashEmail(email);
   const doc = await db.collection(COLLECTION).doc(emailHash).get();
@@ -70,6 +84,17 @@ type UpsertInput = {
 };
 
 export async function upsertSuppression({ email, scope, source, reason }: UpsertInput): Promise<SuppressionRecord> {
+  if (isTestMode()) {
+    const emailHash = hashEmail(email);
+    const record: SuppressionRecord = {
+      emailHash,
+      scope,
+      source,
+      reason,
+    };
+    MEMORY_SUPPRESSIONS.set(emailHash, record);
+    return record;
+  }
   const db = initAdmin().firestore();
   const emailHash = hashEmail(email);
   const ref = db.collection(COLLECTION).doc(emailHash);

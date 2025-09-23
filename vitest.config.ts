@@ -16,8 +16,14 @@ export default defineConfig({
       '__tests__/**/*.test.ts',
       '__tests__/**/*.test.tsx',
     ],
-    environment: 'jsdom',
-    setupFiles: ['./vitest.setup.ts'],
+    environment: 'node',
+    environmentMatchGlobs: [
+      ['**/*.test.tsx', 'jsdom'],
+      ['__tests__/**/*.test.tsx', 'jsdom'],
+      ['tests/unit/**/*.spec.ts', 'jsdom'],
+      ['tests/unit/**/*.unit.test.ts', 'jsdom'],
+    ],
+    setupFiles: ['./tests/setup.server-mocks.ts', './vitest.setup.ts'],
     globals: true,
     coverage: {
       enabled: false,

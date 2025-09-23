@@ -1,3 +1,5 @@
+import 'server-only';
+
 import { NextResponse } from 'next/server';
 import { initAdmin } from '@/lib/firebaseAdmin';
 import type { EmailPrefs, WaitlistDoc } from '@/types/waitlist';

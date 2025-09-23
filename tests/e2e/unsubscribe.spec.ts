@@ -5,14 +5,6 @@ import { buildUnsubUrl } from '@/lib/email/tokens';
 
 const TEST_SCOPE = 'transactional' as const;
 
-if (!process.env.SUPPRESSION_SALT) {
-  process.env.SUPPRESSION_SALT = 'test-salt';
-}
-
-if (!process.env.APP_BASE_URL) {
-  process.env.APP_BASE_URL = 'http://localhost:4311';
-}
-
 function uniqueEmail() {
   const id = Date.now() + Math.floor(Math.random() * 1000);
   return `playwright-unsubscribe-${id}@example.com`;
@@ -29,7 +21,7 @@ test.describe('Unsubscribe flow', () => {
     const url = buildUnsubUrl(email, 'all');
 
     await page.goto(url);
-    await expect(page.getByText(/Success!/i)).toBeVisible();
+    await expect(page.getByText(/stop emailing/i)).toBeVisible();
 
     await expectSuppressed(email);
   });

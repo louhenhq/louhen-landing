@@ -1,3 +1,5 @@
+import 'server-only';
+
 import { NextResponse } from 'next/server';
 import { randomBytes, createHash } from 'crypto';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
@@ -8,6 +10,7 @@ import { getWaitlistConfirmTtlMs } from '@/lib/waitlistConfirmTtl';
 import { waitlistPayloadSchema, type WaitlistPayload } from '@/lib/waitlist/schema';
 import { sendWaitlistConfirmEmail } from '@/lib/waitlist/email';
 import { logAnalyticsEvent } from '@/lib/analytics';
+import { isTestMode } from '@/lib/testMode';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -66,6 +69,9 @@ function createConfirmToken() {
 }
 
 async function verifyCaptcha(token: string, ip: string | null): Promise<CaptchaVerificationResult> {
+  if (isTestMode()) {
+    return { success: true };
+  }
   const secret = process.env.HCAPTCHA_SECRET?.trim();
   if (!secret) {
     throw new Error('Missing HCAPTCHA_SECRET');
@@ -112,6 +118,9 @@ async function persistWaitlist(
   expiresAt: Date,
   ipHash: string | null
 ): Promise<PersistResult> {
+  if (isTestMode()) {
+    return { created: true, status: 'pending' };
+  }
   const app = initAdmin();
   const db = app.firestore();
   const ref = db.collection('waitlist').doc(docId);
@@ -184,7 +193,7 @@ export async function POST(req: Request) {
   }
 
   const payload = parsed.data;
-  if (process.env.TEST_E2E_SHORTCIRCUIT === 'true') {
+  if (process.env.TEST_E2E_SHORTCIRCUIT === 'true' || isTestMode()) {
     const bypassToken = process.env.TEST_E2E_BYPASS_TOKEN || 'e2e-mocked-token';
     if (payload.captchaToken !== bypassToken) {
       return jsonError(429, 'captcha_failed', 'Captcha verification failed.');

@@ -3,6 +3,8 @@ import { cert, getApps, initializeApp, type ServiceAccount } from 'firebase-admi
 import { getFirestore, type Firestore } from 'firebase-admin/firestore';
 import * as admin from 'firebase-admin';
 
+import { isTestMode } from '@/lib/testMode';
+
 type DecodedServiceAccount = ServiceAccount & {
   private_key?: string;
 };
@@ -25,6 +27,7 @@ function decodeServiceAccount(): DecodedServiceAccount | null {
 let firestoreInstance: Firestore | null = null;
 
 function ensureAppInitialized() {
+  if (isTestMode()) return;
   if (firestoreInstance) return;
 
   const serviceAccount = decodeServiceAccount();
@@ -47,11 +50,17 @@ function ensureAppInitialized() {
 }
 
 export function initAdmin(): typeof admin {
+  if (isTestMode()) {
+    return admin;
+  }
   ensureAppInitialized();
   return admin;
 }
 
 export function getDb(): Firestore {
+  if (isTestMode()) {
+    throw new Error('Firestore is not available in TEST_MODE');
+  }
   ensureAppInitialized();
   return firestoreInstance as Firestore;
 }

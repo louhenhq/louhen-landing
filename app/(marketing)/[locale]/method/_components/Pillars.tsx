@@ -12,14 +12,19 @@ type Pillar = {
 export default function Pillars() {
   const t = useTranslations('method.pillars');
 
-  const pillars = useMemo<Pillar[]>(
-    () => [
-      { title: t('oneTitle'), body: t('oneBody') },
-      { title: t('twoTitle'), body: t('twoBody') },
-      { title: t('threeTitle'), body: t('threeBody') },
-    ],
-    [t]
-  );
+  const pillars = useMemo<Pillar[]>(() => {
+    const raw = t.raw('items');
+    if (!Array.isArray(raw)) return [];
+
+    return raw
+      .map((item) => {
+        if (!item || typeof item !== 'object') return null;
+        const value = item as Partial<Pillar>;
+        if (typeof value.title !== 'string' || typeof value.body !== 'string') return null;
+        return { title: value.title, body: value.body };
+      })
+      .filter((pillar): pillar is Pillar => Boolean(pillar));
+  }, [t]);
 
   return (
     <section className={cn(layout.section, 'bg-bg')} aria-labelledby="method-pillars-title">
@@ -29,7 +34,7 @@ export default function Pillars() {
             {t('title')}
           </h2>
         </div>
-        <div className="grid gap-lg md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-lg md:grid-cols-2 xl:grid-cols-4">
           {pillars.map((pillar) => (
             <article key={pillar.title} className={cn(layout.card, 'flex h-full flex-col gap-sm px-gutter py-xl')}>
               <h3 className="text-xl font-semibold text-text">{pillar.title}</h3>

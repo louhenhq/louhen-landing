@@ -1,7 +1,9 @@
+import 'server-only';
+
 import { verifyUnsubToken } from '@/lib/email/tokens';
 import { upsertSuppression } from '@/lib/email/suppress';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;

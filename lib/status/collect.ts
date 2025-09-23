@@ -1,6 +1,7 @@
 import { parseConsentCookie } from '@/lib/consent/cookie';
 import { getEmailTransport } from '@/lib/email/transport';
 import { getDb } from '@/lib/firebaseAdmin';
+import { isTestMode } from '@/lib/testMode';
 
 const startedAt = new Date();
 const SUPPRESSIONS_SAMPLE_LIMIT = 20;
@@ -32,6 +33,9 @@ type StatusSnapshot = {
 };
 
 async function countRecentSuppressions(): Promise<number | null> {
+  if (isTestMode()) {
+    return 0;
+  }
   try {
     const db = getDb();
     const snapshot = await db

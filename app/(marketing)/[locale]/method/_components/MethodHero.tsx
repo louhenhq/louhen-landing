@@ -16,6 +16,9 @@ export default function MethodHero() {
     <section className={cn(layout.section, 'bg-bg')} aria-labelledby="method-hero-title">
       <div className={cn(layout.container, 'flex flex-col items-center gap-xl text-center')}>
         <div className="flex max-w-3xl flex-col gap-md">
+          {t('eyebrow') ? (
+            <span className={cn(text.eyebrow, 'text-brand-primary/80')}>{t('eyebrow')}</span>
+          ) : null}
           <h1 id="method-hero-title" className={cn(text.heading, 'text-balance')}>
             {t('title')}
           </h1>

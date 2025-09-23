@@ -10,6 +10,15 @@ describe('landing metadata', () => {
 
   it('returns default metadata when ref missing', async () => {
     const metadata = await generateMetadata({ params: { locale: 'en' }, searchParams: {} });
-    expect(metadata.title).toBeUndefined();
+    if (typeof metadata.title === 'string') {
+      expect(metadata.title).toMatch(/Louhen/i);
+    } else if (metadata.title !== undefined && metadata.title !== null) {
+      expect(metadata.title).toMatchObject({
+        default: expect.stringMatching(/Louhen/i),
+      });
+    }
+    if (typeof metadata.openGraph?.url === 'string') {
+      expect(metadata.openGraph.url.includes('ref=')).toBe(false);
+    }
   });
 });

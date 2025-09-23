@@ -1,3 +1,5 @@
+import 'server-only';
+
 import { NextResponse } from 'next/server';
 import { initAdmin, admin } from '@/lib/firebaseAdmin';
 import { generateUnsubToken } from '@/lib/unsubTokens';
@@ -65,4 +67,3 @@ export async function GET(req: Request) {
     samples: updates.slice(0, 5),
   });
 }
-

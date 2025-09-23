@@ -366,52 +366,66 @@
   },
   "method": {
     "seo": {
-      "title": "[DE] Method — Healthy steps. Happy kids.",
-      "description": "[DE] How Louhen makes kids’ shoe shopping stress-free with thoughtful recommendations and care."
+      "title": "[DE] Louhen Method — Fit intelligence for growing feet",
+      "description": "[DE] Discover how Louhen blends kid-safe scanning, fit science, and privacy-first data to recommend shoes families trust."
     },
     "hero": {
-      "title": "[DE] Healthy steps. Happy kids. Relaxed parents.",
-      "subtitle": "[DE] Louhen takes the stress out of shoe shopping. With a little smart tech and a lot of care, you’ll only see shoes that feel right — for your child, and for you."
+      "eyebrow": "[DE] The Louhen Method",
+      "title": "[DE] Fit intelligence that keeps up with growing feet.",
+      "subtitle": "[DE] We pair quick scans with podiatrist-reviewed data so every recommendation feels personal, safe, and ready for play."
     },
     "pillars": {
-      "title": "[DE] Our Approach",
-      "oneTitle": "[DE] Growing Together",
-      "oneBody": "[DE] Children’s feet change fast. We guide you at every stage, so you never have to guess.",
-      "twoTitle": "[DE] Simple & Stress-Free",
-      "twoBody": "[DE] Scan their feet in seconds — or just tell us their current size. We’ll handle the rest.",
-      "threeTitle": "[DE] Made Just for Them",
-      "threeBody": "[DE] Every recommendation feels personal. Because no two children — or feet — are the same."
+      "title": "[DE] What powers every Louhen recommendation",
+      "items": [
+        {
+          "title": "[DE] Kid-safe scanning",
+          "body": "[DE] Capture a 3D foot profile with any phone in under a minute. No raw images ever leave your device."
+        },
+        {
+          "title": "[DE] Verified fit science",
+          "body": "[DE] LouhenFit balances length, width, and instep data against real-world footwear benchmarks."
+        },
+        {
+          "title": "[DE] Adaptive personalization",
+          "body": "[DE] Profiles learn from wear feedback, surfacing styles that match growth patterns and preferences."
+        },
+        {
+          "title": "[DE] Trust built-in",
+          "body": "[DE] Privacy-first defaults, transparent size notes, and return-ready guidance keep families in control."
+        }
+      ]
     },
     "how": {
-      "title": "[DE] How It Works",
+      "title": "[DE] How it works",
       "steps": [
         {
-          "title": "[DE] You start simple",
-          "body": "[DE] Add your child’s profile."
+          "title": "[DE] Start with a scan or size",
+          "body": "[DE] Create a child profile with measurements or their current best-fit pair."
         },
         {
-          "title": "[DE] We do the thinking",
-          "body": "[DE] Growth, comfort, and support considered."
+          "title": "[DE] Louhen builds the fit profile",
+          "body": "[DE] We analyze growth history, support needs, and activity goals."
         },
         {
-          "title": "[DE] You see only what fits",
-          "body": "[DE] Shoes matched to their unique needs."
+          "title": "[DE] Recommendations stay relevant",
+          "body": "[DE] Only shoes that match their fit confidence, style, and season appear."
         },
         {
-          "title": "[DE] Everyone’s happy",
-          "body": "[DE] Less stress for you, more comfort for them."
+          "title": "[DE] You review, they explore",
+          "body": "[DE] Order with clarity and simple wear checks to confirm comfort at home."
         }
       ]
     },
     "trust": {
-      "reassurance": "[DE] Every pair is covered by LouhenFit — if it doesn’t feel right, we’ll make it right.",
-      "badge": "[DE] Podiatrist Approved for growing feet.",
-      "quote": "[DE] “Shopping for shoes used to feel like a gamble. With Louhen, it’s finally easy — and my kids actually like the choices.”",
-      "attribution": "[DE] Julia, mom of twins"
+      "badge": "[DE] Clinically guided",
+      "headline": "[DE] Podiatry advisors keep LouhenFit aligned with healthy development for every stage.",
+      "body": "[DE] Each recommendation includes fit confidence, break-in guidance, and when to re-check their size.",
+      "quote": "[DE] “We never guess sizes anymore. Louhen explains why a shoe fits so I can say yes with confidence.”",
+      "attribution": "[DE] Maya, mom of two explorers"
     },
     "cta": {
-      "title": "[DE] Turn shoe shopping into something you look forward to.",
-      "button": "[DE] Sign Up for Early Access"
+      "title": "[DE] Be first to try Louhen for your family.",
+      "button": "[DE] Join the waitlist"
     }
   }
 }

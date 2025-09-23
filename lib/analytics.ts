@@ -1,5 +1,6 @@
 import { FieldValue } from 'firebase-admin/firestore';
 import { initAdmin } from '@/lib/firebaseAdmin';
+import { isTestMode } from '@/lib/testMode';
 
 export type WaitlistAnalyticsEventName =
   | 'waitlist_signup_submitted'
@@ -25,6 +26,9 @@ function buildPayload(event: WaitlistAnalyticsEvent): Record<string, unknown> {
 }
 
 export async function logAnalyticsEvent(event: WaitlistAnalyticsEvent) {
+  if (isTestMode()) {
+    return;
+  }
   const payload = buildPayload(event);
 
   if (process.env.NODE_ENV !== 'production') {
@@ -43,4 +47,3 @@ export async function logAnalyticsEvent(event: WaitlistAnalyticsEvent) {
     console.error('logAnalyticsEvent failed', { event: event.name, error });
   }
 }
-

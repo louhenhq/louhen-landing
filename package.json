@@ -11,6 +11,7 @@
     "prepare": "husky",
     "build": "next build",
     "start": "next start",
+    "start:test": "PORT=4311 next start",
     "lint": "next lint",
     "guard:hex": "node scripts/guard-hex.mjs",
     "test:unit": "vitest run",

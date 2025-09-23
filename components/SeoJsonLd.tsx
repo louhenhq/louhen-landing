@@ -91,3 +91,17 @@ export function BreadcrumbJsonLd({ items, nonce }: BreadcrumbJsonLdProps & { non
     />
   );
 }
+
+export type TechArticleSchema = Record<string, unknown> & {
+  '@context': 'https://schema.org';
+  '@type': 'TechArticle';
+};
+
+type TechArticleJsonLdProps = {
+  schema: TechArticleSchema;
+  nonce?: string;
+};
+
+export function TechArticleJsonLd({ schema, nonce }: TechArticleJsonLdProps) {
+  return <JsonLd schema={schema} nonce={nonce} />;
+}

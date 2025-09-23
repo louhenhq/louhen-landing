@@ -1,3 +1,5 @@
+import 'server-only';
+
 import { NextResponse, NextRequest } from 'next/server';
 import { createHash } from 'crypto';
 import { FieldValue, type QuerySnapshot, type DocumentData, type Timestamp } from 'firebase-admin/firestore';

@@ -9,7 +9,7 @@ import { buildStatusChallenge, verifyStatusAuth } from '@/lib/status/auth';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-type HeaderStore = ReturnType<typeof headers>;
+type HeaderStore = Awaited<ReturnType<typeof headers>>;
 
 function buildUnauthorizedResponse(): Response {
   return new Response('Unauthorized', {
@@ -22,8 +22,8 @@ function buildUnauthorizedResponse(): Response {
   });
 }
 
-function requireStatusAuth(): HeaderStore {
-  const headerStore = headers();
+async function requireStatusAuth(): Promise<HeaderStore> {
+  const headerStore = await headers();
   const auth = verifyStatusAuth(headerStore.get('authorization'));
   if (!auth.ok) {
     throw buildUnauthorizedResponse();
@@ -90,7 +90,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function StatusPage() {
-  const headerStore = requireStatusAuth();
+  const headerStore = await requireStatusAuth();
   const snapshot = await fetchStatusSnapshot(headerStore);
 
   return (

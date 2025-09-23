@@ -1,9 +1,11 @@
+import 'server-only';
+
 import { NextResponse } from 'next/server';
 
 import { upsertSuppression } from '@/lib/email/suppress';
 import { verifyUnsubToken } from '@/lib/email/tokens';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 async function parseBody(request: Request): Promise<Record<string, unknown>> {
   const contentType = request.headers.get('content-type') || '';
