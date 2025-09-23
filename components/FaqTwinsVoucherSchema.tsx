@@ -1,3 +1,8 @@
+'use client';
+
+import { useMemo } from 'react';
+import { useNonce } from '@/lib/csp/nonce-context';
+
 const schema = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
@@ -46,5 +51,7 @@ const schema = {
 };
 
 export default function FaqTwinsVoucherSchema() {
-  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
+  const nonce = useNonce();
+  const json = useMemo(() => JSON.stringify(schema), []);
+  return <script type="application/ld+json" nonce={nonce ?? undefined} dangerouslySetInnerHTML={{ __html: json }} />;
 }

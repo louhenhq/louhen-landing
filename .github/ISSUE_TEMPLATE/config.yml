@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Questions & Support
+    url: https://github.com/louhenhq/louhen-landing/discussions
+    about: Please ask questions and request help in GitHub Discussions instead of issues.

@@ -1,0 +1,19 @@
+# CODEOWNERS — Louhen Landing
+# Auto-assigns reviewers based on file patterns.
+# Syntax: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global default: Martin (founder/maintainer)
+*       @martinweis
+
+# Context files always need review
+/CONTEXT/*   @martinweis
+
+# CI/CD and workflows
+.github/*    @martinweis
+
+# App-specific ownership (expand later when team grows)
+app/**       @martinweis
+lib/**       @martinweis
+components/** @martinweis
+styles/**    @martinweis
+tests/**     @martinweis

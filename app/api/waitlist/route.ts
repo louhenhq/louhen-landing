@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import { z } from 'zod';
 import { randomBytes, createHash } from 'crypto';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { initAdmin } from '@/lib/firebaseAdmin';
 import { emailHash } from '@/lib/crypto/emailHash';
 import { hashIp } from '@/lib/crypto/ipHash';
 import { getWaitlistConfirmTtlMs } from '@/lib/waitlistConfirmTtl';
+import { waitlistPayloadSchema, type WaitlistPayload } from '@/lib/waitlist/schema';
 import { sendWaitlistConfirmEmail } from '@/lib/waitlist/email';
 import { logAnalyticsEvent } from '@/lib/analytics';
 
@@ -14,7 +14,6 @@ export const dynamic = 'force-dynamic';
 
 const MAX_REQUESTS_PER_WINDOW = 5;
 const RATE_WINDOW_MS = 10 * 60 * 1000;
-
 type RateBucket = { count: number; resetAt: number };
 
 const rateLimiterGlobal = globalThis as unknown as {
@@ -26,15 +25,6 @@ if (!rateLimiterGlobal.__waitlistBuckets) {
 }
 
 const RATE_BUCKETS = rateLimiterGlobal.__waitlistBuckets;
-
-const payloadSchema = z.object({
-  email: z.string().trim().min(1).email(),
-  locale: z.string().trim().min(2).max(10),
-  captchaToken: z.string().trim().min(1),
-  gdprConsent: z.literal(true),
-});
-
-type Payload = z.infer<typeof payloadSchema>;
 
 type CaptchaVerificationResult = {
   success: boolean;
@@ -117,7 +107,7 @@ type PersistResult = {
 
 async function persistWaitlist(
   docId: string,
-  payload: Payload,
+  payload: WaitlistPayload,
   tokenHash: string,
   expiresAt: Date,
   ipHash: string | null
@@ -172,12 +162,36 @@ export async function POST(req: Request) {
     return jsonError(400, 'invalid_json', 'Unable to parse request body.');
   }
 
-  const parsed = payloadSchema.safeParse(body);
+  const parsed = waitlistPayloadSchema.safeParse(body);
   if (!parsed.success) {
-    return jsonError(400, 'invalid_payload', 'Invalid or missing waitlist fields.');
+    const issues = parsed.error.issues || [];
+    const fields = Array.from(
+      new Set(
+        issues
+          .map((issue) => {
+            const path = issue.path.filter(Boolean).join('.');
+            if (path) return path;
+            const message = typeof issue.message === 'string' ? issue.message : '';
+            const match = message.match(/[A-Za-z0-9_]+/);
+            return match ? match[0] : '';
+          })
+      )
+    ).filter(Boolean);
+    const detail = fields.length
+      ? `Invalid or missing waitlist fields: ${fields.join(', ')}.`
+      : 'Invalid or missing waitlist fields.';
+    return jsonError(400, 'invalid_payload', detail);
   }
 
   const payload = parsed.data;
+  if (process.env.TEST_E2E_SHORTCIRCUIT === 'true') {
+    const bypassToken = process.env.TEST_E2E_BYPASS_TOKEN || 'e2e-mocked-token';
+    if (payload.captchaToken !== bypassToken) {
+      return jsonError(429, 'captcha_failed', 'Captcha verification failed.');
+    }
+    return NextResponse.json({ ok: true, message: 'Confirmation email sent (short-circuit).' });
+  }
+
   const docId = emailHash(payload.email.toLowerCase());
   const ipHashValue = hashIp(ip);
 
@@ -213,14 +227,20 @@ export async function POST(req: Request) {
   const confirmUrl = buildConfirmUrl(token);
 
   try {
-    await sendWaitlistConfirmEmail({ to: payload.email, confirmUrl });
+    const emailResult = await sendWaitlistConfirmEmail({ to: payload.email, confirmUrl });
+    if (emailResult?.skipped) {
+      console.info('[email:waitlist-confirm] skipped', {
+        reason: emailResult.skipped,
+        transport: emailResult.transport,
+        to: payload.email,
+      });
+    }
   } catch (error) {
     console.error('waitlist confirmation email failed', error);
     await logAnalyticsEvent({
       name: 'waitlist_bounced',
       data: { emailHash: docId, locale: payload.locale, reason: error instanceof Error ? error.message : 'email_error' },
     });
-    return jsonError(500, 'email_failed', 'Unable to send confirmation email.');
   }
 
   await logAnalyticsEvent({

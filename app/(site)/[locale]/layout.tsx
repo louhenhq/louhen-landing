@@ -2,7 +2,6 @@ import type { ReactNode } from 'react';
 import { NextIntlClientProvider, type AbstractIntlMessages } from 'next-intl';
 import { loadMessages } from '@/lib/intl/loadMessages';
 import { locales, type SupportedLocale } from '@/next-intl.locales';
-import { ConsentProvider } from '@/app/(site)/components/ConsentProvider';
 
 type Props = {
   children: ReactNode;
@@ -51,9 +50,7 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   return (
     <NextIntlClientProvider locale={resolvedLocale} messages={resolvedMessages} timeZone="UTC">
-      <ConsentProvider>
-        {children}
-      </ConsentProvider>
+      {children}
     </NextIntlClientProvider>
   );
 }

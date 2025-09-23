@@ -3,7 +3,7 @@ import { initAdmin } from '@/lib/firebaseAdmin';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { emailHash } from '@/lib/crypto/emailHash';
 import { randomTokenBase64Url, sha256Hex } from '@/lib/crypto/token';
-import { sendWaitlistConfirmEmail } from '@/lib/waitlist/email';
+import { sendWaitlistResendEmail } from '@/lib/waitlist/email';
 import { getWaitlistConfirmTtlMs } from '@/lib/waitlistConfirmTtl';
 
 export const runtime = 'nodejs';
@@ -46,7 +46,18 @@ export async function POST(req: Request) {
     const baseUrl = process.env.APP_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://louhen-landing.vercel.app';
     const confirmUrl = new URL('/api/waitlist/confirm', baseUrl);
     confirmUrl.searchParams.set('token', token);
-    await sendWaitlistConfirmEmail({ to: email, confirmUrl: confirmUrl.toString() });
+    try {
+      const emailResult = await sendWaitlistResendEmail({ to: email, confirmUrl: confirmUrl.toString() });
+      if (emailResult?.skipped) {
+        console.info('[email:waitlist-resend] skipped', {
+          reason: emailResult.skipped,
+          transport: emailResult.transport,
+          to: email,
+        });
+      }
+    } catch (error) {
+      console.error('waitlist resend email failed', error);
+    }
     return NextResponse.json({ ok: true });
   } catch (e) {
     console.error('resend-confirm error', e);

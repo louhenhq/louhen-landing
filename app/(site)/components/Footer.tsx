@@ -4,12 +4,12 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { cn, layout } from '@/app/(site)/_lib/ui';
 import { LEGAL_ENTITY } from '@/constants/site';
-import { useConsent } from '@/app/(site)/components/ConsentProvider';
+import { useConsent } from '@/components/ConsentProvider';
 
 export default function Footer() {
   const t = useTranslations('footer');
   const year = new Date().getFullYear();
-  const { openPreferences } = useConsent();
+  const { openManager } = useConsent();
 
   return (
     <footer className={cn(layout.section, 'border-t border-border bg-bg')}>
@@ -25,7 +25,7 @@ export default function Footer() {
           <Link href="/imprint" prefetch={false} className="hover:text-text">
             {t('legal.imprint')}
           </Link>
-          <button type="button" className="text-left text-text-muted hover:text-text underline" onClick={openPreferences}>
+          <button type="button" className="text-left text-text-muted hover:text-text underline" onClick={openManager}>
             {t('legal.preferences')}
           </button>
         </nav>

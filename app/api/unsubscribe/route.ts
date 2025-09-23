@@ -1,47 +1,78 @@
 import { NextResponse } from 'next/server';
-import { initAdmin } from '@/lib/firebaseAdmin';
-import { FieldValue } from 'firebase-admin/firestore';
-import type { WaitlistDoc } from '@/types/waitlist';
 
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
+import { upsertSuppression } from '@/lib/email/suppress';
+import { verifyUnsubToken } from '@/lib/email/tokens';
 
-export async function GET(req: Request) {
-  try {
-    const { searchParams } = new URL(req.url);
-    const token = searchParams.get('token') || '';
-    if (!token) return html('Invalid link. Missing token.', 400);
+export const runtime = 'edge';
 
-    const app = initAdmin();
-    const db = app.firestore();
-
-    const snap = await db.collection('waitlist').where('unsubscribeToken', '==', token).limit(1).get();
-    if (snap.empty) return html('This unsubscribe link is invalid or already used.', 404);
-
-    const doc = snap.docs[0];
-    const raw = doc.data() as WaitlistDoc;
-    const expiresAt = raw.unsubscribeTokenExpiresAt ?? null;
-    const expTs = expiresAt?.toMillis?.() ?? 0;
-    if (expTs && Date.now() > expTs) return html('This unsubscribe link has expired.', 410);
-    if (Boolean(raw.unsubscribed) === true) return html('You are already unsubscribed. 👍');
-
-    await doc.ref.update({
-      unsubscribed: true,
-      emailPrefs: { waitlistUpdates: false, referrals: false, launchNews: false },
-      unsubscribeToken: null,
-      unsubscribeTokenExpiresAt: null,
-      unsubscribedAt: FieldValue.serverTimestamp(),
-    });
-
-    const site = process.env.NEXT_PUBLIC_SITE_URL || '/';
-    return html(`You have been unsubscribed. <a href="${site}/unsubscribed" style="color:#0f172a;text-decoration:underline;">Return to site</a>`);
-  } catch (e) {
-    console.error('Unsubscribe error', e);
-    return html('Something went wrong. Please contact hello@louhen.com', 500);
+async function parseBody(request: Request): Promise<Record<string, unknown>> {
+  const contentType = request.headers.get('content-type') || '';
+  if (contentType.includes('application/json')) {
+    try {
+      return await request.json();
+    } catch {
+      return {};
+    }
   }
+
+  if (contentType.includes('application/x-www-form-urlencoded') || contentType.includes('multipart/form-data')) {
+    try {
+      const form = await request.formData();
+      const result: Record<string, unknown> = {};
+      form.forEach((value, key) => {
+        result[key] = typeof value === 'string' ? value : String(value);
+      });
+      return result;
+    } catch {
+      return {};
+    }
+  }
+
+  return {};
 }
 
-function html(body: string, status = 200) {
-  const page = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Unsubscribe — Louhen</title></head><body style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#0f172a;padding:24px;line-height:1.6"><h1 style="font-size:20px;margin:0 0 12px">Unsubscribe</h1><p>${body}</p></body></html>`;
-  return new NextResponse(page, { status, headers: { 'content-type': 'text/html; charset=utf-8' } });
+export async function POST(request: Request) {
+  const body = await parseBody(request);
+
+  let redirectTarget: string | undefined;
+  try {
+    const token = typeof body.token === 'string' ? body.token.trim() : undefined;
+    const email = typeof body.email === 'string' ? body.email.trim() : undefined;
+    redirectTarget = typeof body.redirect === 'string' ? body.redirect : undefined;
+
+    if (token) {
+      const payload = verifyUnsubToken(token);
+      if (payload) {
+        await upsertSuppression({
+          email: payload.email,
+          scope: payload.scope,
+          source: 'one-click',
+          reason: 'User unsubscribed via token',
+        });
+      }
+    } else if (email) {
+      await upsertSuppression({
+        email,
+        scope: 'all',
+        source: 'manual',
+        reason: 'User unsubscribed via form',
+      });
+    }
+  } catch (error) {
+    console.error('unsubscribe error', error);
+  }
+  if (redirectTarget) {
+    try {
+      const url = new URL(redirectTarget, request.url);
+      return NextResponse.redirect(url.toString(), { status: 303 });
+    } catch {
+      // ignore malformed redirect target
+    }
+  }
+
+  return NextResponse.json({ ok: true });
+}
+
+export async function GET() {
+  return NextResponse.json({ ok: true });
 }

@@ -1,13 +1,19 @@
+import type { Metadata } from 'next';
+
 import { SITE_NAME } from '@/constants/site';
-export const metadata = { title: `Terms — ${SITE_NAME}` };
+
+export const metadata: Metadata = {
+  title: `Terms — ${SITE_NAME}`,
+  description: `Pre-launch terms of service details for ${SITE_NAME}.`,
+};
 
 export default function TermsPage() {
   return (
     <main className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">
       <h1 className="text-3xl font-bold tracking-tight">Terms</h1>
       <p className="mt-4 text-slate-700">
-        These terms govern use of the pre-launch waitlist only. By joining the waitlist you consent to receive early-access communications.
-        Full product Terms will be provided prior to launch.
+        These placeholder terms cover the waitlist period while we finalize the full agreement for {SITE_NAME}. Official
+        subscription terms will be shared when early access opens.
       </p>
     </main>
   );

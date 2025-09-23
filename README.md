@@ -1,96 +1,54 @@
 [![CI](https://github.com/Martin/louhen-landing/actions/workflows/ci.yml/badge.svg)](https://github.com/Martin/louhen-landing/actions/workflows/ci.yml)
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+See [BADGES.md](BADGES.md) for full project status and quality metrics.
 
-## Getting Started
+# Louhen Landing
 
-First, run the development server:
+Louhen Landing is the official marketing site for Louhen, designed to provide a seamless user experience and showcase our brand. This project leverages modern web technologies to deliver fast, accessible, and maintainable content.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Tech Stack
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Framework:** Next.js (App Router)
+- **Styling:** CSS Modules, Style Dictionary for design tokens
+- **Fonts:** Custom font optimization using `next/font`
+- **State Management & Analytics:** Custom client-side analytics with consent management
+- **Backend Integrations:** Firebase, Resend, hCaptcha for waitlist and user engagement
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Local Development
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+To get started locally:
 
-## Learn More
+1. Clone the repository.
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Configure environment variables as per `.env.example`, including:
+   - `NEXT_PUBLIC_HCAPTCHA_SITE_KEY`
+   - `HCAPTCHA_SECRET`
+   - `APP_BASE_URL`
+   - `STATUS_USER`, `STATUS_PASS` (Basic Auth for the internal /status diagnostics)
+   - `RESEND_API_KEY`, `RESEND_FROM`, `RESEND_REPLY_TO`
+   - `FIREBASE_ADMIN_SA_B64`
+   - `FIREBASE_PROJECT_ID`, `FIREBASE_DB_REGION`
+   - `VERCEL_GIT_COMMIT_SHA` (provided by Vercel; set `COMMIT_SHA` manually if unavailable)
+   - `WAITLIST_CONFIRM_TTL_DAYS` (optional)
+4. Run the development server:
+   ```bash
+   npm run dev
+   ```
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-To learn more about Next.js, take a look at the following resources:
+> Tokens for design system are automatically built after install and before site builds.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## QA Targets
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Ensure waitlist form functions correctly with and without hCaptcha keys.
+- Validate analytics events respect user consent and are dispatched properly.
+- Confirm environment variables are correctly loaded and used.
+- Verify design tokens are up to date and applied consistently.
+- Test deployment pipelines and CI workflows for reliability.
 
-## Deploy on Vercel
+## License
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-## Design Tokens (web + Flutter)
-
-This repo uses **Style Dictionary** to build brand tokens for both the landing site (CSS variables) and the Flutter app (Dart).
-
-- Source: `packages/design-tokens/tokens/`
-- Build outputs:
-  - Web: `packages/design-tokens/build/web/tokens.css` (imported by `app/globals.css`)
-  - Flutter: `packages/design-tokens/build/flutter/tokens.g.dart` (copy into the app repo)
-
-### Commands
-- Build tokens only:
-  `npm run -w @louhen/design-tokens build`
-- Site build (runs tokens build automatically via `prebuild`):
-  `npm run build`
-
-> Tokens also build automatically after `npm install` via `postinstall`.
-
-## Waitlist
-
-The marketing waitlist relies on Firebase, Resend, and hCaptcha. Configure these environment variables (server-side unless noted):
-
-- `NEXT_PUBLIC_HCAPTCHA_SITE_KEY` (client) and `HCAPTCHA_SECRET`
-- `APP_BASE_URL` – e.g. `https://louhen.com`
-- `RESEND_API_KEY`, `RESEND_FROM`, `RESEND_REPLY_TO`
-- `FIREBASE_ADMIN_SA_B64` (base64 encoded service account JSON)
-- `FIREBASE_PROJECT_ID`, `FIREBASE_DB_REGION`
-- `WAITLIST_CONFIRM_TTL_DAYS` (optional override for confirmation expiration)
-
-Local development notes:
-
-- The waitlist form renders without hCaptcha if `NEXT_PUBLIC_HCAPTCHA_SITE_KEY` is missing and shows a non-blocking warning banner. Submissions will still require a valid site key + secret to succeed against the API.
-- After confirmation, users are redirected to `/waitlist/success` (with optional `status` query) and expired links redirect to `/waitlist/expired`.
-- Run `npm run test:unit -- tests/waitlist.api.test.ts` for API coverage and `npm run test:unit -- __tests__/waitlist.form.test.tsx` for the client form behaviour.
-
-## Analytics
-
-Client-side events are dispatched exclusively through `lib/clientAnalytics.ts`. The helper automatically:
-
-- Respects consent (buffers until analytics consent is granted).
-- Adds page context, UTM parameters, and the current app version to each payload.
-- Retries using `navigator.sendBeacon()` and falls back to `fetch` with exponential backoff.
-- Deduplicates identical events fired within one second.
-
-Dev flags (set in `.env.local`):
-
-```bash
-NEXT_PUBLIC_COMMIT_SHA=<git short sha>
-NEXT_PUBLIC_ANALYTICS_DEBUG=1   # verbose console logging
-NEXT_PUBLIC_ANALYTICS_DISABLED=1 # disable outbound events
-```
-
-Consent sources:
-
-- `window.__LOUHEN_CONSENT__ = { analytics: true|false }`
-- Cookie `louhen_consent=analytics:granted|denied`
-
-Dispatch the custom event `louhen:consent` with `{ detail: { analytics: true } }` to grant analytics at runtime; buffered events flush immediately.
+This project and its contents are proprietary and confidential. Unauthorized use, distribution, or reproduction is strictly prohibited. For licensing inquiries, please contact the Louhen team. See [NOTICE.md](NOTICE.md) for attributions of third-party dependencies and services used in this project.

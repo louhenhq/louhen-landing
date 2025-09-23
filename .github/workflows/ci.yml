@@ -1,14 +1,14 @@
 name: CI
 
 on:
-  pull_request:
   push:
     branches:
-      - main
+      - '**'
+  pull_request:
   workflow_dispatch:
 
 jobs:
-  test:
+  build-and-test:
     runs-on: ubuntu-latest
     env:
       CI: true
@@ -17,22 +17,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-
-      - name: Configure npm cache directory
-        run: npm config set cache ~/.npm --global
-
-      - name: Cache npm
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            npm-${{ runner.os }}-
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
@@ -42,14 +34,17 @@ jobs:
 
       - name: Lint
         run: npm run lint
+        continue-on-error: false
 
       - name: Unit tests
         run: npm run test:unit
+        continue-on-error: false
 
       - name: Build
         run: npm run build
+        continue-on-error: false
 
-      - name: Cache Playwright
+      - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
@@ -60,11 +55,23 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: Playwright e2e tests
-        run: npm run qa:e2e -- --reporter=html
+      - name: E2E tests (Playwright)
+        env:
+          APP_BASE_URL: http://localhost:4311
+          TEST_E2E_SHORTCIRCUIT: 'true'
+          TEST_E2E_BYPASS_TOKEN: e2e-mocked-token
+          HCAPTCHA_SECRET: sk_dummy_for_e2e
+          NODE_ENV: test
+        run: npm run test:e2e -- --reporter=html --workers=2
+        continue-on-error: false
 
-      - name: Lighthouse CI
-        run: npx start-server-and-test "npm run start -- --hostname 0.0.0.0 --port 3000" http://127.0.0.1:3000 "npm run qa:lh"
+      - name: Lighthouse (LHCI)
+        env:
+          BASE_URL: http://localhost:4311
+        run: |
+          npx start-server-and-test "next start -p 4311" http://localhost:4311 \
+            "npm run qa:lh -- --config=./lighthouserc.cjs --collect.startServerCommand="
+        continue-on-error: false
 
       - name: Upload Playwright report
         if: always()
@@ -74,10 +81,48 @@ jobs:
           path: playwright-report/
           if-no-files-found: ignore
 
-      - name: Upload Lighthouse report
+      - name: Upload Lighthouse results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: lighthouse-report
+          name: lighthouse-results
           path: .lighthouseci/
           if-no-files-found: ignore
+
+      - name: Upload Next.js traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: next-traces
+          path: .next/trace
+          if-no-files-found: ignore
+
+  release:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    env:
+      CI: true
+      NEXT_PUBLIC_ANALYTICS_DISABLED: '1'
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Semantic-release
+        run: npx semantic-release --debug

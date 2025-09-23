@@ -1,4 +1,5 @@
 import type { AnalyticsEventName, AnalyticsEventPayload, AnalyticsEventPropsMap, IdentifyProps } from '@/lib/analytics.schema';
+import { parseConsentCookie } from '@/lib/consent/cookie';
 
 const API_ENDPOINT = '/api/track';
 const DEDUPE_WINDOW_MS = 1000;
@@ -27,7 +28,10 @@ declare global {
   interface Window {
     __LOUHEN_CONSENT__?: {
       analytics?: boolean;
+      marketing?: boolean;
+      timestamp?: string;
     };
+    __LOUHEN_ANALYTICS_READY?: boolean;
   }
 }
 
@@ -70,9 +74,13 @@ export function getConsent(): boolean {
   } catch {
     // ignore
   }
-  const cookieConsent = readConsentCookie();
-  if (cookieConsent !== null) {
-    return cookieConsent;
+  const parsed = parseConsentCookie(typeof document !== 'undefined' ? document.cookie : null);
+  if (parsed) {
+    const analyticsGranted = Boolean(parsed.analytics);
+    if (typeof window !== 'undefined') {
+      window.__LOUHEN_CONSENT__ = { analytics: analyticsGranted, marketing: Boolean(parsed.marketing) };
+    }
+    return analyticsGranted;
   }
   return false;
 }
@@ -268,28 +276,6 @@ function ensureUtm(): UtmData {
   }
   cachedUtm = data;
   return cachedUtm;
-}
-
-function readConsentCookie(): boolean | null {
-  if (!isBrowser) return null;
-  try {
-    const cookies = document.cookie.split(';').map((cookie) => cookie.trim());
-    const entry = cookies.find((cookie) => cookie.startsWith('louhen_consent='));
-    if (!entry) return null;
-    const raw = decodeURIComponent(entry.split('=')[1] || '');
-    if (!raw) return null;
-    const analyticsPart = raw
-      .split(',')
-      .map((part) => part.trim())
-      .find((part) => part.startsWith('analytics:'));
-    if (!analyticsPart) return null;
-    const [, value] = analyticsPart.split(':');
-    if (value === 'granted') return true;
-    if (value === 'denied') return false;
-  } catch {
-    // ignore
-  }
-  return null;
 }
 
 async function flushQueue(): Promise<void> {

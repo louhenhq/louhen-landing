@@ -20,7 +20,7 @@ export default function TrustLogoLink({ href, label, logoSrc, ariaLabel }: Trust
     <a
       href={href}
       target="_blank"
-      rel="noreferrer"
+      rel="noopener noreferrer"
       onClick={handleClick}
       className="group inline-flex items-center justify-center rounded-md px-sm py-xs transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
       aria-label={ariaLabel ?? label}
@@ -28,7 +28,7 @@ export default function TrustLogoLink({ href, label, logoSrc, ariaLabel }: Trust
     >
       <Image
         src={logoSrc}
-        alt=""
+        alt={`${label} logo`}
         width={120}
         height={40}
         className="h-8 w-auto opacity-70 transition-opacity duration-150 group-hover:opacity-100"

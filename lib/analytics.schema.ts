@@ -35,8 +35,8 @@ export type AnalyticsEventName =
   | 'privacy_ribbon_click';
 
 export interface AnalyticsEventPropsMap {
-  page_view: { path: string; variant?: string; ref?: string | null };
-  cta_click: { id: 'hero_primary' | 'hero_secondary'; variant?: string };
+  page_view: { path?: string; page?: string; variant?: string; ref?: string | null };
+  cta_click: { id: 'hero_primary' | 'hero_secondary'; variant?: string } | { page: string; cta: string };
   waitlist_submit: { ok: boolean; error?: string };
   how_it_works_click: NoProps;
   wl_view: { locale?: string; path?: string; ref?: string | null };

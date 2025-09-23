@@ -57,9 +57,21 @@
     "testimonials": {
       "title": "Eltern über Louhen",
       "items": [
-        { "name": "Sophie", "meta": "Emma, 3", "quote": "Die Größenempfehlung hat sofort gepasst und die Styles kamen super an. Keine Rücksendungen mehr." },
-        { "name": "Jonas", "meta": "Mila, 5", "quote": "Der Scan dauerte eine Minute und die Vorschläge haben wirklich gepasst. Stressfrei einkaufen." },
-        { "name": "Lea", "meta": "Noah, 2", "quote": "Wir raten endlich nicht mehr. Er hat die Schuhe den ganzen Tag gern getragen." }
+        {
+          "name": "Sophie",
+          "meta": "Emma, 3",
+          "quote": "Die Größenempfehlung hat sofort gepasst und die Styles kamen super an. Keine Rücksendungen mehr."
+        },
+        {
+          "name": "Jonas",
+          "meta": "Mila, 5",
+          "quote": "Der Scan dauerte eine Minute und die Vorschläge haben wirklich gepasst. Stressfrei einkaufen."
+        },
+        {
+          "name": "Lea",
+          "meta": "Noah, 2",
+          "quote": "Wir raten endlich nicht mehr. Er hat die Schuhe den ganzen Tag gern getragen."
+        }
       ]
     },
     "privacy": {
@@ -350,6 +362,56 @@
       "cta": "Mit Zwillingseltern teilen",
       "aria": "Zwillings-Gutschein teilen",
       "message": "Hey 👋 Schau dir Louhen an — eine App für perfekt passende Kinderschuhe.\nZwillingseltern bekommen 5% Rabatt auf jede Bestellung mit dem Code TWINS5. 🎉\nHier entlang → {url}"
+    }
+  },
+  "method": {
+    "seo": {
+      "title": "[DE] Method — Healthy steps. Happy kids.",
+      "description": "[DE] How Louhen makes kids’ shoe shopping stress-free with thoughtful recommendations and care."
+    },
+    "hero": {
+      "title": "[DE] Healthy steps. Happy kids. Relaxed parents.",
+      "subtitle": "[DE] Louhen takes the stress out of shoe shopping. With a little smart tech and a lot of care, you’ll only see shoes that feel right — for your child, and for you."
+    },
+    "pillars": {
+      "title": "[DE] Our Approach",
+      "oneTitle": "[DE] Growing Together",
+      "oneBody": "[DE] Children’s feet change fast. We guide you at every stage, so you never have to guess.",
+      "twoTitle": "[DE] Simple & Stress-Free",
+      "twoBody": "[DE] Scan their feet in seconds — or just tell us their current size. We’ll handle the rest.",
+      "threeTitle": "[DE] Made Just for Them",
+      "threeBody": "[DE] Every recommendation feels personal. Because no two children — or feet — are the same."
+    },
+    "how": {
+      "title": "[DE] How It Works",
+      "steps": [
+        {
+          "title": "[DE] You start simple",
+          "body": "[DE] Add your child’s profile."
+        },
+        {
+          "title": "[DE] We do the thinking",
+          "body": "[DE] Growth, comfort, and support considered."
+        },
+        {
+          "title": "[DE] You see only what fits",
+          "body": "[DE] Shoes matched to their unique needs."
+        },
+        {
+          "title": "[DE] Everyone’s happy",
+          "body": "[DE] Less stress for you, more comfort for them."
+        }
+      ]
+    },
+    "trust": {
+      "reassurance": "[DE] Every pair is covered by LouhenFit — if it doesn’t feel right, we’ll make it right.",
+      "badge": "[DE] Podiatrist Approved for growing feet.",
+      "quote": "[DE] “Shopping for shoes used to feel like a gamble. With Louhen, it’s finally easy — and my kids actually like the choices.”",
+      "attribution": "[DE] Julia, mom of twins"
+    },
+    "cta": {
+      "title": "[DE] Turn shoe shopping into something you look forward to.",
+      "button": "[DE] Sign Up for Early Access"
     }
   }
 }

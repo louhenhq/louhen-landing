@@ -23,7 +23,14 @@ export default function ThanksPage({ searchParams }: { searchParams: Record<stri
       <p className="mt-4">Share your referral link:</p>
       <p className="mt-2 font-mono break-all border rounded-lg p-3 bg-white">{link}</p>
       <div className="mt-4 flex gap-2">
-        <a className="underline" href={`https://wa.me/?text=${encodeURIComponent(link)}`} target="_blank">WhatsApp</a>
+        <a
+          className="underline"
+          href={`https://wa.me/?text=${encodeURIComponent(link)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          WhatsApp
+        </a>
         <a className="underline" href={`sms:&body=${encodeURIComponent(link)}`}>SMS</a>
         <button
           className="underline"

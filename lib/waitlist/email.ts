@@ -1,6 +1,10 @@
 import * as React from 'react';
-import WaitlistConfirmEmail from '@/emails/WaitlistConfirm';
+
 import WaitlistWelcomeEmail from '@/emails/WaitlistWelcome';
+import { renderWaitlistConfirm, renderWaitlistResend } from '@/lib/email/renderWaitlist';
+import { getEmailTransport } from '@/lib/email/transport';
+import { buildStandardHeaders } from '@/lib/email/headers';
+import { shouldSend } from '@/lib/email/suppress';
 import { getResendClient } from '@/lib/resendClient';
 
 type MailSenderConfig = {
@@ -17,43 +21,125 @@ function getMailSenderConfig(): MailSenderConfig {
   return { from, replyTo, appName };
 }
 
-type ConfirmEmailOptions = {
+type ConfirmEmailArgs = {
   to: string;
   confirmUrl: string;
-  supportEmail?: string;
 };
+
+type EmailResult = {
+  ok: boolean;
+  transport: 'noop' | 'resend';
+  skipped?: string;
+};
+
+const templatesEnabled = (() => {
+  const flag = process.env.EMAIL_TEMPLATES_ENABLED?.trim()?.toLowerCase();
+  return flag === 'true' || flag === '1';
+})();
+
+const FALLBACK_BASE_URL = 'https://louhen-landing.vercel.app';
+const DEFAULT_UNSUBSCRIBE_EMAIL = 'unsubscribe@louhen.eu';
+const DEFAULT_SUPPORT_EMAIL = 'support@louhen.eu';
+
+function resolveBaseUrl() {
+  const fromEnv = process.env.APP_BASE_URL?.trim() || process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  return (fromEnv ?? FALLBACK_BASE_URL).replace(/\/$/, '');
+}
+
+function buildSkippedResult(reason: string): EmailResult {
+  return { ok: true, transport: 'noop', skipped: reason };
+}
+
+export async function sendWaitlistConfirmEmail({ to, confirmUrl }: ConfirmEmailArgs): Promise<EmailResult> {
+  if (!templatesEnabled) {
+    return buildSkippedResult('flag disabled');
+  }
+
+  const suppression = await shouldSend({ email: to, scope: 'transactional' });
+  if (!suppression.allowed) {
+    console.info('[email:suppressed]', { scope: 'transactional', emailHash: suppression.record?.emailHash });
+    return buildSkippedResult('suppressed');
+  }
+
+  const transport = getEmailTransport();
+  const { html, text } = await renderWaitlistConfirm({ confirmUrl });
+  const subject = 'Confirm your Louhen waitlist signup';
+  const baseUrl = resolveBaseUrl();
+  const unsubscribeUrl = `${baseUrl}/unsubscribe`;
+  const replyTo = process.env.RESEND_REPLY_TO?.trim() || DEFAULT_SUPPORT_EMAIL;
+  const headers = buildStandardHeaders({
+    email: to,
+    unsubscribeMailto: DEFAULT_UNSUBSCRIBE_EMAIL,
+    unsubscribeUrl,
+    replyTo,
+    marketing: false,
+  });
+
+  await transport.send({ to, subject, html, text, replyTo, headers });
+
+  return transport.name === 'noop'
+    ? { ok: true, transport: transport.name, skipped: 'using noop transport' }
+    : { ok: true, transport: transport.name };
+}
+
+export async function sendWaitlistResendEmail({ to, confirmUrl }: ConfirmEmailArgs): Promise<EmailResult> {
+  if (!templatesEnabled) {
+    return buildSkippedResult('flag disabled');
+  }
+
+  const suppression = await shouldSend({ email: to, scope: 'transactional' });
+  if (!suppression.allowed) {
+    console.info('[email:suppressed]', { scope: 'transactional', emailHash: suppression.record?.emailHash });
+    return buildSkippedResult('suppressed');
+  }
+
+  const transport = getEmailTransport();
+  const { html, text } = await renderWaitlistResend({ confirmUrl });
+  const subject = 'Your Louhen confirmation link';
+  const baseUrl = resolveBaseUrl();
+  const unsubscribeUrl = `${baseUrl}/unsubscribe`;
+  const replyTo = process.env.RESEND_REPLY_TO?.trim() || DEFAULT_SUPPORT_EMAIL;
+  const headers = buildStandardHeaders({
+    email: to,
+    unsubscribeMailto: DEFAULT_UNSUBSCRIBE_EMAIL,
+    unsubscribeUrl,
+    replyTo,
+    marketing: false,
+  });
+
+  await transport.send({ to, subject, html, text, replyTo, headers });
+
+  return transport.name === 'noop'
+    ? { ok: true, transport: transport.name, skipped: 'using noop transport' }
+    : { ok: true, transport: transport.name };
+}
 
 type WelcomeEmailOptions = {
   to: string;
   supportEmail?: string;
 };
 
-export async function sendWaitlistConfirmEmail(options: ConfirmEmailOptions) {
-  const { to, confirmUrl, supportEmail } = options;
-  const { from, replyTo, appName } = getMailSenderConfig();
-  const resend = getResendClient();
-
-  await resend.emails.send({
-    from,
-    to,
-    subject: `Confirm your ${appName} email`,
-    react: React.createElement(WaitlistConfirmEmail, {
-      confirmUrl,
-      appName,
-      supportEmail: supportEmail || replyTo,
-    }),
-    replyTo,
-    text: buildConfirmTextBody({ appName, confirmUrl }),
-  });
-}
-
 export async function sendWaitlistWelcomeEmail(options: WelcomeEmailOptions) {
   const { to, supportEmail } = options;
+  const suppression = await shouldSend({ email: to, scope: 'transactional' });
+  if (!suppression.allowed) {
+    console.info('[email:suppressed]', { scope: 'transactional', emailHash: suppression.record?.emailHash });
+    return;
+  }
+
   const { from, replyTo, appName } = getMailSenderConfig();
   const resend = getResendClient();
-  const baseUrl = process.env.APP_BASE_URL?.trim() || process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  const normalizedBase = baseUrl ? baseUrl.replace(/\/$/, '') : null;
+  const normalizedBase = resolveBaseUrl();
   const preferencesUrl = normalizedBase ? `${normalizedBase}/preferences` : undefined;
+  const unsubscribeUrl = `${normalizedBase}/unsubscribe`;
+  const effectiveReplyTo = supportEmail || replyTo || DEFAULT_SUPPORT_EMAIL;
+  const headers = buildStandardHeaders({
+    email: to,
+    unsubscribeMailto: DEFAULT_UNSUBSCRIBE_EMAIL,
+    unsubscribeUrl,
+    replyTo: effectiveReplyTo,
+    marketing: false,
+  });
 
   await resend.emails.send({
     from,
@@ -64,23 +150,10 @@ export async function sendWaitlistWelcomeEmail(options: WelcomeEmailOptions) {
       supportEmail: supportEmail || replyTo,
       preferencesUrl,
     }),
-    replyTo,
+    replyTo: effectiveReplyTo,
+    headers,
     text: buildWelcomeTextBody({ appName, preferencesUrl }),
   });
-}
-
-function buildConfirmTextBody(params: { appName: string; confirmUrl: string }): string {
-  return [
-    `Welcome to ${params.appName}!`,
-    '',
-    'Thanks for joining the waitlist. Please confirm your email by opening the link below:',
-    params.confirmUrl,
-    '',
-    'This link expires soon for your security. If it stops working, you can request a fresh confirmation email.',
-    '',
-    `See you soon,`,
-    `${params.appName} team`,
-  ].join('\n');
 }
 
 function buildWelcomeTextBody(params: { appName: string; preferencesUrl?: string }): string {

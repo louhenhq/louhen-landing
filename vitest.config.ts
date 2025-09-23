@@ -22,6 +22,6 @@ export default defineConfig({
     coverage: {
       enabled: false,
     },
-    exclude: ['e2e/**', 'playwright.config.ts', 'tests/landing.spec.ts'],
+    exclude: ['e2e/**', 'playwright.config.ts', 'tests/e2e/**'],
   },
 });

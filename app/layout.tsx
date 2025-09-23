@@ -1,9 +1,14 @@
 import './globals.css'
 import './styles/tokens.css'
 import type { Metadata, Viewport } from 'next'
-import ThemeInit from '@/components/ThemeInit';
-import { SITE_NAME } from '@/constants/site';
-import tokens from '@louhen/design-tokens/build/web/tokens.json' assert { type: 'json' };
+import { headers } from 'next/headers'
+import ThemeInit from '@/components/ThemeInit'
+import { ConsentProvider } from '@/components/ConsentProvider'
+import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/SeoJsonLd'
+import { SITE_NAME } from '@/constants/site'
+import { getServerConsent } from '@/lib/consent/state'
+import { NonceProvider } from '@/lib/csp/nonce-context'
+import tokens from '@louhen/design-tokens/build/web/tokens.json' assert { type: 'json' }
 
 const tokenValues = tokens as Record<string, unknown> & {
   color?: {
@@ -30,11 +35,24 @@ const THEME_COLOR_DARK =
   (tokenValues['--semanticDark-color-bg-page'] as string | undefined) ||
   THEME_COLOR_LIGHT;
 
+const FALLBACK_SITE_URL = 'https://louhen-landing.vercel.app'
+const rawBaseUrl = process.env.APP_BASE_URL?.trim() || process.env.NEXT_PUBLIC_SITE_URL?.trim() || FALLBACK_SITE_URL
+const baseUrl = rawBaseUrl.replace(/\/$/, '')
+const metadataBaseUrl = `${baseUrl}/`
+const defaultDescription =
+  'Join the Louhen waitlist and get smarter sizing, curated looks, and fit feedback that improves with every try.'
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://louhen-landing.vercel.app'),
-  title: 'Louhen — Personal style. Effortless fit.',
-  description: 'Join the Louhen waitlist and get smarter sizing, curated looks, and fit feedback that improves with every try.',
+  metadataBase: new URL(metadataBaseUrl),
+  title: {
+    default: 'Louhen — Personal style. Effortless fit.',
+    template: '%s — Louhen',
+  },
+  description: defaultDescription,
   applicationName: SITE_NAME,
+  alternates: {
+    canonical: '/',
+  },
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
@@ -45,15 +63,24 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     title: 'Louhen — Personal style. Effortless fit.',
-    description: 'Join the Louhen waitlist and get smarter sizing, curated looks, and fit feedback that improves with every try.',
+    description: defaultDescription,
     url: '/',
     siteName: SITE_NAME,
-    images: ['/opengraph-image.png'],
+    images: [
+      {
+        url: '/opengraph-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Louhen — Personal style. Effortless fit.',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
+    site: '@louhenhq',
+    creator: '@louhenhq',
     title: 'Louhen — Personal style. Effortless fit.',
-    description: 'Join the Louhen waitlist and get smarter sizing, curated looks, and fit feedback that improves with every try.',
+    description: defaultDescription,
     images: ['/opengraph-image.png'],
   },
 }
@@ -65,7 +92,17 @@ export const viewport: Viewport = {
   ],
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const consentHeaders = await headers();
+  const consent = getServerConsent(consentHeaders);
+  const nonce = consentHeaders.get('x-csp-nonce') ?? undefined;
+  const shouldNoIndex = typeof process.env.VERCEL_ENV === 'string' && process.env.VERCEL_ENV !== 'production'
+  const sameAsProfiles = [
+    'https://www.linkedin.com/company/louhen',
+    'https://www.instagram.com/louhen',
+  ]
+  const searchActionUrl = `${baseUrl}/search?q={search_term_string}`
+
   return (
     <html lang="en">
       <head>
@@ -74,6 +111,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="theme-color" content={THEME_COLOR_LIGHT} media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content={THEME_COLOR_DARK} media="(prefers-color-scheme: dark)" />
+        <meta name="description" content={defaultDescription} key="global-description" />
+        {shouldNoIndex ? <meta name="robots" content="noindex,nofollow" /> : null}
+        <OrganizationJsonLd
+          name={SITE_NAME}
+          url={baseUrl}
+          logo={`${baseUrl}/icon-512.png`}
+          sameAs={sameAsProfiles}
+          nonce={nonce}
+        />
+        <WebSiteJsonLd
+          name={SITE_NAME}
+          url={baseUrl}
+          searchUrl={searchActionUrl}
+          nonce={nonce}
+        />
       </head>
       <body
         className="min-h-screen antialiased font-sans"
@@ -82,9 +134,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           color: 'var(--color-text-default, var(--semantic-color-text-body))',
         }}
       >
-        {/* Apply theme/contrast on first paint + react to system changes */}
-        <ThemeInit />
-        {children}
+        <NonceProvider nonce={nonce}>
+          <ConsentProvider initialConsent={consent}>
+            {/* Apply theme/contrast on first paint + react to system changes */}
+            <ThemeInit />
+            {children}
+          </ConsentProvider>
+        </NonceProvider>
       </body>
     </html>
   )

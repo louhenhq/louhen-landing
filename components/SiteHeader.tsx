@@ -23,6 +23,7 @@ export default function SiteHeader({ onboardingEnabled = false }: Props) {
         <nav className="ml-auto hidden md:flex items-center gap-4">
           <Link href="/privacy" prefetch={false} className="text-sm hover:underline">Privacy</Link>
           <Link href="/terms" prefetch={false} className="text-sm hover:underline">Terms</Link>
+          <Link href="/method" prefetch={false} className="text-sm hover:underline">Method</Link>
           <Link href="/imprint" prefetch={false} className="text-sm hover:underline">Imprint</Link>
           {onboardingEnabled && (
             <Link href="/onboarding/account" prefetch={false} className="text-sm hover:underline">
@@ -49,6 +50,7 @@ export default function SiteHeader({ onboardingEnabled = false }: Props) {
         <nav className="px-4 py-3 flex flex-col gap-2">
           <Link href="/privacy" prefetch={false} className="text-sm underline">Privacy</Link>
           <Link href="/terms" prefetch={false} className="text-sm underline">Terms</Link>
+          <Link href="/method" prefetch={false} className="text-sm underline">Method</Link>
           <Link href="/imprint" prefetch={false} className="text-sm underline">Imprint</Link>
           {onboardingEnabled && (
             <Link href="/onboarding/account" prefetch={false} className="text-sm underline">

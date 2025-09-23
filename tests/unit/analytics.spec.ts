@@ -29,7 +29,7 @@ beforeEach(() => {
 
 describe('client analytics', () => {
   it('enriches events with utm, page context, and version', async () => {
-    const { track } = await import('../lib/clientAnalytics');
+    const { track } = await import('@/lib/clientAnalytics');
     await track({ name: 'hero_twin_badge_click' });
     await flush();
 
@@ -45,7 +45,7 @@ describe('client analytics', () => {
   });
 
   it('dedupes identical events within one second', async () => {
-    const { track } = await import('../lib/clientAnalytics');
+    const { track } = await import('@/lib/clientAnalytics');
     const fetchMock: any = globalThis.fetch;
     await track({ name: 'hero_twin_badge_click' });
     await track({ name: 'hero_twin_badge_click' });
@@ -57,7 +57,7 @@ describe('client analytics', () => {
     if (typeof window !== 'undefined') {
       (window as any).__LOUHEN_CONSENT__ = { analytics: false };
     }
-    const { track, getConsent } = await import('../lib/clientAnalytics');
+    const { track, getConsent } = await import('@/lib/clientAnalytics');
     const fetchMock: any = globalThis.fetch;
 
     await track({ name: 'hero_twin_badge_click' });
@@ -85,7 +85,7 @@ describe('client analytics', () => {
       .mockResolvedValue({ ok: true });
     globalThis.fetch = fetchMock as unknown as typeof fetch;
 
-    const { track } = await import('../lib/clientAnalytics');
+    const { track } = await import('@/lib/clientAnalytics');
     await track({ name: 'hero_twin_badge_click' });
     await flush();
 
@@ -95,7 +95,7 @@ describe('client analytics', () => {
   it('no-ops when analytics disabled', async () => {
     process.env.NEXT_PUBLIC_ANALYTICS_DISABLED = '1';
     const fetchMock: any = globalThis.fetch;
-    const { track } = await import('../lib/clientAnalytics');
+    const { track } = await import('@/lib/clientAnalytics');
     await track({ name: 'hero_twin_badge_click' });
     await flush();
     expect(fetchMock).not.toHaveBeenCalled();
@@ -117,7 +117,7 @@ describe('client analytics', () => {
     }
     (globalThis as any).IntersectionObserver = MockIntersectionObserver as unknown as typeof IntersectionObserver;
 
-    const { observeOnce } = await import('../lib/clientAnalytics');
+    const { observeOnce } = await import('@/lib/clientAnalytics');
     const el = document.createElement('div');
     const handler = vi.fn();
     const dispose = observeOnce(el, handler, 0.2);
