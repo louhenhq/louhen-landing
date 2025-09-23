@@ -18,6 +18,7 @@ import TestimonialCards from '@/components/TestimonialCards';
 import PrivacyRibbon from '@/components/PrivacyRibbon';
 import TrustSchema from '@/components/TrustSchema';
 import WaitlistForm from '@/components/waitlist/WaitlistForm';
+import Section from '@/components/Section';
 import { layout, surfaces } from '@/app/(site)/_lib/ui';
 import { track } from '@/lib/clientAnalytics';
 
@@ -83,14 +84,14 @@ export default function LandingExperience() {
         ) : null}
         <Hero onJoinClick={scrollToForm} />
         <WaitlistForm source={source ?? undefined} />
-        <section className={`${layout.section} ${surfaces.subtle}`}>
-          <div className={`${layout.container} grid gap-8 md:grid-cols-2 md:items-start`}>
+        <Section pad="lg" className={surfaces.subtle}>
+          <div className={`${layout.container} grid gap-xl md:grid-cols-2 md:items-start`}>
             <div className="overflow-hidden rounded-2xl">
               <FounderPhoto />
             </div>
             <FounderStoryWithVoucher />
           </div>
-        </section>
+        </Section>
         <HowItWorks />
         <PodiatristBadge />
         <TrustBar />

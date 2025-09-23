@@ -4,6 +4,14 @@ This file defines how Codex (and other AI assistants) must operate inside this r
 
 ---
 
+### Validation Policy (MANDATORY)
+- After every DIFF, Codex **must** perform VALIDATE locally and include the raw command outputs in the reply.
+- Minimum VALIDATE command: `npm run validate:local` (runs lint, build, unit tests).
+- If a change touches routing, SEO, or end-to-end behaviour, Codex must also run `npm run validate:e2e:dev` (or explicitly justify why it was skipped) and include its logs.
+- If any validation command fails, Codex must stop, surface the logs, and await guidance before proceeding.
+
+---
+
 ## 1) Roles
 
 - **Architect Agent**  

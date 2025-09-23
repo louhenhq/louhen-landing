@@ -39,16 +39,13 @@ const FALLBACK_SITE_URL = 'https://louhen-landing.vercel.app'
 const rawBaseUrl = process.env.APP_BASE_URL?.trim() || process.env.NEXT_PUBLIC_SITE_URL?.trim() || FALLBACK_SITE_URL
 const baseUrl = rawBaseUrl.replace(/\/$/, '')
 const metadataBaseUrl = `${baseUrl}/`
-const defaultDescription =
-  'Join the Louhen waitlist and get smarter sizing, curated looks, and fit feedback that improves with every try.'
 
 export const metadata: Metadata = {
   metadataBase: new URL(metadataBaseUrl),
   title: {
-    default: 'Louhen — Personal style. Effortless fit.',
+    default: 'Louhen',
     template: '%s — Louhen',
   },
-  description: defaultDescription,
   applicationName: SITE_NAME,
   alternates: {
     canonical: '/',
@@ -62,8 +59,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: 'website',
-    title: 'Louhen — Personal style. Effortless fit.',
-    description: defaultDescription,
+    title: 'Louhen',
     url: '/',
     siteName: SITE_NAME,
     images: [
@@ -79,8 +75,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     site: '@louhenhq',
     creator: '@louhenhq',
-    title: 'Louhen — Personal style. Effortless fit.',
-    description: defaultDescription,
+    title: 'Louhen',
     images: ['/opengraph-image.png'],
   },
 }
@@ -111,7 +106,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="theme-color" content={THEME_COLOR_LIGHT} media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content={THEME_COLOR_DARK} media="(prefers-color-scheme: dark)" />
-        <meta name="description" content={defaultDescription} key="global-description" />
         {shouldNoIndex ? <meta name="robots" content="noindex,nofollow" /> : null}
         <OrganizationJsonLd
           name={SITE_NAME}

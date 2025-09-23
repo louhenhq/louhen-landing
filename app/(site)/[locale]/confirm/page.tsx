@@ -7,6 +7,8 @@ import { sha256Hex } from '@/lib/crypto/token';
 import ConfirmResendForm from '@/app/(site)/components/ConfirmResendForm';
 import ConfirmAnalytics from '@/app/(site)/components/ConfirmAnalytics';
 import { cn, layout, text } from '@/app/(site)/_lib/ui';
+import { InlineFaq } from '@/components/InlineFaq';
+import { extractInlineFaq, type InlineFaqEntry } from '@/lib/help/inlineFaq';
 import { loadMessages } from '@/lib/intl/loadMessages';
 import type { SupportedLocale } from '@/next-intl.locales';
 import SharePanel from '@/app/(site)/components/SharePanel';
@@ -94,9 +96,10 @@ export default async function ConfirmPage({ params, searchParams }: ConfirmPageP
   const baseMessages = localeMessages as Record<string, unknown>;
   const confirmMessages = getConfirmMessages(baseMessages);
   const shareCopy = getShareCopy(baseMessages);
+  const inlineFaq = extractInlineFaq(baseMessages, 'checkout');
 
   if (!token || token.length < 20) {
-    return renderInfo('invalid', confirmMessages);
+    return renderInfo('invalid', confirmMessages, inlineFaq);
   }
 
   const hash = sha256Hex(token);
@@ -105,7 +108,7 @@ export default async function ConfirmPage({ params, searchParams }: ConfirmPageP
   const snap = await db.collection('waitlist').where('confirmTokenHash', '==', hash).limit(1).get();
 
   if (snap.empty) {
-    return renderInfo('invalid', confirmMessages);
+    return renderInfo('invalid', confirmMessages, inlineFaq);
   }
 
   const doc = snap.docs[0];
@@ -114,12 +117,12 @@ export default async function ConfirmPage({ params, searchParams }: ConfirmPageP
   const creditDelayed = Boolean(doc.get('creditDelayed'));
 
   if (data.confirmedAt) {
-    return renderShare({ state: 'already', confirmMessages, shareCopy, locale, code: refCode, creditDelayed });
+    return renderShare({ state: 'already', confirmMessages, shareCopy, locale, code: refCode, creditDelayed, inlineFaq });
   }
 
   const expires = typeof data.confirmExpiresAt?.toMillis === 'function' ? data.confirmExpiresAt.toMillis() : undefined;
   if (expires && Date.now() > expires) {
-    return renderInfo('expired', confirmMessages);
+    return renderInfo('expired', confirmMessages, inlineFaq);
   }
 
   await doc.ref.set(
@@ -132,10 +135,10 @@ export default async function ConfirmPage({ params, searchParams }: ConfirmPageP
     { merge: true }
   );
 
-  return renderShare({ state: 'confirmed', confirmMessages, shareCopy, locale, code: refCode, creditDelayed });
+  return renderShare({ state: 'confirmed', confirmMessages, shareCopy, locale, code: refCode, creditDelayed, inlineFaq });
 }
 
-function renderInfo(state: ConfirmState, messages: ConfirmMessages) {
+function renderInfo(state: ConfirmState, messages: ConfirmMessages, inlineFaq: InlineFaqEntry[]) {
   const titles: Record<ConfirmState, string> = {
     confirmed: messages.success.title,
     expired: messages.expired.title,
@@ -161,6 +164,7 @@ function renderInfo(state: ConfirmState, messages: ConfirmMessages) {
             <p className={text.body}>{bodies[state]}</p>
           </div>
           {showResend && <ConfirmResendForm />}
+          {inlineFaq.length ? <InlineFaq items={inlineFaq} className="border-t border-border/60 pt-md" /> : null}
         </div>
       </div>
     </main>
@@ -174,9 +178,10 @@ type ShareRenderParams = {
   locale: SupportedLocale;
   code: string | null;
   creditDelayed: boolean;
+  inlineFaq: InlineFaqEntry[];
 };
 
-function renderShare({ state, confirmMessages, shareCopy, locale, code, creditDelayed }: ShareRenderParams) {
+function renderShare({ state, confirmMessages, shareCopy, locale, code, creditDelayed, inlineFaq }: ShareRenderParams) {
   const heading = state === 'confirmed' ? confirmMessages.success.title : confirmMessages.already.title;
   const body = state === 'confirmed' ? confirmMessages.success.body : confirmMessages.already.body;
 
@@ -195,6 +200,9 @@ function renderShare({ state, confirmMessages, shareCopy, locale, code, creditDe
             </p>
           )}
           <SharePanel locale={locale} code={code} copy={shareCopy} />
+          {inlineFaq.length ? (
+            <InlineFaq items={inlineFaq} className="mx-auto w-full max-w-xl text-left" />
+          ) : null}
         </div>
       </div>
     </main>

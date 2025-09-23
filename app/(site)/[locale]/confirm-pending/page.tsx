@@ -2,7 +2,11 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 import ConfirmResendForm from '@/app/(site)/components/ConfirmResendForm';
+import { InlineFaq } from '@/components/InlineFaq';
 import { cn, layout, text } from '@/app/(site)/_lib/ui';
+import { extractInlineFaq } from '@/lib/help/inlineFaq';
+import { buildFaqPageJsonLd } from '@/lib/help/faqJsonLd';
+import { resolveBaseUrl } from '@/lib/seo/baseUrl';
 import { loadMessages } from '@/lib/intl/loadMessages';
 import type { SupportedLocale } from '@/next-intl.locales';
 
@@ -39,16 +43,31 @@ function ensureWaitlistErrorsCopy(input: unknown): WaitlistErrorsCopy {
 }
 
 export default async function ConfirmPendingPage({ params, searchParams }: Props) {
-  const [{ locale }, query] = await Promise.all([params, searchParams]);
+  const [{ locale }, query, baseUrl] = await Promise.all([params, searchParams, resolveBaseUrl()]);
   const rawMessages = await loadMessages(locale);
   const confirmPending = ensureConfirmPendingCopy((rawMessages as Record<string, unknown>).confirmPending);
   const waitlistErrors = ensureWaitlistErrorsCopy((((rawMessages as Record<string, unknown>).waitlist as Record<string, unknown> | undefined)?.form as Record<string, unknown> | undefined)?.errors);
+  const inlineFaq = extractInlineFaq(rawMessages, 'onboarding');
 
   const status = typeof query.status === 'string' ? query.status : undefined;
   const already = status === 'already';
 
+  const faqJsonLd = inlineFaq.length
+    ? buildFaqPageJsonLd({
+        url: `${baseUrl}/${locale}/confirm-pending`,
+        locale,
+        items: inlineFaq,
+      })
+    : null;
+
   return (
     <main className={cn(layout.page, 'flex items-center justify-center bg-bg py-3xl')}>
+      {faqJsonLd ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        />
+      ) : null}
       <div className={cn(layout.card, 'mx-auto max-w-2xl px-gutter py-2xl')}>
         <div className="flex flex-col gap-md">
           <div className="flex flex-col gap-xs">
@@ -61,6 +80,9 @@ export default async function ConfirmPendingPage({ params, searchParams }: Props
             </p>
           )}
           <ConfirmResendForm />
+          {inlineFaq.length ? (
+            <InlineFaq items={inlineFaq} className="border-t border-border/60 pt-md" />
+          ) : null}
         </div>
       </div>
     </main>

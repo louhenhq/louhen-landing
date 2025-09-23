@@ -43,17 +43,23 @@ function mapScope(value?: string): SuppressionScope {
 }
 
 const COLLECTION = 'suppressions';
-const MEMORY_SUPPRESSIONS = new Map<string, SuppressionRecord>();
+const MEMORY_SCOPES = new Map<string, Set<SuppressionScope>>();
 
 export async function isSuppressed(email: string, scope: SuppressionScope): Promise<{ suppressed: boolean; record?: SuppressionRecord }>
 {
   if (isTestMode()) {
     const emailHash = hashEmail(email);
-    const record = MEMORY_SUPPRESSIONS.get(emailHash);
-    if (!record) {
+    const scopes = MEMORY_SCOPES.get(emailHash);
+    if (!scopes || scopes.size === 0) {
       return { suppressed: false };
     }
-    const suppressed = record.scope === 'all' || record.scope === scope;
+    const suppressed = scopes.has('all') || scopes.has(scope);
+    const record: SuppressionRecord | undefined = suppressed
+      ? {
+          emailHash,
+          scope: scopes.has('all') ? 'all' : scope,
+        }
+      : undefined;
     return { suppressed, record };
   }
   const db = initAdmin().firestore();
@@ -86,14 +92,16 @@ type UpsertInput = {
 export async function upsertSuppression({ email, scope, source, reason }: UpsertInput): Promise<SuppressionRecord> {
   if (isTestMode()) {
     const emailHash = hashEmail(email);
-    const record: SuppressionRecord = {
+    const scopes = MEMORY_SCOPES.get(emailHash) ?? new Set<SuppressionScope>();
+    const normalizedScope = mapScope(scope);
+    scopes.add(normalizedScope);
+    MEMORY_SCOPES.set(emailHash, scopes);
+    return {
       emailHash,
-      scope,
+      scope: normalizedScope,
       source,
       reason,
     };
-    MEMORY_SUPPRESSIONS.set(emailHash, record);
-    return record;
   }
   const db = initAdmin().firestore();
   const emailHash = hashEmail(email);

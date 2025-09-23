@@ -4,7 +4,8 @@ import type { MouseEventHandler } from 'react';
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import HeroTwinBadge from '@/components/HeroTwinBadge';
-import { buttons, cn, layout, text } from '@/app/(site)/_lib/ui';
+import Section from '@/components/Section';
+import { buttons } from '@/app/(site)/_lib/ui';
 import PodiatristBadge, { LouhenFitBadge } from '@/app/(site)/components/PodiatristBadge';
 
 type HeroProps = {
@@ -24,12 +25,18 @@ export default function Hero({ onJoinClick }: HeroProps) {
   };
 
   return (
-    <section className={cn(layout.section, 'bg-bg')}>
-      <div className={cn(layout.container, 'text-center flex flex-col items-center gap-xl')}>
-        <div className="flex flex-col items-center gap-md">
-          <p className={cn(text.eyebrow, 'text-brand-teal')}>Louhen</p>
-          <h1 className={cn(text.heading, 'max-w-3xl')}>{t('h1')}</h1>
-          <p className={cn(text.subheading, 'max-w-2xl')}>{t('sub')}</p>
+    <Section pad="xl" className="bg-bg text-center">
+      <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-xl">
+        <div className="flex flex-col items-center gap-sm">
+          <p className="text-sm font-medium uppercase tracking-[var(--typography-letter-spacing-wide)] text-brand-teal">
+            Louhen
+          </p>
+          <h1 className="max-w-3xl font-semibold text-balance tracking-[var(--typography-letter-spacing-tight)] text-[var(--typography-size-2xl)] leading-[var(--typography-line-height-tight)] md:text-[var(--typography-size-3xl)]">
+            {t('h1')}
+          </h1>
+          <p className="mt-sm max-w-2xl text-[var(--typography-size-lg)] leading-[var(--typography-line-height-relaxed)] text-text-muted md:text-[var(--typography-size-xl)]">
+            {t('sub')}
+          </p>
         </div>
         <div className="flex flex-col items-center gap-sm sm:flex-row sm:gap-md">
           <button type="button" className={buttons.primary} onClick={onCtaClick}>
@@ -42,7 +49,7 @@ export default function Hero({ onJoinClick }: HeroProps) {
         <HeroTwinBadge />
         <div className="flex flex-col items-center gap-sm">
           <span className="text-sm text-text-muted">{t('trust')}</span>
-          <div className="flex flex-wrap items-center justify-center gap-sm text-xs uppercase tracking-wide text-text-muted">
+          <div className="flex flex-wrap items-center justify-center gap-sm text-xs uppercase tracking-[var(--typography-letter-spacing-wide)] text-text-muted">
             {trustBadges.map((badge: string) => (
               <span key={badge} className="rounded-pill border border-border px-md py-xs">
                 {badge}
@@ -53,6 +60,6 @@ export default function Hero({ onJoinClick }: HeroProps) {
           </div>
         </div>
       </div>
-    </section>
+    </Section>
   );
 }

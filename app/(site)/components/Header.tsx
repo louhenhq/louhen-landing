@@ -12,8 +12,11 @@ type HeaderProps = {
 
 export default function Header({ onCta }: HeaderProps) {
   const t = useTranslations('header');
+  const helpT = useTranslations('help');
   const locale = useLocale();
   const activeLocale: SupportedLocale = locales.includes(locale as SupportedLocale) ? (locale as SupportedLocale) : defaultLocale;
+  const helpHref = activeLocale === defaultLocale ? '/help' : `/${activeLocale}/help`;
+  const helpLabel = helpT('navLabel');
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -59,6 +62,9 @@ export default function Header({ onCta }: HeaderProps) {
           <a className="text-sm text-text-muted transition-colors hover:text-text" href="#faq">
             {t('nav.faq')}
           </a>
+          <Link className="text-sm text-text-muted transition-colors hover:text-text" href={helpHref} prefetch={false}>
+            {helpLabel}
+          </Link>
         </nav>
         <div className="ml-4 flex items-center gap-sm">
           <label className="sr-only" htmlFor="locale-select">{t('locale.label')}</label>
@@ -83,10 +89,13 @@ export default function Header({ onCta }: HeaderProps) {
           </button>
         </div>
       </div>
-      <div className="px-gutter pb-sm lg:hidden">
+      <div className="px-gutter pb-sm lg:hidden space-y-sm">
         <button type="button" className={cn(buttons.primary, 'w-full')} onClick={handleScrollToForm}>
           {t('cta')}
         </button>
+        <Link className="text-sm text-text-muted underline" href={helpHref} prefetch={false}>
+          {helpLabel}
+        </Link>
       </div>
     </header>
   );

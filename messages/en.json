@@ -29,6 +29,12 @@
       "aria": "Scroll to twin parent voucher"
     }
   },
+  "home": {
+    "meta": {
+      "title": "Louhen — Personal style. Effortless fit.",
+      "description": "Join the Louhen waitlist and get smarter sizing, curated looks, and fit feedback that improves with every try."
+    }
+  },
   "trust": {
     "badges": {
       "gdpr": "EU GDPR compliant",
@@ -426,6 +432,107 @@
     "cta": {
       "title": "Be first to try Louhen for your family.",
       "button": "Join the waitlist"
+    }
+  },
+  "guides": {
+    "meta": {
+      "title": "Guides — Fit, healthy feet & parenting tips",
+      "description": "Explore Louhen’s research-backed guides on kids’ foot health, sizing, and stress-free shopping."
+    },
+    "hero": {
+      "title": "Guides",
+      "subtitle": "Research-backed articles for growing feet and growing families."
+    },
+    "cta": {
+      "readMore": "Read more"
+    },
+    "topics": {
+      "healthyFeet": {
+        "title": "Healthy Feet",
+        "summary": "Foundations for foot development, movement, and comfort.",
+        "intro": "What matters most for growing feet: natural movement, room for toes, and flexible soles."
+      },
+      "sizing": {
+        "title": "Sizing",
+        "summary": "Simple ways to get size and shape right at home.",
+        "intro": "Learn easy, parent-friendly methods to measure length, width, and shape—no special tools needed."
+      },
+      "parenting": {
+        "title": "Parenting Tips",
+        "summary": "Practical advice to make shoe shopping stress-free.",
+        "intro": "From first walkers to school shoes—practical tips to shop with confidence at every stage."
+      }
+    },
+    "articles": {
+      "choosingFirst": {
+        "title": "Choosing first shoes for your toddler",
+        "description": "What to look for in first walkers: flexibility, grip, and healthy development.",
+        "h1": "First steps, first shoes",
+        "p1": "Early shoes should be flexible, lightweight, and shaped to the foot to support natural movement.",
+        "h2": "What really matters",
+        "p2": "Prioritize fit and comfort over looks; avoid stiff soles at this stage so toes can splay and balance improves."
+      }
+    }
+  },
+  "help": {
+    "navLabel": "Help",
+    "meta": {
+      "title": "Louhen Help & FAQ",
+      "description": "Answers to the most common questions about sizing, delivery, and the Louhen experience."
+    },
+    "hero": {
+      "title": "How can we help?",
+      "subtitle": "Quick answers for parents exploring Louhen’s sizing, delivery, and support."
+    },
+    "faqs": [
+      {
+        "q": "How does Louhen size children’s shoes?",
+        "a": "We combine parent-provided measurements with LouhenFit data points so recommendations match length, width, and instep comfort."
+      },
+      {
+        "q": "What is the LouhenFit guarantee?",
+        "a": "Every order is covered with free exchanges until the fit feels right, and your feedback improves future picks."
+      },
+      {
+        "q": "Do I need special tools to measure at home?",
+        "a": "No. A sheet of paper, a wall, and a soft tape are enough—we guide you through each step in the app."
+      },
+      {
+        "q": "Is there support for twin parents?",
+        "a": "Yes. Twin families receive the Twins Welcome Voucher (5% off every order) plus tailored recommendations for each child."
+      }
+    ],
+    "inline": {
+      "onboarding": [
+        {
+          "q": "Didn’t get the confirmation email?",
+          "a": "Check spam or tap resend above—fresh links arrive within seconds."
+        },
+        {
+          "q": "Can my partner join with the same family email?",
+          "a": "One confirmed signup per family is enough; invite others with your referral link once you’re in."
+        }
+      ],
+      "pdp": [
+        {
+          "q": "What if the first pair doesn’t fit perfectly?",
+          "a": "LouhenFit covers free exchanges and uses your feedback to dial in the next recommendation."
+        },
+        {
+          "q": "Do I have to scan every time?",
+          "a": "No. Update measurements when you notice growth spurts—the profile remembers their baseline fit."
+        }
+      ],
+      "checkout": [
+        {
+          "q": "When will my child’s code unlock rewards?",
+          "a": "Referral perks activate as soon as their friend confirms—look for the status banner in your account."
+        },
+        {
+          "q": "Can I change delivery details after checkout?",
+          "a": "Yes. Reply to your order confirmation within 24 hours and our team adjusts the shipment before it leaves."
+        }
+      ]
     }
   }
 }

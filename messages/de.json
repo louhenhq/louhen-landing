@@ -29,6 +29,12 @@
       "aria": "Zum Gutschein für Zwillingseltern scrollen"
     }
   },
+  "home": {
+    "meta": {
+      "title": "Louhen — Persönlicher Stil. Mühelose Passform.",
+      "description": "Trage dich in die Louhen-Warteliste ein und erhalte intelligenteres Sizing, kuratierte Looks und Fit-Feedback, das mit jeder Anprobe besser wird."
+    }
+  },
   "trust": {
     "badges": {
       "gdpr": "[DE] EU GDPR compliant",
@@ -426,6 +432,107 @@
     "cta": {
       "title": "[DE] Be first to try Louhen for your family.",
       "button": "[DE] Join the waitlist"
+    }
+  },
+  "guides": {
+    "meta": {
+      "title": "Ratgeber — Passform, gesunde Füße & Eltern-Tipps",
+      "description": "Entdecke Louhens fundierte Ratgeber zu Kinderfuß-Gesundheit, Größenwahl und entspanntem Einkaufen."
+    },
+    "hero": {
+      "title": "Ratgeber",
+      "subtitle": "Fundierte Beiträge für wachsende Füße und Familien."
+    },
+    "cta": {
+      "readMore": "Mehr lesen"
+    },
+    "topics": {
+      "healthyFeet": {
+        "title": "Gesunde Füße",
+        "summary": "Grundlagen für Entwicklung, Bewegung und Komfort.",
+        "intro": "Worauf es bei wachsenden Füßen ankommt: natürliche Bewegung, Zehenfreiheit und flexible Sohlen."
+      },
+      "sizing": {
+        "title": "Größenwahl",
+        "summary": "Einfache Wege für richtige Größe und Form zu Hause.",
+        "intro": "Elternfreundliche Methoden für Länge, Breite und Form—ohne Spezialwerkzeug."
+      },
+      "parenting": {
+        "title": "Eltern-Tipps",
+        "summary": "Praktische Ratschläge für stressfreies Schuhshopping.",
+        "intro": "Von Lauflernern bis Schulschuhen—praktische Tipps für selbstbewusstes Einkaufen in jeder Phase."
+      }
+    },
+    "articles": {
+      "choosingFirst": {
+        "title": "Die ersten Schuhe für dein Kleinkind",
+        "description": "Worauf es bei Lauflernschuhen ankommt: Flexibilität, Grip und gesunde Entwicklung.",
+        "h1": "Erste Schritte, erste Schuhe",
+        "p1": "Frühe Schuhe sollten flexibel, leicht und fußgerecht geformt sein, damit sich die Bewegung natürlich entwickelt.",
+        "h2": "Was wirklich zählt",
+        "p2": "Stelle Passform und Komfort vor Optik; verzichte in dieser Phase auf steife Sohlen, damit Zehen spreizen und das Gleichgewicht besser wird."
+      }
+    }
+  },
+  "help": {
+    "navLabel": "Hilfe",
+    "meta": {
+      "title": "Louhen Hilfe & FAQ",
+      "description": "Antworten auf die häufigsten Fragen zu Größen, Lieferung und dem Louhen-Erlebnis."
+    },
+    "hero": {
+      "title": "Wie können wir helfen?",
+      "subtitle": "Schnelle Antworten für Familien, die Louhens Größenempfehlungen, Lieferung und Support kennenlernen."
+    },
+    "faqs": [
+      {
+        "q": "Wie misst Louhen Kinderschuhe?",
+        "a": "Wir kombinieren gemeldete Maße mit LouhenFit-Daten, damit Empfehlungen Länge, Breite und Ristkomfort berücksichtigen."
+      },
+      {
+        "q": "Was ist die LouhenFit-Garantie?",
+        "a": "Jede Bestellung ist mit kostenlosen Umtauschoptionen abgesichert, bis der Sitz stimmt – Feedback verbessert zukünftige Vorschläge."
+      },
+      {
+        "q": "Brauche ich spezielles Messwerkzeug zu Hause?",
+        "a": "Nein. Ein Blatt Papier, eine Wand und ein weiches Maßband reichen – die App führt Schritt für Schritt."
+      },
+      {
+        "q": "Gibt es Unterstützung für Zwillingseltern?",
+        "a": "Ja. Zwillingsfamilien erhalten den Twins Welcome Voucher (5 % Rabatt auf jede Bestellung) plus individuelle Empfehlungen für jedes Kind."
+      }
+    ],
+    "inline": {
+      "onboarding": [
+        {
+          "q": "Keine Bestätigungs-E-Mail erhalten?",
+          "a": "Sieh im Spam nach oder sende sie oben erneut – neue Links landen in Sekunden in deinem Postfach."
+        },
+        {
+          "q": "Kann mein Partner dieselbe Familienadresse nutzen?",
+          "a": "Eine bestätigte Anmeldung pro Familie reicht; weitere Einladungen verschickst du später über deinen Empfehlungslink."
+        }
+      ],
+      "pdp": [
+        {
+          "q": "Was, wenn das erste Paar doch nicht passt?",
+          "a": "LouhenFit übernimmt kostenlose Umtauschoptionen und nutzt dein Feedback für die nächsten Empfehlungen."
+        },
+        {
+          "q": "Muss ich bei jedem Wachstum neu scannen?",
+          "a": "Nein. Aktualisiere die Maße nur bei Wachstumsschüben – das Profil merkt sich die Ausgangspassform."
+        }
+      ],
+      "checkout": [
+        {
+          "q": "Wann werden meine Prämien freigeschaltet?",
+          "a": "Sobald deine Freund:in bestätigt, erscheint der Status direkt in deinem Konto."
+        },
+        {
+          "q": "Kann ich Lieferdaten nach dem Checkout anpassen?",
+          "a": "Ja. Antworte innerhalb von 24 Stunden auf die Bestellmail und wir aktualisieren den Versand, bevor das Paket rausgeht."
+        }
+      ]
     }
   }
 }

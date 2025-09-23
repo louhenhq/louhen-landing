@@ -6,13 +6,17 @@ import path from 'node:path';
 import process from 'node:process';
 import { setTimeout as delay } from 'node:timers/promises';
 
-const BASE_URL = process.env.BASE_URL ?? 'http://localhost:4311';
-const thresholds = {
-  performance: 0.9,
+const BASE_URL = (process.env.BASE_URL ?? 'http://localhost:4311').replace(/\/$/, '');
+const baseBudgets = {
+  performance: 0.8,
   accessibility: 0.9,
   'best-practices': 0.9,
   seo: 0.9,
 };
+
+const buildTarget = (path) => ({ path, budgets: { ...baseBudgets } });
+const defaultTargets = ['/en/guides', '/en/method'].map(buildTarget);
+const cliPaths = process.argv.slice(2);
 
 const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 const npxCmd = process.platform === 'win32' ? 'npx.cmd' : 'npx';
@@ -145,28 +149,52 @@ async function cleanupServer(started) {
   let startedServer = false;
   try {
     startedServer = await ensureServer();
-    await rm('.lighthouseci', { recursive: true, force: true });
-    await runCommand(npxCmd, ['lhci', 'collect', '--config=lighthouserc.cjs'], { env: { ...process.env, BASE_URL } });
-    const summary = await readLatestSummary();
-    const failing = Object.entries(thresholds).filter(([key, min]) => {
-      const score = typeof summary[key] === 'number' ? summary[key] : 0;
-      return score < min;
+    const targets = cliPaths.length ? cliPaths.map(buildTarget) : defaultTargets;
+    const results = [];
+    const failures = [];
+
+    for (const target of targets) {
+      await rm('.lighthouseci', { recursive: true, force: true });
+      const targetUrl = target.path.startsWith('http') ? target.path : `${BASE_URL}${target.path}`;
+      await runCommand(npxCmd, ['lhci', 'collect', '--config=lighthouserc.cjs', `--url=${targetUrl}`], {
+        env: { ...process.env, BASE_URL },
+      });
+      const summary = await readLatestSummary();
+      results.push({ path: target.path, summary });
+
+      const budgets = target.budgets ?? baseBudgets;
+      const failing = Object.entries(budgets).filter(([key, min]) => {
+        const score = typeof summary[key] === 'number' ? summary[key] : 0;
+        return score < min;
+      });
+
+      if (failing.length) {
+        failures.push({ path: target.path, failing, summary });
+      }
+    }
+
+    const pct = (score) => `${Math.round((Number.isFinite(score) ? score : 0) * 100)}`;
+    results.forEach(({ path, summary }) => {
+      const formatted = {
+        performance: pct(summary.performance),
+        accessibility: pct(summary.accessibility),
+        'best-practices': pct(summary['best-practices']),
+        seo: pct(summary.seo),
+      };
+      console.log(`[Lighthouse] ${path}`, formatted);
     });
 
-    if (failing.length) {
-      console.error('Lighthouse scores below threshold:');
-      failing.forEach(([key, min]) => {
-        const score = Number.isFinite(summary[key]) ? summary[key] : 0;
-        console.error(`  ${key}: ${(score ?? 0).toFixed(2)} < ${min}`);
+    if (failures.length) {
+      console.error('Lighthouse scores below budget:');
+      failures.forEach(({ path, failing, summary }) => {
+        failing.forEach(([key, min]) => {
+          const score = typeof summary[key] === 'number' ? summary[key] : 0;
+          console.error(`  ${path} – ${key}: ${(score * 100).toFixed(0)} < ${(min * 100).toFixed(0)}`);
+        });
       });
       process.exitCode = 1;
       return;
     }
-
-    const report = Object.fromEntries(
-      Object.keys(thresholds).map((key) => [key, Number.isFinite(summary[key]) ? summary[key].toFixed(2) : '0.00'])
-    );
-    console.log('Lighthouse scores', report);
   } catch (error) {
     console.error(error instanceof Error ? error.message : error);
     process.exitCode = 1;

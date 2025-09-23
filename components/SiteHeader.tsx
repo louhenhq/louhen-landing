@@ -4,6 +4,8 @@ import * as React from 'react';
 import Link from 'next/link';
 import ThemeToggle from '@/components/ThemeToggle';
 import { SITE_NAME } from '@/constants/site';
+import { useLocale, useTranslations } from 'next-intl';
+import { locales, defaultLocale, type SupportedLocale } from '@/next-intl.locales';
 
 type Props = {
   onboardingEnabled?: boolean;
@@ -11,6 +13,14 @@ type Props = {
 };
 
 export default function SiteHeader({ onboardingEnabled = false }: Props) {
+  const locale = useLocale();
+  const t = useTranslations('help');
+  const activeLocale: SupportedLocale = locales.includes(locale as SupportedLocale)
+    ? (locale as SupportedLocale)
+    : defaultLocale;
+  const helpHref = activeLocale === defaultLocale ? '/help' : `/${activeLocale}/help`;
+  const helpLabel = t('navLabel');
+
   return (
     <header className="w-full border-b border-slate-200">
       <div className="mx-auto max-w-6xl px-4 py-3 flex items-center gap-4">
@@ -24,6 +34,7 @@ export default function SiteHeader({ onboardingEnabled = false }: Props) {
           <Link href="/privacy" prefetch={false} className="text-sm hover:underline">Privacy</Link>
           <Link href="/terms" prefetch={false} className="text-sm hover:underline">Terms</Link>
           <Link href="/method" prefetch={false} className="text-sm hover:underline">Method</Link>
+          <Link href={helpHref} prefetch={false} className="text-sm hover:underline">{helpLabel}</Link>
           <Link href="/imprint" prefetch={false} className="text-sm hover:underline">Imprint</Link>
           {onboardingEnabled && (
             <Link href="/onboarding/account" prefetch={false} className="text-sm hover:underline">
@@ -51,6 +62,7 @@ export default function SiteHeader({ onboardingEnabled = false }: Props) {
           <Link href="/privacy" prefetch={false} className="text-sm underline">Privacy</Link>
           <Link href="/terms" prefetch={false} className="text-sm underline">Terms</Link>
           <Link href="/method" prefetch={false} className="text-sm underline">Method</Link>
+          <Link href={helpHref} prefetch={false} className="text-sm underline">{helpLabel}</Link>
           <Link href="/imprint" prefetch={false} className="text-sm underline">Imprint</Link>
           {onboardingEnabled && (
             <Link href="/onboarding/account" prefetch={false} className="text-sm underline">

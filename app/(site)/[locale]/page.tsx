@@ -3,6 +3,7 @@ import LandingExperience from '@/app/(site)/components/LandingExperience'
 import ReferralAttribution from '@/app/(site)/components/ReferralAttribution'
 import { SITE_NAME } from '@/constants/site'
 import { loadMessages } from '@/lib/intl/loadMessages'
+import { resolveBaseUrl } from '@/lib/seo/baseUrl'
 import type { SupportedLocale } from '@/next-intl.locales'
 
 type PageProps = {
@@ -16,24 +17,24 @@ function firstParam(value: string | string[] | undefined): string | null {
   return null;
 }
 
-const FALLBACK_SITE_URL = 'https://louhen-landing.vercel.app'
-
 export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const [{ locale }, resolvedSearchParams] = await Promise.all([params, searchParams])
   const messages = (await loadMessages(locale)) as Record<string, unknown>
-  const heroMessages = (messages.hero ?? {}) as Record<string, unknown>
-  const heroSubtitle = typeof heroMessages.sub === 'string'
-    ? heroMessages.sub
-    : 'Louhen pairs podiatrist-backed comfort with adaptive sizing to keep every step confident.'
-  const defaultTitle = `${SITE_NAME} — Personal style. Effortless fit.`
-  const defaultDescription = heroSubtitle
-  const baseUrl = (process.env.APP_BASE_URL?.trim() || process.env.NEXT_PUBLIC_SITE_URL?.trim() || FALLBACK_SITE_URL).replace(/\/$/, '')
+  const homeMessages = (messages.home ?? {}) as Record<string, unknown>
+  const metaMessages = (homeMessages.meta ?? {}) as Record<string, unknown>
+  const defaultTitle = typeof metaMessages.title === 'string'
+    ? metaMessages.title
+    : `${SITE_NAME} — Personal style. Effortless fit.`
+  const defaultDescription = typeof metaMessages.description === 'string'
+    ? metaMessages.description
+    : 'Join the Louhen waitlist and get smarter sizing, curated looks, and fit feedback that improves with every try.'
+  const baseUrl = await resolveBaseUrl()
   const canonicalPath = `/${locale}`
   const ref = firstParam(resolvedSearchParams.ref)
 
   if (!ref) {
     return {
-      title: defaultTitle,
+      title: { absolute: defaultTitle },
       description: defaultDescription,
       alternates: {
         canonical: canonicalPath,
@@ -60,7 +61,7 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   const imageUrl = `${baseUrl}/opengraph-image?locale=${locale}&ref=${encodeURIComponent(ref)}`
 
   return {
-    title: invitedTitle,
+    title: { absolute: invitedTitle },
     description: invitedDescription,
     alternates: {
       canonical: canonicalPath,

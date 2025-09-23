@@ -2,6 +2,9 @@ export function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(' ');
 }
 
+export const focusRing =
+  'focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--semantic-color-focus-ring,var(--semantic-color-border-focus))]';
+
 export const layout = {
   page: 'bg-bg text-text min-h-screen',
   container: 'mx-auto w-full max-w-6xl px-gutter',
@@ -20,8 +23,16 @@ export const text = {
 };
 
 export const buttons = {
-  primary: 'inline-flex items-center justify-center rounded-pill bg-brand-primary px-lg py-sm text-base font-medium text-white transition-opacity duration-base hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus',
-  secondary: 'inline-flex items-center justify-center rounded-pill border border-border px-lg py-sm text-base font-medium text-text transition-colors duration-base hover:border-border-strong focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus',
+  primary: cn(
+    'inline-flex items-center justify-center rounded-pill bg-brand-primary px-lg py-sm text-base font-medium text-white transition-opacity duration-base hover:opacity-90',
+    'min-h-[var(--spacing-xxl)]',
+    focusRing,
+  ),
+  secondary: cn(
+    'inline-flex items-center justify-center rounded-pill border border-border px-lg py-sm text-base font-medium text-text transition-colors duration-base hover:border-border-strong',
+    'min-h-[var(--spacing-xxl)]',
+    focusRing,
+  ),
 };
 
 export const badges = {
