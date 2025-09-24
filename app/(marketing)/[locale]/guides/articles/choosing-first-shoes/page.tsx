@@ -3,24 +3,37 @@ import { getLocale, getTranslations } from 'next-intl/server';
 
 import { TechArticleJsonLd, type TechArticleSchema } from '@/components/SeoJsonLd';
 import { resolveBaseUrl } from '@/lib/seo/baseUrl';
+import {
+  buildLocalePath,
+  getLocaleDefinition,
+  normalizeLocale,
+  defaultLocale,
+  type SupportedLocale,
+} from '@/next-intl.locales';
 
 export default async function ChoosingFirstShoes() {
-  const [locale, articleTranslations, baseUrl, headerList] = await Promise.all([
-    getLocale(),
-    getTranslations('guides.articles.choosingFirst'),
+  const rawLocale = await getLocale();
+  const locale: SupportedLocale = normalizeLocale(rawLocale) ?? defaultLocale;
+
+  const [articleTranslations, baseUrl, headerList, guidesTranslations] = await Promise.all([
+    getTranslations({ locale, namespace: 'guides.articles.choosingFirst' }),
     resolveBaseUrl(),
     headers(),
+    getTranslations({ locale, namespace: 'guides.hero' }),
   ]);
 
-  const url = `${baseUrl}/${locale}/guides/articles/choosing-first-shoes`;
+  const localizedPath = buildLocalePath(locale, '/guides/articles/choosing-first-shoes');
+  const url = `${baseUrl}${localizedPath}`;
   const nonce = headerList.get('x-csp-nonce') ?? undefined;
+
+  const localeDefinition = getLocaleDefinition(locale);
 
   const schema: TechArticleSchema = {
     '@context': 'https://schema.org',
     '@type': 'TechArticle',
     headline: articleTranslations('title'),
     description: articleTranslations('description'),
-    inLanguage: locale,
+    inLanguage: localeDefinition?.hreflang ?? locale,
     author: { '@type': 'Organization', name: 'Louhen' },
     datePublished: '2025-01-01T00:00:00.000Z',
     dateModified: '2025-01-01T00:00:00.000Z',
@@ -28,8 +41,7 @@ export default async function ChoosingFirstShoes() {
     url,
   };
 
-  const guidesTranslations = await getTranslations('guides.hero');
-  const homeLabel = locale === 'de' ? 'Startseite' : 'Home';
+  const homeLabel = localeDefinition?.language === 'de' ? 'Startseite' : 'Home';
   const breadcrumbJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -38,13 +50,13 @@ export default async function ChoosingFirstShoes() {
         '@type': 'ListItem',
         position: 1,
         name: homeLabel,
-        item: `${baseUrl}/${locale}`,
+        item: `${baseUrl}${buildLocalePath(locale)}`,
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: guidesTranslations('title'),
-        item: `${baseUrl}/${locale}/guides`,
+        item: `${baseUrl}${buildLocalePath(locale, '/guides')}`,
       },
       {
         '@type': 'ListItem',

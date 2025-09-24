@@ -3,6 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import ThemeToggle from '@/components/ThemeToggle';
+import LocaleSwitcher from '@/components/LocaleSwitcher';
 import { SITE_NAME } from '@/constants/site';
 import { useLocale, useTranslations } from 'next-intl';
 import { locales, defaultLocale, type SupportedLocale } from '@/next-intl.locales';
@@ -46,6 +47,7 @@ export default function SiteHeader({ onboardingEnabled = false }: Props) {
           </Link>
           {/* Theme toggle visible on desktop */}
           <ThemeToggle />
+          <LocaleSwitcher className="rounded-pill border border-slate-200 bg-white px-sm py-xs text-sm text-slate-900" />
         </nav>
 
         {/* Mobile menu button */}
@@ -73,6 +75,7 @@ export default function SiteHeader({ onboardingEnabled = false }: Props) {
           <div className="pt-2">
             <ThemeToggle />
           </div>
+          <LocaleSwitcher className="rounded-pill border border-slate-200 bg-white px-sm py-xs text-sm text-slate-900" />
         </nav>
       </div>
     </header>

@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import enMessages from '@/messages/en.json';
 import deMessages from '@/messages/de.json';
+import { localeDefinitions, type MessageLocale } from '@/next-intl.locales';
 
-const locales = {
+const messageMap: Record<MessageLocale, typeof enMessages> = {
   en: enMessages,
   de: deMessages,
 };
@@ -35,8 +36,13 @@ function getPathValue(obj: any, path: string) {
 }
 
 describe('waitlist i18n completeness', () => {
+  const testedLocales = localeDefinitions.map((definition) => ({
+    code: definition.locale,
+    messages: messageMap[definition.messageLocale] ?? enMessages,
+  }));
+
   it('provides required keys for each locale', () => {
-    for (const [code, messages] of Object.entries(locales)) {
+    for (const { code, messages } of testedLocales) {
       for (const path of requiredPaths) {
         const value = getPathValue(messages, path);
         expect(value, `${code} missing ${path}`).toBeDefined();

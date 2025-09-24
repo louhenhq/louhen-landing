@@ -88,6 +88,10 @@ export async function POST(req: NextRequest) {
       const ipRaw = getIp(req);
       const ip_hash = hashIp(ipRaw);
       const storeIp = typeof process.env.ANALYTICS_STORE_IP === 'string' && process.env.ANALYTICS_STORE_IP.trim().toLowerCase() === 'true';
+      const locale = typeof data.locale === 'string' && data.locale ? data.locale : null;
+      const language = typeof data.language === 'string' && data.language ? data.language : null;
+      const region = typeof data.region === 'string' && data.region ? data.region : null;
+
       const eventDoc: Record<string, unknown> = {
         ...data,
         name,
@@ -97,6 +101,9 @@ export async function POST(req: NextRequest) {
         ip: storeIp ? ipRaw : undefined,
         ip_hash,
         ref: typeof data.ref === 'string' ? data.ref : null,
+        locale,
+        language,
+        region,
         ...(utm ? utm : {}),
         referrer: (() => {
           const r = req.headers.get('referer') || '';

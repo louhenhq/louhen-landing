@@ -1,19 +1,48 @@
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
+import type { Metadata } from 'next';
 import ConfirmResendForm from '@/app/(site)/components/ConfirmResendForm';
 import { InlineFaq } from '@/components/InlineFaq';
 import { cn, layout, text } from '@/app/(site)/_lib/ui';
 import { extractInlineFaq } from '@/lib/help/inlineFaq';
 import { buildFaqPageJsonLd } from '@/lib/help/faqJsonLd';
 import { resolveBaseUrl } from '@/lib/seo/baseUrl';
+import { buildLocaleAlternates } from '@/lib/seo/alternates';
 import { loadMessages } from '@/lib/intl/loadMessages';
-import type { SupportedLocale } from '@/next-intl.locales';
+import { defaultLocale, normalizeLocale, type SupportedLocale } from '@/next-intl.locales';
 
 type Props = {
   params: Promise<{ locale: SupportedLocale }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
+
+type ConfirmPendingMetadataProps = {
+  params: Promise<{ locale: SupportedLocale }>;
+};
+
+export async function generateMetadata({ params }: ConfirmPendingMetadataProps): Promise<Metadata> {
+  const { locale } = await params;
+  const normalized = normalizeLocale(locale) ?? defaultLocale;
+  const { canonical, alternates } = await buildLocaleAlternates(normalized, '/confirm-pending');
+
+  return {
+    title: { absolute: 'Check your inbox — Louhen waitlist' },
+    description: 'Confirm your email to finish joining the Louhen waitlist or resend the verification link.',
+    alternates,
+    openGraph: {
+      url: canonical,
+      title: 'Check your inbox — Louhen waitlist',
+      description: 'Confirm your email to finish joining the Louhen waitlist or resend the verification link.',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'Check your inbox — Louhen waitlist',
+      description: 'Confirm your email to finish joining the Louhen waitlist or resend the verification link.',
+    },
+  };
+}
 
 type ConfirmPendingCopy = { title: string; help: string };
 type WaitlistErrorsCopy = { already: string };

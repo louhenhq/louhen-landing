@@ -32,7 +32,8 @@ export type AnalyticsEventName =
   | 'trust_logo_click'
   | 'trust_podiatrist_learn_more'
   | 'testimonial_view'
-  | 'privacy_ribbon_click';
+  | 'privacy_ribbon_click'
+  | 'locale_changed';
 
 export interface AnalyticsEventPropsMap {
   page_view: { path?: string; page?: string; variant?: string; ref?: string | null };
@@ -64,6 +65,7 @@ export interface AnalyticsEventPropsMap {
   trust_podiatrist_learn_more: NoProps;
   testimonial_view: { ix: TestimonialIndex };
   privacy_ribbon_click: NoProps;
+  locale_changed: { from: string; to: string; preservedPath: boolean };
 }
 
 export type AnalyticsEventPayload<E extends AnalyticsEventName = AnalyticsEventName> = {

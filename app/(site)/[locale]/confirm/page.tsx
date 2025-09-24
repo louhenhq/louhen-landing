@@ -1,6 +1,7 @@
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
+import type { Metadata } from 'next';
 import { FieldValue } from 'firebase-admin/firestore';
 import { initAdmin } from '@/lib/firebaseAdmin';
 import { sha256Hex } from '@/lib/crypto/token';
@@ -10,13 +11,41 @@ import { cn, layout, text } from '@/app/(site)/_lib/ui';
 import { InlineFaq } from '@/components/InlineFaq';
 import { extractInlineFaq, type InlineFaqEntry } from '@/lib/help/inlineFaq';
 import { loadMessages } from '@/lib/intl/loadMessages';
-import type { SupportedLocale } from '@/next-intl.locales';
+import { buildLocaleAlternates } from '@/lib/seo/alternates';
+import { defaultLocale, normalizeLocale, type SupportedLocale } from '@/next-intl.locales';
 import SharePanel from '@/app/(site)/components/SharePanel';
 
 type ConfirmPageProps = {
   params: { locale: SupportedLocale };
   searchParams?: { token?: string };
 };
+
+type ConfirmMetadataProps = {
+  params: Promise<{ locale: SupportedLocale }>;
+};
+
+export async function generateMetadata({ params }: ConfirmMetadataProps): Promise<Metadata> {
+  const { locale } = await params;
+  const normalized = normalizeLocale(locale) ?? defaultLocale;
+  const { canonical, alternates } = await buildLocaleAlternates(normalized, '/confirm');
+
+  return {
+    title: { absolute: 'Confirm your Louhen waitlist spot' },
+    description: 'Confirm your email to activate your Louhen waitlist access and unlock referral rewards.',
+    alternates,
+    openGraph: {
+      url: canonical,
+      title: 'Confirm your Louhen waitlist spot',
+      description: 'Confirm your email to activate your Louhen waitlist access and unlock referral rewards.',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'Confirm your Louhen waitlist spot',
+      description: 'Confirm your email to activate your Louhen waitlist access and unlock referral rewards.',
+    },
+  };
+}
 
 type ConfirmState = 'confirmed' | 'expired' | 'already' | 'invalid';
 type WaitlistDocSnapshot = {

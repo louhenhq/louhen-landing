@@ -1,10 +1,12 @@
+import type { Metadata } from 'next';
 import Header from '@/app/(site)/components/Header';
 import Footer from '@/app/(site)/components/Footer';
 import { layout } from '@/app/(site)/_lib/ui';
 import { TechArticleJsonLd } from '@/components/SeoJsonLd';
-import type { SupportedLocale } from '@/next-intl.locales';
+import { buildLocalePath, getLocaleDefinition, type SupportedLocale } from '@/next-intl.locales';
 import { headers } from 'next/headers';
 import { getTranslations } from 'next-intl/server';
+import { buildLocaleAlternates } from '@/lib/seo/alternates';
 import MethodHero from './_components/MethodHero';
 import Pillars from './_components/Pillars';
 import HowItWorks from './_components/HowItWorks';
@@ -20,6 +22,26 @@ type MethodPageProps = {
   params: Promise<{ locale: SupportedLocale }>;
 };
 
+export async function generateMetadata({ params }: MethodPageProps): Promise<Metadata> {
+  const { locale } = await params;
+  const { canonical, alternates } = await buildLocaleAlternates(locale, '/method');
+
+  return {
+    title: methodTitle,
+    description: methodDescription,
+    alternates,
+    openGraph: {
+      title: `${methodTitle} — Louhen`,
+      description: methodDescription,
+      url: canonical,
+    },
+    twitter: {
+      title: `${methodTitle} — Louhen`,
+      description: methodDescription,
+    },
+  };
+}
+
 export default async function MethodPage({ params }: MethodPageProps) {
   const { locale } = await params;
   const headerStore = await headers();
@@ -31,7 +53,7 @@ export default async function MethodPage({ params }: MethodPageProps) {
   const FALLBACK_SITE_URL = 'https://louhen-landing.vercel.app';
   const rawBaseUrl = process.env.APP_BASE_URL?.trim() || process.env.NEXT_PUBLIC_SITE_URL?.trim() || FALLBACK_SITE_URL;
   const baseUrl = rawBaseUrl.replace(/\/$/, '');
-  const localizedPath = `/${locale}/method`;
+  const localizedPath = buildLocalePath(locale, '/method');
   const articleUrl = `${baseUrl}${localizedPath}`;
 
   const pillarTitles = (() => {
@@ -61,7 +83,8 @@ export default async function MethodPage({ params }: MethodPageProps) {
     return [];
   })();
 
-  const homeLabel = locale === 'de' ? 'Startseite' : 'Home';
+  const localeDefinition = getLocaleDefinition(locale);
+  const homeLabel = localeDefinition?.language === 'de' ? 'Startseite' : 'Home';
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -70,7 +93,7 @@ export default async function MethodPage({ params }: MethodPageProps) {
         '@type': 'ListItem',
         position: 1,
         name: homeLabel,
-        item: `${baseUrl}/${locale}`,
+        item: `${baseUrl}${buildLocalePath(locale)}`,
       },
       {
         '@type': 'ListItem',

@@ -6,7 +6,7 @@ import path from 'node:path';
 import process from 'node:process';
 import { setTimeout as delay } from 'node:timers/promises';
 
-const BASE_URL = (process.env.BASE_URL ?? 'http://localhost:4311').replace(/\/$/, '');
+const BASE_URL = (process.env.BASE_URL ?? 'http://127.0.0.1:4311').replace(/\/$/, '');
 const baseBudgets = {
   performance: 0.8,
   accessibility: 0.9,

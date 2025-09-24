@@ -2,15 +2,16 @@ import React from 'react';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import enMessages from '@/messages/en.json';
+import { LOCALE_COOKIE, type SupportedLocale } from '@/next-intl.locales';
 
-let locale: 'en' | 'de' | null = 'en';
+let locale: SupportedLocale | null = 'en-eu';
 
 vi.mock('next/headers', () => ({
   cookies: () => ({
     get: () => (locale ? { value: locale } : undefined),
   }),
   headers: () => ({
-    get: () => (locale ? `NEXT_LOCALE=${locale}` : null),
+    get: (key: string) => (key.toLowerCase() === 'cookie' && locale ? `${LOCALE_COOKIE}=${locale}` : null),
   }),
 }));
 
@@ -24,7 +25,7 @@ describe('/waitlist/expired resend flow', () => {
   beforeEach(() => {
     vi.resetModules();
     trackSpy.mockReset();
-    locale = 'en';
+    locale = 'en-eu';
   });
 
   it('submits resend request and shows success message', async () => {

@@ -17,6 +17,7 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
 - **Payments**: Adyen is company-wide provider (not yet used here).  
 - **i18n**: next-intl scaffolding; ready for Locize + DeepL later.  
 - **Security baseline**: no client-side secrets; GDPR-first handling of PII.
+- **URL & i18n routing** (Locked 2025-09-24): BCP-47 locale path prefixes (e.g., `/en-de/`) with root `/` as x-default suggestion, hreflang parity, and consent-aware locale storage.
 
 ---
 
@@ -69,9 +70,19 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
 - Local QA: `PORT=4311 npm run start` → `/sitemap.xml` lists static + Guides URLs for EN/DE with localhost `<loc>` values.
 - Spot-checked sitemap links return 200.
 
-**Follow-ups**
+**Follow-ups**  
 - Add additional articles by extending `GUIDE_ARTICLE_SEGMENTS`.
 - Revisit alias entries if `localePrefix: "always"` is enabled later.
+
+
+### 2025-09-24 — URL & i18n Strategy (BCP-47 path prefixes) — Locked
+
+- **Summary**: Adopt BCP-47 locale path prefixes (lowercase) like `/en-de/`, `/de-de/`, `/fr-fr/`, with `/` as the x-default entry offering a one-time suggestion/redirect for humans while bots receive the x-default content. Legacy `/de/` paths permanently redirect (308) to `/de-de/`. Hreflang is emitted for every locale variant plus x-default, and the visible switcher preserves paths when possible or falls back to the target locale homepage. User-consented preferences persist via cookie + localStorage.
+- **Rationale**: Path-based BCP-47 slugs scale cleanly across markets, keep locale intent explicit for SEO, and align with industry standards and search engine guidance on hreflang/x-default usage.
+- **Scope**: Landing experience only; product/app surfaces may adopt the same model later once dependencies are ready.
+- **Non-goals**: No domain-per-locale rollout yet; URLs remain path-based under a single hostname. No mandatory auto-redirect loops for bots.
+- **Rollback plan**: Revert to the previous `/de/` German subtree with root `/` serving English if the path strategy introduces regressions.
+- **Owner**: Martin (Growth) — **Date**: 2025-09-24
 
 
 ### 2025-09-23 — FAQ Inline Injection + FAQPage JSON-LD

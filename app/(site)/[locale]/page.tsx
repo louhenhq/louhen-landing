@@ -3,7 +3,7 @@ import LandingExperience from '@/app/(site)/components/LandingExperience'
 import ReferralAttribution from '@/app/(site)/components/ReferralAttribution'
 import { SITE_NAME } from '@/constants/site'
 import { loadMessages } from '@/lib/intl/loadMessages'
-import { resolveBaseUrl } from '@/lib/seo/baseUrl'
+import { buildLocaleAlternates } from '@/lib/seo/alternates'
 import type { SupportedLocale } from '@/next-intl.locales'
 
 type PageProps = {
@@ -28,21 +28,19 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   const defaultDescription = typeof metaMessages.description === 'string'
     ? metaMessages.description
     : 'Join the Louhen waitlist and get smarter sizing, curated looks, and fit feedback that improves with every try.'
-  const baseUrl = await resolveBaseUrl()
-  const canonicalPath = `/${locale}`
+  const { canonical, alternates } = await buildLocaleAlternates(locale, '/')
+  const baseUrl = new URL(canonical).origin
   const ref = firstParam(resolvedSearchParams.ref)
 
   if (!ref) {
     return {
       title: { absolute: defaultTitle },
       description: defaultDescription,
-      alternates: {
-        canonical: canonicalPath,
-      },
+      alternates,
       openGraph: {
         title: defaultTitle,
         description: defaultDescription,
-        url: canonicalPath,
+        url: canonical,
       },
       twitter: {
         title: defaultTitle,
@@ -63,9 +61,7 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   return {
     title: { absolute: invitedTitle },
     description: invitedDescription,
-    alternates: {
-      canonical: canonicalPath,
-    },
+    alternates,
     openGraph: {
       title: invitedTitle,
       description: invitedDescription,

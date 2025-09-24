@@ -111,6 +111,7 @@ Required env vars (all set in Vercel):
 - RESEND_REPLY_TO
 - APP_BASE_URL (e.g., `https://louhen-landing.vercel.app`)
 - WAITLIST_CONFIRM_TTL_DAYS (e.g., `7`)
+- NEXT_PUBLIC_SITE_URL (canonical + hreflang base URL)
 
 Fail fast on missing envs with clear server-side error logs (no secrets echoed).
 
@@ -133,6 +134,7 @@ Fail fast on missing envs with clear server-side error logs (no secrets echoed).
   - `WAITLIST_CREATE_OK`, `WAITLIST_CREATE_FAIL_INPUT`, `WAITLIST_CREATE_FAIL_CAPTCHA`, `CONFIRM_OK`, `CONFIRM_EXPIRED`
 - Redact sensitive fields; attach a short `reqId` for correlation.
 - Consider Sentry (optional) for production error alerts; if added, scrub PII tags.
+- Ensure analytics/pageview payloads always include `locale`, `language`, and `region` derived from the active BCP-47 prefix.
 
 ---
 
@@ -151,9 +153,16 @@ Fail fast on missing envs with clear server-side error logs (no secrets echoed).
 
 ## 9) Internationalization (next-intl)
 
+- Locale handling is path-based using lowercase BCP-47 prefixes (e.g., `/en-de/`, `/de-de/`); do **not** enable the Next.js built-in i18n routing block.
+- Edge Middleware + the App Router cooperatively manage locale selection, suggestion redirects, and content rendering.
+- Middleware responsibilities:
+  - Detect humans vs bots (user agent heuristics) and skip redirects for bots.
+  - Read `lh_locale` cookie + Accept-Language/IP hints to offer one-time suggestions from `/` to the market default.
+  - Enforce legacy rewrites/redirects, including `/de/` → `/de-de/` (308).
 - No hardcoded user-visible copy. Use message catalogs.
-- Language detection: accept-language and explicit locale; keep simple until Locize/DeepL is wired.
+- Keep locale catalogs aligned with the BCP-47 prefix; add both language + region scope when introducing new markets.
 - Keep keys stable and human-readable.
+- Analytics payloads add `locale`, `language`, and `region` from `<html data-*>` attributes, and the locale switcher emits a `locale_changed` event (`{ from, to, preservedPath }`). Update downstream consumers if the schema changes.
 
 ---
 

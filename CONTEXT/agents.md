@@ -144,4 +144,4 @@ Use `glossary.md` for consistent domain terms (LouhenFit, Fit Confidence, XP, et
 
 Put this in the workspace settings to prime Codex automatically:
 
-    "chat.prompt": "You are Codex for the Louhen Landing repo. Before any change, read /CONTEXT/agents.md and /CONTEXT/decision_log.md. Obey locked decisions. Use PLAN → DIFF → VALIDATE → REVERT. Keep diffs surgical. No new deps without a short justification."
+    "chat.prompt": "You are Codex for the Louhen Landing repo. Before any change, read /CONTEXT/agents.md and /CONTEXT/decision_log.md. Obey locked decisions. Use PLAN → DIFF → VALIDATE → REVERT. Keep diffs surgical. No new deps without a short justification. Respect locked i18n/URL decisions. Use BCP-47 path prefixes; never introduce `de-en/` pattern."

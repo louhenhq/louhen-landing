@@ -2,18 +2,21 @@ import { createElement } from 'react';
 import { ImageResponse } from 'next/og';
 import { SITE_NAME, LEGAL_ENTITY } from '@/constants/site';
 import { loadMessages } from '@/lib/intl/loadMessages';
-import { locales, type SupportedLocale } from '@/next-intl.locales';
+import { normalizeLocale, defaultLocale, type SupportedLocale } from '@/next-intl.locales';
 import tokens from '@louhen/design-tokens/build/web/tokens.json' assert { type: 'json' };
 
 export const runtime = 'edge';
 export const size = { width: 1200, height: 630 } as const;
 export const contentType = 'image/png';
 
-const DEFAULT_LOCALE: SupportedLocale = 'en';
+const DEFAULT_LOCALE: SupportedLocale = defaultLocale;
 
 function resolveLocale(input: string | null): SupportedLocale {
-  if (!input) return DEFAULT_LOCALE;
-  return locales.includes(input as SupportedLocale) ? (input as SupportedLocale) : DEFAULT_LOCALE;
+  const normalized = normalizeLocale(input);
+  if (normalized) {
+    return normalized;
+  }
+  return DEFAULT_LOCALE;
 }
 
 function token(name: string): string {

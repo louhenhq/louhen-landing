@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { locales, defaultLocale, type SupportedLocale } from '@/next-intl.locales';
 import { buttons, cn } from '@/app/(site)/_lib/ui';
+import LocaleSwitcher from '@/components/LocaleSwitcher';
+import { locales, defaultLocale, type SupportedLocale } from '@/next-intl.locales';
 
 type HeaderProps = {
   onCta?: () => void;
@@ -17,9 +17,6 @@ export default function Header({ onCta }: HeaderProps) {
   const activeLocale: SupportedLocale = locales.includes(locale as SupportedLocale) ? (locale as SupportedLocale) : defaultLocale;
   const helpHref = activeLocale === defaultLocale ? '/help' : `/${activeLocale}/help`;
   const helpLabel = helpT('navLabel');
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   function handleScrollToForm() {
     const form = document.getElementById('waitlist-form');
@@ -29,21 +26,6 @@ export default function Header({ onCta }: HeaderProps) {
       if (firstInput) firstInput.focus({ preventScroll: true });
     }
     onCta?.();
-  }
-
-  function navigateToLocale(nextLocale: string) {
-    if (nextLocale === activeLocale) return;
-    if (!locales.includes(nextLocale as SupportedLocale)) return;
-    const params = searchParams?.toString();
-    const query = params ? `?${params}` : '';
-    const segments = pathname.split('/').filter(Boolean);
-    const hasLocaleSegment = segments.length > 0 && locales.includes(segments[0] as SupportedLocale);
-    const withoutLocale = hasLocaleSegment ? `/${segments.slice(1).join('/')}` : pathname;
-    const normalized = withoutLocale === '' ? '/' : withoutLocale;
-    const target = nextLocale === defaultLocale
-      ? normalized
-      : `/${nextLocale}${normalized === '/' ? '' : normalized}`;
-    router.push(`${target}${query}`);
   }
 
   return (
@@ -67,19 +49,8 @@ export default function Header({ onCta }: HeaderProps) {
           </Link>
         </nav>
         <div className="ml-4 flex items-center gap-sm">
-          <label className="sr-only" htmlFor="locale-select">{t('locale.label')}</label>
-          <select
-            id="locale-select"
-            className="rounded-pill border border-border bg-bg px-sm py-xs text-sm text-text"
-            value={activeLocale}
-            onChange={(event) => navigateToLocale(event.target.value)}
-          >
-            {locales.map((value) => (
-              <option key={value} value={value}>
-                {t(`locale.${value}` as const)}
-              </option>
-            ))}
-          </select>
+          <label className="sr-only" htmlFor="locale-switcher-select">{t('locale.label')}</label>
+          <LocaleSwitcher id="locale-switcher-select" className="rounded-pill border border-border bg-bg px-sm py-xs text-sm text-text" />
           <button
             type="button"
             className={cn(buttons.primary, 'hidden lg:inline-flex')}

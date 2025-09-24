@@ -8,6 +8,13 @@ import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/SeoJsonLd'
 import { SITE_NAME } from '@/constants/site'
 import { getServerConsent } from '@/lib/consent/state'
 import { NonceProvider } from '@/lib/csp/nonce-context'
+import {
+  defaultLocale,
+  getLocaleDefinition,
+  normalizeLocale,
+  buildLocalePath,
+  X_DEFAULT_LOCALE,
+} from '@/next-intl.locales'
 import tokens from '@louhen/design-tokens/build/web/tokens.json' assert { type: 'json' }
 
 const tokenValues = tokens as Record<string, unknown> & {
@@ -48,7 +55,7 @@ export const metadata: Metadata = {
   },
   applicationName: SITE_NAME,
   alternates: {
-    canonical: '/',
+    canonical: buildLocalePath(X_DEFAULT_LOCALE),
   },
   icons: {
     icon: [
@@ -91,6 +98,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const consentHeaders = await headers();
   const consent = getServerConsent(consentHeaders);
   const nonce = consentHeaders.get('x-csp-nonce') ?? undefined;
+  const headerLocale = normalizeLocale(consentHeaders.get('x-active-locale')) ?? defaultLocale;
+  const localeDefinition = getLocaleDefinition(headerLocale);
+  const htmlLanguage = localeDefinition?.language ?? 'en';
+  const htmlRegion = localeDefinition?.region ?? 'EU';
   const shouldNoIndex = typeof process.env.VERCEL_ENV === 'string' && process.env.VERCEL_ENV !== 'production'
   const sameAsProfiles = [
     'https://www.linkedin.com/company/louhen',
@@ -99,7 +110,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const searchActionUrl = `${baseUrl}/search?q={search_term_string}`
 
   return (
-    <html lang="en">
+    <html lang={headerLocale} data-locale={headerLocale} data-language={htmlLanguage} data-region={htmlRegion}>
       <head>
         {/* iOS PWA / status bar styling */}
         <meta name="apple-mobile-web-app-capable" content="yes" />

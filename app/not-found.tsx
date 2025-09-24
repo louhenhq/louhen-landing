@@ -3,7 +3,7 @@ import { headers } from 'next/headers';
 import { getLocale, getTranslations } from 'next-intl/server';
 
 import { resolveBaseUrl } from '@/lib/seo/baseUrl';
-import { defaultLocale, type SupportedLocale } from '@/next-intl.locales';
+import { getLocaleDefinition, buildLocalePath, type SupportedLocale } from '@/next-intl.locales';
 
 export default async function NotFound() {
   const locale = (await getLocale()) as SupportedLocale;
@@ -15,19 +15,19 @@ export default async function NotFound() {
   const headerList = await headers();
   const nonce = headerList.get('x-csp-nonce') ?? undefined;
 
-  const isDefault = locale === defaultLocale;
-  const homeLabel = locale === 'de' ? 'Startseite' : 'Home';
-  const heading = locale === 'de' ? 'Seite nicht gefunden' : 'Page not found';
-  const body =
-    locale === 'de'
-      ? 'Wir konnten die angeforderte Adresse nicht finden. Nutze einen der folgenden Links, um fortzufahren.'
-      : 'We couldn’t find the address you requested. Use one of the following links to continue.';
+  const localeDefinition = getLocaleDefinition(locale);
+  const isGerman = localeDefinition?.language === 'de';
+  const homeLabel = isGerman ? 'Startseite' : 'Home';
+  const heading = isGerman ? 'Seite nicht gefunden' : 'Page not found';
+  const body = isGerman
+    ? 'Wir konnten die angeforderte Adresse nicht finden. Nutze einen der folgenden Links, um fortzufahren.'
+    : 'We couldn’t find the address you requested. Use one of the following links to continue.';
   const helpLabel = helpTranslations('navLabel');
   const guidesLabel = guidesTranslations('title');
 
-  const homeHref = isDefault ? '/' : `/${locale}`;
-  const helpHref = isDefault ? '/help' : `/${locale}/help`;
-  const guidesHref = isDefault ? '/guides' : `/${locale}/guides`;
+  const homeHref = buildLocalePath(locale);
+  const helpHref = buildLocalePath(locale, '/help');
+  const guidesHref = buildLocalePath(locale, '/guides');
 
   const breadcrumbJsonLd = {
     '@context': 'https://schema.org',
@@ -37,13 +37,13 @@ export default async function NotFound() {
         '@type': 'ListItem',
         position: 1,
         name: homeLabel,
-        item: `${baseUrl}/${locale}`,
+        item: `${baseUrl}${homeHref}`,
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: '404',
-        item: `${baseUrl}${isDefault ? '/404' : `/${locale}/404`}`,
+        item: `${baseUrl}${buildLocalePath(locale, '/404')}`,
       },
     ],
   };

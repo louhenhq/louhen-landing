@@ -3,6 +3,7 @@ import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import messages from '@/messages/en.json';
+import type { SupportedLocale } from '@/next-intl.locales';
 
 const trackSpy = vi.fn();
 
@@ -11,6 +12,8 @@ vi.mock('@/lib/clientAnalytics', () => ({
 }));
 
 describe('WaitlistForm (marketing)', () => {
+  const testLocale: SupportedLocale = 'en-eu';
+
   beforeEach(() => {
     vi.resetModules();
     vi.clearAllMocks();
@@ -30,7 +33,7 @@ describe('WaitlistForm (marketing)', () => {
     const { default: WaitlistForm } = await import('@/components/waitlist/WaitlistForm');
 
     render(
-      <NextIntlClientProvider locale="en" messages={messages}>
+      <NextIntlClientProvider locale={testLocale} messages={messages}>
         <WaitlistForm source="unit-test" />
       </NextIntlClientProvider>
     );
@@ -53,11 +56,18 @@ describe('WaitlistForm (marketing)', () => {
 
     await screen.findByText(/Check your inbox/i);
 
+    expect(global.fetch).toHaveBeenCalledWith(
+      '/api/waitlist',
+      expect.objectContaining({
+        body: expect.stringContaining(`"locale":"${testLocale}"`),
+      })
+    );
+
     expect(trackSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ name: 'waitlist_signup_submitted' })
+      expect.objectContaining({ name: 'waitlist_signup_submitted', locale: testLocale })
     );
     expect(trackSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ name: 'waitlist_signup_result', ok: true })
+      expect.objectContaining({ name: 'waitlist_signup_result', ok: true, locale: testLocale })
     );
   });
 });

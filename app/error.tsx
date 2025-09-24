@@ -4,7 +4,13 @@ import Link from 'next/link';
 import { useEffect } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 
-import { locales, defaultLocale, type SupportedLocale } from '@/next-intl.locales';
+import {
+  locales,
+  defaultLocale,
+  getLocaleDefinition,
+  buildLocalePath,
+  type SupportedLocale,
+} from '@/next-intl.locales';
 
 type ErrorProps = {
   error: Error & { digest?: string };
@@ -20,23 +26,24 @@ export default function GlobalError({ error, reset }: ErrorProps) {
   const activeLocale: SupportedLocale = locales.includes(locale as SupportedLocale)
     ? (locale as SupportedLocale)
     : defaultLocale;
+  const localeDefinition = getLocaleDefinition(activeLocale);
+  const isGerman = localeDefinition?.language === 'de';
 
   const helpTranslations = useTranslations('help');
   const guidesTranslations = useTranslations('guides.hero');
 
-  const homeLabel = activeLocale === 'de' ? 'Startseite' : 'Home';
-  const heading = activeLocale === 'de' ? 'Etwas ist schiefgelaufen' : 'Something went wrong';
-  const body =
-    activeLocale === 'de'
-      ? 'Bitte versuche es erneut oder kehre zur Startseite zurück.'
-      : 'Please try again or head back to the home page.';
-  const retryLabel = activeLocale === 'de' ? 'Erneut versuchen' : 'Try again';
+  const homeLabel = isGerman ? 'Startseite' : 'Home';
+  const heading = isGerman ? 'Etwas ist schiefgelaufen' : 'Something went wrong';
+  const body = isGerman
+    ? 'Bitte versuche es erneut oder kehre zur Startseite zurück.'
+    : 'Please try again or head back to the home page.';
+  const retryLabel = isGerman ? 'Erneut versuchen' : 'Try again';
   const helpLabel = helpTranslations('navLabel');
   const guidesLabel = guidesTranslations('title');
 
-  const homeHref = activeLocale === defaultLocale ? '/' : `/${activeLocale}`;
-  const helpHref = activeLocale === defaultLocale ? '/help' : `/${activeLocale}/help`;
-  const guidesHref = activeLocale === defaultLocale ? '/guides' : `/${activeLocale}/guides`;
+  const homeHref = buildLocalePath(activeLocale);
+  const helpHref = buildLocalePath(activeLocale, '/help');
+  const guidesHref = buildLocalePath(activeLocale, '/guides');
 
   return (
     <html lang={activeLocale}>

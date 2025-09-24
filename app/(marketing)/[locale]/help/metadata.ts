@@ -1,23 +1,21 @@
 import type { Metadata } from 'next';
 import { getLocale, getTranslations } from 'next-intl/server';
 
-import { resolveBaseUrl } from '@/lib/seo/baseUrl';
+import { buildLocaleAlternates } from '@/lib/seo/alternates';
+import { normalizeLocale, defaultLocale, type SupportedLocale } from '@/next-intl.locales';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [locale, t, baseUrl] = await Promise.all([
-    getLocale(),
-    getTranslations('help.meta'),
-    resolveBaseUrl(),
-  ]);
-
-  const url = `${baseUrl}/${locale}/help`;
+  const rawLocale = await getLocale();
+  const locale: SupportedLocale = normalizeLocale(rawLocale) ?? defaultLocale;
+  const t = await getTranslations('help.meta');
+  const { canonical, alternates } = await buildLocaleAlternates(locale, '/help');
 
   return {
     title: { absolute: t('title') },
     description: t('description'),
-    alternates: { canonical: url },
+    alternates,
     openGraph: {
-      url,
+      url: canonical,
       title: t('title'),
       description: t('description'),
       type: 'website',

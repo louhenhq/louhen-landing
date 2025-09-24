@@ -1,9 +1,9 @@
 import type { MetadataRoute } from 'next';
 
 import { resolveBaseUrl } from '@/lib/seo/baseUrl';
-import { defaultLocale, locales } from '@/next-intl.locales';
+import { defaultLocale, locales, buildLocalePath } from '@/next-intl.locales';
 
-const STATIC_PATHS = ['', '/method', '/privacy', '/terms', '/imprint'] as const;
+const STATIC_LOCALE_SEGMENTS = ['/', '/method', '/privacy', '/terms', '/imprint'] as const;
 const GUIDE_SEGMENTS = ['', '/healthy-feet', '/sizing', '/parenting'] as const;
 const GUIDE_ARTICLE_SEGMENTS = ['/articles/choosing-first-shoes'] as const;
 
@@ -11,16 +11,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = await resolveBaseUrl();
   const now = new Date().toISOString();
 
-  const staticEntries: MetadataRoute.Sitemap = STATIC_PATHS.map((path) => ({
-    url: `${base}${path}`,
+  const homeEntry: MetadataRoute.Sitemap[number] = {
+    url: `${base}/`,
     lastModified: now,
     changeFrequency: 'weekly',
-    priority: path === '' ? 1 : 0.6,
-  }));
+    priority: 1,
+  };
+
+  const localizedStaticEntries: MetadataRoute.Sitemap = locales.flatMap((locale) =>
+    STATIC_LOCALE_SEGMENTS.map((segment) => {
+      const path = buildLocalePath(locale, segment);
+      return {
+        url: `${base}${path}`,
+        lastModified: now,
+        changeFrequency: 'weekly',
+        priority: segment === '/' ? 0.9 : 0.6,
+      } satisfies MetadataRoute.Sitemap[number];
+    })
+  );
 
   const guideEntries: MetadataRoute.Sitemap = locales.flatMap((locale) => {
     const indexAndTopics = GUIDE_SEGMENTS.map((segment) => {
-      const path = segment === '' ? `/${locale}/guides` : `/${locale}/guides${segment}`;
+      const targetPath = segment === '' ? '/guides' : `/guides${segment}`;
+      const path = buildLocalePath(locale, targetPath);
 
       return {
         url: `${base}${path}`,
@@ -31,7 +44,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
 
     const articles = GUIDE_ARTICLE_SEGMENTS.map((segment) => ({
-      url: `${base}/${locale}/guides${segment}`,
+      url: `${base}${buildLocalePath(locale, `/guides${segment}`)}`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.5,
@@ -40,23 +53,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return [...indexAndTopics, ...articles];
   });
 
-const hasDefaultAlias = Boolean(defaultLocale);
-const aliasEntries: MetadataRoute.Sitemap = hasDefaultAlias
-  ? [
-      ...GUIDE_SEGMENTS.map((segment) => ({
-        url: `${base}${segment === '' ? '/guides' : `/guides${segment}`}`,
-        lastModified: now,
-        changeFrequency: 'weekly',
-        priority: 0.6,
-      } satisfies MetadataRoute.Sitemap[number])),
-      ...GUIDE_ARTICLE_SEGMENTS.map((segment) => ({
-        url: `${base}/guides${segment}`,
-        lastModified: now,
-        changeFrequency: 'monthly',
-        priority: 0.5,
-      } satisfies MetadataRoute.Sitemap[number])),
-    ]
-  : [];
+  const hasDefaultAlias = Boolean(defaultLocale);
+  const aliasEntries: MetadataRoute.Sitemap = hasDefaultAlias
+    ? [
+        ...GUIDE_SEGMENTS.map((segment) => ({
+          url: `${base}${segment === '' ? '/guides' : `/guides${segment}`}`,
+          lastModified: now,
+          changeFrequency: 'weekly',
+          priority: 0.6,
+        } satisfies MetadataRoute.Sitemap[number])),
+        ...GUIDE_ARTICLE_SEGMENTS.map((segment) => ({
+          url: `${base}/guides${segment}`,
+          lastModified: now,
+          changeFrequency: 'monthly',
+          priority: 0.5,
+        } satisfies MetadataRoute.Sitemap[number])),
+      ]
+    : [];
 
-  return [...staticEntries, ...guideEntries, ...aliasEntries];
+  return [homeEntry, ...localizedStaticEntries, ...guideEntries, ...aliasEntries];
 }

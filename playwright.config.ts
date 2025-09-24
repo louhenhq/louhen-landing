@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 import type { PlaywrightTestConfig } from '@playwright/test';
 
-const baseURL = process.env.BASE_URL ?? 'http://localhost:4311';
+const baseURL = process.env.BASE_URL ?? 'http://127.0.0.1:4311';
 const shouldSkipWebServer = process.env.PLAYWRIGHT_SKIP === '1';
 
 const testEnv = {
@@ -54,8 +54,8 @@ if (shouldSkipWebServer) {
     },
   ];
   config.webServer = {
-    command: 'npm run start:test',
-    url: baseURL,
+    command: 'next start -H 127.0.0.1 -p 4311',
+    url: 'http://127.0.0.1:4311',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
     env: {

@@ -5,11 +5,19 @@ import Section from '@/components/Section';
 import { Card } from '@/components/ui/Card';
 import { cn, focusRing } from '@/app/(site)/_lib/ui';
 import { resolveBaseUrl } from '@/lib/seo/baseUrl';
+import {
+  buildLocalePath,
+  getLocaleDefinition,
+  normalizeLocale,
+  defaultLocale,
+  type SupportedLocale,
+} from '@/next-intl.locales';
 
 export default async function GuidesIndex() {
-  const [locale, t, headerList, baseUrl] = await Promise.all([
-    getLocale(),
-    getTranslations('guides'),
+  const rawLocale = await getLocale();
+  const locale: SupportedLocale = normalizeLocale(rawLocale) ?? defaultLocale;
+  const [t, headerList, baseUrl] = await Promise.all([
+    getTranslations({ locale, namespace: 'guides' }),
     headers(),
     resolveBaseUrl(),
   ]);
@@ -28,8 +36,9 @@ export default async function GuidesIndex() {
     about: items.map((item) => item.title),
   };
 
-  const homeLabel = locale === 'de' ? 'Startseite' : 'Home';
-  const guidesUrl = `${baseUrl}/${locale}/guides`;
+  const localeDefinition = getLocaleDefinition(locale);
+  const homeLabel = localeDefinition?.language === 'de' ? 'Startseite' : 'Home';
+  const guidesUrl = `${baseUrl}${buildLocalePath(locale, '/guides')}`;
   const breadcrumbJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -38,7 +47,7 @@ export default async function GuidesIndex() {
         '@type': 'ListItem',
         position: 1,
         name: homeLabel,
-        item: `${baseUrl}/${locale}`,
+        item: `${baseUrl}${buildLocalePath(locale)}`,
       },
       {
         '@type': 'ListItem',
@@ -64,7 +73,7 @@ export default async function GuidesIndex() {
             <Card key={item.slug} role="article" className="flex h-full flex-col gap-sm">
               <h2 className="font-semibold text-[var(--typography-size-xl)] leading-[var(--typography-line-height-snug)] text-text">
                 <Link
-                  href={`/${locale}/guides/${item.slug}`}
+                  href={buildLocalePath(locale, `/guides/${item.slug}`)}
                   className={cn(
                     'flex w-full items-center rounded-md py-xs min-h-[var(--spacing-xl)] text-left',
                     focusRing,
@@ -78,7 +87,7 @@ export default async function GuidesIndex() {
               </p>
               <div className="mt-md">
                 <Link
-                  href={`/${locale}/guides/${item.slug}`}
+                  href={buildLocalePath(locale, `/guides/${item.slug}`)}
                   className={cn(
                     'inline-flex items-center gap-xs rounded-pill px-sm min-h-[var(--spacing-xl)] text-[var(--typography-size-sm)] font-medium text-brand-primary underline underline-offset-4',
                     focusRing,

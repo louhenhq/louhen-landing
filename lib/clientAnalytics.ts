@@ -196,6 +196,15 @@ function buildPayload(name: AnalyticsEventName, props: Record<string, unknown>, 
   if (!('ref' in props) && page.referrer) {
     payload.ref = page.referrer;
   }
+  if (!('locale' in props) && page.locale) {
+    payload.locale = page.locale;
+  }
+  if (!('language' in props) && page.language) {
+    payload.language = page.language;
+  }
+  if (!('region' in props) && page.region) {
+    payload.region = page.region;
+  }
 
   const utm = ensureUtm();
   Object.entries(utm).forEach(([key, value]) => {
@@ -226,13 +235,17 @@ function stableStringify(value: unknown): string {
 }
 
 function getPageContext() {
-  if (!isBrowser) return { path: '', referrer: null as string | null };
+  if (!isBrowser) return { path: '', referrer: null as string | null, locale: null as string | null, language: null as string | null, region: null as string | null };
   try {
     const path = window.location.pathname + window.location.search;
     const referrer = document.referrer || null;
-    return { path, referrer };
+    const doc = document.documentElement;
+    const locale = doc?.dataset?.locale ?? null;
+    const language = doc?.dataset?.language ?? null;
+    const region = doc?.dataset?.region ?? null;
+    return { path, referrer, locale, language, region };
   } catch {
-    return { path: '', referrer: null as string | null };
+    return { path: '', referrer: null as string | null, locale: null as string | null, language: null as string | null, region: null as string | null };
   }
 }
 

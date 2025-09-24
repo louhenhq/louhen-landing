@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-const rawBaseUrl = process.env.APP_BASE_URL ?? 'http://localhost:4311';
+const rawBaseUrl = process.env.APP_BASE_URL ?? 'http://127.0.0.1:4311';
 const baseUrl = rawBaseUrl.replace(/\/$/, '');
 const fallbackBaseUrl = 'https://louhen-landing.vercel.app';
 const allowedHosts = [
@@ -13,6 +13,12 @@ const allowedHosts = [
   })(),
   new URL(fallbackBaseUrl).host,
 ].filter(Boolean) as string[];
+
+function expectBcp47Path(value: string | null) {
+  expect(value).not.toBeNull();
+  if (!value) return;
+  expect(value).toMatch(/^\/[a-z]{2}-[a-z]{2}(?:\/.*)?$/);
+}
 
 function getCanonicalParts(href: string | null) {
   if (!href) {
@@ -42,7 +48,7 @@ test.describe('SEO metadata', () => {
     const canonical = page.locator('link[rel="canonical"]');
     const canonicalHref = await canonical.getAttribute('href');
     const canonicalParts = getCanonicalParts(canonicalHref);
-    expect(['/','/en','/de']).toContain(canonicalParts.path);
+    expectBcp47Path(canonicalParts.path);
     expect(allowedHosts).toContain(canonicalParts.host);
 
     const altTexts = await page

@@ -1,16 +1,14 @@
 import { getRequestConfig } from 'next-intl/server';
 import { loadMessages } from './lib/intl/loadMessages';
-import { locales, defaultLocale, type SupportedLocale } from './next-intl.locales';
-
-function resolveLocale(input?: string | null): SupportedLocale {
-  if (input && locales.includes(input as SupportedLocale)) {
-    return input as SupportedLocale;
-  }
-  return defaultLocale;
-}
+import {
+  locales,
+  defaultLocale,
+  normalizeLocale,
+  type SupportedLocale,
+} from './next-intl.locales';
 
 export default getRequestConfig(async ({ locale }) => {
-  const activeLocale = resolveLocale(locale);
+  const activeLocale = normalizeLocale(locale) ?? defaultLocale;
   const messages = await loadMessages(activeLocale);
   return {
     locale: activeLocale,

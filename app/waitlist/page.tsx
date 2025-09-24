@@ -4,17 +4,18 @@ import { cookies, headers } from 'next/headers';
 import StateCard from '@/components/marketing/StateCard';
 import { extractLocaleFromCookies, resolveLocale as resolveLocaleValue } from '@/lib/intl/getLocale';
 import { loadMessages } from '@/lib/intl/loadMessages';
-import type { SupportedLocale } from '@/next-intl.locales';
+import { buildLocaleAlternates } from '@/lib/seo/alternates';
+import { LOCALE_COOKIE, defaultLocale, type SupportedLocale } from '@/next-intl.locales';
 
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
 
 async function resolveLocale(): Promise<SupportedLocale> {
   const cookieStore = await cookies();
-  const cookieLocale = resolveLocaleValue(cookieStore.get('NEXT_LOCALE')?.value ?? null);
+  const cookieLocale = resolveLocaleValue(cookieStore.get(LOCALE_COOKIE)?.value ?? null);
   const headerList = await headers();
   const headerLocale = extractLocaleFromCookies(headerList.get('cookie'));
-  return cookieLocale ?? headerLocale ?? 'en';
+  return cookieLocale ?? headerLocale ?? defaultLocale;
 }
 
 type UnknownRecord = Record<string, unknown>;
@@ -36,10 +37,6 @@ async function getMessages(locale: SupportedLocale) {
   return (await loadMessages(locale)) as UnknownRecord;
 }
 
-function baseUrl() {
-  return (process.env.APP_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://louhen.com').replace(/\/$/, '');
-}
-
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await resolveLocale();
   const messages = await getMessages(locale);
@@ -52,7 +49,7 @@ export async function generateMetadata(): Promise<Metadata> {
     meta.description,
     'Discover how to join the Louhen waitlist and secure early access in minutes.'
   );
-  const url = `${baseUrl()}/waitlist`;
+  const { canonical, alternates } = await buildLocaleAlternates(locale, '/waitlist');
 
   return {
     title,
@@ -60,11 +57,9 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title,
       description,
-      url,
+      url: canonical,
     },
-    alternates: {
-      canonical: url,
-    },
+    alternates,
   };
 }
 
