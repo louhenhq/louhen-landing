@@ -1,6 +1,7 @@
 # Pull Request
 
 > Please review /CONTEXT/decision_log.md before merging. Keep diffs surgical and follow PLAN → DIFF → VALIDATE.
+> For release PRs (`staging → production`), please use `.github/pull_request_template_release.md`.
 
 ## Summary
 - What changed & why (1–2 lines):

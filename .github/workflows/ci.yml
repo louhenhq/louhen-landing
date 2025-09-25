@@ -97,8 +97,22 @@ jobs:
           path: .next/trace
           if-no-files-found: ignore
 
+
+  enforce-release-source:
+    # Guard: only allow PRs into production if they originate from staging
+    if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'production'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if head is not staging
+        run: |
+          if [ "${{ github.event.pull_request.head.ref }}" != "staging" ]; then
+            echo "❌ PRs into 'production' must originate from 'staging'."
+            exit 1
+          fi
+          echo "✅ Source branch is 'staging' — release guard passed."
+
   release:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/production'
     needs: build-and-test
     runs-on: ubuntu-latest
     permissions:

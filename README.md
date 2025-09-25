@@ -49,6 +49,41 @@ To get started locally:
 - Verify design tokens are up to date and applied consistently.
 - Test deployment pipelines and CI workflows for reliability.
 
+## End-to-End Testing Modes
+
+- **Local mode**: Run `npx playwright test` without `E2E_BASE_URL`; Playwright binds to the local dev server on loopback.
+- **Remote mode**: Export `E2E_BASE_URL=https://staging.louhen.app` so tests hit the staging branch deployment. If Deployment Protection is enabled, also set `VERCEL_AUTOMATION_BYPASS_SECRET` and include the header below.
+
+### cURL sanity check
+
+```bash
+curl -H "x-vercel-protection-bypass: $VERCEL_AUTOMATION_BYPASS_SECRET" \
+  "$E2E_BASE_URL/status"
+```
+
+### Playwright auth header snippet
+
+```ts
+import { test as base } from '@playwright/test';
+
+const test = base.extend({
+  context: async ({ browser }, use) => {
+    const headers = process.env.VERCEL_AUTOMATION_BYPASS_SECRET
+      ? { 'x-vercel-protection-bypass': process.env.VERCEL_AUTOMATION_BYPASS_SECRET }
+      : {};
+
+    const context = await browser.newContext({
+      baseURL: process.env.E2E_BASE_URL || 'http://127.0.0.1:3000',
+      extraHTTPHeaders: headers,
+    });
+    await use(context);
+    await context.close();
+  },
+});
+
+export { test };
+```
+
 ## License
 
 This project and its contents are proprietary and confidential. Unauthorized use, distribution, or reproduction is strictly prohibited. For licensing inquiries, please contact the Louhen team. See [NOTICE.md](NOTICE.md) for attributions of third-party dependencies and services used in this project.

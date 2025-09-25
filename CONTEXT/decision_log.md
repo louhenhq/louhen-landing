@@ -17,6 +17,7 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
 - **Payments**: Adyen is company-wide provider (not yet used here).  
 - **i18n**: next-intl scaffolding; ready for Locize + DeepL later.  
 - **Security baseline**: no client-side secrets; GDPR-first handling of PII.
+- **Environment & Domains locked**: Canonical host `www.louhen.app` (production). Apex `louhen.app` issues 301 redirect to `www.louhen.app`. Preview domain `staging.louhen.app` (maps to `staging` branch). Wildcard previews `*.staging.louhen.app` CNAME to `cname.vercel-dns.com` (DNS only). Deployment Protection does not cover custom production domains without Vercel Business; mitigation is keeping production DNS dark until launch.
 
 ---
 

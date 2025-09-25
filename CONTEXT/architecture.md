@@ -114,6 +114,14 @@ Required env vars (all set in Vercel):
 
 Fail fast on missing envs with clear server-side error logs (no secrets echoed).
 
+### DNS / Environment Addendum
+
+- Apex `louhen.app` must point to `76.76.21.21` (A record, DNS only) once production goes live.
+- `www.louhen.app` stays a CNAME to `cname.vercel-dns.com` (DNS only).
+- Wildcard previews `*.staging.louhen.app` stay CNAME records to `cname.vercel-dns.com` (DNS only).
+- If Vercel validator lags, provision explicit subdomains (e.g., `tmp.staging.louhen.app`) as fallbacks.
+- Keep production DNS dark prior to launch; only preview domains remain exposed.
+
 ---
 
 ## 6) Security Model
@@ -169,6 +177,8 @@ GitHub Actions:
 - Job: release (on push to `main`)
   - `npx semantic-release --debug` (updates GitHub Release + CHANGELOG)
 
+**CI / E2E note**: Remote runs use `E2E_BASE_URL=https://staging.louhen.app`. If the preview environment is protected, attach the `x-vercel-protection-bypass` header with the shared secret.
+
 Branching:
 - `main` (stable)  
 - `next` / `beta` if needed for pre-releases (already configured in `.releaserc.json`)
@@ -204,5 +214,30 @@ UI should map these to friendly messages; server logs should include the code fo
 - Do not couple UI components to Firestore/Admin SDK.
 - No drive-by refactors; minimal diffs and stable interfaces.
 - Document non-obvious trade-offs here when they become policy.
+
+---
+
+## 14) Release Process (Staging → Production)
+
+We use a two-branch model:
+
+- **staging** is the default branch. All feature work and PRs should target `staging`.  
+  Preview deployments (`staging.louhen.app` and `*.staging.louhen.app`) are built from this branch.
+
+- **production** is the release branch. The production site (`www.louhen.app`) deploys from this branch.
+
+### How to release
+1. Merge feature branches into `staging` via pull requests.
+2. Once `staging` is validated (QA, e2e, approvals), open a pull request from `staging` into `production`.
+3. The CI job **`enforce-release-source`** is a required status check: it blocks PRs into `production` unless the head branch is `staging`.
+4. The `production` ruleset requires 2 approvals, up-to-date checks, and blocks force pushes/deletions.
+5. Reviewers must confirm every item in `.github/pull_request_template_release.md` before approving the `staging` → `production` PR.
+6. In emergencies, add the `skip-checklist` label to bypass enforcement **only** with justification in the PR description and Release Manager approval.
+7. The **Enforce Release PR Checklist** workflow status check must stay marked Required in the `production` branch ruleset.
+
+### Why this guard exists
+- Ensures production deployments are only promoted from a validated staging branch.
+- Prevents accidental direct merges from feature branches into production.
+- Keeps the release flow auditable and consistent.
 
 ---
