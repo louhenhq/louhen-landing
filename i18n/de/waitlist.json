@@ -1,0 +1,93 @@
+{
+  "waitlist": {
+    "title": "Trag dich in die Louhen-Warteliste ein",
+    "subtitle": "Sei unter den Ersten, die intelligente Größenberatung und kuratierte Looks testen.",
+    "email": {
+      "label": "E-Mail-Adresse",
+      "placeholder": "du@example.com"
+    },
+    "consent": {
+      "label": "Ich möchte Updates zur Warteliste erhalten und akzeptiere die <privacy>Datenschutzerklärung</privacy> und <terms>Nutzungsbedingungen</terms>."
+    },
+    "submit": {
+      "cta": "Zur Warteliste anmelden"
+    },
+    "urgency": {
+      "badge": "🎟 Begrenzter Frühzugang verfügbar"
+    },
+    "trust": {
+      "podiatrist": "Von Podolog:innen empfohlen",
+      "louhenfit": "LouhenFit schützt jede Bestellung"
+    },
+    "confirm": {
+      "verifying": "Link wird geprüft …"
+    },
+    "success": {
+      "title": "Du bist dabei!",
+      "subtitle": "Dein Platz ist gesichert. Halte dein Postfach für Frühzugang bereit.",
+      "preOnboarding": {
+        "cta": "Weiter zur Voranmeldung"
+      },
+      "privacy": "Wir respektieren dein Postfach und schreiben nur mit Einwilligung.",
+      "share": {
+        "heading": "Warteliste teilen",
+        "copy": "Link kopieren",
+        "whatsapp": "Auf WhatsApp teilen",
+        "email": "Per E-Mail einladen"
+      }
+    },
+    "expired": {
+      "title": "Bestätigungslink abgelaufen",
+      "subtitle": "Fordere einen neuen Link an, um deine Anmeldung abzuschließen.",
+      "resend": {
+        "cta": "Neuen Bestätigungslink senden"
+      }
+    },
+    "already": {
+      "title": "Bereits bestätigt",
+      "subtitle": "Alles erledigt – ergänze gern noch ein paar Passform-Details."
+    },
+    "resend": {
+      "email": {
+        "label": "E-Mail-Adresse",
+        "placeholder": "du@example.com"
+      },
+      "submit": "Bestätigung erneut senden"
+    }
+  },
+  "preonboarding": {
+    "title": "Erzähl uns mehr (optional)",
+    "subtitle": "Mit ein paar Angaben können wir Frühzugänge besser auf deine Familie abstimmen.",
+    "parent": {
+      "firstName": {
+        "label": "Vorname Elternteil"
+      }
+    },
+    "child": {
+      "section": "Kinder",
+      "name": {
+        "label": "Name des Kindes"
+      },
+      "birthday": {
+        "label": "Geburtsdatum"
+      },
+      "weight": {
+        "label": "Gewicht"
+      },
+      "shoeSize": {
+        "label": "Schuhgröße"
+      }
+    },
+    "save": {
+      "cta": "Speichern und fortfahren"
+    },
+    "comingSoon": "Demnächst verfügbar – wir schalten diesen Schritt bald frei."
+  },
+  "errors": {
+    "required": "Dieses Feld ist erforderlich.",
+    "email": {
+      "invalid": "Bitte gib eine gültige E-Mail-Adresse ein."
+    },
+    "generic": "Etwas ist schiefgelaufen. Bitte versuch es erneut."
+  }
+}

@@ -37,7 +37,7 @@ jobs:
         continue-on-error: false
 
       - name: Unit tests
-        run: npm run test:unit
+        run: npm run test
         continue-on-error: false
 
       - name: Build
@@ -68,9 +68,7 @@ jobs:
       - name: Lighthouse (LHCI)
         env:
           BASE_URL: http://localhost:4311
-        run: |
-          npx start-server-and-test "next start -p 4311" http://localhost:4311 \
-            "npm run qa:lh -- --config=./lighthouserc.cjs --collect.startServerCommand="
+        run: npm run lighthouse
         continue-on-error: false
 
       - name: Upload Playwright report

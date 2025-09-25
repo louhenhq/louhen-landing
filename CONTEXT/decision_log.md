@@ -32,4 +32,7 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
 - **2025-09-22**  
   Added `/CONTEXT` bundle with agents.md, project_overview.md, decision_log.md, etc. Codex workflow formalized.  
 
+- **2025-09-24**  
+  Locked transactional email identity to louhen.app (`no-reply@` sender, `hello@` reply-to). Ratified `https://www.louhen.app` as the canonical production host (apex `louhen.app` 301s to `https://www.louhen.app`) and confirmed preview at `https://staging.louhen.app`. Documented hCaptcha policy (universal test keys locally; environment-specific keys in preview/prod), enforced Basic Auth on `/api/status` with hourly GitHub Action monitoring, and ratified the waitlist funnel as a 2-step flow with optional pre-onboarding.
+
 ---

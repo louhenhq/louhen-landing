@@ -1,6 +1,7 @@
 import { parseConsentCookie } from '@/lib/consent/cookie';
 import { getEmailTransport } from '@/lib/email/transport';
 import { getDb } from '@/lib/firebaseAdmin';
+import { ensureWaitlistEnv } from '@/lib/env/guard';
 import { isTestMode } from '@/lib/testMode';
 
 const startedAt = new Date();
@@ -22,10 +23,12 @@ type StatusSnapshot = {
   timestamp: string;
   noncePresent: boolean;
   consent: ConsentSnapshot;
-  emailTransport: 'noop' | 'resend';
+  emailTransport: boolean;
+  emailTransportMode: 'noop' | 'resend';
   suppressionsCount: number | null;
   suppressionsSampleLimit: number;
   env: EnvInfo;
+  envLabel: string;
   uptime: {
     seconds: number;
     startedAt: string;
@@ -83,15 +86,21 @@ export async function collectStatusSignals({ headers, fallbackNonce }: { headers
   const nonceHeader = headers.get('x-csp-nonce') || fallbackNonce || '';
   const emailTransport = getEmailTransport().name;
   const suppressionsCount = await countRecentSuppressions();
+  const envSummary = ensureWaitlistEnv();
+  const emailTransportLive = envSummary.resend.configured && emailTransport === 'resend';
+  const envInfo = resolveEnvInfo();
+  const envLabel = envInfo.vercelEnv ?? envSummary.runtime.phase;
 
   return {
     timestamp: new Date().toISOString(),
     noncePresent: Boolean(nonceHeader),
     consent: snapshotConsent(headers),
-    emailTransport,
+    emailTransport: emailTransportLive,
+    emailTransportMode: emailTransport,
     suppressionsCount,
     suppressionsSampleLimit: SUPPRESSIONS_SAMPLE_LIMIT,
-    env: resolveEnvInfo(),
+    env: envInfo,
+    envLabel,
     uptime: {
       seconds: Number(process.uptime().toFixed(3)),
       startedAt: startedAt.toISOString(),

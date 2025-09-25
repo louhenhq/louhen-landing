@@ -31,10 +31,12 @@ test.describe('status diagnostics API', () => {
     expect(response.status()).toBe(200);
     const body = await response.json();
     expect(typeof body.noncePresent).toBe('boolean');
-    expect(['noop', 'resend']).toContain(body.emailTransport);
+    expect(typeof body.emailTransport).toBe('boolean');
     expect(body).toHaveProperty('suppressionsCount');
-    expect(body).toHaveProperty('env');
-    expect(body.env).toHaveProperty('vercelEnv');
+    expect(typeof body.env).toBe('string');
+    if (body.details) {
+      expect(['noop', 'resend']).toContain(body.details.emailTransportMode);
+    }
   });
 });
 
