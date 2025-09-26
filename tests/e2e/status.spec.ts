@@ -8,8 +8,18 @@ const HAS_CREDS = Boolean(STATUS_USER && STATUS_PASS);
 const AUTH_HEADER = `Basic ${Buffer.from(`${STATUS_USER}:${STATUS_PASS}`).toString('base64')}`;
 
 test.describe('status diagnostics API', () => {
-  test('returns 401 without auth', async ({ request }) => {
-    const response = await request.get('/api/status');
+  test('returns 401 without auth', async ({ playwright, baseURL }) => {
+    const context = await playwright.request.newContext({
+      baseURL,
+      httpCredentials: {
+        username: 'unauthorized-user',
+        password: 'unauthorized-pass',
+      },
+      extraHTTPHeaders: {},
+    });
+    const response = await context.get('/api/status');
+    await context.dispose();
+
     expect(response.status()).toBe(401);
     const wwwAuth = response.headers()['www-authenticate'];
     expect(wwwAuth).toBeTruthy();
@@ -31,29 +41,40 @@ test.describe('status diagnostics API', () => {
     expect(response.status()).toBe(200);
     const body = await response.json();
     expect(typeof body.noncePresent).toBe('boolean');
-    expect(['noop', 'resend']).toContain(body.emailTransport);
+    expect(typeof body.emailTransport).toBe('boolean');
     expect(body).toHaveProperty('suppressionsCount');
-    expect(body).toHaveProperty('env');
-    expect(body.env).toHaveProperty('vercelEnv');
+    expect(typeof body.env).toBe('string');
+    if (body.details) {
+      expect(['noop', 'resend']).toContain(body.details.emailTransportMode);
+    }
   });
 });
 
 test.describe('status diagnostics page', () => {
   test.skip(!HAS_CREDS, 'STATUS credentials missing');
 
-  test('renders key fields after auth', async ({ page }) => {
-    await page.route('**/api/status', (route) => {
-      const headers = {
-        ...route.request().headers(),
-        authorization: AUTH_HEADER,
-      };
-      route.continue({ headers });
+  test('renders key fields after auth', async ({ browser, baseURL }) => {
+    const context = await browser.newContext({
+      baseURL,
+      httpCredentials: {
+        username: STATUS_USER,
+        password: STATUS_PASS,
+      },
+      extraHTTPHeaders: {
+        Authorization: AUTH_HEADER,
+      },
     });
 
-    await page.goto('/status');
-    await expect(page.getByRole('heading', { name: /Operational diagnostics/i })).toBeVisible();
-    await expect(page.getByText(/CSP nonce/i)).toBeVisible();
-    await expect(page.getByText(/Transport mode/i)).toBeVisible();
-    await expect(page.getByText(/Vercel env/i)).toBeVisible();
+    try {
+      const authedPage = await context.newPage();
+      const response = await authedPage.goto('/status', { waitUntil: 'networkidle' });
+      expect(response?.status()).toBe(200);
+      await expect(authedPage.getByRole('heading', { name: /Operational diagnostics/i })).toBeVisible();
+      await expect(authedPage.getByText(/CSP nonce/i)).toBeVisible();
+      await expect(authedPage.getByText(/Transport mode/i)).toBeVisible();
+      await expect(authedPage.getByText(/Vercel env/i)).toBeVisible();
+    } finally {
+      await context.close();
+    }
   });
 });

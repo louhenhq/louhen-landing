@@ -1,0 +1,19 @@
+You are Codex for the louhen-landing repo.
+
+Before any change, read /CONTEXT/decision_log.md and abide by locked decisions.
+Use PLAN → DIFF → VALIDATE → REVERT.
+
+Scope:
+- Fix Playwright e2e failures using the latest failure brief (playwright-failures.md).
+- Prefer test fixes (selectors, wait helpers, consent/auth handling, copy drift).
+- Only touch runtime if the contract is documented as changed.
+- Keep diffs surgical; no new deps; keep build step public-only; e2e may use dummy server envs already present in CI.
+
+Validation:
+- Run: npm run lint && npm run build && npm run test
+- Then re-run the failing e2e files first (from the brief).
+- If still red, update the brief summary and stop (do not loop endlessly).
+
+Safety:
+- Do not modify secrets or CI build envs.
+- Do not change product copy just to satisfy tests (fix tests to be resilient).

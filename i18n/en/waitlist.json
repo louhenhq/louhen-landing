@@ -1,0 +1,93 @@
+{
+  "waitlist": {
+    "title": "Join the Louhen waitlist",
+    "subtitle": "Be first to try smarter sizing and curated looks tailored to your family.",
+    "email": {
+      "label": "Email",
+      "placeholder": "you@example.com"
+    },
+    "consent": {
+      "label": "I agree to receive waitlist updates and accept the <privacy>Privacy Policy</privacy> and <terms>Terms</terms>."
+    },
+    "submit": {
+      "cta": "Join the waitlist"
+    },
+    "urgency": {
+      "badge": "🎟 Limited early access available"
+    },
+    "trust": {
+      "podiatrist": "Podiatrist-approved comfort",
+      "louhenfit": "LouhenFit protects every order"
+    },
+    "confirm": {
+      "verifying": "Verifying your request…"
+    },
+    "success": {
+      "title": "You're in!",
+      "subtitle": "We saved your spot. Watch your inbox for early access and fit guidance.",
+      "preOnboarding": {
+        "cta": "Continue to pre-onboarding"
+      },
+      "privacy": "We respect your inbox and only email with consent.",
+      "share": {
+        "heading": "Share the waitlist",
+        "copy": "Copy link",
+        "whatsapp": "Share on WhatsApp",
+        "email": "Invite via email"
+      }
+    },
+    "expired": {
+      "title": "Confirmation link expired",
+      "subtitle": "Request a fresh link to finish your signup.",
+      "resend": {
+        "cta": "Send a new confirmation email"
+      }
+    },
+    "already": {
+      "title": "Already confirmed",
+      "subtitle": "You're all set—jump ahead to share a few fit details."
+    },
+    "resend": {
+      "email": {
+        "label": "Email",
+        "placeholder": "you@example.com"
+      },
+      "submit": "Resend confirmation"
+    }
+  },
+  "preonboarding": {
+    "title": "Tell us more (optional)",
+    "subtitle": "Share a few details so we can tailor early access drops to your family.",
+    "parent": {
+      "firstName": {
+        "label": "Parent first name"
+      }
+    },
+    "child": {
+      "section": "Children",
+      "name": {
+        "label": "Child name"
+      },
+      "birthday": {
+        "label": "Birthday"
+      },
+      "weight": {
+        "label": "Weight"
+      },
+      "shoeSize": {
+        "label": "Shoe size"
+      }
+    },
+    "save": {
+      "cta": "Save and continue"
+    },
+    "comingSoon": "Coming next — we’ll unlock this step soon."
+  },
+  "errors": {
+    "required": "This field is required.",
+    "email": {
+      "invalid": "Enter a valid email address."
+    },
+    "generic": "Something went wrong. Please try again."
+  }
+}

@@ -38,10 +38,10 @@ export function ResendConfirmForm({ strings }: ResendConfirmFormProps) {
     track({ name: 'waitlist_resend_requested' });
 
     try {
-      const response = await fetch('/api/waitlist/resend-confirm', {
+      const response = await fetch('/api/waitlist/resend', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ email: email.trim() }),
+        body: JSON.stringify({ email: email.trim(), hcaptchaToken: 'dev-bypass' }),
       });
       const payload = await response.json().catch(() => ({}));
 

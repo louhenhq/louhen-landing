@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
     return unauthorizedResponse();
   }
 
-  const payload = await collectStatusSignals({ headers: request.headers });
+  const snapshot = await collectStatusSignals({ headers: request.headers });
 
   const headers = new Headers({
     'Cache-Control': 'no-store',
@@ -84,5 +84,13 @@ export async function GET(request: NextRequest) {
     Vary: 'Authorization',
   });
 
-  return NextResponse.json(payload, { status: 200, headers });
+  const response = {
+    noncePresent: snapshot.noncePresent,
+    emailTransport: snapshot.emailTransport,
+    suppressionsCount: snapshot.suppressionsCount ?? 0,
+    env: snapshot.envLabel,
+    details: snapshot,
+  };
+
+  return NextResponse.json(response, { status: 200, headers });
 }

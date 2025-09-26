@@ -45,6 +45,14 @@ function resolveStatusEndpoint(headerStore: HeaderStore): string {
   return `${proto}://${host}/api/status`;
 }
 
+type StatusApiResponse = {
+  noncePresent: boolean;
+  emailTransport: boolean;
+  suppressionsCount: number;
+  env: string;
+  details?: StatusSnapshot;
+};
+
 async function fetchStatusSnapshot(headerStore: HeaderStore): Promise<StatusSnapshot> {
   const endpoint = resolveStatusEndpoint(headerStore);
   const user = process.env.STATUS_USER;
@@ -66,7 +74,34 @@ async function fetchStatusSnapshot(headerStore: HeaderStore): Promise<StatusSnap
     throw new Error(`Status fetch failed with ${response.status}`);
   }
 
-  return (await response.json()) as StatusSnapshot;
+  const payload = (await response.json()) as StatusApiResponse;
+  if (payload.details) {
+    return payload.details;
+  }
+
+  return {
+    timestamp: new Date().toISOString(),
+    noncePresent: payload.noncePresent,
+    consent: {
+      analytics: null,
+      marketing: null,
+      timestamp: null,
+    },
+    emailTransport: payload.emailTransport,
+    emailTransportMode: payload.emailTransport ? 'resend' : 'noop',
+    suppressionsCount: payload.suppressionsCount,
+    suppressionsSampleLimit: 0,
+    env: {
+      vercelEnv: payload.env,
+      commitSha: null,
+      appBaseUrl: null,
+    },
+    envLabel: payload.env,
+    uptime: {
+      seconds: 0,
+      startedAt: new Date().toISOString(),
+    },
+  };
 }
 
 function formatBoolean(value: boolean | null): string {
@@ -134,8 +169,14 @@ export default async function StatusPage() {
           <h2 className="text-sm font-semibold text-slate-700">Email</h2>
           <dl className="mt-3 space-y-2 text-sm text-slate-600">
             <div className="flex items-center justify-between">
+              <dt>Live transport</dt>
+              <dd className={snapshot.emailTransport ? 'text-emerald-600' : 'text-amber-600'}>
+                {formatBoolean(snapshot.emailTransport)}
+              </dd>
+            </div>
+            <div className="flex items-center justify-between">
               <dt>Transport mode</dt>
-              <dd className="font-mono text-xs uppercase text-slate-800">{snapshot.emailTransport}</dd>
+              <dd className="font-mono text-xs uppercase text-slate-800">{snapshot.emailTransportMode}</dd>
             </div>
             <div className="flex items-center justify-between">
               <dt>Suppressions (last {snapshot.suppressionsSampleLimit})</dt>
