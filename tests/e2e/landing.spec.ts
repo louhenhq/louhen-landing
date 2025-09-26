@@ -4,7 +4,19 @@ async function interceptAnalytics(page: import('@playwright/test').Page) {
   const events: any[] = [];
   await page.route('**/api/track', async (route) => {
     const request = route.request();
-    const payload = request.postDataJSON?.() ?? {};
+    let payload = request.postDataJSON?.();
+    if (!payload) {
+      const rawBody = request.postData();
+      if (rawBody) {
+        try {
+          payload = JSON.parse(rawBody);
+        } catch {
+          payload = {};
+        }
+      } else {
+        payload = {};
+      }
+    }
     events.push(payload);
     await route.fulfill({ status: 200, body: '{}' });
   });
@@ -15,7 +27,11 @@ async function waitForEvent(events: any[], name: string) {
   await expect.poll(() => events.some((event) => event.name === name)).toBeTruthy();
 }
 
-async function allowAnalytics(page: import('@playwright/test').Page) {
+async function allowAnalytics(page: import('@playwright/test').Page, events: any[]) {
+  await page.exposeBinding('__captureAnalytics__', async (_source, payload) => {
+    events.push(payload ?? {});
+  });
+
   await page.addInitScript(() => {
     const value = { analytics: true, marketing: false };
     window['__LOUHEN_CONSENT__'] = value;
@@ -30,6 +46,90 @@ async function allowAnalytics(page: import('@playwright/test').Page) {
       }
       return null;
     };
+
+    const originalSendBeacon = navigator.sendBeacon.bind(navigator);
+    navigator.sendBeacon = (url, data) => {
+      try {
+        if (typeof url === 'string' && url.includes('/api/track')) {
+          const pushPayload = (text: string | null) => {
+            if (!text) {
+              window.__captureAnalytics__({});
+              return true;
+            }
+            try {
+              const parsed = JSON.parse(text);
+              window.__captureAnalytics__(parsed);
+              return true;
+            } catch {
+              window.__captureAnalytics__({});
+              return true;
+            }
+          };
+
+          if (typeof data === 'string') {
+            return pushPayload(data);
+          }
+          if (data instanceof Blob) {
+            const reader = new FileReader();
+            reader.addEventListener('load', () => {
+              pushPayload(reader.result ? String(reader.result) : null);
+            });
+            reader.readAsText(data);
+            return true;
+          }
+          if (data instanceof ArrayBuffer || ArrayBuffer.isView(data)) {
+            const buffer = data instanceof ArrayBuffer ? data : (data as ArrayBufferView).buffer;
+            const text = new TextDecoder().decode(buffer);
+            return pushPayload(text);
+          }
+          return pushPayload(null);
+        }
+      } catch {
+        // ignore and fall back to the original implementation
+      }
+      return originalSendBeacon(url, data);
+    };
+
+    const originalFetch = window.fetch.bind(window);
+    window.fetch = async (input: RequestInfo, init?: RequestInit) => {
+      const shouldCapture = (req: RequestInfo) => {
+        if (typeof req === 'string') return req.includes('/api/track');
+        try {
+          return req.url.includes('/api/track');
+        } catch {
+          return false;
+        }
+      };
+
+      if (shouldCapture(input) && init?.method?.toUpperCase() === 'POST' && init.body) {
+        try {
+          let text: string | null = null;
+          if (typeof init.body === 'string') {
+            text = init.body;
+          } else if (init.body instanceof Blob) {
+            text = await init.body.text();
+          } else if (init.body instanceof FormData) {
+            const obj: Record<string, unknown> = {};
+            init.body.forEach((value, key) => {
+              obj[key] = value;
+            });
+            text = JSON.stringify(obj);
+          }
+          if (text) {
+            try {
+              const parsed = JSON.parse(text);
+              window.__captureAnalytics__(parsed);
+            } catch {
+              window.__captureAnalytics__({});
+            }
+          }
+        } catch {
+          window.__captureAnalytics__({});
+        }
+      }
+
+      return originalFetch(input, init);
+    };
   });
 }
 
@@ -37,7 +137,7 @@ test.describe('Landing Page – EN', () => {
   test('hero scroll, voucher copy/share, section views, founder placeholder', async ({ page }) => {
     const events = await interceptAnalytics(page);
 
-    await allowAnalytics(page);
+    await allowAnalytics(page, events);
 
     await page.goto('/en', { waitUntil: 'networkidle' });
     const { origin } = new URL(page.url());

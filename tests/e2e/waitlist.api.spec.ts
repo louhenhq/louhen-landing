@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 const LOCALE = 'en';
 const SHORT_CIRCUIT_ENABLED = process.env.TEST_E2E_SHORTCIRCUIT === 'true';
-const BYPASS_TOKEN = process.env.TEST_E2E_BYPASS_TOKEN || 'e2e-mocked-token';
+const BYPASS_TOKEN = process.env.TEST_E2E_BYPASS_TOKEN || 'dev-bypass';
 
 function validWaitlistPayload() {
   return {
@@ -18,7 +18,7 @@ test.describe('API /api/waitlist', () => {
     const response = await request.post('/api/waitlist', {
       data: {
         locale: LOCALE,
-        captchaToken: 'invalid-token',
+        captchaToken: BYPASS_TOKEN,
         gdprConsent: true,
       },
       headers: { 'content-type': 'application/json' },

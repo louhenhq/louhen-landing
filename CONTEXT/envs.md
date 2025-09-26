@@ -23,6 +23,7 @@ Canonical reference for environment configuration across stages. Update this mat
 - Maintain parity between `APP_BASE_URL` and `NEXT_PUBLIC_SITE_URL` within each environment to avoid mismatched redirects and metadata.
 - Any environment change requires a redeploy for Next.js serverless functions and static output to pick up new values.
 - The waitlist env guard caches public/server snapshots; restart `next dev` after editing `.env*` files so updates are recognised.
+- CI build job runs with public `NEXT_PUBLIC_*` vars only; the Playwright e2e job injects dummy analytics + server envs (never real secrets) so runtime guards and feature tests can execute (including a non-sensitive `HCAPTCHA_SECRET` so schema validation is exercised).
 - Manage preview/production secrets exclusively in Vercel + GitHub; never commit secrets to the repository.
 - Mirror the dummy `NEXT_PUBLIC_*` variables configured in CI within Vercel preview env settings to keep builds passing without server secrets.
 - When rotating STATUS_* credentials, update Vercel, GitHub Secrets, and re-run the status monitor workflow to confirm success.

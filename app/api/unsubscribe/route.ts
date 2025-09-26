@@ -2,7 +2,7 @@ import 'server-only';
 
 import { NextResponse } from 'next/server';
 
-import { upsertSuppression } from '@/lib/email/suppress';
+import { shouldSend, upsertSuppression } from '@/lib/email/suppress';
 import { verifyUnsubToken } from '@/lib/email/tokens';
 
 export const runtime = 'nodejs';
@@ -75,6 +75,21 @@ export async function POST(request: Request) {
   return NextResponse.json({ ok: true });
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  if (process.env.TEST_MODE === '1') {
+    try {
+      const url = new URL(request.url);
+      const email = url.searchParams.get('email');
+      const scopeParam = url.searchParams.get('scope');
+      if (email) {
+        const scope = scopeParam === 'marketing' || scopeParam === 'transactional' ? scopeParam : 'all';
+        const result = await shouldSend({ email, scope });
+        return NextResponse.json({ ok: true, allowed: result.allowed });
+      }
+    } catch {
+      // fall through to generic response
+    }
+  }
+
   return NextResponse.json({ ok: true });
 }

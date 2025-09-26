@@ -44,15 +44,10 @@ test.describe('status diagnostics page', () => {
   test.skip(!HAS_CREDS, 'STATUS credentials missing');
 
   test('renders key fields after auth', async ({ page }) => {
-    await page.route('**/api/status', (route) => {
-      const headers = {
-        ...route.request().headers(),
-        authorization: AUTH_HEADER,
-      };
-      route.continue({ headers });
-    });
+    await page.context().setExtraHTTPHeaders({ Authorization: AUTH_HEADER });
 
-    await page.goto('/status');
+    const response = await page.goto('/status', { waitUntil: 'domcontentloaded' });
+    expect(response?.status()).toBe(200);
     await expect(page.getByRole('heading', { name: /Operational diagnostics/i })).toBeVisible();
     await expect(page.getByText(/CSP nonce/i)).toBeVisible();
     await expect(page.getByText(/Transport mode/i)).toBeVisible();
