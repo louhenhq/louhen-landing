@@ -9,7 +9,14 @@ const AUTH_HEADER = `Basic ${Buffer.from(`${STATUS_USER}:${STATUS_PASS}`).toStri
 
 test.describe('status diagnostics API', () => {
   test('returns 401 without auth', async ({ playwright, baseURL }) => {
-    const context = await playwright.request.newContext({ baseURL });
+    const context = await playwright.request.newContext({
+      baseURL,
+      httpCredentials: {
+        username: 'unauthorized-user',
+        password: 'unauthorized-pass',
+      },
+      extraHTTPHeaders: {},
+    });
     const response = await context.get('/api/status');
     await context.dispose();
 
@@ -46,14 +53,28 @@ test.describe('status diagnostics API', () => {
 test.describe('status diagnostics page', () => {
   test.skip(!HAS_CREDS, 'STATUS credentials missing');
 
-  test('renders key fields after auth', async ({ page }) => {
-    await page.context().setExtraHTTPHeaders({ Authorization: AUTH_HEADER });
+  test('renders key fields after auth', async ({ browser, baseURL }) => {
+    const context = await browser.newContext({
+      baseURL,
+      httpCredentials: {
+        username: STATUS_USER,
+        password: STATUS_PASS,
+      },
+      extraHTTPHeaders: {
+        Authorization: AUTH_HEADER,
+      },
+    });
 
-    const response = await page.goto('/status', { waitUntil: 'domcontentloaded' });
-    expect(response?.status()).toBe(200);
-    await expect(page.getByRole('heading', { name: /Operational diagnostics/i })).toBeVisible();
-    await expect(page.getByText(/CSP nonce/i)).toBeVisible();
-    await expect(page.getByText(/Transport mode/i)).toBeVisible();
-    await expect(page.getByText(/Vercel env/i)).toBeVisible();
+    try {
+      const authedPage = await context.newPage();
+      const response = await authedPage.goto('/status', { waitUntil: 'networkidle' });
+      expect(response?.status()).toBe(200);
+      await expect(authedPage.getByRole('heading', { name: /Operational diagnostics/i })).toBeVisible();
+      await expect(authedPage.getByText(/CSP nonce/i)).toBeVisible();
+      await expect(authedPage.getByText(/Transport mode/i)).toBeVisible();
+      await expect(authedPage.getByText(/Vercel env/i)).toBeVisible();
+    } finally {
+      await context.close();
+    }
   });
 });
