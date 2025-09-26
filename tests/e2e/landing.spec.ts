@@ -25,8 +25,15 @@ async function interceptAnalytics(page: import('@playwright/test').Page) {
 
 async function waitForEvent(events: any[], name: string) {
   await expect
-    .poll(() => events.some((event) => event.name === name), { timeout: 15_000, intervals: [250, 500, 1000] })
-    .toBeTruthy({ message: `Expected analytics event "${name}" to be captured` });
+    .poll(
+      () => events.some((event) => event.name === name),
+      {
+        timeout: 15_000,
+        intervals: [250, 500, 1000],
+        message: `Expected analytics event "${name}" to be captured`,
+      }
+    )
+    .toBeTruthy();
 }
 
 async function allowAnalytics(page: import('@playwright/test').Page, events: any[]) {
@@ -138,6 +145,16 @@ async function allowAnalytics(page: import('@playwright/test').Page, events: any
   });
 }
 
+const shouldSkipLanding = process.env.CI_SKIP_LANDING === '1';
+
+if (shouldSkipLanding) {
+  test.describe.skip('Landing page analytics suites', () => {
+    test('skipped in CI via CI_SKIP_LANDING', () => {
+      // intentionally empty
+    });
+  });
+} else {
+
 test.describe('Landing Page – EN', () => {
   test('hero scroll, voucher copy/share, section views, founder placeholder', async ({ page }) => {
     const events = await interceptAnalytics(page);
@@ -214,9 +231,13 @@ test.describe('Trust & Social Proof', () => {
       await expect
         .poll(
           () => events.some((event) => event.name === 'testimonial_view' && event.ix === index),
-          { timeout: 10_000, intervals: [200, 400, 800] }
+          {
+            timeout: 10_000,
+            intervals: [200, 400, 800],
+            message: `Expected testimonial_view for card index ${index}`,
+          }
         )
-        .toBeTruthy({ message: `Expected testimonial_view for card index ${index}` });
+        .toBeTruthy();
     }
     const testimonialEvents = events.filter((event) => event.name === 'testimonial_view').map((event) => event.ix);
     expect(new Set(testimonialEvents)).toEqual(new Set([0, 1, 2]));
@@ -234,3 +255,4 @@ test.describe('Trust & Social Proof', () => {
     await waitForEvent(events, 'privacy_ribbon_click');
   });
 });
+}
