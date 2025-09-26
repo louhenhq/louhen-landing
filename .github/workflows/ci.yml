@@ -144,7 +144,7 @@ jobs:
           STATUS_PASS: ci-secret
           SUPPRESSION_SALT: ci-suppression-salt
           NODE_ENV: test
-        run: npm run test:e2e -- --reporter=html --workers=2
+        run: npm run test:e2e -- --reporter=html,json --workers=2 | tee playwright-report/report.json
         continue-on-error: false
 
       - name: Lighthouse (LHCI)
