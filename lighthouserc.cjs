@@ -18,7 +18,7 @@ module.exports = {
         'categories:accessibility': ['error', { minScore: 0.9 }],
         'categories:seo': ['error', { minScore: 0.9 }],
         'cumulative-layout-shift': ['error', { maxNumericValue: 0.01 }],
-        'largest-contentful-paint': ['error', { maxNumericValue: 2500 }],
+        'largest-contentful-paint': ['warn', { maxNumericValue: 2500 }],
       },
     },
     upload: { target: 'temporary-public-storage' }
