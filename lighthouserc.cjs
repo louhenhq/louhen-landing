@@ -2,7 +2,7 @@ const BASE = process.env.BASE_URL || 'http://localhost:4311';
 module.exports = {
   ci: {
     collect: {
-      url: [`${BASE}/en`],
+      url: [`${BASE}/`, `${BASE}/method`],
       numberOfRuns: 1,
       settings: {
         formFactor: 'mobile',

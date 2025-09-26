@@ -7,7 +7,7 @@ import process from 'node:process';
 import { setTimeout as delay } from 'node:timers/promises';
 
 const BASE_URL = process.env.BASE_URL ?? 'http://localhost:4311';
-const READINESS_PATH = process.env.LHCI_READINESS_PATH ?? '/en';
+const READINESS_PATH = process.env.LHCI_READINESS_PATH ?? '/';
 const MAX_DURATION_MS = (() => {
   const parsed = Number.parseInt(process.env.LHCI_TIMEOUT_MS ?? '', 10);
   if (Number.isFinite(parsed) && parsed > 0) {
@@ -38,8 +38,8 @@ function resolveReadinessUrl() {
 
 async function isServerReady() {
   try {
-    const response = await fetch(resolveReadinessUrl(), { method: 'GET' });
-    return response.ok || response.status >= 200;
+    const response = await fetch(resolveReadinessUrl(), { method: 'GET', redirect: 'manual' });
+    return response.status >= 200 && response.status < 300;
   } catch (error) {
     if (error && typeof error === 'object' && 'code' in error && error.code === 'ECONNREFUSED') {
       return false;
