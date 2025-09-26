@@ -26,7 +26,7 @@ async function interceptAnalytics(page: import('@playwright/test').Page) {
 async function waitForEvent(events: any[], name: string) {
   await expect
     .poll(() => events.some((event) => event.name === name), { timeout: 15_000, intervals: [250, 500, 1000] })
-    .toBeTruthy();
+    .toBeTruthy({ message: `Expected analytics event "${name}" to be captured` });
 }
 
 async function allowAnalytics(page: import('@playwright/test').Page, events: any[]) {
@@ -49,7 +49,7 @@ async function allowAnalytics(page: import('@playwright/test').Page, events: any
       return null;
     };
 
-    const originalSendBeacon = navigator.sendBeacon.bind(navigator);
+    const originalSendBeacon = typeof navigator.sendBeacon === 'function' ? navigator.sendBeacon.bind(navigator) : undefined;
     navigator.sendBeacon = (url, data) => {
       try {
         if (typeof url === 'string' && url.includes('/api/track')) {
@@ -89,7 +89,10 @@ async function allowAnalytics(page: import('@playwright/test').Page, events: any
       } catch {
         // ignore and fall back to the original implementation
       }
-      return originalSendBeacon(url, data);
+      if (originalSendBeacon) {
+        return originalSendBeacon(url, data);
+      }
+      return false;
     };
 
     const originalFetch = window.fetch.bind(window);
@@ -190,6 +193,7 @@ test.describe('Landing Page – DE', () => {
 
     await expect(page.getByRole('button', { name: /zwillingseltern/i })).toBeVisible();
 
+    await page.waitForTimeout(1_200);
     const copyButton = page.getByRole('button', { name: /gutscheincode.*twins5.*kopieren/i });
     await copyButton.click();
     await expect(page.getByText(/kopiert/i)).toBeVisible();
@@ -207,9 +211,13 @@ test.describe('Trust & Social Proof', () => {
     const testimonialCount = await testimonials.count();
     for (let index = 0; index < testimonialCount; index += 1) {
       await testimonials.nth(index).scrollIntoViewIfNeeded();
-      await page.waitForTimeout(200);
+      await expect
+        .poll(
+          () => events.some((event) => event.name === 'testimonial_view' && event.ix === index),
+          { timeout: 10_000, intervals: [200, 400, 800] }
+        )
+        .toBeTruthy({ message: `Expected testimonial_view for card index ${index}` });
     }
-    await waitForEvent(events, 'testimonial_view');
     const testimonialEvents = events.filter((event) => event.name === 'testimonial_view').map((event) => event.ix);
     expect(new Set(testimonialEvents)).toEqual(new Set([0, 1, 2]));
 

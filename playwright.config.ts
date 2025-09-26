@@ -5,8 +5,8 @@ import type { PlaywrightTestConfig } from '@playwright/test';
 const baseURL = process.env.BASE_URL ?? 'http://localhost:4311';
 const shouldSkipWebServer = process.env.PLAYWRIGHT_SKIP === '1';
 
-const statusUser = process.env.STATUS_USER ?? process.env.CI_STATUS_USER ?? '';
-const statusPass = process.env.STATUS_PASS ?? process.env.CI_STATUS_PASS ?? '';
+const statusUser = process.env.STATUS_USER ?? process.env.CI_STATUS_USER ?? 'status-ops';
+const statusPass = process.env.STATUS_PASS ?? process.env.CI_STATUS_PASS ?? 'status-secret';
 
 const testEnv = {
   BASE_URL: baseURL,
@@ -34,8 +34,8 @@ const testEnv = {
   NODE_ENV: 'test',
   SUPPRESSION_SALT: process.env.SUPPRESSION_SALT ?? 'test-salt',
   EMAIL_TRANSPORT: process.env.EMAIL_TRANSPORT ?? 'noop',
-  STATUS_USER: statusUser || 'status-ops',
-  STATUS_PASS: statusPass || 'status-secret',
+  STATUS_USER: statusUser,
+  STATUS_PASS: statusPass,
 } as const;
 
 for (const [key, value] of Object.entries(testEnv)) {

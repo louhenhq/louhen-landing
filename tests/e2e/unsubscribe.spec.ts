@@ -11,12 +11,18 @@ function uniqueEmail() {
 }
 
 async function expectSuppressed(request: import('@playwright/test').APIRequestContext, email: string) {
-  await expect.poll(async () => {
-    const response = await request.get(`/api/unsubscribe?email=${encodeURIComponent(email)}&scope=${TEST_SCOPE}`);
-    expect(response.ok()).toBeTruthy();
-    const data = await response.json();
-    return data.allowed;
-  }).toBe(false);
+  await expect
+    .poll(async () => {
+      const response = await request.get('/api/unsubscribe', {
+        params: { email, scope: TEST_SCOPE },
+      });
+      if (!response.ok()) {
+        return null;
+      }
+      const data = await response.json().catch(() => null);
+      return data?.allowed ?? null;
+    }, { timeout: 5_000, message: `Expected suppression flag for ${email}` })
+    .toBe(false);
 }
 
 test.describe('Unsubscribe flow', () => {
