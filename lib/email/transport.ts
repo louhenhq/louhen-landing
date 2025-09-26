@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
 
-import { ensureWaitlistEnv } from '@/lib/env/guard';
+import { ensureWaitlistServerEnv } from '@/lib/env/guard';
 
 type SendEmailArgs = {
   to: string;
@@ -52,7 +52,7 @@ class ResendTransport implements EmailTransport {
 let notifiedNoop = false;
 
 export function getEmailTransport(): EmailTransport {
-  const envSummary = ensureWaitlistEnv();
+  const envSummary = ensureWaitlistServerEnv();
   const apiKey = process.env.RESEND_API_KEY?.trim();
   const from = process.env.RESEND_FROM?.trim();
   const replyTo = process.env.RESEND_REPLY_TO?.trim();

@@ -14,6 +14,13 @@ jobs:
       CI: true
       NEXT_PUBLIC_ANALYTICS_DISABLED: '1'
       NEXT_PUBLIC_ANALYTICS_DEBUG: '0'
+      NEXT_PUBLIC_ENV: 'ci'
+      NEXT_PUBLIC_SITE_URL: 'https://ci.louhen.app'
+      NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
+      NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
+      NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
+      NEXT_PUBLIC_LOCALES: 'en,de'
+      NEXT_PUBLIC_DEFAULT_LOCALE: 'en'
     steps:
       - name: Checkout
         uses: actions/checkout@v4

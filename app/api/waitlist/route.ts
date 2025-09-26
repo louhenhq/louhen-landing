@@ -8,6 +8,7 @@ import { verifyToken as verifyCaptchaToken } from '@/lib/security/hcaptcha';
 import { generateToken, hashToken } from '@/lib/security/tokens';
 import { getExpiryDate } from '@/lib/waitlistConfirmTtl';
 import { parseSignupDTO } from '@/lib/validation/waitlist';
+import { ensureWaitlistServerEnv } from '@/lib/env/guard';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -45,8 +46,9 @@ export async function POST(request: Request) {
     // TODO: integrate IP/email rate limiting (Slice 3).
     const payload = parseSignupDTO(await readJson(request));
 
+    const { captcha } = ensureWaitlistServerEnv();
     const secret = process.env.HCAPTCHA_SECRET?.trim();
-    if (!secret) {
+    if (!secret || !captcha.hasSecret) {
       throw new InternalServerError('Missing hCaptcha credentials');
     }
 

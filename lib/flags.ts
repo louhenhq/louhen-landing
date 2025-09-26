@@ -1,6 +1,6 @@
-import { ensureWaitlistEnv } from '@/lib/env/guard';
+import { ensureWaitlistPublicEnv } from '@/lib/env/guard';
 
-const waitlistEnv = ensureWaitlistEnv();
+const waitlistEnv = ensureWaitlistPublicEnv();
 
 function parseBooleanFlag(raw: string | null | undefined): boolean | null {
   if (raw === undefined || raw === null) return null;

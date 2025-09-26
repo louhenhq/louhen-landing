@@ -1,7 +1,7 @@
 import { parseConsentCookie } from '@/lib/consent/cookie';
 import { getEmailTransport } from '@/lib/email/transport';
 import { getDb } from '@/lib/firebaseAdmin';
-import { ensureWaitlistEnv } from '@/lib/env/guard';
+import { ensureWaitlistServerEnv } from '@/lib/env/guard';
 import { isTestMode } from '@/lib/testMode';
 
 const startedAt = new Date();
@@ -86,7 +86,7 @@ export async function collectStatusSignals({ headers, fallbackNonce }: { headers
   const nonceHeader = headers.get('x-csp-nonce') || fallbackNonce || '';
   const emailTransport = getEmailTransport().name;
   const suppressionsCount = await countRecentSuppressions();
-  const envSummary = ensureWaitlistEnv();
+  const envSummary = ensureWaitlistServerEnv();
   const emailTransportLive = envSummary.resend.configured && emailTransport === 'resend';
   const envInfo = resolveEnvInfo();
   const envLabel = envInfo.vercelEnv ?? envSummary.runtime.phase;

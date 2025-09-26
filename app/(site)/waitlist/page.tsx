@@ -5,6 +5,7 @@ import { loadWaitlistMessages } from '@/app/(site)/waitlist/_lib/messages';
 import { WAITLIST_URGENCY_COPY_ENABLED } from '@/lib/flags';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function generateMetadata(): Promise<Metadata> {
   const { locale, messages } = await loadWaitlistMessages();
