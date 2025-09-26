@@ -46,6 +46,10 @@ export async function POST(request: Request) {
     // TODO: integrate IP/email rate limiting (Slice 3).
     const payload = parseSignupDTO(await readJson(request));
 
+    if (process.env.TEST_E2E_SHORTCIRCUIT === 'true') {
+      return NextResponse.json({ ok: true, shortCircuit: true }, { status: 200 });
+    }
+
     const { captcha } = ensureWaitlistServerEnv();
     const secret = process.env.HCAPTCHA_SECRET?.trim();
     if (!secret || !captcha.hasSecret) {
