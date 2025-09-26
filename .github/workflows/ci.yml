@@ -147,7 +147,8 @@ jobs:
           NODE_ENV: test
         run: |
           mkdir -p playwright-report
-          npx playwright test --reporter=json=playwright-report/report.json,html --workers=2
+          set -o pipefail
+          npx playwright test --reporter=html,json --workers=2 | tee playwright-report/report.json
         continue-on-error: false
 
       - name: Lighthouse (LHCI)

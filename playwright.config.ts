@@ -49,6 +49,10 @@ const httpCredentials = statusUser && statusPass ? { username: statusUser, passw
 const config: PlaywrightTestConfig = {
   testDir: 'tests/e2e',
   retries: process.env.CI ? 1 : 0,
+  reporter: [
+    ['html'],
+    ['json'],
+  ],
   use: {
     baseURL,
     trace: 'on-first-retry',
