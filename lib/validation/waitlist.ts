@@ -67,17 +67,17 @@ function sanitizeIssues(issues: z.ZodIssue[]): string[] {
   return Array.from(fields);
 }
 
-function parseWithSchema<T>(schema: z.ZodSchema<T>, payload: unknown, errorMessage: string): T {
+function parseWithSchema<T>(schema: z.ZodSchema<T>, payload: unknown, errorMessage: string, errorCode = 'invalid_request'): T {
   const result = schema.safeParse(payload);
   if (result.success) {
     return result.data;
   }
   const details = sanitizeIssues(result.error.issues);
-  throw new BadRequestError('invalid_request', errorMessage, { details });
+  throw new BadRequestError(errorCode, errorMessage, { details });
 }
 
 export function parseSignupDTO(payload: unknown): SignupDTO {
-  return parseWithSchema(signupSchema, payload, 'Invalid waitlist signup request');
+  return parseWithSchema(signupSchema, payload, 'Invalid waitlist signup request', 'invalid_payload');
 }
 
 export function parseResendDTO(payload: unknown): ResendDTO {

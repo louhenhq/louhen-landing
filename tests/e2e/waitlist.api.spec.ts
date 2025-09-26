@@ -8,8 +8,8 @@ function validWaitlistPayload() {
   return {
     email: `e2e+${Date.now()}@example.com`,
     locale: LOCALE,
-    captchaToken: BYPASS_TOKEN,
-    gdprConsent: true,
+    hcaptchaToken: BYPASS_TOKEN,
+    consent: true,
   };
 }
 
@@ -18,8 +18,8 @@ test.describe('API /api/waitlist', () => {
     const response = await request.post('/api/waitlist', {
       data: {
         locale: LOCALE,
-        captchaToken: BYPASS_TOKEN,
-        gdprConsent: true,
+        hcaptchaToken: BYPASS_TOKEN,
+        consent: true,
       },
       headers: { 'content-type': 'application/json' },
     });
@@ -48,8 +48,8 @@ test.describe('API /api/waitlist', () => {
       data: {
         email: 'not-an-email',
         locale: LOCALE,
-        captchaToken: BYPASS_TOKEN,
-        gdprConsent: true,
+        hcaptchaToken: BYPASS_TOKEN,
+        consent: true,
       },
       headers: { 'content-type': 'application/json' },
     });

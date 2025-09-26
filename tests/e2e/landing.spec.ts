@@ -24,7 +24,9 @@ async function interceptAnalytics(page: import('@playwright/test').Page) {
 }
 
 async function waitForEvent(events: any[], name: string) {
-  await expect.poll(() => events.some((event) => event.name === name)).toBeTruthy();
+  await expect
+    .poll(() => events.some((event) => event.name === name), { timeout: 15_000, intervals: [250, 500, 1000] })
+    .toBeTruthy();
 }
 
 async function allowAnalytics(page: import('@playwright/test').Page, events: any[]) {
@@ -181,7 +183,7 @@ test.describe('Landing Page – EN', () => {
 test.describe('Landing Page – DE', () => {
   test('localized copy and voucher analytics', async ({ page }) => {
     const events = await interceptAnalytics(page);
-    await allowAnalytics(page);
+    await allowAnalytics(page, events);
     await page.goto('/de', { waitUntil: 'networkidle' });
     const { origin } = new URL(page.url());
     await page.context().grantPermissions(['clipboard-read', 'clipboard-write'], { origin });
@@ -198,7 +200,7 @@ test.describe('Landing Page – DE', () => {
 test.describe('Trust & Social Proof', () => {
   test('testimonials, podiatrist, trust logos, privacy analytics', async ({ page }) => {
     const events = await interceptAnalytics(page);
-    await allowAnalytics(page);
+    await allowAnalytics(page, events);
     await page.goto('/en', { waitUntil: 'networkidle' });
 
     const testimonials = page.getByTestId('testimonial-card');

@@ -8,8 +8,11 @@ const HAS_CREDS = Boolean(STATUS_USER && STATUS_PASS);
 const AUTH_HEADER = `Basic ${Buffer.from(`${STATUS_USER}:${STATUS_PASS}`).toString('base64')}`;
 
 test.describe('status diagnostics API', () => {
-  test('returns 401 without auth', async ({ request }) => {
-    const response = await request.get('/api/status');
+  test('returns 401 without auth', async ({ playwright, baseURL }) => {
+    const context = await playwright.request.newContext({ baseURL });
+    const response = await context.get('/api/status');
+    await context.dispose();
+
     expect(response.status()).toBe(401);
     const wwwAuth = response.headers()['www-authenticate'];
     expect(wwwAuth).toBeTruthy();
