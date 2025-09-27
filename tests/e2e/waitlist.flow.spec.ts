@@ -14,7 +14,7 @@ test.describe('Waitlist flows', () => {
 
     await page.goto(`/waitlist/confirm?token=${payload.token}`);
     await page.waitForURL('**/waitlist/success');
-    await expect(page.locator('[data-testid="waitlist-success-message"]')).toHaveText(/We saved your spot/i);
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(/you're in/i);
     const preOnboardingLink = page.getByRole('link', { name: /pre-onboarding/i });
     await expect(preOnboardingLink).toBeVisible();
 

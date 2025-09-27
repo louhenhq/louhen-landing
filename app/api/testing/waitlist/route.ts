@@ -5,7 +5,7 @@ import { __test as waitlistTestUtils, markExpiredByTokenHash, upsertPending } fr
 import { createTokenLookupHash } from '@/lib/security/tokens';
 
 export async function POST(request: Request) {
-  if (process.env.NODE_ENV !== 'test') {
+  if (process.env.NODE_ENV !== 'test' && process.env.TEST_E2E_SHORTCIRCUIT !== 'true') {
     return NextResponse.json({ ok: false }, { status: 404 });
   }
 
