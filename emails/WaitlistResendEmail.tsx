@@ -1,7 +1,10 @@
 import * as React from 'react';
 
 import { SITE_NAME } from '@/constants/site';
-import { emailTheme } from '@/emails/emailTheme';
+import { buildEmailTheme } from '@/emails/emailTheme';
+import { emailColors } from '@/lib/email/colors';
+
+const theme = buildEmailTheme(emailColors);
 
 export type WaitlistResendEmailProps = {
   confirmUrl: string;
@@ -9,17 +12,17 @@ export type WaitlistResendEmailProps = {
 };
 
 const bodyStyle: React.CSSProperties = {
-  backgroundColor: emailTheme.background,
-  color: emailTheme.text,
+  backgroundColor: theme.background,
+  color: theme.text,
   fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif",
   margin: 0,
   padding: 0,
 };
 
 const cardStyle: React.CSSProperties = {
-  backgroundColor: emailTheme.card,
+  backgroundColor: theme.card,
   borderRadius: '16px',
-  boxShadow: emailTheme.shadow,
+  boxShadow: theme.shadow,
   margin: '32px auto',
   maxWidth: '560px',
   padding: '32px',
@@ -47,9 +50,9 @@ export function WaitlistResendEmail({ confirmUrl, supportEmail }: WaitlistResend
                     <a
                       href={confirmUrl}
                       style={{
-                        backgroundColor: emailTheme.buttonBackground,
+                        backgroundColor: theme.buttonBackground,
                         borderRadius: '9999px',
-                        color: emailTheme.buttonText,
+                        color: theme.buttonText,
                         display: 'inline-block',
                         fontWeight: 600,
                         padding: '12px 24px',
@@ -63,16 +66,16 @@ export function WaitlistResendEmail({ confirmUrl, supportEmail }: WaitlistResend
                     If the button does not work, copy and paste this link into your browser:
                   </p>
                   <p style={{ margin: '0 0 24px' }}>
-                    <a href={confirmUrl} style={{ color: emailTheme.link, wordBreak: 'break-all' }}>
+                    <a href={confirmUrl} style={{ color: theme.link, wordBreak: 'break-all' }}>
                       {confirmUrl}
                     </a>
                   </p>
-                  <p style={{ fontSize: '12px', color: emailTheme.mutedText, lineHeight: '20px', margin: 0 }}>
+                  <p style={{ fontSize: '12px', color: theme.mutedText, lineHeight: '20px', margin: 0 }}>
                     You are receiving this message because you asked for a fresh confirmation link for the {SITE_NAME} waitlist.
                     {supportEmail ? (
                       <>
                         {' '}Need help? Email{' '}
-                        <a href={`mailto:${supportEmail}`} style={{ color: emailTheme.link }}>
+                        <a href={`mailto:${supportEmail}`} style={{ color: theme.link }}>
                           {supportEmail}
                         </a>
                         .

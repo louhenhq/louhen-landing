@@ -39,6 +39,24 @@ jobs:
       - name: Build design tokens
         run: npm run -w @louhen/design-tokens build
 
+      - name: Color policy (fast scan)
+        env:
+          COLOR_POLICY_MODE: warn
+        run: npm run guard:hex
+
+      - name: Color policy (enforce)
+        env:
+          COLOR_POLICY_MODE: enforce
+        run: npm run ci:color-policy
+
+      - name: Upload color policy report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: color-policy-report
+          path: ci-artifacts/color-policy-report.txt
+          if-no-files-found: warn
+
       - name: Lint
         run: npm run lint
         continue-on-error: false

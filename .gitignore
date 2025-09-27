@@ -45,3 +45,4 @@ next-env.d.ts
 .lighthouseci/
 playwright-report/
 .playwright/
+ci-artifacts/color-policy-report.txt

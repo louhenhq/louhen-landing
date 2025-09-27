@@ -3,15 +3,18 @@ import { SITE_NAME } from '@/constants/site';
 // JSON tokens emitted by Style Dictionary (light defaults)
 import tokens from '@/packages/design-tokens/build/web/tokens.json';
 
-function cssVar(name: string, fallback: string) {
+function cssVar(name: string) {
   // tokens.json keys are CSS vars like "--semantic-color-bg-page"
-  // @ts-expect-error index-by-css-var
-  return (tokens?.[name] as string | undefined) ?? fallback;
+  const value = tokens?.[name as keyof typeof tokens];
+  if (typeof value !== 'string' || value.trim().length === 0) {
+    throw new Error(`Missing expected token: ${name}`);
+  }
+  return value;
 }
 
 export default function manifest(): MetadataRoute.Manifest {
-  const themeColor = cssVar('--semantic-color-bg-page', '#ffffff');
-  const bgColor = cssVar('--semantic-color-bg-page', '#ffffff');
+  const themeColor = cssVar('--semantic-color-bg-page');
+  const bgColor = cssVar('--semantic-color-bg-page');
   return {
     name: SITE_NAME,
     short_name: SITE_NAME,

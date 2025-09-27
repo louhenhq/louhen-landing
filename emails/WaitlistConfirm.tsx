@@ -1,5 +1,8 @@
 import * as React from 'react';
-import { emailTheme } from '@/emails/emailTheme';
+import { buildEmailTheme } from '@/emails/emailTheme';
+import { emailColors } from '@/lib/email/colors';
+
+const theme = buildEmailTheme(emailColors);
 
 type Props = {
   confirmUrl: string;
@@ -12,8 +15,8 @@ const baseStyles = {
     margin: 0,
     padding: 0,
     fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif",
-    backgroundColor: emailTheme.background,
-    color: emailTheme.text,
+    backgroundColor: theme.background,
+    color: theme.text,
   },
   container: {
     maxWidth: '560px',
@@ -21,24 +24,24 @@ const baseStyles = {
     padding: '32px 24px',
   },
   card: {
-    backgroundColor: emailTheme.card,
+    backgroundColor: theme.card,
     borderRadius: '16px',
     padding: '32px',
-    boxShadow: emailTheme.shadow,
+    boxShadow: theme.shadow,
   },
   button: {
     display: 'inline-block',
     padding: '14px 24px',
     borderRadius: '9999px',
-    backgroundColor: emailTheme.buttonBackground,
-    color: emailTheme.buttonText,
+    backgroundColor: theme.buttonBackground,
+    color: theme.buttonText,
     textDecoration: 'none',
     fontWeight: 600,
   },
   footer: {
     marginTop: '32px',
     fontSize: '12px',
-    color: emailTheme.mutedText,
+    color: theme.mutedText,
     lineHeight: 1.6,
     textAlign: 'center' as const,
   },
@@ -72,7 +75,7 @@ export function WaitlistConfirmEmail({ confirmUrl, appName = 'Louhen', supportEm
                         <p style={{ margin: '0 0 24px', lineHeight: 1.6 }}>
                           If the button does not work, copy and paste this link into your browser:
                           <br />
-                          <a href={confirmUrl} style={{ color: emailTheme.link, wordBreak: 'break-all' }}>
+                          <a href={confirmUrl} style={{ color: theme.link, wordBreak: 'break-all' }}>
                             {confirmUrl}
                           </a>
                         </p>
@@ -89,7 +92,7 @@ export function WaitlistConfirmEmail({ confirmUrl, appName = 'Louhen', supportEm
                     <>
                       {' '}
                       Need help? Contact us at{' '}
-                      <a href={`mailto:${supportEmail}`} style={{ color: emailTheme.link }}>
+                      <a href={`mailto:${supportEmail}`} style={{ color: theme.link }}>
                         {supportEmail}
                       </a>
                       .

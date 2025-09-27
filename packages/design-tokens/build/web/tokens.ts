@@ -2677,4 +2677,340 @@ module.exports = {
       },
     },
   },
+  email: {
+    light: {
+      background: {
+        value: "#FFFFFF",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.light.surface.value}",
+        },
+        name: "email-light-background",
+        attributes: {
+          category: "email",
+          type: "light",
+          item: "background",
+        },
+        path: ["email", "light", "background"],
+      },
+      surface: {
+        value: "#FFFFFF",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.neutral.paper.value}",
+        },
+        name: "email-light-surface",
+        attributes: {
+          category: "email",
+          type: "light",
+          item: "surface",
+        },
+        path: ["email", "light", "surface"],
+      },
+      text: {
+        value: "#2B2D42",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.light.onSurface.value}",
+        },
+        name: "email-light-text",
+        attributes: {
+          category: "email",
+          type: "light",
+          item: "text",
+        },
+        path: ["email", "light", "text"],
+      },
+      muted: {
+        value: "#B8BDC6",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.light.outline.value}",
+        },
+        name: "email-light-muted",
+        attributes: {
+          category: "email",
+          type: "light",
+          item: "muted",
+        },
+        path: ["email", "light", "muted"],
+      },
+      link: {
+        value: "#4A90E2",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.status.info.value}",
+        },
+        name: "email-light-link",
+        attributes: {
+          category: "email",
+          type: "light",
+          item: "link",
+        },
+        path: ["email", "light", "link"],
+      },
+      border: {
+        value: "#B8BDC6",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.light.outline.value}",
+        },
+        name: "email-light-border",
+        attributes: {
+          category: "email",
+          type: "light",
+          item: "border",
+        },
+        path: ["email", "light", "border"],
+      },
+      success: {
+        value: "#2BB673",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.status.success.value}",
+        },
+        name: "email-light-success",
+        attributes: {
+          category: "email",
+          type: "light",
+          item: "success",
+        },
+        path: ["email", "light", "success"],
+      },
+      warning: {
+        value: "#F4B400",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.status.warning.value}",
+        },
+        name: "email-light-warning",
+        attributes: {
+          category: "email",
+          type: "light",
+          item: "warning",
+        },
+        path: ["email", "light", "warning"],
+      },
+      danger: {
+        value: "#FF6B6B",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.status.danger.value}",
+        },
+        name: "email-light-danger",
+        attributes: {
+          category: "email",
+          type: "light",
+          item: "danger",
+        },
+        path: ["email", "light", "danger"],
+      },
+      badge: {
+        value: "#1A4E5F",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.brand.teal.value}",
+        },
+        name: "email-light-badge",
+        attributes: {
+          category: "email",
+          type: "light",
+          item: "badge",
+        },
+        path: ["email", "light", "badge"],
+      },
+      badgeText: {
+        value: "#F8F9FA",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.light.onPrimary.value}",
+        },
+        name: "email-light-badge-text",
+        attributes: {
+          category: "email",
+          type: "light",
+          item: "badgeText",
+        },
+        path: ["email", "light", "badgeText"],
+      },
+    },
+    dark: {
+      background: {
+        value: "#1B2130",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.dark.surface.value}",
+        },
+        name: "email-dark-background",
+        attributes: {
+          category: "email",
+          type: "dark",
+          item: "background",
+        },
+        path: ["email", "dark", "background"],
+      },
+      surface: {
+        value: "#FFFFFF",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.dark.inverseSurface.value}",
+        },
+        name: "email-dark-surface",
+        attributes: {
+          category: "email",
+          type: "dark",
+          item: "surface",
+        },
+        path: ["email", "dark", "surface"],
+      },
+      text: {
+        value: "#FFFFFF",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.dark.onSurface.value}",
+        },
+        name: "email-dark-text",
+        attributes: {
+          category: "email",
+          type: "dark",
+          item: "text",
+        },
+        path: ["email", "dark", "text"],
+      },
+      muted: {
+        value: "#3F485A",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.dark.outline.value}",
+        },
+        name: "email-dark-muted",
+        attributes: {
+          category: "email",
+          type: "dark",
+          item: "muted",
+        },
+        path: ["email", "dark", "muted"],
+      },
+      link: {
+        value: "#93C6D0",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.dark.primary.value}",
+        },
+        name: "email-dark-link",
+        attributes: {
+          category: "email",
+          type: "dark",
+          item: "link",
+        },
+        path: ["email", "dark", "link"],
+      },
+      border: {
+        value: "#3F485A",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.dark.outline.value}",
+        },
+        name: "email-dark-border",
+        attributes: {
+          category: "email",
+          type: "dark",
+          item: "border",
+        },
+        path: ["email", "dark", "border"],
+      },
+      success: {
+        value: "#2BB673",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.status.success.value}",
+        },
+        name: "email-dark-success",
+        attributes: {
+          category: "email",
+          type: "dark",
+          item: "success",
+        },
+        path: ["email", "dark", "success"],
+      },
+      warning: {
+        value: "#F4B400",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.status.warning.value}",
+        },
+        name: "email-dark-warning",
+        attributes: {
+          category: "email",
+          type: "dark",
+          item: "warning",
+        },
+        path: ["email", "dark", "warning"],
+      },
+      danger: {
+        value: "#FF6B6B",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.status.danger.value}",
+        },
+        name: "email-dark-danger",
+        attributes: {
+          category: "email",
+          type: "dark",
+          item: "danger",
+        },
+        path: ["email", "dark", "danger"],
+      },
+      badge: {
+        value: "#93C6D0",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.dark.primary.value}",
+        },
+        name: "email-dark-badge",
+        attributes: {
+          category: "email",
+          type: "dark",
+          item: "badge",
+        },
+        path: ["email", "dark", "badge"],
+      },
+      badgeText: {
+        value: "#2B2D42",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.dark.onPrimary.value}",
+        },
+        name: "email-dark-badge-text",
+        attributes: {
+          category: "email",
+          type: "dark",
+          item: "badgeText",
+        },
+        path: ["email", "dark", "badgeText"],
+      },
+    },
+  },
 };

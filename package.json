@@ -14,6 +14,7 @@
     "start:test": "PORT=4311 next start",
     "lint": "next lint",
     "guard:hex": "node scripts/guard-hex.mjs",
+    "ci:color-policy": "node scripts/guard-hex.mjs --ci --report ci-artifacts/color-policy-report.txt",
     "test": "npm run test:unit",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",

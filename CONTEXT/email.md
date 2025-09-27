@@ -32,6 +32,11 @@ Authoritative playbook for transactional email on louhen.app using Resend. Keep 
 
 Keep `RESEND_FROM`/`RESEND_REPLY_TO` identical across environments unless governance changes.
 
+## Visual System & Palette
+- Colours for HTML emails are generated from design tokens. Run `npm run -w @louhen/design-tokens build` to refresh `lib/email/colors.ts` (light + optional dark).
+- Templates must import `emailColors` (and optionally `emailColorsDark`) and derive styles through helpers in `emails/emailTheme.ts`. Never inline hex values or CSS variables in template markup — palette changes flow through the generator.
+- Palette updates require design sign-off and a short changelog showing light/dark previews before merging.
+
 ## Compliance Headers (to be enforced in code)
 - `List-Unsubscribe`: both mailto and HTTPS one-click URLs.
 - `List-Unsubscribe-Post: List-Unsubscribe=One-Click`.
