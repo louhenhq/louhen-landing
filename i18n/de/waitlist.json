@@ -40,7 +40,9 @@
       "title": "Bestätigungslink abgelaufen",
       "subtitle": "Fordere einen neuen Link an, um deine Anmeldung abzuschließen.",
       "resend": {
-        "cta": "Neuen Bestätigungslink senden"
+        "cta": "Neuen Bestätigungslink senden",
+        "success": "Schau in dein Postfach – der neue Bestätigungslink ist unterwegs.",
+        "rateLimited": "Zu viele Versuche. Bitte versuch es in Kürze erneut."
       }
     },
     "already": {
@@ -88,6 +90,7 @@
     "email": {
       "invalid": "Bitte gib eine gültige E-Mail-Adresse ein."
     },
-    "generic": "Etwas ist schiefgelaufen. Bitte versuch es erneut."
+    "generic": "Etwas ist schiefgelaufen. Bitte versuch es erneut.",
+    "rateLimited": "Zu viele Anfragen. Bitte versuch es später noch einmal."
   }
 }

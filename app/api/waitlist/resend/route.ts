@@ -4,6 +4,8 @@ import { NextResponse } from 'next/server';
 import { BadRequestError, HttpError, InternalServerError } from '@/lib/http/errors';
 import { findByEmail, upsertPending } from '@/lib/firestore/waitlist';
 import { sendWaitlistConfirmEmail } from '@/lib/email/sendWaitlistConfirm';
+import { enforceRateLimit } from '@/lib/rate/limiter';
+import { getWaitlistResendRule } from '@/lib/rate/rules';
 import { verifyToken as verifyCaptchaToken } from '@/lib/security/hcaptcha';
 import { generateToken, hashToken } from '@/lib/security/tokens';
 import { getExpiryDate } from '@/lib/waitlistConfirmTtl';
@@ -44,6 +46,19 @@ function errorResponse(error: HttpError) {
 export async function POST(request: Request) {
   try {
     const payload = parseResendDTO(await readJson(request));
+
+    const rateDecision = await enforceRateLimit(getWaitlistResendRule(), payload.email);
+    if (!rateDecision.allowed) {
+      return NextResponse.json(
+        { ok: false, code: 'rate_limited' },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': rateDecision.retryAfterSeconds.toString(),
+          },
+        }
+      );
+    }
 
     const { captcha } = ensureWaitlistServerEnv();
     const secret = process.env.HCAPTCHA_SECRET?.trim();

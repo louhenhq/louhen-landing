@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { createTranslator } from 'next-intl';
 import ShareButtons from '@/app/(site)/components/ShareButtons';
+import WaitlistSuccessAnalytics from '@/app/(site)/waitlist/_components/WaitlistSuccessAnalytics';
 import { loadWaitlistMessages } from '@/app/(site)/waitlist/_lib/messages';
 
 export const dynamic = 'force-dynamic';
@@ -12,6 +13,7 @@ export default async function WaitlistSuccessPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-6 py-12 text-slate-800">
+      <WaitlistSuccessAnalytics locale={locale} />
       <h1 className="text-3xl font-semibold tracking-tight text-slate-900">{t('success.title')}</h1>
       <p className="text-base leading-relaxed text-slate-600">{t('success.subtitle')}</p>
 

@@ -1,9 +1,12 @@
 import 'server-only';
 
+import { randomUUID } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { BadRequestError, HttpError, InternalServerError } from '@/lib/http/errors';
 import { upsertPending } from '@/lib/firestore/waitlist';
 import { sendWaitlistConfirmEmail } from '@/lib/email/sendWaitlistConfirm';
+import { enforceRateLimit } from '@/lib/rate/limiter';
+import { getWaitlistSubmitRule } from '@/lib/rate/rules';
 import { verifyToken as verifyCaptchaToken } from '@/lib/security/hcaptcha';
 import { generateToken, hashToken } from '@/lib/security/tokens';
 import { getExpiryDate } from '@/lib/waitlistConfirmTtl';
@@ -29,6 +32,23 @@ function resolveRemoteIp(request: Request): string | undefined {
   return realIp?.trim() || undefined;
 }
 
+function resolveRateIdentifier(request: Request): string {
+  const remoteIp = resolveRemoteIp(request);
+  if (remoteIp) {
+    return remoteIp;
+  }
+
+  const headerCandidates = ['x-vercel-id', 'x-request-id', 'x-amzn-trace-id'];
+  for (const header of headerCandidates) {
+    const value = request.headers.get(header);
+    if (value && value.trim()) {
+      return `req:${value.trim()}`;
+    }
+  }
+
+  return `req:${randomUUID()}`;
+}
+
 function errorResponse(error: HttpError) {
   return NextResponse.json(
     {
@@ -43,8 +63,20 @@ function errorResponse(error: HttpError) {
 
 export async function POST(request: Request) {
   try {
-    // TODO: integrate IP/email rate limiting (Slice 3).
     const payload = parseSignupDTO(await readJson(request));
+
+    const rateDecision = await enforceRateLimit(getWaitlistSubmitRule(), resolveRateIdentifier(request));
+    if (!rateDecision.allowed) {
+      return NextResponse.json(
+        { ok: false, code: 'rate_limited' },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': rateDecision.retryAfterSeconds.toString(),
+          },
+        }
+      );
+    }
 
     if (process.env.TEST_E2E_SHORTCIRCUIT === 'true') {
       return NextResponse.json({ ok: true, shortCircuit: true }, { status: 200 });

@@ -40,7 +40,9 @@
       "title": "Confirmation link expired",
       "subtitle": "Request a fresh link to finish your signup.",
       "resend": {
-        "cta": "Send a new confirmation email"
+        "cta": "Send a new confirmation email",
+        "success": "Check your inbox for a fresh confirmation link.",
+        "rateLimited": "Too many requests right now. Please try again soon."
       }
     },
     "already": {
@@ -88,6 +90,7 @@
     "email": {
       "invalid": "Enter a valid email address."
     },
-    "generic": "Something went wrong. Please try again."
+    "generic": "Something went wrong. Please try again.",
+    "rateLimited": "Too many requests right now. Please try again soon."
   }
 }

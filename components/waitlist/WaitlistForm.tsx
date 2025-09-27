@@ -89,11 +89,11 @@ export default function WaitlistForm({ defaultEmail = '', source }: WaitlistForm
     setStatus('loading');
     setMessage('');
 
-    track({
+    void track({
       name: 'waitlist_signup_submitted',
-      source: normalizedSource,
       locale,
-      hasConsent: true,
+      hasUtm: Boolean(normalizedSource),
+      hasRef: Boolean(normalizedSource),
     });
 
     try {

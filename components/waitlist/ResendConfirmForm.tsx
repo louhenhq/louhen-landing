@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, type ChangeEvent, type FormEvent } from 'react';
+import { useLocale } from 'next-intl';
 import { buttons, cn, layout, text } from '@/app/(site)/_lib/ui';
 import { track } from '@/lib/clientAnalytics';
 
@@ -23,8 +24,10 @@ type ResendConfirmFormProps = {
 };
 
 type Status = 'idle' | 'loading' | 'success' | 'error';
+type ResendOutcome = 'ok' | 'rate_limited' | 'error';
 
 export function ResendConfirmForm({ strings }: ResendConfirmFormProps) {
+  const locale = useLocale();
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<Status>('idle');
   const [message, setMessage] = useState('');
@@ -35,7 +38,7 @@ export function ResendConfirmForm({ strings }: ResendConfirmFormProps) {
 
     setStatus('loading');
     setMessage('');
-    track({ name: 'waitlist_resend_requested' });
+    let outcome: ResendOutcome = 'ok';
 
     try {
       const response = await fetch('/api/waitlist/resend', {
@@ -46,16 +49,19 @@ export function ResendConfirmForm({ strings }: ResendConfirmFormProps) {
       const payload = await response.json().catch(() => ({}));
 
       if (response.status === 429) {
+        outcome = 'rate_limited';
         setStatus('error');
         setMessage(strings.rateLimited);
         return;
       }
       if (response.status === 400) {
+        outcome = 'error';
         setStatus('error');
         setMessage(strings.invalid);
         return;
       }
       if (!response.ok || payload?.ok === false) {
+        outcome = 'error';
         setStatus('error');
         setMessage(strings.error);
         return;
@@ -64,8 +70,11 @@ export function ResendConfirmForm({ strings }: ResendConfirmFormProps) {
       setStatus('success');
       setMessage(strings.success);
     } catch {
+      outcome = 'error';
       setStatus('error');
       setMessage(strings.error);
+    } finally {
+      void track({ name: 'waitlist_resend_requested', locale, outcome });
     }
   }
 

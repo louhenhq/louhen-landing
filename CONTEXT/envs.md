@@ -10,6 +10,11 @@
 - Update production secrets in Vercel before launch; preview stays isolated to the staging branch.
 - Any change to environment variables requires a redeploy to ensure functions and static prerenders pick up new values.
 
+## Waitlist rate limiting
+
+- `WAITLIST_RATE_SUBMITS_PER_HOUR_PER_IP` — soft cap for `/api/waitlist` submissions per IP per hour (defaults to `10` when unset or invalid).
+- `WAITLIST_RATE_RESENDS_PER_30M_PER_EMAIL` — soft cap for `/api/waitlist/resend` per email per 30 minutes (defaults to `3`).
+
 ## CI secrets
 
 - `VERCEL_AUTOMATION_BYPASS_SECRET` — used to send the `x-vercel-protection-bypass` header when Deployment Protection is active.

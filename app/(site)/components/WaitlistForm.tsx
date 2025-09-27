@@ -1,8 +1,9 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import ConsentNotice from '@/app/(site)/components/ConsentNotice';
+import { track } from '@/lib/clientAnalytics';
 
 type WaitlistFormProps = {
   defaultEmail?: string;
@@ -29,11 +30,27 @@ export default function WaitlistForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [hasUtm, setHasUtm] = useState(false);
 
   const emailTrimmed = email.trim();
   const emailTouched = email.length > 0;
   const emailIsValid = useMemo(() => (emailTrimmed ? isValidEmail(emailTrimmed) : false), [emailTrimmed]);
   const showInlineEmailError = emailTouched && !emailIsValid;
+  const hasRef = useMemo(() => Boolean(source && source.trim()), [source]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const utmPresent = Array.from(params.keys()).some((key) => key.toLowerCase().startsWith('utm_'));
+      setHasUtm(utmPresent);
+    } catch (error) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn('[waitlist:utm-detect]', error instanceof Error ? error.message : error);
+      }
+      setHasUtm(false);
+    }
+  }, []);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -59,6 +76,8 @@ export default function WaitlistForm({
     setError(null);
     setIsSubmitting(true);
 
+    void track({ name: 'waitlist_signup_submitted', locale, hasUtm, hasRef });
+
     try {
       const response = await fetch('/api/waitlist', {
         method: 'POST',
@@ -74,8 +93,27 @@ export default function WaitlistForm({
         }),
       });
 
+      const responseBody = await response.json().catch(() => ({}));
+
+      void track({
+        name: 'waitlist_signup_result',
+        ok: response.ok,
+        code: typeof responseBody?.code === 'string' ? responseBody.code : null,
+        source: source ?? null,
+        locale,
+        status: response.status,
+      });
+
       if (!response.ok) {
-        throw new Error('waitlist_request_failed');
+        if (response.status === 429) {
+          setError(errorsT('rateLimited'));
+          setSuccessMessage(null);
+          return;
+        }
+
+        setError(errorsT('generic'));
+        setSuccessMessage(null);
+        return;
       }
 
       const payload = { email: emailTrimmed, consent: true, locale, source: source ?? undefined };
