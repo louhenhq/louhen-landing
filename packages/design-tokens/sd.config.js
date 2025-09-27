@@ -41,7 +41,7 @@ StyleDictionary.registerFormat({
 
     const dark = groups.get('dark');
     const lines = [];
-    lines.push('// AUTO-GENERATED FILE. Update design tokens and re-run the token build to regenerate.');
+    lines.push('// GENERATED FILE - DO NOT EDIT. Generated from design tokens.');
     lines.push('// Source: packages/design-tokens/tokens/tokens.json (email.* tokens)');
     lines.push('export const emailColors = {');
     lines.push(buildObject(light));

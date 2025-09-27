@@ -1,4 +1,4 @@
-// AUTO-GENERATED FILE. Update design tokens and re-run the token build to regenerate.
+// GENERATED FILE - DO NOT EDIT. Generated from design tokens.
 // Source: packages/design-tokens/tokens/tokens.json (email.* tokens)
 export const emailColors = {
   background: '#FFFFFF',

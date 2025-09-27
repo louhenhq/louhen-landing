@@ -25,6 +25,8 @@ const ALLOWED_FILES = new Set([
   resolve(ROOT, 'lib/email/colors.ts'),
 ]);
 
+const GENERATED_HEADER = '// GENERATED FILE - DO NOT EDIT. Generated from design tokens.';
+
 const REPORT_HEADER = '# Color policy violations';
 
 const optionArgsEnd = process.argv.indexOf('--');
@@ -62,7 +64,10 @@ if (reportPath) {
 }
 
 function shouldSkipPath(absPath) {
-  if (ALLOWED_FILES.has(absPath)) return true;
+  if (ALLOWED_FILES.has(absPath)) {
+    verifyGeneratedHeader(absPath);
+    return true;
+  }
   const normalized = absPath.split(/\\|\//).join('/');
   return SKIP_PATH_SNIPPETS.some((snippet) => normalized.includes(snippet));
 }
@@ -110,6 +115,18 @@ if (scanAll) {
 
 const hexViolations = new Map();
 const emailViolations = [];
+const generatedHeaderViolations = [];
+
+function verifyGeneratedHeader(absPath) {
+  try {
+    const firstLine = readFileSync(absPath, 'utf8').split(/\r?\n/, 1)[0]?.trim();
+    if (firstLine !== GENERATED_HEADER) {
+      generatedHeaderViolations.push({ file: absPath, expected: GENERATED_HEADER, actual: firstLine || '' });
+    }
+  } catch (error) {
+    generatedHeaderViolations.push({ file: absPath, expected: GENERATED_HEADER, actual: '<<unable to read file>>' });
+  }
+}
 
 function recordHex(file, line, matches) {
   if (!hexViolations.has(file)) hexViolations.set(file, []);
@@ -142,7 +159,7 @@ for (const file of files) {
   }
 }
 
-const problems = hexViolations.size + emailViolations.length;
+const problems = hexViolations.size + emailViolations.length + generatedHeaderViolations.length;
 
 function formatRelative(absPath) {
   return relative(ROOT, absPath).split(/\\/g).join('/');
@@ -161,6 +178,12 @@ function printViolations() {
   for (const violation of emailViolations) {
     console.error(`\n❌ Email colour policy violation in ${formatRelative(violation.file)}`);
     console.error(`  ${violation.message}`);
+  }
+
+  for (const violation of generatedHeaderViolations) {
+    console.error(`\n❌ Generated palette header missing in ${formatRelative(violation.file)}`);
+    console.error(`  Expected first line: "${violation.expected}"`);
+    console.error(`  Found: "${violation.actual}"`);
   }
 
   if (problems > 0) {
@@ -187,6 +210,9 @@ function writeReport() {
     }
     for (const violation of emailViolations) {
       lines.push(`- EMAIL ${formatRelative(violation.file)} -> ${violation.message}`);
+    }
+    for (const violation of generatedHeaderViolations) {
+      lines.push(`- HEADER ${formatRelative(violation.file)} -> expected "${violation.expected}" but found "${violation.actual}"`);
     }
   }
   mkdirSync(dirname(reportAbs), { recursive: true });
