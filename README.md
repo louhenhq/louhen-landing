@@ -82,6 +82,20 @@ To get started locally:
 - Confirm environment variables are correctly loaded and used.
 - Verify design tokens are up to date and applied consistently.
 - Test deployment pipelines and CI workflows for reliability.
+### QA automation quickstart
+
+Run the automated checks locally before pushing changes:
+
+```bash
+# axe a11y sweep across waitlist routes
+npm run test:axe
+
+# Playwright regression covering happy/expired/resend/pre-onboarding flows
+npx playwright test tests/e2e/waitlist.flow.spec.ts
+
+# Lighthouse budget guard (waitlist route must stay ≥90 across categories)
+npm run lighthouse
+```
 
 ## End-to-End Testing Modes
 

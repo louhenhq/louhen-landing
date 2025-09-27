@@ -28,6 +28,6 @@ export default defineConfig({
     coverage: {
       enabled: false,
     },
-    exclude: ['e2e/**', 'playwright.config.ts', 'tests/e2e/**'],
+    exclude: ['e2e/**', 'playwright.config.ts', 'tests/e2e/**', 'tests/accessibility/**'],
   },
 });

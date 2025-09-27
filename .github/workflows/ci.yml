@@ -166,7 +166,36 @@ jobs:
         run: |
           mkdir -p playwright-report
           set -o pipefail
-          npx playwright test --reporter=html,json --workers=2 | tee playwright-report/report.json
+          npx playwright test --project chromium --reporter=html,json --workers=2 | tee playwright-report/report.json
+        continue-on-error: false
+
+      - name: Accessibility (axe)
+        env:
+          APP_BASE_URL: http://localhost:4311
+          TEST_E2E_SHORTCIRCUIT: 'true'
+          TEST_E2E_BYPASS_TOKEN: e2e-mocked-token
+          NEXT_PUBLIC_ENV: 'ci'
+          NEXT_PUBLIC_SITE_URL: 'https://ci.louhen.app'
+          NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
+          NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
+          NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
+          NEXT_PUBLIC_LOCALES: 'en,de'
+          NEXT_PUBLIC_DEFAULT_LOCALE: 'en'
+          NEXT_PUBLIC_ANALYTICS_DISABLED: '0'
+          NEXT_PUBLIC_ANALYTICS_DEBUG: '1'
+          HCAPTCHA_SECRET: ci-hcaptcha-secret
+          WAITLIST_CONFIRM_TTL_DAYS: '7'
+          FIREBASE_PROJECT_ID: ci-firebase
+          FIREBASE_DB_REGION: eur3
+          FIREBASE_ADMIN_SA_B64: eyJwcm9qZWN0X2lkIjoiY2ktZmlyZWJhc2UifQ==
+          RESEND_API_KEY: ci-resend-key
+          RESEND_FROM: no-reply@ci.louhen.app
+          RESEND_REPLY_TO: hello@ci.louhen.app
+          STATUS_USER: ci-status
+          STATUS_PASS: ci-secret
+          SUPPRESSION_SALT: ci-suppression-salt
+          NODE_ENV: test
+        run: npm run test:axe
         continue-on-error: false
 
       - name: Lighthouse (LHCI)

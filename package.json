@@ -25,6 +25,7 @@
     "qa:e2e": "playwright test",
     "qa:lh": "npm run lighthouse",
     "lighthouse": "node scripts/run-lighthouse.mjs",
+    "test:axe": "npx playwright test --config playwright.config.ts --project accessibility",
     "qa": "start-server-and-test start http://localhost:3000 'npm run qa:e2e && npm run qa:lh'",
     "email:preview": "tsx scripts/email-preview.ts",
     "email:headers": "tsx scripts/email-headers-preview.ts",

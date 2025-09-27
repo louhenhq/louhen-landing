@@ -68,6 +68,7 @@ if (shouldSkipWebServer) {
   config.projects = [
     {
       name: 'chromium',
+      testDir: 'tests/e2e',
       testMatch: /__skip__\.spec\.ts/,
       use: { ...devices['Desktop Chrome'] },
     },
@@ -76,6 +77,12 @@ if (shouldSkipWebServer) {
   config.projects = [
     {
       name: 'chromium',
+      testDir: 'tests/e2e',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'accessibility',
+      testDir: 'tests/accessibility',
       use: { ...devices['Desktop Chrome'] },
     },
   ];

@@ -79,7 +79,31 @@ export async function POST(request: Request) {
     }
 
     if (process.env.TEST_E2E_SHORTCIRCUIT === 'true') {
-      return NextResponse.json({ ok: true, shortCircuit: true }, { status: 200 });
+      const confirmToken = generateToken();
+      const { hash, salt, lookupHash } = hashToken(confirmToken);
+      const expiresAt = getExpiryDate();
+
+      const upsertResult = await upsertPending(payload.email, {
+        locale: payload.locale ?? null,
+        utm: payload.utm,
+        ref: payload.ref ?? null,
+        consent: payload.consent,
+        confirmExpiresAt: expiresAt,
+        confirmTokenHash: hash,
+        confirmTokenLookupHash: lookupHash,
+        confirmSalt: salt,
+      });
+
+      return NextResponse.json(
+        {
+          ok: true,
+          shortCircuit: true,
+          token: confirmToken,
+          lookupHash,
+          docId: upsertResult.docId,
+        },
+        { status: 200 }
+      );
     }
 
     const { captcha } = ensureWaitlistServerEnv();

@@ -60,6 +60,39 @@ export async function POST(request: Request) {
       );
     }
 
+    if (process.env.TEST_E2E_SHORTCIRCUIT === 'true') {
+      const record = await findByEmail(payload.email);
+      if (!record || record.status === 'confirmed') {
+        return NextResponse.json({ ok: true, status: record?.status ?? null }, { status: 200 });
+      }
+
+      const confirmToken = generateToken();
+      const { hash, salt, lookupHash } = hashToken(confirmToken);
+      const expiresAt = getExpiryDate();
+
+      await upsertPending(payload.email, {
+        locale: record.locale ?? null,
+        utm: record.utm ?? undefined,
+        ref: record.ref ?? null,
+        consent: true,
+        confirmExpiresAt: expiresAt,
+        confirmTokenHash: hash,
+        confirmTokenLookupHash: lookupHash,
+        confirmSalt: salt,
+      });
+
+      return NextResponse.json(
+        {
+          ok: true,
+          shortCircuit: true,
+          token: confirmToken,
+          lookupHash,
+          docId: record.id,
+        },
+        { status: 200 }
+      );
+    }
+
     const { captcha } = ensureWaitlistServerEnv();
     const secret = process.env.HCAPTCHA_SECRET?.trim();
     if (!secret || !captcha.hasSecret) {
