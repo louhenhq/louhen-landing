@@ -160,6 +160,19 @@ export function track<E extends AnalyticsEventName>(eventOrPayload: AnalyticsEve
 
   pendingQueue.push(payload);
 
+  if (ANALYTICS_DEBUG && isBrowser) {
+    try {
+      const capture = (window as typeof window & { __captureAnalytics__?: (value: PendingPayload) => void }).__captureAnalytics__;
+      if (typeof capture === 'function') {
+        capture(payload);
+      }
+    } catch (error) {
+      if (ANALYTICS_DEBUG) {
+        console.info('[analytics] debug tap failed', error);
+      }
+    }
+  }
+
   consentGranted = getConsent();
   if (!consentGranted) {
     return Promise.resolve();
@@ -308,7 +321,7 @@ async function dispatch(payload: PendingPayload, attempt = 0): Promise<void> {
   const body = JSON.stringify(payload);
 
   try {
-    if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
+    if (!ANALYTICS_DEBUG && typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
       const success = navigator.sendBeacon(API_ENDPOINT, new Blob([body], { type: 'application/json' }));
       if (success) return;
     }

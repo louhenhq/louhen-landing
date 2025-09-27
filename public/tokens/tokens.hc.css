@@ -168,4 +168,26 @@
   --semantic-hc-color-button-primary-fg: #F8F9FA;
   --semantic-hc-color-button-secondary-bg: #A8DADC;
   --semantic-hc-color-button-secondary-fg: #FFFFFF;
+  --email-light-background: #FFFFFF;
+  --email-light-surface: #FFFFFF;
+  --email-light-text: #2B2D42;
+  --email-light-muted: #B8BDC6;
+  --email-light-link: #4A90E2;
+  --email-light-border: #B8BDC6;
+  --email-light-success: #2BB673;
+  --email-light-warning: #F4B400;
+  --email-light-danger: #FF6B6B;
+  --email-light-badge: #1A4E5F;
+  --email-light-badge-text: #F8F9FA;
+  --email-dark-background: #1B2130;
+  --email-dark-surface: #FFFFFF;
+  --email-dark-text: #FFFFFF;
+  --email-dark-muted: #3F485A;
+  --email-dark-link: #93C6D0;
+  --email-dark-border: #3F485A;
+  --email-dark-success: #2BB673;
+  --email-dark-warning: #F4B400;
+  --email-dark-danger: #FF6B6B;
+  --email-dark-badge: #93C6D0;
+  --email-dark-badge-text: #2B2D42;
 }

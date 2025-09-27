@@ -1,29 +1,39 @@
+import { randomUUID } from 'node:crypto';
+
 import { expect, test } from '@playwright/test';
 
-import { shouldSend } from '@/lib/email/suppress';
 import { buildUnsubUrl } from '@/lib/email/tokens';
 
 const TEST_SCOPE = 'transactional' as const;
 
 function uniqueEmail() {
-  const id = Date.now() + Math.floor(Math.random() * 1000);
-  return `playwright-unsubscribe-${id}@example.com`;
+  return `playwright-unsubscribe-${randomUUID()}@example.com`;
 }
 
-async function expectSuppressed(email: string) {
-  const suppression = await shouldSend({ email, scope: TEST_SCOPE });
-  expect(suppression.allowed).toBe(false);
+async function expectSuppressed(request: import('@playwright/test').APIRequestContext, email: string) {
+  await expect
+    .poll(async () => {
+      const response = await request.get('/api/unsubscribe', {
+        params: { email, scope: TEST_SCOPE },
+      });
+      if (!response.ok()) {
+        return null;
+      }
+      const data = await response.json().catch(() => null);
+      return data?.allowed ?? null;
+    }, { timeout: 5_000, message: `Expected suppression flag for ${email}` })
+    .toBe(false);
 }
 
 test.describe('Unsubscribe flow', () => {
-  test('token link suppresses future sends', async ({ page }) => {
+  test('token link suppresses future sends', async ({ page, request }) => {
     const email = uniqueEmail();
     const url = buildUnsubUrl(email, 'all');
 
     await page.goto(url);
     await expect(page.getByText(/stop emailing/i)).toBeVisible();
 
-    await expectSuppressed(email);
+    await expectSuppressed(request, email);
   });
 
   test('manual unsubscribe via API suppresses email', async ({ page, request }) => {
@@ -35,7 +45,7 @@ test.describe('Unsubscribe flow', () => {
       },
     });
 
-    await expectSuppressed(email);
+    await expectSuppressed(request, email);
 
     await page.goto('/unsubscribe?status=manual-success');
     await expect(page.getByText(/Thanks! Your unsubscribe request/i)).toBeVisible();

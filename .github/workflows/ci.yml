@@ -14,6 +14,13 @@ jobs:
       CI: true
       NEXT_PUBLIC_ANALYTICS_DISABLED: '1'
       NEXT_PUBLIC_ANALYTICS_DEBUG: '0'
+      NEXT_PUBLIC_ENV: 'ci'
+      NEXT_PUBLIC_SITE_URL: 'https://ci.louhen.app'
+      NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
+      NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
+      NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
+      NEXT_PUBLIC_LOCALES: 'en,de'
+      NEXT_PUBLIC_DEFAULT_LOCALE: 'en'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,12 +39,30 @@ jobs:
       - name: Build design tokens
         run: npm run -w @louhen/design-tokens build
 
+      - name: Color policy (fast scan)
+        env:
+          COLOR_POLICY_MODE: warn
+        run: npm run guard:hex
+
+      - name: Color policy (enforce)
+        env:
+          COLOR_POLICY_MODE: enforce
+        run: npm run ci:color-policy
+
+      - name: Upload color policy report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: color-policy-report
+          path: ci-artifacts/color-policy-report.txt
+          if-no-files-found: warn
+
       - name: Lint
         run: npm run lint
         continue-on-error: false
 
       - name: Unit tests
-        run: npm run test:unit
+        run: npm run test
         continue-on-error: false
 
       - name: Build
@@ -55,22 +80,100 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
+      - name: Check Playwright env wiring
+        env:
+          APP_BASE_URL: http://localhost:4311
+          NEXT_PUBLIC_ENV: 'ci'
+          NEXT_PUBLIC_SITE_URL: 'https://ci.louhen.app'
+          NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
+          NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
+          NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
+          NEXT_PUBLIC_LOCALES: 'en,de'
+          NEXT_PUBLIC_DEFAULT_LOCALE: 'en'
+          NEXT_PUBLIC_ANALYTICS_DISABLED: '0'
+          NEXT_PUBLIC_ANALYTICS_DEBUG: '1'
+          HCAPTCHA_SECRET: ci-hcaptcha-secret
+          WAITLIST_CONFIRM_TTL_DAYS: '7'
+          FIREBASE_PROJECT_ID: ci-firebase
+          FIREBASE_DB_REGION: eur3
+          FIREBASE_ADMIN_SA_B64: eyJwcm9qZWN0X2lkIjoiY2ktZmlyZWJhc2UifQ==
+          RESEND_API_KEY: ci-resend-key
+          RESEND_FROM: no-reply@ci.louhen.app
+          RESEND_REPLY_TO: hello@ci.louhen.app
+          STATUS_USER: ci-status
+          STATUS_PASS: ci-secret
+          SUPPRESSION_SALT: ci-suppression-salt
+        run: |
+          required_envs=(
+            NEXT_PUBLIC_ANALYTICS_DISABLED
+            NEXT_PUBLIC_ANALYTICS_DEBUG
+            NEXT_PUBLIC_ENV
+            NEXT_PUBLIC_SITE_URL
+            NEXT_PUBLIC_HCAPTCHA_SITE_KEY
+            NEXT_PUBLIC_WAITLIST_URGENCY
+            NEXT_PUBLIC_COMMIT_SHA
+            NEXT_PUBLIC_LOCALES
+            NEXT_PUBLIC_DEFAULT_LOCALE
+            APP_BASE_URL
+            FIREBASE_PROJECT_ID
+            FIREBASE_DB_REGION
+            FIREBASE_ADMIN_SA_B64
+            RESEND_API_KEY
+            RESEND_FROM
+            RESEND_REPLY_TO
+            HCAPTCHA_SECRET
+            WAITLIST_CONFIRM_TTL_DAYS
+            STATUS_USER
+            STATUS_PASS
+            SUPPRESSION_SALT
+          )
+          for key in "${required_envs[@]}"; do
+            if [ -z "${!key+x}" ]; then
+              echo "::error::missing $key"
+              exit 1
+            else
+              echo "✅ $key present"
+            fi
+          done
+
       - name: E2E tests (Playwright)
         env:
           APP_BASE_URL: http://localhost:4311
           TEST_E2E_SHORTCIRCUIT: 'true'
           TEST_E2E_BYPASS_TOKEN: e2e-mocked-token
-          HCAPTCHA_SECRET: sk_dummy_for_e2e
+          CI_SKIP_LANDING: '1'
+          NEXT_PUBLIC_ENV: 'ci'
+          NEXT_PUBLIC_SITE_URL: 'https://ci.louhen.app'
+          NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
+          NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
+          NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
+          NEXT_PUBLIC_LOCALES: 'en,de'
+          NEXT_PUBLIC_DEFAULT_LOCALE: 'en'
+          NEXT_PUBLIC_ANALYTICS_DISABLED: '0'
+          NEXT_PUBLIC_ANALYTICS_DEBUG: '1'
+          HCAPTCHA_SECRET: ci-hcaptcha-secret
+          WAITLIST_CONFIRM_TTL_DAYS: '7'
+          FIREBASE_PROJECT_ID: ci-firebase
+          FIREBASE_DB_REGION: eur3
+          FIREBASE_ADMIN_SA_B64: eyJwcm9qZWN0X2lkIjoiY2ktZmlyZWJhc2UifQ==
+          RESEND_API_KEY: ci-resend-key
+          RESEND_FROM: no-reply@ci.louhen.app
+          RESEND_REPLY_TO: hello@ci.louhen.app
+          STATUS_USER: ci-status
+          STATUS_PASS: ci-secret
+          SUPPRESSION_SALT: ci-suppression-salt
           NODE_ENV: test
-        run: npm run test:e2e -- --reporter=html --workers=2
+        run: |
+          mkdir -p playwright-report
+          set -o pipefail
+          npx playwright test --reporter=html,json --workers=2 | tee playwright-report/report.json
         continue-on-error: false
 
       - name: Lighthouse (LHCI)
+        timeout-minutes: 10
         env:
           BASE_URL: http://localhost:4311
-        run: |
-          npx start-server-and-test "next start -p 4311" http://localhost:4311 \
-            "npm run qa:lh -- --config=./lighthouserc.cjs --collect.startServerCommand="
+        run: npm run lighthouse
         continue-on-error: false
 
       - name: Upload Playwright report
@@ -97,8 +200,22 @@ jobs:
           path: .next/trace
           if-no-files-found: ignore
 
+
+  enforce-release-source:
+    # Guard: only allow PRs into production if they originate from staging
+    if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'production'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if head is not staging
+        run: |
+          if [ "${{ github.event.pull_request.head.ref }}" != "staging" ]; then
+            echo "❌ PRs into 'production' must originate from 'staging'."
+            exit 1
+          fi
+          echo "✅ Source branch is 'staging' — release guard passed."
+
   release:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/production'
     needs: build-and-test
     runs-on: ubuntu-latest
     permissions:

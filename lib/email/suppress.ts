@@ -43,7 +43,16 @@ function mapScope(value?: string): SuppressionScope {
 }
 
 const COLLECTION = 'suppressions';
-const MEMORY_SUPPRESSIONS = new Map<string, SuppressionRecord>();
+type SuppressionStore = Map<string, SuppressionRecord>;
+const suppressionGlobal = globalThis as typeof globalThis & {
+  __LOUHEN_SUPPRESSIONS__?: SuppressionStore;
+};
+
+const MEMORY_SUPPRESSIONS: SuppressionStore = suppressionGlobal.__LOUHEN_SUPPRESSIONS__ ?? new Map<string, SuppressionRecord>();
+
+if (!suppressionGlobal.__LOUHEN_SUPPRESSIONS__) {
+  suppressionGlobal.__LOUHEN_SUPPRESSIONS__ = MEMORY_SUPPRESSIONS;
+}
 
 export async function isSuppressed(email: string, scope: SuppressionScope): Promise<{ suppressed: boolean; record?: SuppressionRecord }>
 {

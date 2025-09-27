@@ -1,121 +1,231 @@
 #!/usr/bin/env node
-import { readFileSync, statSync, readdirSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { dirname, extname, join, relative, resolve } from 'node:path';
 
+const ROOT = resolve('.');
 const HEX_RE = /#[0-9a-fA-F]{3,8}\b/g;
+const INCLUDE_EXTS = new Set(['.ts', '.tsx', '.js', '.jsx', '.css', '.scss', '.md', '.mdx']);
 
-const IGNORE_DIRS = new Set([
-  'node_modules',
-  '.next',
-  'public/tokens',
-  'packages',
-  'dist',
-  'build',
-]);
-
-const ALLOWED_EXTS = new Set([
-  '.ts',
-  '.tsx',
-  '.js',
-  '.jsx',
-  '.css',
-  '.scss',
-  '.md',
-  '.mdx',
-  '.html',
-  '.json',
-  '.svg',
-]);
-
-const IGNORE_PATH_PARTS = [
-  '/tokens/tokens.json',
-  '/tokens/tokens.css',
-  '/tokens/tokens.dark.css',
-  '/tokens/tokens.hc.css',
-  '/build/web/tokens',
+const SKIP_PATH_SNIPPETS = [
+  `${join('', 'node_modules')}`,
+  `${join('', '.next')}`,
+  `${join('', '.git')}`,
+  `${join('', 'dist')}`,
+  `${join('', 'build')}`,
+  `${join('', 'coverage')}`,
+  `${join('', '.cache')}`,
+  `${join('', 'playwright-report')}`,
+  `${join('', 'test-results')}`,
+  `${join('', 'ci-artifacts')}`,
+  `${join('', 'public', 'tokens')}`,
+  `${join('', 'packages', 'design-tokens')}`,
 ];
 
-function isTextPath(p) {
-  for (const ext of ALLOWED_EXTS) {
-    if (p.endsWith(ext)) return true;
+const ALLOWED_FILES = new Set([
+  resolve(ROOT, 'lib/email/colors.ts'),
+]);
+
+const GENERATED_HEADER = '// GENERATED FILE - DO NOT EDIT. Generated from design tokens.';
+
+const REPORT_HEADER = '# Color policy violations';
+
+const optionArgsEnd = process.argv.indexOf('--');
+const optionArgs = optionArgsEnd === -1 ? process.argv.slice(2) : process.argv.slice(2, optionArgsEnd);
+const fileArgs = optionArgsEnd === -1 ? [] : process.argv.slice(optionArgsEnd + 1).filter(Boolean);
+
+let scanAll = false;
+let reportPath;
+let reportAbs;
+let mode = 'enforce';
+
+const envMode = process.env.COLOR_POLICY_MODE?.toLowerCase().trim();
+if (envMode === 'warn' || envMode === 'enforce') {
+  mode = envMode;
+}
+
+for (let i = 0; i < optionArgs.length; i += 1) {
+  const arg = optionArgs[i];
+  if (arg === '--ci' || arg === '--mode=ci' || arg === '--all') {
+    scanAll = true;
+  } else if (arg === '--report') {
+    reportPath = optionArgs[i + 1];
+    i += 1;
+  } else if (arg.startsWith('--report=')) {
+    reportPath = arg.split('=')[1];
+  } else if (arg === '--warn' || arg === '--mode=warn') {
+    mode = 'warn';
+  } else if (arg === '--enforce' || arg === '--mode=enforce') {
+    mode = 'enforce';
   }
-  return false;
 }
 
-function isIgnoredPath(p) {
-  if (IGNORE_PATH_PARTS.some((part) => p.includes(part))) return true;
-  const segments = p.split(/[\\/]+/);
-  return segments.some((seg) => IGNORE_DIRS.has(seg));
+if (reportPath) {
+  reportAbs = resolve(reportPath);
 }
 
-function scanFile(path) {
-  try {
-    const buf = readFileSync(path, 'utf8');
-    const lines = buf.split(/\r?\n/);
-    const hits = [];
-    for (let i = 0; i < lines.length; i += 1) {
-      const match = lines[i].match(HEX_RE);
-      if (match) {
-        hits.push({ line: i + 1, matches: match });
-      }
-    }
-    return hits;
-  } catch {
-    return [];
+function shouldSkipPath(absPath) {
+  if (ALLOWED_FILES.has(absPath)) {
+    verifyGeneratedHeader(absPath);
+    return true;
   }
+  const normalized = absPath.split(/\\|\//).join('/');
+  return SKIP_PATH_SNIPPETS.some((snippet) => normalized.includes(snippet));
 }
 
-const dashIndex = process.argv.indexOf('--');
-const argvFiles = dashIndex === -1 ? [] : process.argv.slice(dashIndex + 1).filter(Boolean);
-let files = argvFiles;
+function isIncludedExt(absPath) {
+  const ext = extname(absPath);
+  return INCLUDE_EXTS.has(ext);
+}
 
 function walk(dir, acc) {
   for (const entry of readdirSync(dir)) {
-    const p = join(dir, entry);
-    if (isIgnoredPath(p)) continue;
-    const info = statSync(p);
-    if (info.isDirectory()) {
-      walk(p, acc);
-    } else {
-      acc.push(p);
+    const abs = join(dir, entry);
+    if (shouldSkipPath(abs)) continue;
+    let stats;
+    try {
+      stats = statSync(abs);
+    } catch {
+      continue;
+    }
+    if (stats.isDirectory()) {
+      walk(abs, acc);
+    } else if (stats.isFile()) {
+      if (!isIncludedExt(abs)) continue;
+      acc.push(abs);
     }
   }
 }
 
-if (files.length === 0) {
-  const roots = ['app', 'components', 'lib', 'pages', 'styles', 'scripts'];
-  files = [];
-  for (const root of roots) {
-    const base = resolve(root);
+let files = [];
+if (scanAll) {
+  walk(ROOT, files);
+} else if (fileArgs.length > 0) {
+  files = fileArgs.map((f) => resolve(f)).filter((abs) => !shouldSkipPath(abs) && isIncludedExt(abs));
+} else {
+  const defaults = ['app', 'components', 'emails', 'lib', 'scripts', 'src'];
+  for (const dir of defaults) {
+    const abs = resolve(dir);
     try {
-      walk(base, files);
-    } catch {}
+      walk(abs, files);
+    } catch {
+      /* ignore missing directories */
+    }
   }
 }
 
-files = files
-  .map((f) => resolve(f))
-  .filter((f) => !isIgnoredPath(f))
-  .filter((f) => isTextPath(f));
+const hexViolations = new Map();
+const emailViolations = [];
+const generatedHeaderViolations = [];
 
-let violations = 0;
+function verifyGeneratedHeader(absPath) {
+  try {
+    const firstLine = readFileSync(absPath, 'utf8').split(/\r?\n/, 1)[0]?.trim();
+    if (firstLine !== GENERATED_HEADER) {
+      generatedHeaderViolations.push({ file: absPath, expected: GENERATED_HEADER, actual: firstLine || '' });
+    }
+  } catch (error) {
+    generatedHeaderViolations.push({ file: absPath, expected: GENERATED_HEADER, actual: '<<unable to read file>>' });
+  }
+}
+
+function recordHex(file, line, matches) {
+  if (!hexViolations.has(file)) hexViolations.set(file, []);
+  hexViolations.get(file).push({ line, matches });
+}
+
+function isEmailTemplate(absPath) {
+  const rel = relative(ROOT, absPath).split(/\\|\//).join('/');
+  return rel.startsWith('emails/') || rel.startsWith('lib/email/templates/');
+}
 
 for (const file of files) {
-  const hits = scanFile(file);
-  if (hits.length) {
-    const preview = hits
-      .slice(0, 3)
-      .map((hit) => `  line ${hit.line}: ${hit.matches.join(', ')}`)
-      .join('\n');
-    console.error(`\n❌ Hardcoded hex colour(s) in ${file}:\n${preview}${hits.length > 3 ? '\n  ...' : ''}`);
-    violations += 1;
+  let content;
+  try {
+    content = readFileSync(file, 'utf8');
+  } catch {
+    continue;
+  }
+
+  const lines = content.split(/\r?\n/);
+  lines.forEach((line, index) => {
+    const matches = line.match(HEX_RE);
+    if (matches) {
+      recordHex(file, index + 1, matches);
+    }
+  });
+
+  if (isEmailTemplate(file) && !content.includes('emailColors')) {
+    emailViolations.push({ file, message: 'Email templates must import emailColors/emailColorsDark (generated palette).' });
   }
 }
 
-if (violations > 0) {
-  console.error('\nBlocked: Found hardcoded hex colours outside design tokens.');
-  console.error('Use CSS variables from design tokens or add new tokens via @louhen/design-tokens.');
+const problems = hexViolations.size + emailViolations.length + generatedHeaderViolations.length;
+
+function formatRelative(absPath) {
+  return relative(ROOT, absPath).split(/\\/g).join('/');
+}
+
+function printViolations() {
+  for (const [file, hits] of hexViolations.entries()) {
+    const rel = formatRelative(file);
+    console.error(`\n❌ Hardcoded hex colour(s) in ${rel}`);
+    hits.slice(0, 5).forEach((hit) => {
+      console.error(`  line ${hit.line}: ${hit.matches.join(', ')}`);
+    });
+    if (hits.length > 5) console.error('  ...');
+  }
+
+  for (const violation of emailViolations) {
+    console.error(`\n❌ Email colour policy violation in ${formatRelative(violation.file)}`);
+    console.error(`  ${violation.message}`);
+  }
+
+  for (const violation of generatedHeaderViolations) {
+    console.error(`\n❌ Generated palette header missing in ${formatRelative(violation.file)}`);
+    console.error(`  Expected first line: "${violation.expected}"`);
+    console.error(`  Found: "${violation.actual}"`);
+  }
+
+  if (problems > 0) {
+    console.error('\n✋ Replace hex values with design tokens or the generated email palette (emailColors.*).');
+    if (reportAbs) {
+      console.error(`ℹ️  Full report: ${formatRelative(reportAbs)}`);
+    }
+  } else {
+    console.log('✅ No disallowed hex colours detected.');
+  }
+}
+
+function writeReport() {
+  if (!reportAbs) return;
+  const lines = [REPORT_HEADER];
+  if (problems === 0) {
+    lines.push('', '- none ✅');
+  } else {
+    for (const [file, hits] of hexViolations.entries()) {
+      const rel = formatRelative(file);
+      hits.forEach((hit) => {
+        lines.push(`- HEX ${rel}:${hit.line} -> ${hit.matches.join(', ')}`);
+      });
+    }
+    for (const violation of emailViolations) {
+      lines.push(`- EMAIL ${formatRelative(violation.file)} -> ${violation.message}`);
+    }
+    for (const violation of generatedHeaderViolations) {
+      lines.push(`- HEADER ${formatRelative(violation.file)} -> expected "${violation.expected}" but found "${violation.actual}"`);
+    }
+  }
+  mkdirSync(dirname(reportAbs), { recursive: true });
+  writeFileSync(reportAbs, `${lines.join('\n')}\n`, 'utf8');
+}
+
+writeReport();
+printViolations();
+
+if (problems > 0 && mode !== 'warn') {
   process.exit(1);
 }
 
-console.log('✅ No hardcoded hex colours detected in staged files.');
+if (problems > 0 && mode === 'warn') {
+  console.warn('⚠️  Color policy violations detected (warn mode) — CI will stay green, but issues must be resolved.');
+}

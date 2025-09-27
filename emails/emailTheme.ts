@@ -1,11 +1,23 @@
-import semantic from '@louhen/design-tokens/build/web/tokens.json' assert { type: 'json' };
+import { emailColors, emailColorsDark } from '@/lib/email/colors';
 
-const tokens = semantic as Record<string, string>;
+const FALLBACK_SHADOW = 'rgba(43, 45, 66, 0.08)';
 
-const resolve = (name: string, fallback: string) => tokens[name] ?? fallback;
+export type EmailPalette = Readonly<{
+  background: string;
+  surface: string;
+  text: string;
+  muted: string;
+  border: string;
+  link: string;
+  badge: string;
+  badgeText: string;
+  success: string;
+  warning: string;
+  danger: string;
+}>;
 
 const hexToRgb = (hex: string) => {
-  const normalized = hex.replace('#', '');
+  const normalized = hex.replace('#', '').trim();
   if (normalized.length !== 6) return null;
   const bigint = Number.parseInt(normalized, 16);
   const r = (bigint >> 16) & 255;
@@ -21,24 +33,32 @@ const toRgba = (hex: string | undefined, alpha: number, fallback: string) => {
   return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
 };
 
-const neutrals = {
-  cloud: resolve('--color-neutral-cloud', 'rgb(245, 245, 245)'),
-  paper: resolve('--color-neutral-paper', 'rgb(255, 255, 255)'),
-  ink: resolve('--color-neutral-ink', 'rgb(17, 24, 39)'),
+export type EmailTheme = {
+  background: string;
+  text: string;
+  card: string;
+  mutedText: string;
+  border: string;
+  buttonBackground: string;
+  buttonText: string;
+  link: string;
+  shadow: string;
 };
 
-const outline = resolve('--color-light-outline', 'rgb(184, 189, 198)');
+export function buildEmailTheme(palette: EmailPalette): EmailTheme {
+  return {
+    background: palette.background,
+    text: palette.text,
+    card: palette.surface,
+    mutedText: palette.muted,
+    border: palette.border,
+    buttonBackground: palette.badge,
+    buttonText: palette.badgeText,
+    link: palette.link,
+    shadow: toRgba(palette.text, 0.08, FALLBACK_SHADOW),
+  };
+}
 
-export const emailTheme = {
-  background: neutrals.cloud,
-  text: neutrals.ink,
-  card: neutrals.paper,
-  mutedText: outline,
-  border: outline,
-  buttonBackground: neutrals.ink,
-  buttonText: neutrals.paper,
-  link: neutrals.ink,
-  shadow: toRgba(neutrals.ink, 0.08, 'rgba(43, 45, 66, 0.08)'),
-} as const;
+export const emailTheme = buildEmailTheme(emailColors);
 
-export type EmailTheme = typeof emailTheme;
+export const emailThemeDark = buildEmailTheme(emailColorsDark);

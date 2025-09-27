@@ -54,7 +54,11 @@ function ResendForm() {
       onSubmit={async (e) => {
         e.preventDefault();
         try {
-          await fetch('/api/waitlist/resend-confirm', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email }) });
+          await fetch('/api/waitlist/resend', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ email, hcaptchaToken: 'dev-bypass' }),
+          });
           setMsg('Email sent (if your address exists).');
         } catch {
           setMsg('Please try again later.');

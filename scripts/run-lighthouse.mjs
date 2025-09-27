@@ -7,6 +7,14 @@ import process from 'node:process';
 import { setTimeout as delay } from 'node:timers/promises';
 
 const BASE_URL = process.env.BASE_URL ?? 'http://localhost:4311';
+const READINESS_PATH = process.env.LHCI_READINESS_PATH ?? '/';
+const MAX_DURATION_MS = (() => {
+  const parsed = Number.parseInt(process.env.LHCI_TIMEOUT_MS ?? '', 10);
+  if (Number.isFinite(parsed) && parsed > 0) {
+    return parsed;
+  }
+  return 10 * 60 * 1000;
+})();
 const thresholds = {
   performance: 0.9,
   accessibility: 0.9,
@@ -17,11 +25,21 @@ const thresholds = {
 const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 const npxCmd = process.platform === 'win32' ? 'npx.cmd' : 'npx';
 let serverProcess = null;
+let terminationHandlers = [];
+let exiting = false;
+
+function resolveReadinessUrl() {
+  try {
+    return new URL(READINESS_PATH, BASE_URL).toString();
+  } catch {
+    return BASE_URL;
+  }
+}
 
 async function isServerReady() {
   try {
-    const response = await fetch(BASE_URL, { method: 'GET' });
-    return response.ok || response.status >= 200;
+    const response = await fetch(resolveReadinessUrl(), { method: 'GET', redirect: 'manual' });
+    return response.status >= 200 && response.status < 300;
   } catch (error) {
     if (error && typeof error === 'object' && 'code' in error && error.code === 'ECONNREFUSED') {
       return false;
@@ -39,20 +57,6 @@ async function waitForServerReady() {
   throw new Error(`Timed out waiting for server at ${BASE_URL}`);
 }
 
-function runCommand(command, args, options = {}) {
-  return new Promise((resolve, reject) => {
-    const child = spawn(command, args, { stdio: 'inherit', ...options });
-    child.on('error', reject);
-    child.on('exit', (code) => {
-      if (code === 0) {
-        resolve(undefined);
-      } else {
-        reject(new Error(`${command} ${args.join(' ')} exited with code ${code}`));
-      }
-    });
-  });
-}
-
 async function ensureServer() {
   if (await isServerReady()) {
     return false;
@@ -67,28 +71,30 @@ async function ensureServer() {
   }
 
   serverProcess = spawn(npmCmd, ['run', 'start', '--', '--port', port], {
-    env: { ...process.env, BASE_URL },
+    env: { ...process.env, PORT: port, BASE_URL },
     stdio: 'inherit',
   });
 
-  const terminate = () => {
-    if (serverProcess) {
-      serverProcess.kill('SIGINT');
-      serverProcess = null;
+  serverProcess.on('error', (error) => {
+    console.error('[lhci] Failed to start Next.js server', error);
+  });
+
+  const readyPromise = waitForServerReady();
+  let earlyExitHandler;
+  const earlyExitPromise = new Promise((_, reject) => {
+    earlyExitHandler = (code, signal) => {
+      reject(new Error(`[lhci] Next.js server exited early (code: ${code ?? 'null'}, signal: ${signal ?? 'null'})`));
+    };
+    serverProcess.once('exit', earlyExitHandler);
+  });
+
+  try {
+    await Promise.race([readyPromise, earlyExitPromise]);
+  } finally {
+    if (earlyExitHandler) {
+      serverProcess.removeListener('exit', earlyExitHandler);
     }
-  };
-
-  process.on('SIGINT', () => {
-    terminate();
-    process.exit(130);
-  });
-  process.on('SIGTERM', () => {
-    terminate();
-    process.exit(143);
-  });
-  process.on('exit', terminate);
-
-  await waitForServerReady();
+  }
   return true;
 }
 
@@ -130,47 +136,164 @@ async function readLatestSummary() {
   );
 }
 
-async function cleanupServer(started) {
-  if (started && serverProcess) {
-    const child = serverProcess;
-    child.kill('SIGINT');
-    await new Promise((resolve) => {
-      child.once('exit', () => resolve());
-    });
-    serverProcess = null;
+async function stopServer() {
+  if (!serverProcess) {
+    return;
   }
+
+  const child = serverProcess;
+  serverProcess = null;
+
+  if (!child.killed) {
+    child.kill('SIGTERM');
+  }
+
+  const forceTimer = setTimeout(() => {
+    if (!child.killed) {
+      child.kill('SIGKILL');
+    }
+  }, 5_000);
+
+  await new Promise((resolve) => {
+    child.once('exit', () => {
+      clearTimeout(forceTimer);
+      resolve();
+    });
+  });
+}
+
+function registerTerminationHandlers() {
+  const entries = [
+    ['SIGINT', () => gracefulExit(130)],
+    ['SIGTERM', () => gracefulExit(143)],
+    [
+      'uncaughtException',
+      (error) => {
+        console.error('[lhci] Uncaught exception', error);
+        gracefulExit(1);
+      },
+    ],
+    [
+      'unhandledRejection',
+      (reason) => {
+        console.error('[lhci] Unhandled rejection', reason);
+        gracefulExit(1);
+      },
+    ],
+  ];
+
+  terminationHandlers = entries;
+  entries.forEach(([event, handler]) => {
+    process.once(event, handler);
+  });
+}
+
+function removeTerminationHandlers() {
+  terminationHandlers.forEach(([event, handler]) => {
+    process.removeListener(event, handler);
+  });
+  terminationHandlers = [];
+}
+
+async function gracefulExit(code) {
+  if (exiting) {
+    return;
+  }
+  exiting = true;
+  await stopServer();
+  removeTerminationHandlers();
+  process.exitCode = code;
+  process.exit(code);
+}
+
+function formatDuration(ms) {
+  const minutes = Math.floor(ms / 60_000);
+  const seconds = Math.round((ms % 60_000) / 1000);
+  if (minutes <= 0) {
+    return `${seconds}s`;
+  }
+  return `${minutes}m ${seconds}s`;
+}
+
+async function runLighthouseWithTimeout() {
+  return new Promise((resolve, reject) => {
+    const child = spawn(npxCmd, ['lhci', 'autorun', '--config=lighthouserc.cjs'], {
+      env: { ...process.env, BASE_URL },
+      stdio: 'inherit',
+    });
+
+    let timedOut = false;
+    let forceTimer;
+
+    const timeoutTimer = setTimeout(() => {
+      timedOut = true;
+      console.error(`[lhci] Timeout after ${formatDuration(MAX_DURATION_MS)} — terminating Lighthouse run`);
+      child.kill('SIGTERM');
+      forceTimer = setTimeout(() => {
+        if (!child.killed) {
+          child.kill('SIGKILL');
+        }
+      }, 5_000);
+    }, MAX_DURATION_MS);
+
+    child.on('error', (error) => {
+      clearTimeout(timeoutTimer);
+      if (forceTimer) clearTimeout(forceTimer);
+      reject(error);
+    });
+
+    child.on('exit', (code, signal) => {
+      clearTimeout(timeoutTimer);
+      if (forceTimer) clearTimeout(forceTimer);
+      if (timedOut) {
+        reject(new Error(`Lighthouse run exceeded ${formatDuration(MAX_DURATION_MS)}`));
+        return;
+      }
+      if (signal && code === null) {
+        resolve(1);
+        return;
+      }
+      resolve(code ?? 0);
+    });
+  });
 }
 
 (async () => {
-  let startedServer = false;
+  registerTerminationHandlers();
+  let exitCode = 0;
   try {
-    startedServer = await ensureServer();
-    await rm('.lighthouseci', { recursive: true, force: true });
-    await runCommand(npxCmd, ['lhci', 'collect', '--config=lighthouserc.cjs'], { env: { ...process.env, BASE_URL } });
-    const summary = await readLatestSummary();
-    const failing = Object.entries(thresholds).filter(([key, min]) => {
-      const score = typeof summary[key] === 'number' ? summary[key] : 0;
-      return score < min;
-    });
-
-    if (failing.length) {
-      console.error('Lighthouse scores below threshold:');
-      failing.forEach(([key, min]) => {
-        const score = Number.isFinite(summary[key]) ? summary[key] : 0;
-        console.error(`  ${key}: ${(score ?? 0).toFixed(2)} < ${min}`);
-      });
-      process.exitCode = 1;
-      return;
+    const startedServer = await ensureServer();
+    if (startedServer) {
+      console.log('[lhci] Started local Next.js server');
+    } else {
+      console.log('[lhci] Reusing existing server at', BASE_URL);
     }
+    await rm('.lighthouseci', { recursive: true, force: true });
 
-    const report = Object.fromEntries(
-      Object.keys(thresholds).map((key) => [key, Number.isFinite(summary[key]) ? summary[key].toFixed(2) : '0.00'])
-    );
-    console.log('Lighthouse scores', report);
+    const runExitCode = await runLighthouseWithTimeout();
+    exitCode = runExitCode;
+
+    const summary = await readLatestSummary().catch(() => null);
+    if (summary && typeof summary === 'object') {
+      const report = Object.fromEntries(
+        Object.keys(thresholds).map((key) => [key, Number.isFinite(summary[key]) ? summary[key].toFixed(2) : '0.00'])
+      );
+      console.log('Lighthouse scores', report);
+    }
   } catch (error) {
-    console.error(error instanceof Error ? error.message : error);
-    process.exitCode = 1;
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('[lhci] run failed:', message);
+    if (exitCode === 0) {
+      exitCode = 1;
+    }
   } finally {
-    await cleanupServer(startedServer);
+    removeTerminationHandlers();
+    await stopServer();
+    if (!exiting) {
+      exiting = true;
+      process.exit(exitCode);
+    } else {
+      process.exitCode = exitCode;
+    }
   }
 })();

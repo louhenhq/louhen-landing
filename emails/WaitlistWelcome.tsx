@@ -1,5 +1,8 @@
 import * as React from 'react';
-import { emailTheme } from '@/emails/emailTheme';
+import { buildEmailTheme } from '@/emails/emailTheme';
+import { emailColors } from '@/lib/email/colors';
+
+const theme = buildEmailTheme(emailColors);
 
 type Props = {
   appName?: string;
@@ -13,8 +16,8 @@ const styles = {
     margin: 0,
     padding: 0,
     fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif",
-    backgroundColor: emailTheme.background,
-    color: emailTheme.text,
+    backgroundColor: theme.background,
+    color: theme.text,
   },
   container: {
     maxWidth: '560px',
@@ -22,10 +25,10 @@ const styles = {
     padding: '32px 24px',
   },
   card: {
-    backgroundColor: emailTheme.card,
+    backgroundColor: theme.card,
     borderRadius: '16px',
     padding: '32px',
-    boxShadow: emailTheme.shadow,
+    boxShadow: theme.shadow,
   },
   list: {
     paddingLeft: '20px',
@@ -34,7 +37,7 @@ const styles = {
   footer: {
     marginTop: '32px',
     fontSize: '12px',
-    color: emailTheme.mutedText,
+    color: theme.mutedText,
     lineHeight: 1.6,
     textAlign: 'center' as const,
   },
@@ -84,7 +87,7 @@ export function WaitlistWelcomeEmail({ appName = 'Louhen', supportEmail, nextSte
                         {preferencesUrl ? (
                           <p style={{ margin: '24px 0 0', lineHeight: 1.6 }}>
                             Prefer fewer emails?{' '}
-                            <a href={preferencesUrl} style={{ color: emailTheme.link }}>Manage your preferences</a> anytime.
+                            <a href={preferencesUrl} style={{ color: theme.link }}>Manage your preferences</a> anytime.
                           </p>
                         ) : null}
                       </td>
@@ -97,7 +100,7 @@ export function WaitlistWelcomeEmail({ appName = 'Louhen', supportEmail, nextSte
                     <>
                       {' '}
                       Need help? Contact us at{' '}
-                      <a href={`mailto:${supportEmail}`} style={{ color: emailTheme.link }}>
+                      <a href={`mailto:${supportEmail}`} style={{ color: theme.link }}>
                         {supportEmail}
                       </a>
                       .

@@ -17,10 +17,10 @@ export default function ConfirmResendForm() {
     setPending(true);
     setStatus('idle');
     try {
-      const res = await fetch('/api/waitlist/resend-confirm', {
+      const res = await fetch('/api/waitlist/resend', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, hcaptchaToken: 'dev-bypass' }),
       });
       if (res.ok) {
         setStatus('success');

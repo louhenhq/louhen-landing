@@ -14,9 +14,12 @@
     "start:test": "PORT=4311 next start",
     "lint": "next lint",
     "guard:hex": "node scripts/guard-hex.mjs",
+    "ci:color-policy": "node scripts/guard-hex.mjs --ci --report ci-artifacts/color-policy-report.txt",
+    "test": "npm run test:unit",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
     "test:e2e": "playwright test",
+    "axe": "playwright test --grep @axe",
     "test:all": "npm run test:unit && npm run test:e2e",
     "i18n:check": "node scripts/check-i18n-placeholders.mjs",
     "qa:e2e": "playwright test",
@@ -27,15 +30,16 @@
     "email:headers": "tsx scripts/email-headers-preview.ts",
     "release": "semantic-release",
     "e2e:local": "cross-env NODE_ENV=test APP_BASE_URL=http://localhost:4311 TEST_E2E_SHORTCIRCUIT=true TEST_E2E_BYPASS_TOKEN=e2e-mocked-token HCAPTCHA_SECRET=sk_dummy_for_e2e playwright test --reporter=html --workers=2",
-    "e2e:open": "npx playwright show-report"
+    "e2e:open": "npx playwright show-report",
+    "pw:failures": "node scripts/summarize_playwright_failures.mjs"
   },
   "dependencies": {
     "firebase-admin": "^13.5.0",
     "next": "15.5.3",
     "next-intl": "3.26.5",
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
-    "resend": "^3.0.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "resend": "^6.1.0",
     "zod": "3.25.76",
     "zustand": "^4.5.2"
   },
@@ -44,13 +48,15 @@
     "@hcaptcha/react-hcaptcha": "^1.12.1",
     "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.55.0",
-    "@react-email/components": "^0.0.21",
-    "@react-email/render": "^1.1.2",
+    "@react-email/components": "^0.5.5",
+    "@react-email/render": "^1.3.1",
+    "@react-email/tailwind": "^1.2.2",
     "@semantic-release/changelog": "^6",
-    "@semantic-release/commit-analyzer": "^13.0.0",
-    "@semantic-release/git": "^12",
+    "@semantic-release/commit-analyzer": "^12",
+    "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^11",
-    "@semantic-release/release-notes-generator": "^14.0.0",
+    "@semantic-release/npm": "^12",
+    "@semantic-release/release-notes-generator": "^14",
     "@tailwindcss/postcss": "^4.1.13",
     "@testing-library/jest-dom": "^6.8.0",
     "@testing-library/react": "^16.3.0",
@@ -62,12 +68,13 @@
     "@vitest/coverage-v8": "^3.2.4",
     "@vitest/ui": "^3.2.4",
     "autoprefixer": "^10.4.21",
+    "cross-env": "^7",
     "eslint": "^9",
     "eslint-config-next": "15.5.3",
     "husky": "^9.1.7",
     "jsdom": "^24.0.0",
     "lint-staged": "^15.5.2",
-    "semantic-release": "^24.1.0",
+    "semantic-release": "^24",
     "start-server-and-test": "^2.1.2",
     "tailwindcss": "^4.1.13",
     "tiny-invariant": "^1.3.3",
@@ -75,8 +82,7 @@
     "tsx": "^4.19.2",
     "typescript": "^5",
     "undici": "^7.1.0",
-    "vitest": "^3.2.4",
-    "cross-env": "^7"
+    "vitest": "^3.2.4"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx,css,scss,md,mdx,html,json}": [
@@ -85,5 +91,6 @@
   },
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "overrides": {}
 }

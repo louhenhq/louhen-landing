@@ -2,14 +2,14 @@ import { test, expect } from '@playwright/test';
 
 const LOCALE = 'en';
 const SHORT_CIRCUIT_ENABLED = process.env.TEST_E2E_SHORTCIRCUIT === 'true';
-const BYPASS_TOKEN = process.env.TEST_E2E_BYPASS_TOKEN || 'e2e-mocked-token';
+const BYPASS_TOKEN = process.env.TEST_E2E_BYPASS_TOKEN || 'dev-bypass';
 
 function validWaitlistPayload() {
   return {
     email: `e2e+${Date.now()}@example.com`,
     locale: LOCALE,
-    captchaToken: BYPASS_TOKEN,
-    gdprConsent: true,
+    hcaptchaToken: BYPASS_TOKEN,
+    consent: true,
   };
 }
 
@@ -18,8 +18,8 @@ test.describe('API /api/waitlist', () => {
     const response = await request.post('/api/waitlist', {
       data: {
         locale: LOCALE,
-        captchaToken: 'invalid-token',
-        gdprConsent: true,
+        hcaptchaToken: BYPASS_TOKEN,
+        consent: true,
       },
       headers: { 'content-type': 'application/json' },
     });
@@ -48,8 +48,8 @@ test.describe('API /api/waitlist', () => {
       data: {
         email: 'not-an-email',
         locale: LOCALE,
-        captchaToken: BYPASS_TOKEN,
-        gdprConsent: true,
+        hcaptchaToken: BYPASS_TOKEN,
+        consent: true,
       },
       headers: { 'content-type': 'application/json' },
     });
