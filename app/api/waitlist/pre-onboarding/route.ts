@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 import { BadRequestError, HttpError } from '@/lib/http/errors';
 import { savePreOnboardingDraft } from '@/lib/firestore/waitlist';
 import { parsePreOnboardingDTO } from '@/lib/validation/waitlist';
-import { getWaitlistSession } from '@/lib/waitlist/session';
+import { readWaitlistSession } from '@/lib/waitlist/session';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -29,7 +29,7 @@ function errorResponse(error: HttpError) {
 
 export async function POST(request: Request) {
   try {
-    const sessionId = getWaitlistSession();
+    const sessionId = await readWaitlistSession();
     if (!sessionId) {
       return NextResponse.json(
         { ok: false, code: 'not_authenticated' },

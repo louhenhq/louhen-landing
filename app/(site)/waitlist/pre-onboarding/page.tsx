@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { createTranslator } from 'next-intl';
 import PreOnboardingForm from '@/app/(site)/waitlist/pre-onboarding/_components/PreOnboardingForm';
 import { loadWaitlistMessages } from '@/app/(site)/waitlist/_lib/messages';
-import { getWaitlistSession } from '@/lib/waitlist/session';
+import { readWaitlistSession } from '@/lib/waitlist/session';
 import { getPreOnboardingDraft, hasPreOnboarded } from '@/lib/firestore/waitlist';
 
 export const dynamic = 'force-dynamic';
@@ -11,7 +11,7 @@ export default async function WaitlistPreOnboardingPage() {
   const { locale, messages } = await loadWaitlistMessages();
   const t = createTranslator({ locale, messages, namespace: 'preonboarding' });
   const tWaitlist = createTranslator({ locale, messages, namespace: 'waitlist' });
-  const sessionId = getWaitlistSession();
+  const sessionId = await readWaitlistSession();
   const canSubmit = Boolean(sessionId);
   const draft = canSubmit ? await getPreOnboardingDraft(sessionId!) : null;
   const preOnboarded = draft ? true : canSubmit ? await hasPreOnboarded(sessionId!) : false;

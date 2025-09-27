@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { createTranslator } from 'next-intl';
 import { loadWaitlistMessages } from '@/app/(site)/waitlist/_lib/messages';
-import { getWaitlistSession } from '@/lib/waitlist/session';
+import { readWaitlistSession } from '@/lib/waitlist/session';
 import { hasPreOnboarded } from '@/lib/firestore/waitlist';
 
 export const dynamic = 'force-dynamic';
@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 export default async function WaitlistAlreadyConfirmedPage() {
   const { locale, messages } = await loadWaitlistMessages();
   const t = createTranslator({ locale, messages, namespace: 'waitlist' });
-  const sessionId = getWaitlistSession();
+  const sessionId = await readWaitlistSession();
   const preOnboarded = sessionId ? await hasPreOnboarded(sessionId) : false;
 
   return (

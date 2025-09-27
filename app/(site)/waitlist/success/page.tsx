@@ -3,7 +3,7 @@ import { createTranslator } from 'next-intl';
 import ShareButtons from '@/app/(site)/components/ShareButtons';
 import WaitlistSuccessAnalytics from '@/app/(site)/waitlist/_components/WaitlistSuccessAnalytics';
 import { loadWaitlistMessages } from '@/app/(site)/waitlist/_lib/messages';
-import { getWaitlistSession } from '@/lib/waitlist/session';
+import { readWaitlistSession } from '@/lib/waitlist/session';
 import { hasPreOnboarded } from '@/lib/firestore/waitlist';
 
 export const dynamic = 'force-dynamic';
@@ -12,7 +12,7 @@ export default async function WaitlistSuccessPage() {
   const { locale, messages } = await loadWaitlistMessages();
   const t = createTranslator({ locale, messages, namespace: 'waitlist' });
   const share = t('success.share.heading');
-  const sessionId = getWaitlistSession();
+  const sessionId = await readWaitlistSession();
   const preOnboarded = sessionId ? await hasPreOnboarded(sessionId) : false;
 
   return (
