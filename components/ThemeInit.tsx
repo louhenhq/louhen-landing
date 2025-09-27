@@ -1,11 +1,16 @@
 'use client';
 import { useEffect } from 'react';
+import tokens from '@/packages/design-tokens/build/web/tokens.json';
 import { applyThemeFromMedia, getSavedTheme, getSavedContrast, setTheme, setContrast } from '@/app/theme-client';
+
+const bgToken = tokens['--semantic-color-bg-page'];
+
+const FALLBACK_BG = typeof bgToken === 'string' && bgToken.trim().length > 0 ? bgToken : 'rgb(255, 255, 255)';
 
 function setMetaThemeFromTokens() {
   const root = document.documentElement;
   const bg = getComputedStyle(root).getPropertyValue('--semantic-color-bg-page').trim();
-  const hex = bg || '#ffffff';
+  const hex = bg || FALLBACK_BG;
   let meta = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement | null;
   if (!meta) {
     meta = document.createElement('meta');
@@ -41,7 +46,7 @@ export default function ThemeInit() {
         })();
       const bg = getComputedStyle(document.documentElement)
         .getPropertyValue('--semantic-color-bg-page')
-        .trim() || '#ffffff';
+        .trim() || FALLBACK_BG;
       meta.setAttribute('content', bg);
     };
 

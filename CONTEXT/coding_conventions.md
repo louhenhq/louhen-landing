@@ -68,7 +68,8 @@ Rules:
 ## 6) Styling (Tailwind)
 
 - Use utility classes over custom CSS; extract to components when patterns repeat.
-- Keep color values in theme tokens (no stray hex codes). If a hex appears, explain why in PR.
+- Colours must come from design tokens: use CSS variables/Tailwind utilities on web and the generated `emailColors` palette in emails. `npm run guard:hex` enforces this; violations should never merge.
+- The generated palette at `lib/email/colors.ts` is exempt (ESLint override + guard allowlist) because it is produced by the token build. Do not add further exceptions without design/engineering approval.
 - Avoid deep nesting; prefer composition via components.
 
 ---

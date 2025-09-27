@@ -5,6 +5,25 @@ import { cn, layout, shadows, text } from '@/app/(site)/_lib/ui';
 import { useTranslations } from 'next-intl';
 import { observeOnce, track } from '@/lib/clientAnalytics';
 
+function visibleRatio(node: Element): number {
+  const rect = node.getBoundingClientRect();
+  const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+  const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+
+  if (rect.height <= 0 || rect.width <= 0) {
+    return 0;
+  }
+
+  const visibleHeight = Math.min(rect.bottom, viewportHeight) - Math.max(rect.top, 0);
+  const visibleWidth = Math.min(rect.right, viewportWidth) - Math.max(rect.left, 0);
+  const clampedHeight = Math.max(0, visibleHeight);
+  const clampedWidth = Math.max(0, visibleWidth);
+
+  const visibleArea = clampedHeight * clampedWidth;
+  const totalArea = rect.height * rect.width;
+  return totalArea > 0 ? visibleArea / totalArea : 0;
+}
+
 type TestimonialItem = {
   name: string;
   meta: string;
@@ -22,9 +41,24 @@ export default function TestimonialCards() {
     cleanups.current.forEach((dispose) => dispose());
     cleanups.current = [];
 
+    const threshold = 0.35;
+
     cardRefs.current.forEach((node, index) => {
       if (!node) return;
-      const dispose = observeOnce(node, () => track({ name: 'testimonial_view', ix: index as 0 | 1 | 2 }), 0.4);
+
+      if (visibleRatio(node) >= threshold) {
+        void track({ name: 'testimonial_view', ix: index as 0 | 1 | 2 });
+        return;
+      }
+
+      const dispose = observeOnce(
+        node,
+        () => {
+          void track({ name: 'testimonial_view', ix: index as 0 | 1 | 2 });
+        },
+        threshold
+      );
+
       cleanups.current.push(dispose);
     });
 

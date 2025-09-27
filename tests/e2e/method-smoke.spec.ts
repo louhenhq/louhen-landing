@@ -6,8 +6,12 @@ test.describe('/en/method page smoke test', () => {
     const title = await page.title();
     expect(title).toMatch(/Method/i);
     expect(title).toMatch(/Louhen/i);
-    await expect(page.getByRole('heading', { level: 1, name: /Fit intelligence that keeps up with growing feet\./i })).toBeVisible();
-    await expect(page.getByRole('heading', { level: 2, name: /What powers every Louhen recommendation/i })).toBeVisible();
-    await expect(page.getByText(/Kid-safe scanning/i)).toBeVisible();
+    const heroHeading = page.getByRole('heading', { level: 1 }).first();
+    await expect(heroHeading).toBeVisible();
+    await expect(heroHeading).toContainText(/Our Method/i);
+
+    await expect(page.getByRole('heading', { level: 2, name: /Capturing precise shoe dimensions/i })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 2, name: /Trust pillars/i })).toBeVisible();
+    await expect(page.getByText(/computer vision with human insight/i)).toBeVisible();
   });
 });

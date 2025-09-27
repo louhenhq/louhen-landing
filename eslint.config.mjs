@@ -81,6 +81,13 @@ const eslintConfig = [
       'no-restricted-syntax': 'off',
     },
   },
+  // Generated email palette – allowed to contain raw hex
+  {
+    files: ['lib/email/colors.ts'],
+    rules: {
+      'no-restricted-syntax': 'off',
+    },
+  },
   // API routes: allow explicit any (pragmatic typing at edges)
   {
     files: ["app/api/**/*.{ts,tsx}"],
