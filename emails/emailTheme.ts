@@ -1,6 +1,20 @@
-import { emailColors, emailColorsDark, type EmailColorPalette } from '@/lib/email/colors';
+import { emailColors, emailColorsDark } from '@/lib/email/colors';
 
 const FALLBACK_SHADOW = 'rgba(43, 45, 66, 0.08)';
+
+export type EmailPalette = Readonly<{
+  background: string;
+  surface: string;
+  text: string;
+  muted: string;
+  border: string;
+  link: string;
+  badge: string;
+  badgeText: string;
+  success: string;
+  warning: string;
+  danger: string;
+}>;
 
 const hexToRgb = (hex: string) => {
   const normalized = hex.replace('#', '').trim();
@@ -31,7 +45,7 @@ export type EmailTheme = {
   shadow: string;
 };
 
-export function buildEmailTheme(palette: EmailColorPalette): EmailTheme {
+export function buildEmailTheme(palette: EmailPalette): EmailTheme {
   return {
     background: palette.background,
     text: palette.text,
