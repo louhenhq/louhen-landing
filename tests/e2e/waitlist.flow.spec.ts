@@ -12,10 +12,9 @@ test.describe('Waitlist flows', () => {
 
     const payload = await seedWaitlistUser(page.request, email);
 
-    await expect(page.locator('[data-testid="waitlist-success-message"]')).toHaveText(/We saved your spot/i);
-
     await page.goto(`/waitlist/confirm?token=${payload.token}`);
     await page.waitForURL('**/waitlist/success');
+    await expect(page.locator('[data-testid="waitlist-success-message"]')).toHaveText(/We saved your spot/i);
     const preOnboardingLink = page.getByRole('link', { name: /pre-onboarding/i });
     await expect(preOnboardingLink).toBeVisible();
 

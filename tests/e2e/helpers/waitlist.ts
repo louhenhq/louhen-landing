@@ -36,10 +36,19 @@ export async function seedWaitlistUser(request: APIRequestContext, email: string
 }
 
 export async function markTokenExpired(request: APIRequestContext, token: string) {
-  await request.post('/api/testing/waitlist', {
+  const response = await request.post('/api/testing/waitlist', {
     data: {
       action: 'expire_token',
       token,
     },
   });
+
+  if (!response.ok()) {
+    throw new Error(`Failed to expire token: ${response.status()}`);
+  }
+
+  const payload = await response.json().catch(() => ({}));
+  if (!payload?.ok) {
+    throw new Error('Expire token action returned non-ok response');
+  }
 }

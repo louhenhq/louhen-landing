@@ -1,8 +1,8 @@
 import 'server-only';
 
 import { NextResponse } from 'next/server';
-import { __test as waitlistTestUtils } from '@/lib/firestore/waitlist';
-import { upsertPending } from '@/lib/firestore/waitlist';
+import { __test as waitlistTestUtils, markExpiredByTokenHash, upsertPending } from '@/lib/firestore/waitlist';
+import { createTokenLookupHash } from '@/lib/security/tokens';
 
 export async function POST(request: Request) {
   if (process.env.NODE_ENV !== 'test') {
@@ -18,8 +18,9 @@ export async function POST(request: Request) {
       if (!token) {
         return NextResponse.json({ ok: false, error: 'missing_token' }, { status: 400 });
       }
-      const success = waitlistTestUtils.expireToken(token);
-      return NextResponse.json({ ok: success });
+      const lookup = createTokenLookupHash(token);
+      const result = await markExpiredByTokenHash(lookup);
+      return NextResponse.json({ ok: result === 'expired', result });
     }
     case 'seed_waitlist': {
       const email = typeof body.email === 'string' ? body.email : null;
