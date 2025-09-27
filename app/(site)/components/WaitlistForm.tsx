@@ -217,7 +217,7 @@ export default function WaitlistForm({
         ) : null}
 
         {successMessage ? (
-          <p role="status" className="text-sm text-emerald-600">
+          <p role="status" data-testid="waitlist-success-message" className="text-sm text-emerald-600">
             {successMessage}
           </p>
         ) : null}

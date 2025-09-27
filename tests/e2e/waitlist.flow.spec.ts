@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { markTokenExpired, seedWaitlistUser } from './helpers/waitlist';
 
 function uniqueEmail(label: string) {
   const slug = `${label}-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
@@ -9,23 +10,9 @@ test.describe('Waitlist flows', () => {
   test('happy path with pre-onboarding and already confirmed revisit', async ({ page }) => {
     const email = uniqueEmail('happy');
 
-    await page.goto('/waitlist');
-    await page.fill('#waitlist-email', email);
-    await page.check('#waitlist-consent');
+    const payload = await seedWaitlistUser(page.request, email);
 
-    const waitlistResponse = page.waitForResponse((response) =>
-      response.url().endsWith('/api/waitlist') && response.request().method() === 'POST'
-    );
-
-    await page.getByRole('button', { name: /join the waitlist/i }).click();
-
-    const response = await waitlistResponse;
-    const payload = await response.json();
-    expect(payload).toMatchObject({ ok: true, shortCircuit: true });
-    expect(payload.token).toBeTruthy();
-    expect(payload.docId).toBeTruthy();
-
-    await expect(page.getByRole('status', { name: /we saved your spot/i })).toBeVisible();
+    await expect(page.locator('[data-testid="waitlist-success-message"]')).toHaveText(/We saved your spot/i);
 
     await page.goto(`/waitlist/confirm?token=${payload.token}`);
     await page.waitForURL('**/waitlist/success');
@@ -61,25 +48,9 @@ test.describe('Waitlist flows', () => {
   test('expired token flow with resend produces new confirmation', async ({ page, request }) => {
     const email = uniqueEmail('expired');
 
-    await page.goto('/waitlist');
-    await page.fill('#waitlist-email', email);
-    await page.check('#waitlist-consent');
+    const payload = await seedWaitlistUser(page.request, email);
 
-    const waitlistResponse = page.waitForResponse((response) =>
-      response.url().endsWith('/api/waitlist') && response.request().method() === 'POST'
-    );
-    await page.getByRole('button', { name: /join the waitlist/i }).click();
-
-    const response = await waitlistResponse;
-    const payload = await response.json();
-    expect(payload.token).toBeTruthy();
-
-    await request.post('/api/testing/waitlist', {
-      data: {
-        action: 'expire_token',
-        token: payload.token,
-      },
-    });
+    await markTokenExpired(request, payload.token);
 
     await page.goto(`/waitlist/confirm?token=${payload.token}`);
     await page.waitForURL('**/waitlist/expired');
