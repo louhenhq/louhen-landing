@@ -26,6 +26,7 @@ export type AnalyticsEventName =
   | 'waitlist_landing_expired_view'
   | 'waitlist_resend_requested'
   | 'waitlist_confirm_toast_view'
+  | 'preonboarding_completed'
   | 'hero_twin_badge_click'
   | 'voucher_share_native_success'
   | 'voucher_share_whatsapp_click'
@@ -59,6 +60,7 @@ export interface AnalyticsEventPropsMap {
   waitlist_landing_expired_view: NoProps;
   waitlist_resend_requested: { locale: string; outcome?: 'ok' | 'rate_limited' | 'error' };
   waitlist_confirm_toast_view: NoProps;
+  preonboarding_completed: { hadChildData: boolean; locale: string };
   hero_twin_badge_click: NoProps;
   voucher_share_native_success: NoProps;
   voucher_share_whatsapp_click: NoProps;

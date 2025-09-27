@@ -76,7 +76,11 @@ class FakeQuery {
 }
 
 class FakeDocSnapshot {
-  constructor(private bucket: Map<string, Record<string, unknown>>, public readonly id: string, private readonly snapshotData: Record<string, unknown> | null) {}
+  public readonly exists: boolean;
+
+  constructor(private bucket: Map<string, Record<string, unknown>>, public readonly id: string, private readonly snapshotData: Record<string, unknown> | null) {
+    this.exists = this.snapshotData !== null;
+  }
 
   data() {
     if (!this.snapshotData) return undefined;
@@ -92,7 +96,15 @@ vi.mock('@/lib/firebaseAdmin', () => ({
   getDb: () => store,
 }));
 
-import { findByEmail, findByTokenHash, markConfirmedByTokenHash, markExpiredByTokenHash, upsertPending } from '@/lib/firestore/waitlist';
+import {
+  findByEmail,
+  getPreOnboardingDraft,
+  hasPreOnboarded,
+  markConfirmedByTokenHash,
+  markExpiredByTokenHash,
+  savePreOnboardingDraft,
+  upsertPending,
+} from '@/lib/firestore/waitlist';
 
 function buildInput(overrides: Partial<WaitlistUpsertInput> = {}): WaitlistUpsertInput {
   return {
@@ -162,5 +174,56 @@ describe('waitlist Firestore helpers', () => {
     const record = await findByEmail('expire@example.com');
     expect(record?.status).toBe('expired');
     expect(record?.confirmTokenLookupHash).toBeNull();
+  });
+
+  it('saves pre-onboarding draft and marks record', async () => {
+    const { docId } = await upsertPending('family@example.com', buildInput());
+
+    await savePreOnboardingDraft(docId, {
+      parentFirstName: 'Jamie',
+      children: [
+        {
+          name: 'Noah',
+          birthday: '2018-05-10',
+          weight: 22,
+          shoeSize: '32 EU',
+        },
+      ],
+    });
+
+    const record = await findByEmail('family@example.com');
+    expect(record?.preOnboarded).toBe(true);
+    expect(record?.profileDraft?.children[0]?.name).toBe('Noah');
+
+    const hasDraft = await hasPreOnboarded(docId);
+    expect(hasDraft).toBe(true);
+
+    const draft = await getPreOnboardingDraft(docId);
+    expect(draft?.parentFirstName).toBe('Jamie');
+    expect(draft?.children[0]?.weight).toBe(22);
+  });
+
+  it('overwrites existing pre-onboarding draft on subsequent saves', async () => {
+    const { docId } = await upsertPending('update@example.com', buildInput());
+
+    await savePreOnboardingDraft(docId, {
+      parentFirstName: 'Alex',
+      children: [
+        { name: 'Mila', birthday: '2019-03-02' },
+      ],
+    });
+
+    await savePreOnboardingDraft(docId, {
+      parentFirstName: 'Taylor',
+      children: [
+        { name: 'Leo', birthday: '2017-07-21', weight: 28 },
+      ],
+    });
+
+    const draft = await getPreOnboardingDraft(docId);
+    expect(draft?.parentFirstName).toBe('Taylor');
+    expect(draft?.children).toHaveLength(1);
+    expect(draft?.children[0]?.name).toBe('Leo');
+    expect(draft?.children[0]?.weight).toBe(28);
   });
 });

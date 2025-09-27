@@ -9,6 +9,18 @@ export type WaitlistUtm = {
   content?: string;
 };
 
+export type PreOnboardingChildDraft = {
+  name: string;
+  birthday: string;
+  weight?: number | null;
+  shoeSize?: string | null;
+};
+
+export type PreOnboardingDraft = {
+  parentFirstName?: string | null;
+  children: PreOnboardingChildDraft[];
+};
+
 export type WaitlistDoc = {
   id: string;
   email: string;
@@ -27,6 +39,9 @@ export type WaitlistDoc = {
   createdAt?: Date | null;
   updatedAt?: Date | null;
   confirmedAt?: Date | null;
+  preOnboarded?: boolean;
+  profileDraft?: PreOnboardingDraft | null;
+  profileDraftUpdatedAt?: Date | null;
 };
 
 export type WaitlistUpsertInput = {
@@ -84,6 +99,7 @@ function mapDoc(doc: FirebaseFirestore.QueryDocumentSnapshot | FirebaseFirestore
   const data = doc.data() as Record<string, unknown> | undefined;
   const consentObj = (data?.consent as Record<string, unknown> | undefined) ?? {};
   const consentAt = consentObj.at ?? data?.consentAt ?? data?.gdprConsentAt;
+  const profileDraft = mapProfileDraft(data?.profileDraft);
 
   return {
     id: doc.id,
@@ -103,6 +119,35 @@ function mapDoc(doc: FirebaseFirestore.QueryDocumentSnapshot | FirebaseFirestore
     createdAt: toDate(data?.createdAt),
     updatedAt: toDate(data?.updatedAt),
     confirmedAt: toDate(data?.confirmedAt),
+    preOnboarded: Boolean(data?.preOnboarded),
+    profileDraft,
+    profileDraftUpdatedAt: toDate(data?.profileDraftUpdatedAt),
+  };
+}
+
+function mapProfileDraft(value: unknown): PreOnboardingDraft | null {
+  if (!value || typeof value !== 'object') return null;
+  const record = value as Record<string, unknown>;
+  const parentFirstName = typeof record.parentFirstName === 'string' && record.parentFirstName.trim() ? record.parentFirstName : null;
+  const childrenRaw = Array.isArray(record.children) ? record.children : [];
+  const children: PreOnboardingChildDraft[] = [];
+
+  for (const child of childrenRaw) {
+    if (!child || typeof child !== 'object') continue;
+    const childRecord = child as Record<string, unknown>;
+    const name = typeof childRecord.name === 'string' ? childRecord.name : null;
+    const birthday = typeof childRecord.birthday === 'string' ? childRecord.birthday : null;
+    if (!name || !birthday) continue;
+    const weightValue = typeof childRecord.weight === 'number' ? childRecord.weight : null;
+    const shoeSizeValue = typeof childRecord.shoeSize === 'string' ? childRecord.shoeSize : null;
+    children.push({ name, birthday, weight: weightValue, shoeSize: shoeSizeValue });
+  }
+
+  if (!children.length) return null;
+
+  return {
+    parentFirstName,
+    children,
   };
 }
 
@@ -111,6 +156,26 @@ async function findDocByField(field: string, value: string): Promise<FirebaseFir
   const snapshot = await db.collection(COLLECTION).where(field, '==', value).limit(1).get();
   if (snapshot.empty) return null;
   return snapshot.docs[0];
+}
+
+async function findDocById(docId: string): Promise<FirebaseFirestore.DocumentSnapshot | null> {
+  if (!docId) return null;
+  const db = getDb();
+  const ref = db.collection(COLLECTION).doc(docId);
+  const snapshot = await ref.get();
+  if (!snapshot.exists) return null;
+  return snapshot;
+}
+
+async function resolveDocSnapshot(identifier: string): Promise<FirebaseFirestore.DocumentSnapshot | FirebaseFirestore.QueryDocumentSnapshot | null> {
+  const trimmed = identifier.trim();
+  if (!trimmed) return null;
+
+  const byId = await findDocById(trimmed);
+  if (byId) return byId;
+
+  const normalizedEmail = normalizeEmail(trimmed);
+  return findDocByField('emailNormalized', normalizedEmail);
 }
 
 export async function upsertPending(email: string, input: WaitlistUpsertInput): Promise<UpsertPendingResult> {
@@ -201,6 +266,102 @@ export async function findByTokenHash(tokenHash: string): Promise<WaitlistDoc | 
   const doc = await findDocByField('confirmTokenLookupHash', tokenHash);
   if (!doc) return null;
   return mapDoc(doc);
+}
+
+function sanitizePreOnboardingDraft(input: PreOnboardingDraft): PreOnboardingDraft | null {
+  if (!input || !Array.isArray(input.children)) {
+    return null;
+  }
+
+  const parentFirstName = typeof input.parentFirstName === 'string' && input.parentFirstName.trim() ? input.parentFirstName.trim() : null;
+  const children: PreOnboardingChildDraft[] = [];
+
+  for (const child of input.children) {
+    if (!child) continue;
+    const name = typeof child.name === 'string' ? child.name.trim() : '';
+    const birthday = typeof child.birthday === 'string' ? child.birthday.trim() : '';
+    if (!name || !birthday) {
+      continue;
+    }
+    const weight = typeof child.weight === 'number' && Number.isFinite(child.weight) ? Number(child.weight) : null;
+    const shoeSize = typeof child.shoeSize === 'string' && child.shoeSize.trim() ? child.shoeSize.trim() : null;
+    children.push({
+      name,
+      birthday,
+      ...(weight !== null ? { weight } : {}),
+      ...(shoeSize ? { shoeSize } : {}),
+    });
+  }
+
+  if (!children.length) {
+    return null;
+  }
+
+  return {
+    parentFirstName,
+    children,
+  };
+}
+
+export async function savePreOnboardingDraft(identifier: string, draft: PreOnboardingDraft): Promise<void> {
+  const snapshot = await resolveDocSnapshot(identifier);
+  if (!snapshot) {
+    return;
+  }
+
+  const sanitized = sanitizePreOnboardingDraft(draft);
+  if (!sanitized) {
+    return;
+  }
+
+  const now = new Date();
+  const profileDraftPayload: Record<string, unknown> = {
+    children: sanitized.children.map((child) => {
+      const childPayload: Record<string, unknown> = {
+        name: child.name,
+        birthday: child.birthday,
+      };
+      if (typeof child.weight === 'number') {
+        childPayload.weight = child.weight;
+      }
+      if (child.shoeSize) {
+        childPayload.shoeSize = child.shoeSize;
+      }
+      return childPayload;
+    }),
+  };
+
+  if (sanitized.parentFirstName) {
+    profileDraftPayload.parentFirstName = sanitized.parentFirstName;
+  }
+
+  await snapshot.ref.set(
+    {
+      preOnboarded: true,
+      profileDraft: profileDraftPayload,
+      profileDraftUpdatedAt: now,
+      updatedAt: now,
+    },
+    { merge: true }
+  );
+}
+
+export async function hasPreOnboarded(identifier: string): Promise<boolean> {
+  const snapshot = await resolveDocSnapshot(identifier);
+  if (!snapshot) {
+    return false;
+  }
+  const data = snapshot.data() as Record<string, unknown> | undefined;
+  return Boolean(data?.preOnboarded);
+}
+
+export async function getPreOnboardingDraft(identifier: string): Promise<PreOnboardingDraft | null> {
+  const snapshot = await resolveDocSnapshot(identifier);
+  if (!snapshot) {
+    return null;
+  }
+  const data = snapshot.data() as Record<string, unknown> | undefined;
+  return mapProfileDraft(data?.profileDraft) ?? null;
 }
 
 export async function markConfirmedByTokenHash(tokenHash: string): Promise<'confirmed' | 'already' | 'expired' | 'missing'> {

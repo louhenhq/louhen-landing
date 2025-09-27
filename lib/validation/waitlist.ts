@@ -43,16 +43,25 @@ const resendSchema = z.object({
 const childSchema = z
   .object({
     name: z.string().trim().min(1).max(120),
-    birthday: z.string().trim().min(4).max(32),
-    weight: z.number().positive().max(500).optional(),
+    birthday: z
+      .string()
+      .trim()
+      .regex(/^\d{4}-\d{2}-\d{2}$/u, 'invalid_birthday'),
+    weight: z
+      .number({ invalid_type_error: 'invalid_weight' })
+      .min(0.1, 'invalid_weight')
+      .max(100, 'invalid_weight')
+      .optional(),
     shoeSize: z.string().trim().max(32).optional(),
   })
   .strict();
 
-const preOnboardingSchema = z.object({
-  parentFirstName: z.string().trim().min(1).max(120).optional(),
-  children: z.array(childSchema).max(5).optional(),
-});
+const preOnboardingSchema = z
+  .object({
+    parentFirstName: z.string().trim().min(1).max(120).optional(),
+    children: z.array(childSchema).min(1).max(5),
+  })
+  .strict();
 
 export type SignupDTO = z.infer<typeof signupSchema>;
 export type ResendDTO = z.infer<typeof resendSchema>;
