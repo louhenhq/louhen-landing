@@ -12,6 +12,60 @@ StyleDictionary.registerFormat({
   },
 });
 
+StyleDictionary.registerFormat({
+  name: 'custom/email-colors-ts',
+  format: ({ dictionary }) => {
+    const groups = new Map();
+    for (const token of dictionary.allTokens) {
+      if (token.path[0] !== 'email') continue;
+      const [, mode, ...rest] = token.path;
+      if (!mode || rest.length === 0) continue;
+      const key = rest.join('-');
+      const value = String(token.value);
+      if (!groups.has(mode)) groups.set(mode, new Map());
+      const bucket = groups.get(mode);
+      bucket.set(key, value);
+    }
+
+    const buildObject = (map) => {
+      return Array.from(map.entries())
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([name, value]) => `  ${name}: '${value.replace(/'/g, "\\'")}',`)
+        .join('\n');
+    };
+
+    const light = groups.get('light');
+    if (!light) {
+      throw new Error('Email palette requires a light mode (email.light.* tokens)');
+    }
+
+    const dark = groups.get('dark');
+    const lines = [];
+    lines.push('// GENERATED FILE - DO NOT EDIT. Generated from design tokens.');
+    lines.push('// Source: packages/design-tokens/tokens/tokens.json (email.* tokens)');
+    lines.push('export const emailColors = {');
+    lines.push(buildObject(light));
+    lines.push('} as const;');
+    lines.push('export type EmailColorName = keyof typeof emailColors;');
+
+    if (dark && dark.size > 0) {
+      lines.push('');
+      lines.push('export const emailColorsDark = {');
+      lines.push(buildObject(dark));
+      lines.push('} as const;');
+      lines.push('export type EmailColorNameDark = keyof typeof emailColorsDark;');
+    }
+
+    lines.push('');
+    lines.push('export type EmailColorPalette = typeof emailColors;');
+    if (dark && dark.size > 0) {
+      lines.push('export type EmailColorPaletteDark = typeof emailColorsDark;');
+    }
+
+    return lines.join('\n');
+  },
+});
+
 /** ---------- Web outputs (CSS variables + TS export) ---------- */
 const webCss = {
   transformGroup: 'web',
@@ -97,7 +151,13 @@ const flutterDart = {
   files: [{ destination: 'tokens.g.dart', format: 'custom/flutter-dart' }]
 };
 
+const emailTs = {
+  transformGroup: 'js',
+  buildPath: '../../lib/email/',
+  files: [{ destination: 'colors.ts', format: 'custom/email-colors-ts' }]
+};
+
 export default {
   source: ['tokens/**/*.json'],
-  platforms: { web: webCss, webCssPublic, flutter: flutterDart }
+  platforms: { web: webCss, webCssPublic, flutter: flutterDart, email: emailTs }
 };

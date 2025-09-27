@@ -167,4 +167,26 @@ class LouhenTokens {
   static const SemanticHcColorButtonPrimaryFg = Color(0xFFF8F9FA);
   static const SemanticHcColorButtonSecondaryBg = Color(0xFFA8DADC);
   static const SemanticHcColorButtonSecondaryFg = Color(0xFFFFFFFF);
+  static const EmailLightBackground = Color(0xFFFFFFFF);
+  static const EmailLightSurface = Color(0xFFFFFFFF);
+  static const EmailLightText = Color(0xFF2B2D42);
+  static const EmailLightMuted = Color(0xFFB8BDC6);
+  static const EmailLightLink = Color(0xFF4A90E2);
+  static const EmailLightBorder = Color(0xFFB8BDC6);
+  static const EmailLightSuccess = Color(0xFF2BB673);
+  static const EmailLightWarning = Color(0xFFF4B400);
+  static const EmailLightDanger = Color(0xFFFF6B6B);
+  static const EmailLightBadge = Color(0xFF1A4E5F);
+  static const EmailLightBadgeText = Color(0xFFF8F9FA);
+  static const EmailDarkBackground = Color(0xFF1B2130);
+  static const EmailDarkSurface = Color(0xFFFFFFFF);
+  static const EmailDarkText = Color(0xFFFFFFFF);
+  static const EmailDarkMuted = Color(0xFF3F485A);
+  static const EmailDarkLink = Color(0xFF93C6D0);
+  static const EmailDarkBorder = Color(0xFF3F485A);
+  static const EmailDarkSuccess = Color(0xFF2BB673);
+  static const EmailDarkWarning = Color(0xFFF4B400);
+  static const EmailDarkDanger = Color(0xFFFF6B6B);
+  static const EmailDarkBadge = Color(0xFF93C6D0);
+  static const EmailDarkBadgeText = Color(0xFF2B2D42);
 }

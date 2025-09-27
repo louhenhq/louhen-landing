@@ -185,7 +185,18 @@ Branching:
 
 ---
 
-## 11) Error Codes (canonical)
+## 11) Color Policy & Design Tokens
+
+- Source of truth: `packages/design-tokens/tokens/` (human-edited). Regenerate all outputs with `npm run -w @louhen/design-tokens build` — this refreshes web CSS variables, the public `tokens.css` bundle, Dart bindings, and the generated email palette at `lib/email/colors.ts`.
+- Web UI: consume semantic CSS variables or Tailwind utilities that map to tokens (`tailwind.config.ts`). No raw hex literals in `*.ts(x)/.js(x)/.css/.scss/.md(x)` code paths.
+- Email: templates in `emails/**` import the generated `emailColors` (and optional `emailColorsDark`) and derive any additional styles from that palette. Inline hex is forbidden; use palette values or helper utilities that wrap them.
+- Guardrails:
+  - Pre-commit (`lint-staged`): `npm run guard:hex` scans staged files and blocks commits containing disallowed hex colours.
+  - CI: `npm run ci:color-policy` scans the entire repo, enforces email palette imports, and writes `ci-artifacts/color-policy-report.txt` for PR visibility.
+- Exceptions (allowlist): generated outputs only — `packages/design-tokens/**`, `public/tokens/**`, and the single `lib/email/colors.ts` module. Any new exception requires design-engineering approval and an update to the guard script.
+- Governance: new colours come via the design weekly. Designers propose token additions/changes, engineering reviews build impact, and the change ships with screenshots + changelog. Tokens are versioned by semver tags on the design-tokens package for traceability.
+
+## 12) Error Codes (canonical)
 
 - INPUT_INVALID — Zod validation failed
 - CAPTCHA_FAILED — hCaptcha verification failed
