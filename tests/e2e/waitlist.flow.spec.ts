@@ -25,7 +25,7 @@ test.describe('Waitlist flows', () => {
     expect(payload.token).toBeTruthy();
     expect(payload.docId).toBeTruthy();
 
-    await expect(page.getByRole('status')).toContainText('We saved your spot');
+    await expect(page.getByRole('status', { name: /we saved your spot/i })).toBeVisible();
 
     await page.goto(`/waitlist/confirm?token=${payload.token}`);
     await page.waitForURL('**/waitlist/success');

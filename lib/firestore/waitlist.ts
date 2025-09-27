@@ -685,8 +685,10 @@ function expireTokenForTest(token: string): boolean {
   const doc = findTestDocByLookupHash(lookupHash);
   if (!doc) return false;
   doc.confirmExpiresAt = new Date(Date.now() - 60_000);
-  doc.status = 'pending';
+  doc.status = 'expired';
   doc.confirmTokenLookupHash = lookupHash;
+  doc.confirmTokenHash = null;
+  doc.confirmSalt = null;
   saveTestDoc(doc);
   return true;
 }
