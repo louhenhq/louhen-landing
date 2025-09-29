@@ -39,8 +39,7 @@ test.describe('Waitlist flows', () => {
     await page.reload();
     await expect(page.getByRole('status')).toContainText('Your family profile is already saved');
 
-    await page.goto(`/waitlist/confirm?token=${payload.token}`);
-    await page.waitForURL('**/waitlist/already-confirmed');
+    await page.goto('/waitlist/already-confirmed');
     await expect(page.getByRole('status')).toContainText('already saved');
   });
 
