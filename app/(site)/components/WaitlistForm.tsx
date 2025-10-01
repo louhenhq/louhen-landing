@@ -185,7 +185,7 @@ export default function WaitlistForm({
               setConsent(event.target.checked);
               setError(null);
             }}
-            aria-describedby="waitlist-consent-help"
+            required
             className="mt-1 h-5 w-5 rounded border border-slate-300 accent-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500"
           />
           <ConsentNotice />

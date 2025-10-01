@@ -7,7 +7,11 @@ export default function ConsentNotice() {
   const t = useTranslations('waitlist.consent');
 
   return (
-    <p id="waitlist-consent-help" className="text-xs leading-relaxed text-slate-600">
+    <label
+      htmlFor="waitlist-consent"
+      id="waitlist-consent-help"
+      className="text-xs leading-relaxed text-slate-600"
+    >
       {t.rich('label', {
         privacy: (chunks) => (
           <Link
@@ -26,6 +30,6 @@ export default function ConsentNotice() {
           </Link>
         ),
       })}
-    </p>
+    </label>
   );
 }
