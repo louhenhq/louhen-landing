@@ -66,7 +66,7 @@ jobs:
         with:
           script: |
             const suite = process.env.SUITE ?? 'all';
-            const message = `🚀 Triggered **run-tests.yml** for suite: \`${suite}\``;
+            const message = '🚀 Triggered **run-tests.yml** for suite: `' + suite + '`';
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,

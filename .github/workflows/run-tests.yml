@@ -382,7 +382,7 @@ jobs:
 
       - name: Start test server
         run: |
-          npm run start:test-server > server.log 2>&1 &
+          npm run start:test > server.log 2>&1 &
           echo $! > server.pid
 
       - name: Wait for server readiness
