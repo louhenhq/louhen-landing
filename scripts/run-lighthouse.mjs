@@ -27,7 +27,7 @@ process.env.LIGHTHOUSE_OUTPUT_DIR = resolvedOutputDir;
 fs.rmSync(resolvedOutputDir, { recursive: true, force: true });
 fs.mkdirSync(resolvedOutputDir, { recursive: true });
 
-const args = ['npx', 'lhci', 'autorun', '--config=.lighthouserc.cjs', `--upload.outputDir=${resolvedOutputDir}`];
+const args = ['npx', 'lhci', 'autorun', '--config=lighthouserc.cjs', `--upload.outputDir=${resolvedOutputDir}`];
 
 if (overrideUrl && overrideUrl.length > 0) {
   console.log(`Running Lighthouse for ${overrideUrl} (override)`);
