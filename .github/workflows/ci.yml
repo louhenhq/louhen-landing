@@ -80,7 +80,7 @@ jobs:
     name: Playwright E2E
     runs-on: ubuntu-latest
     needs: build-and-test
-    if: ${{ env.SKIP_E2E != '1' }}
+    if: ${{ vars.SKIP_E2E != '1' }}
     env:
       CI: true
       NODE_ENV: production
@@ -190,7 +190,7 @@ jobs:
     name: Playwright Axe
     runs-on: ubuntu-latest
     needs: build-and-test
-    if: ${{ env.SKIP_AXE != '1' }}
+    if: ${{ vars.SKIP_AXE != '1' }}
     env:
       CI: true
       NODE_ENV: production
@@ -300,7 +300,7 @@ jobs:
     name: Lighthouse
     runs-on: ubuntu-latest
     needs: build-and-test
-    if: ${{ env.SKIP_LHCI != '1' }}
+    if: ${{ vars.SKIP_LHCI != '1' }}
     env:
       CI: true
       NODE_ENV: production
