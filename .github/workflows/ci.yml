@@ -318,8 +318,6 @@ jobs:
         run: npx --yes wait-on http://127.0.0.1:4311/waitlist --timeout 180000
 
       - name: Run Lighthouse
-        env:
-          LHCI_URL: ${{ format('{0}/{1}/method/', 'http://127.0.0.1:4311', env.DEFAULT_LOCALE) }}
         run: npm run lighthouse
 
       - name: Upload Lighthouse report

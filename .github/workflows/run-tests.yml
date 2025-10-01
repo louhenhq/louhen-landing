@@ -22,6 +22,7 @@ on:
 
 env:
   BASE_SERVER_URL: ${{ vars.BASE_SERVER_URL }}
+  BASE_URL: ${{ vars.BASE_SERVER_URL }}
   PREVIEW_BASE_URL: ${{ vars.PREVIEW_BASE_URL }}
   SANDBOX_VALIDATION: '0'
   DEFAULT_LOCALE: en
@@ -389,8 +390,6 @@ jobs:
         run: npx --yes wait-on "${{ vars.BASE_SERVER_URL }}/waitlist" --timeout 180000
 
       - name: Run Lighthouse
-        env:
-          LHCI_URL: ${{ format('{0}/{1}/method/', vars.BASE_SERVER_URL, env.DEFAULT_LOCALE) }}
         run: npm run lighthouse
 
       - name: Upload Lighthouse report
