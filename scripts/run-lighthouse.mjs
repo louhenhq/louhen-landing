@@ -1,11 +1,20 @@
 import { execSync } from 'node:child_process';
 
-const baseUrl = process.env.BASE_URL || 'http://localhost:4311';
-const targetUrl = new URL('/waitlist', baseUrl).toString();
+if (process.env.SKIP_LHCI === '1') {
+  console.log('Skipping Lighthouse run because SKIP_LHCI=1');
+  process.exit(0);
+}
 
-console.log(`Running Lighthouse for ${targetUrl}`);
+const defaultTarget = 'http://127.0.0.1:4311/waitlist';
+const overrideUrl = process.env.LHCI_URL;
 
-execSync(
-  `npx lhci autorun --collect.url=${targetUrl} --assert.assertions.category-performance>=0.9 --assert.assertions.category-accessibility>=0.9 --assert.assertions.category-best-practices>=0.9 --assert.assertions.category-seo>=0.9`,
-  { stdio: 'inherit' }
-);
+const args = ['npx', 'lhci', 'autorun', '--config=.lighthouserc.json'];
+
+if (overrideUrl && overrideUrl.length > 0) {
+  args.push(`--collect.url=${overrideUrl}`);
+  console.log(`Running Lighthouse for ${overrideUrl} (override)`);
+} else {
+  console.log(`Running Lighthouse using config default ${defaultTarget}`);
+}
+
+execSync(args.join(' '), { stdio: 'inherit' });

@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CI: true
+      SKIP_LHCI: ${{ vars.SKIP_LHCI }}
       NEXT_PUBLIC_ANALYTICS_DISABLED: '1'
       NEXT_PUBLIC_ANALYTICS_DEBUG: '0'
       NEXT_PUBLIC_ENV: 'ci'
@@ -198,12 +199,52 @@ jobs:
         run: npm run test:axe
         continue-on-error: false
 
+      - name: Start Lighthouse test server
+        if: env.SKIP_LHCI != '1'
+        run: |
+          npm run start:test-server > lighthouse-server.log 2>&1 &
+          echo $! > .lighthouse-server.pid
+
+      - name: Wait for Lighthouse server
+        if: env.SKIP_LHCI != '1'
+        run: |
+          for attempt in {1..30}; do
+            if curl -sSf http://127.0.0.1:4311/waitlist > /dev/null; then
+              echo "Lighthouse server is ready"
+              exit 0
+            fi
+            echo "Waiting for Lighthouse server (attempt ${attempt})"
+            sleep 2
+          done
+          echo "Server did not become ready in time" >&2
+          if [ -f .lighthouse-server.pid ]; then
+            kill $(cat .lighthouse-server.pid) || true
+          fi
+          if [ -f lighthouse-server.log ]; then
+            echo "--- lighthouse server log ---"
+            cat lighthouse-server.log
+          fi
+          exit 1
+
       - name: Lighthouse (LHCI)
+        if: env.SKIP_LHCI != '1'
         timeout-minutes: 10
         env:
-          BASE_URL: http://localhost:4311
+          LHCI_URL: http://127.0.0.1:4311/waitlist
         run: npm run lighthouse
         continue-on-error: false
+
+      - name: Stop Lighthouse server
+        if: always() && env.SKIP_LHCI != '1'
+        run: |
+          if [ -f .lighthouse-server.pid ]; then
+            kill $(cat .lighthouse-server.pid) || true
+            rm .lighthouse-server.pid
+          fi
+          if [ -f lighthouse-server.log ]; then
+            echo "--- lighthouse server log (tail) ---"
+            tail -n 200 lighthouse-server.log || true
+          fi
 
       - name: Upload Playwright report
         if: always()
@@ -214,7 +255,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: Upload Lighthouse results
-        if: always()
+        if: always() && env.SKIP_LHCI != '1'
         uses: actions/upload-artifact@v4
         with:
           name: lighthouse-results

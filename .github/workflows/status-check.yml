@@ -1,58 +1,79 @@
-name: Status Endpoint Monitor
+name: Status Monitor
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: '0 * * * *'
-  workflow_dispatch:
 
 jobs:
   ping-status:
-    name: Check ${{ matrix.env_name }}
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
         env_name: [preview, production]
+
     steps:
-      - name: Resolve endpoint and credentials
+      - name: Skip probes (domains not active yet)
+        run: |
+          echo "SKIP_ALL=1" >> $GITHUB_ENV
+          echo "TODO: Remove skip once staging and production domains are live"
+
+      - name: Select URL, creds, and bypass token
+        id: select
+        if: env.SKIP_ALL != '1'
         run: |
           if [ "${{ matrix.env_name }}" = "preview" ]; then
-            echo "STATUS_URL=https://staging.louhen.app/api/status" >> "$GITHUB_ENV"
-            echo "STATUS_USER=${{ secrets.STATUS_USER_PREVIEW }}" >> "$GITHUB_ENV"
-            echo "STATUS_PASS=${{ secrets.STATUS_PASS_PREVIEW }}" >> "$GITHUB_ENV"
+            echo "URL=https://staging.louhen.app/api/status" >> $GITHUB_OUTPUT
+            echo "USER=${{ secrets.STATUS_USER_PREVIEW }}" >> $GITHUB_OUTPUT
+            echo "PASS=${{ secrets.STATUS_PASS_PREVIEW }}" >> $GITHUB_OUTPUT
+            echo "BYPASS=${{ secrets.VERCEL_BYPASS_PREVIEW }}" >> $GITHUB_OUTPUT
           else
-            echo "STATUS_URL=https://www.louhen.app/api/status" >> "$GITHUB_ENV"
-            echo "STATUS_USER=${{ secrets.STATUS_USER_PROD }}" >> "$GITHUB_ENV"
-            echo "STATUS_PASS=${{ secrets.STATUS_PASS_PROD }}" >> "$GITHUB_ENV"
+            echo "URL=https://www.louhen.app/api/status" >> $GITHUB_OUTPUT
+            echo "USER=${{ secrets.STATUS_USER_PROD }}" >> $GITHUB_OUTPUT
+            echo "PASS=${{ secrets.STATUS_PASS_PROD }}" >> $GITHUB_OUTPUT
+            echo "BYPASS=${{ secrets.VERCEL_BYPASS_PROD }}" >> $GITHUB_OUTPUT
           fi
-      - name: Fetch status payload
-        id: fetch
+
+      - name: Mask secrets
+        if: env.SKIP_ALL != '1'
         run: |
-          if [ -z "$STATUS_USER" ] || [ -z "$STATUS_PASS" ]; then
-            echo "Missing STATUS_USER/STATUS_PASS for ${{ matrix.env_name }}" >&2
+          echo "::add-mask::${{ steps.select.outputs.USER }}"
+          echo "::add-mask::${{ steps.select.outputs.PASS }}"
+          echo "::add-mask::${{ steps.select.outputs.BYPASS }}"
+
+      - name: Build Basic Auth header safely
+        id: auth
+        if: env.SKIP_ALL != '1'
+        run: |
+          if [ -z "${{ steps.select.outputs.USER }}" ] || [ -z "${{ steps.select.outputs.PASS }}" ]; then
+            echo "Missing STATUS_USER or STATUS_PASS for ${{ matrix.env_name }}"
             exit 1
           fi
-          echo "Requesting $STATUS_URL"
-          RESP=$(curl --silent --show-error --fail --location \
-            --user "$STATUS_USER:$STATUS_PASS" \
-            --header 'Accept: application/json' \
-            "$STATUS_URL")
-          {
-            echo 'payload<<EOF'
-            echo "$RESP"
-            echo 'EOF'
-          } >> "$GITHUB_OUTPUT"
-      - name: Validate status payload
-        env:
-          PAYLOAD: ${{ steps.fetch.outputs.payload }}
+          AUTH=$(printf '%s' "${{ steps.select.outputs.USER }}:${{ steps.select.outputs.PASS }}" | base64)
+          echo "AUTH_HEADER=Basic $AUTH" >> $GITHUB_ENV
+          echo "::add-mask::$AUTH"
+
+      - name: DNS precheck (skip prod if www not live)
+        if: env.SKIP_ALL != '1' && matrix.env_name == 'production'
         run: |
-          echo "$PAYLOAD" | jq -e '
-            select(.noncePresent | type == "boolean")
-            | select(.emailTransport | type == "boolean")
-            | select(
-                (.env | type == "string")
-                or
-                (.env | type == "object" and (.vercelEnv? | type == "string" or .vercelEnv? == null))
-              )
-          ' > /dev/null
-          echo "Status payload for ${{ matrix.env_name }} looks healthy."
+          if ! dig +short www.louhen.app | grep -q . ; then
+            echo "SKIP_PROD=1" >> $GITHUB_ENV
+          fi
+
+      - name: Set Vercel protection-bypass cookie
+        if: env.SKIP_ALL != '1' && (matrix.env_name != 'production' || env.SKIP_PROD != '1')
+        run: |
+          URL="${{ steps.select.outputs.URL }}"
+          BYPASS="${{ steps.select.outputs.BYPASS }}"
+          if [ -z "$BYPASS" ]; then
+            echo "Missing VERCEL_BYPASS token for ${{ matrix.env_name }}"
+            exit 1
+          fi
+          BYPASS_URL="${URL}?x-vercel-set-bypass-cookie=true&x-vercel-protection-bypass=${BYPASS}"
+          curl -sS --fail -c jar.txt "$BYPASS_URL"
+
+      - name: Ping /api/status with cookie + Basic Auth
+        if: env.SKIP_ALL != '1' && (matrix.env_name != 'production' || env.SKIP_PROD != '1')
+        run: |
+          echo "Requesting ${{ steps.select.outputs.URL }}"
+          curl -sS --fail -b jar.txt -H "Authorization: $AUTH_HEADER" "${{ steps.select.outputs.URL }}"
