@@ -21,7 +21,13 @@ on:
         default: false
 
 env:
-  BASE_SERVER_URL: http://localhost:4311
+  BASE_SERVER_URL: ${{ vars.BASE_SERVER_URL }}
+  PREVIEW_BASE_URL: ${{ vars.PREVIEW_BASE_URL }}
+  SANDBOX_VALIDATION: '0'
+  DEFAULT_LOCALE: en
+  METHOD_STICKY_CTA_ENABLED: 'true'
+  METHOD_EXIT_NUDGE_ENABLED: 'true'
+  NEXT_TELEMETRY_DISABLED: '1'
 
 jobs:
   determine:
@@ -90,8 +96,8 @@ jobs:
       CI: true
       NODE_ENV: production
       TEST_MODE: '1'
-      APP_BASE_URL: http://localhost:4311
-      NEXT_PUBLIC_SITE_URL: http://localhost:4311
+      APP_BASE_URL: ${{ vars.BASE_SERVER_URL }}
+      NEXT_PUBLIC_SITE_URL: ${{ vars.BASE_SERVER_URL }}
       NEXT_PUBLIC_ENV: 'ci'
       NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
       NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
@@ -104,7 +110,7 @@ jobs:
       NEXT_PUBLIC_METHOD_EXIT_NUDGE: 'true'
       NEXT_TELEMETRY_DISABLED: '1'
       DEFAULT_LOCALE: 'en'
-      BASE_URL: http://localhost:4311
+      BASE_URL: ${{ vars.BASE_SERVER_URL }}
       HCAPTCHA_SECRET: ci-hcaptcha-secret
       WAITLIST_CONFIRM_TTL_DAYS: '7'
       FIREBASE_PROJECT_ID: ci-firebase
@@ -147,8 +153,8 @@ jobs:
       CI: true
       NODE_ENV: production
       TEST_MODE: '1'
-      APP_BASE_URL: http://localhost:4311
-      NEXT_PUBLIC_SITE_URL: http://localhost:4311
+      APP_BASE_URL: ${{ vars.BASE_SERVER_URL }}
+      NEXT_PUBLIC_SITE_URL: ${{ vars.BASE_SERVER_URL }}
       NEXT_PUBLIC_ENV: 'ci'
       NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
       NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
@@ -161,7 +167,7 @@ jobs:
       NEXT_PUBLIC_METHOD_EXIT_NUDGE: 'true'
       NEXT_TELEMETRY_DISABLED: '1'
       DEFAULT_LOCALE: 'en'
-      BASE_URL: http://localhost:4311
+      BASE_URL: ${{ vars.BASE_SERVER_URL }}
       HCAPTCHA_SECRET: ci-hcaptcha-secret
       WAITLIST_CONFIRM_TTL_DAYS: '7'
       FIREBASE_PROJECT_ID: ci-firebase
@@ -242,8 +248,8 @@ jobs:
       CI: true
       NODE_ENV: production
       TEST_MODE: '1'
-      APP_BASE_URL: http://localhost:4311
-      NEXT_PUBLIC_SITE_URL: http://localhost:4311
+      APP_BASE_URL: ${{ vars.BASE_SERVER_URL }}
+      NEXT_PUBLIC_SITE_URL: ${{ vars.BASE_SERVER_URL }}
       NEXT_PUBLIC_ENV: 'ci'
       NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
       NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
@@ -337,16 +343,16 @@ jobs:
       CI: true
       NODE_ENV: production
       TEST_MODE: '1'
-      APP_BASE_URL: ${{ env.BASE_SERVER_URL }}
-      NEXT_PUBLIC_SITE_URL: ${{ env.BASE_SERVER_URL }}
+      APP_BASE_URL: http://localhost:4311
+      NEXT_PUBLIC_SITE_URL: http://localhost:4311
       NEXT_PUBLIC_ENV: 'ci'
       NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
       NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
       NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
       NEXT_PUBLIC_LOCALES: 'en,de'
       NEXT_PUBLIC_DEFAULT_LOCALE: 'en'
-      NEXT_PUBLIC_ANALYTICS_DISABLED: '0'
-      NEXT_PUBLIC_ANALYTICS_DEBUG: '1'
+      NEXT_PUBLIC_ANALYTICS_DISABLED: '1'
+      NEXT_PUBLIC_ANALYTICS_DEBUG: '0'
       HCAPTCHA_SECRET: ci-hcaptcha-secret
       WAITLIST_CONFIRM_TTL_DAYS: '7'
       FIREBASE_PROJECT_ID: ci-firebase
@@ -384,11 +390,11 @@ jobs:
           echo $! > server.pid
 
       - name: Wait for server readiness
-        run: npx --yes wait-on "${{ env.BASE_SERVER_URL }}/waitlist" --timeout 180000
+        run: npx --yes wait-on "${{ vars.BASE_SERVER_URL }}/waitlist" --timeout 180000
 
       - name: Run Lighthouse
         env:
-          LHCI_URL: ${{ env.BASE_SERVER_URL }}/waitlist
+          LHCI_URL: ${{ vars.BASE_SERVER_URL }}/waitlist
         run: npm run lighthouse
 
       - name: Stop test server
