@@ -83,9 +83,9 @@ jobs:
 
       - name: Check Playwright env wiring
         env:
-          APP_BASE_URL: http://localhost:4311
+          APP_BASE_URL: http://127.0.0.1:4311
           NEXT_PUBLIC_ENV: 'ci'
-          NEXT_PUBLIC_SITE_URL: 'https://ci.louhen.app'
+          NEXT_PUBLIC_SITE_URL: 'http://127.0.0.1:4311'
           NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
           NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
           NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
@@ -139,12 +139,12 @@ jobs:
 
       - name: E2E tests (Playwright)
         env:
-          APP_BASE_URL: http://localhost:4311
+          APP_BASE_URL: http://127.0.0.1:4311
           TEST_E2E_SHORTCIRCUIT: 'true'
           TEST_E2E_BYPASS_TOKEN: e2e-mocked-token
           CI_SKIP_LANDING: '1'
           NEXT_PUBLIC_ENV: 'ci'
-          NEXT_PUBLIC_SITE_URL: 'https://ci.louhen.app'
+          NEXT_PUBLIC_SITE_URL: 'http://127.0.0.1:4311'
           NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
           NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
           NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
@@ -163,7 +163,7 @@ jobs:
           STATUS_USER: ci-status
           STATUS_PASS: ci-secret
           SUPPRESSION_SALT: ci-suppression-salt
-          NODE_ENV: test
+          NODE_ENV: production
         run: |
           mkdir -p playwright-report
           set -o pipefail
@@ -172,11 +172,11 @@ jobs:
 
       - name: Accessibility (axe)
         env:
-          APP_BASE_URL: http://localhost:4311
+          APP_BASE_URL: http://127.0.0.1:4311
           TEST_E2E_SHORTCIRCUIT: 'true'
           TEST_E2E_BYPASS_TOKEN: e2e-mocked-token
           NEXT_PUBLIC_ENV: 'ci'
-          NEXT_PUBLIC_SITE_URL: 'https://ci.louhen.app'
+          NEXT_PUBLIC_SITE_URL: 'http://127.0.0.1:4311'
           NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
           NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
           NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
@@ -195,7 +195,7 @@ jobs:
           STATUS_USER: ci-status
           STATUS_PASS: ci-secret
           SUPPRESSION_SALT: ci-suppression-salt
-          NODE_ENV: test
+          NODE_ENV: production
         run: npm run test:axe
         continue-on-error: false
 

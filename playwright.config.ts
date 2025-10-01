@@ -2,7 +2,7 @@ import { Buffer } from 'node:buffer';
 import { defineConfig, devices } from '@playwright/test';
 import type { PlaywrightTestConfig } from '@playwright/test';
 
-const baseURL = process.env.BASE_URL ?? 'http://localhost:4311';
+const baseURL = process.env.BASE_URL ?? 'http://127.0.0.1:4311';
 const shouldSkipWebServer = process.env.PLAYWRIGHT_SKIP === '1';
 
 const statusUser = process.env.STATUS_USER ?? process.env.CI_STATUS_USER ?? 'status-ops';
@@ -31,7 +31,7 @@ const testEnv = {
   RESEND_API_KEY: process.env.RESEND_API_KEY ?? 'ci-resend-key',
   RESEND_FROM: process.env.RESEND_FROM ?? 'no-reply@ci.louhen.app',
   RESEND_REPLY_TO: process.env.RESEND_REPLY_TO ?? 'hello@ci.louhen.app',
-  NODE_ENV: 'test',
+  NODE_ENV: 'production',
   SUPPRESSION_SALT: process.env.SUPPRESSION_SALT ?? 'test-salt',
   EMAIL_TRANSPORT: process.env.EMAIL_TRANSPORT ?? 'noop',
   STATUS_USER: statusUser,
@@ -87,12 +87,16 @@ if (shouldSkipWebServer) {
     },
   ];
   config.webServer = {
-    command: 'npm run start:test',
+    command: 'npm run start:test-server',
     url: baseURL,
     reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
+    timeout: 180_000,
     env: {
       ...testEnv,
+      BASE_URL: baseURL,
+      APP_BASE_URL: baseURL,
+      NEXT_PUBLIC_SITE_URL: baseURL,
+      NODE_ENV: 'production',
     },
   };
 }
