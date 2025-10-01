@@ -90,8 +90,8 @@ jobs:
       CI: true
       NODE_ENV: production
       TEST_MODE: '1'
-      APP_BASE_URL: ${{ env.BASE_SERVER_URL }}
-      NEXT_PUBLIC_SITE_URL: ${{ env.BASE_SERVER_URL }}
+      APP_BASE_URL: http://localhost:4311
+      NEXT_PUBLIC_SITE_URL: http://localhost:4311
       NEXT_PUBLIC_ENV: 'ci'
       NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
       NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
@@ -104,7 +104,7 @@ jobs:
       NEXT_PUBLIC_METHOD_EXIT_NUDGE: 'true'
       NEXT_TELEMETRY_DISABLED: '1'
       DEFAULT_LOCALE: 'en'
-      BASE_URL: ${{ env.BASE_SERVER_URL }}
+      BASE_URL: http://localhost:4311
       HCAPTCHA_SECRET: ci-hcaptcha-secret
       WAITLIST_CONFIRM_TTL_DAYS: '7'
       FIREBASE_PROJECT_ID: ci-firebase
@@ -147,8 +147,8 @@ jobs:
       CI: true
       NODE_ENV: production
       TEST_MODE: '1'
-      APP_BASE_URL: ${{ env.BASE_SERVER_URL }}
-      NEXT_PUBLIC_SITE_URL: ${{ env.BASE_SERVER_URL }}
+      APP_BASE_URL: http://localhost:4311
+      NEXT_PUBLIC_SITE_URL: http://localhost:4311
       NEXT_PUBLIC_ENV: 'ci'
       NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
       NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
@@ -161,7 +161,7 @@ jobs:
       NEXT_PUBLIC_METHOD_EXIT_NUDGE: 'true'
       NEXT_TELEMETRY_DISABLED: '1'
       DEFAULT_LOCALE: 'en'
-      BASE_URL: ${{ env.BASE_SERVER_URL }}
+      BASE_URL: http://localhost:4311
       HCAPTCHA_SECRET: ci-hcaptcha-secret
       WAITLIST_CONFIRM_TTL_DAYS: '7'
       FIREBASE_PROJECT_ID: ci-firebase
@@ -242,8 +242,8 @@ jobs:
       CI: true
       NODE_ENV: production
       TEST_MODE: '1'
-      APP_BASE_URL: ${{ env.BASE_SERVER_URL }}
-      NEXT_PUBLIC_SITE_URL: ${{ env.BASE_SERVER_URL }}
+      APP_BASE_URL: http://localhost:4311
+      NEXT_PUBLIC_SITE_URL: http://localhost:4311
       NEXT_PUBLIC_ENV: 'ci'
       NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
       NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
@@ -256,7 +256,7 @@ jobs:
       NEXT_PUBLIC_METHOD_EXIT_NUDGE: 'true'
       NEXT_TELEMETRY_DISABLED: '1'
       DEFAULT_LOCALE: 'en'
-      BASE_URL: ${{ env.BASE_SERVER_URL }}
+      BASE_URL: http://localhost:4311
       HCAPTCHA_SECRET: ci-hcaptcha-secret
       WAITLIST_CONFIRM_TTL_DAYS: '7'
       FIREBASE_PROJECT_ID: ci-firebase
