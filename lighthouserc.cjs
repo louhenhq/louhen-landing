@@ -14,6 +14,7 @@ module.exports = {
         throttlingMethod: 'devtools',
         onlyCategories: ['performance', 'accessibility', 'seo', 'best-practices']
       },
+      chromeFlags: ['--disable-dev-shm-usage', '--allow-insecure-localhost'],
       startServerCommand: null,
     },
     upload: {
