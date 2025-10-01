@@ -390,7 +390,7 @@ jobs:
 
       - name: Run Lighthouse
         env:
-          LHCI_URL: ${{ vars.BASE_SERVER_URL }}/waitlist
+          LHCI_URL: ${{ format('{0}/{1}/method/', vars.BASE_SERVER_URL, env.DEFAULT_LOCALE) }}
         run: npm run lighthouse
 
       - name: Upload Lighthouse report
