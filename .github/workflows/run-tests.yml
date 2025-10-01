@@ -136,8 +136,7 @@ jobs:
       - name: Install dependencies
         env:
           NODE_ENV: development
-          NPM_CONFIG_PRODUCTION: 'false'
-        run: npm ci
+        run: npm ci --include=dev
 
       - name: Build
         run: npm run build:test
@@ -193,8 +192,7 @@ jobs:
       - name: Install dependencies
         env:
           NODE_ENV: development
-          NPM_CONFIG_PRODUCTION: 'false'
-        run: npm ci
+        run: npm ci --include=dev
 
       - name: Build
         run: npm run build:test
@@ -288,8 +286,7 @@ jobs:
       - name: Install dependencies
         env:
           NODE_ENV: development
-          NPM_CONFIG_PRODUCTION: 'false'
-        run: npm ci
+        run: npm ci --include=dev
 
       - name: Build
         run: npm run build
@@ -378,8 +375,7 @@ jobs:
       - name: Install dependencies
         env:
           NODE_ENV: development
-          NPM_CONFIG_PRODUCTION: 'false'
-        run: npm ci
+        run: npm ci --include=dev
 
       - name: Build
         run: npm run build
