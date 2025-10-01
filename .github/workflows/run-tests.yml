@@ -1,0 +1,496 @@
+name: Run Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      suites:
+        description: "Suites to run (all or comma-separated list of unit,e2e,axe,lighthouse)"
+        default: "all"
+        required: true
+      skipE2E:
+        description: "Skip Playwright E2E"
+        type: boolean
+        default: false
+      skipAxe:
+        description: "Skip accessibility axe suite"
+        type: boolean
+        default: false
+      skipLHCI:
+        description: "Skip Lighthouse"
+        type: boolean
+        default: false
+
+env:
+  BASE_SERVER_URL: http://127.0.0.1:4311
+
+jobs:
+  determine:
+    runs-on: ubuntu-latest
+    outputs:
+      run-unit: ${{ steps.set.outputs.run-unit }}
+      run-e2e: ${{ steps.set.outputs.run-e2e }}
+      run-axe: ${{ steps.set.outputs.run-axe }}
+      run-lhci: ${{ steps.set.outputs.run-lhci }}
+    steps:
+      - id: set
+        shell: bash
+        run: |
+          set -euo pipefail
+          suites="${{ inputs.suites }}"
+          suites_lower=$(echo "$suites" | tr '[:upper:]' '[:lower:]')
+          IFS=',' read -ra tokens <<< "$suites_lower"
+          run_all=false
+          declare -A selected=()
+          for token in "${tokens[@]}"; do
+            trimmed="${token// /}"
+            if [[ -z "$trimmed" ]]; then continue; fi
+            if [[ "$trimmed" == "all" ]]; then
+              run_all=true
+            else
+              selected[$trimmed]=1
+            fi
+          done
+          function should_run {
+            local key="$1"
+            if [[ "$run_all" == true ]]; then
+              echo "true"
+              return
+            fi
+            if [[ -n "${selected[$key]:-}" ]]; then
+              echo "true"
+            else
+              echo "false"
+            fi
+          }
+          run_unit=$(should_run "unit")
+          run_e2e=$(should_run "e2e")
+          run_axe=$(should_run "axe")
+          run_lhci=$(should_run "lighthouse")
+
+          if [[ "${{ inputs.skipE2E }}" == "true" ]]; then
+            run_e2e="false"
+          fi
+          if [[ "${{ inputs.skipAxe }}" == "true" ]]; then
+            run_axe="false"
+          fi
+          if [[ "${{ inputs.skipLHCI }}" == "true" ]]; then
+            run_lhci="false"
+          fi
+
+          echo "run-unit=$run_unit" >> "$GITHUB_OUTPUT"
+          echo "run-e2e=$run_e2e" >> "$GITHUB_OUTPUT"
+          echo "run-axe=$run_axe" >> "$GITHUB_OUTPUT"
+          echo "run-lhci=$run_lhci" >> "$GITHUB_OUTPUT"
+
+  unit:
+    needs: determine
+    if: ${{ needs.determine.outputs.run-unit == 'true' }}
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+      NODE_ENV: production
+      TEST_MODE: '1'
+      APP_BASE_URL: ${{ env.BASE_SERVER_URL }}
+      NEXT_PUBLIC_SITE_URL: ${{ env.BASE_SERVER_URL }}
+      NEXT_PUBLIC_ENV: 'ci'
+      NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
+      NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
+      NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
+      NEXT_PUBLIC_LOCALES: 'en,de'
+      NEXT_PUBLIC_DEFAULT_LOCALE: 'en'
+      NEXT_PUBLIC_ANALYTICS_DISABLED: '0'
+      NEXT_PUBLIC_ANALYTICS_DEBUG: '1'
+      HCAPTCHA_SECRET: ci-hcaptcha-secret
+      WAITLIST_CONFIRM_TTL_DAYS: '7'
+      FIREBASE_PROJECT_ID: ci-firebase
+      FIREBASE_DB_REGION: eur3
+      FIREBASE_ADMIN_SA_B64: eyJwcm9qZWN0X2lkIjoiY2ktZmlyZWJhc2UifQ==
+      RESEND_API_KEY: ci-resend-key
+      RESEND_FROM: no-reply@ci.louhen.app
+      RESEND_REPLY_TO: hello@ci.louhen.app
+      STATUS_USER: ci-status
+      STATUS_PASS: ci-secret
+      SUPPRESSION_SALT: ci-suppression-salt
+      EMAIL_TRANSPORT: noop
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        env:
+          NODE_ENV: development
+          NPM_CONFIG_PRODUCTION: 'false'
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Start test server
+        run: |
+          npm run start:test-server > server.log 2>&1 &
+          echo $! > server.pid
+
+      - name: Wait for server readiness
+        run: npx --yes wait-on "${{ env.BASE_SERVER_URL }}/waitlist" --timeout 180000
+
+      - name: Run unit tests
+        run: npm run test:unit
+
+      - name: Stop test server
+        if: always()
+        run: |
+          if [ -f server.pid ]; then
+            kill "$(cat server.pid)" >/dev/null 2>&1 || true
+            wait "$(cat server.pid)" 2>/dev/null || true
+            rm server.pid
+          fi
+          if [ -f server.log ]; then
+            echo '--- server.log tail ---' >> "$GITHUB_STEP_SUMMARY"
+            tail -n 100 server.log >> "$GITHUB_STEP_SUMMARY" || true
+          fi
+
+  e2e:
+    needs: determine
+    if: ${{ needs.determine.outputs.run-e2e == 'true' }}
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+      NODE_ENV: production
+      TEST_MODE: '1'
+      APP_BASE_URL: ${{ env.BASE_SERVER_URL }}
+      NEXT_PUBLIC_SITE_URL: ${{ env.BASE_SERVER_URL }}
+      NEXT_PUBLIC_ENV: 'ci'
+      NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
+      NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
+      NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
+      NEXT_PUBLIC_LOCALES: 'en,de'
+      NEXT_PUBLIC_DEFAULT_LOCALE: 'en'
+      NEXT_PUBLIC_ANALYTICS_DISABLED: '0'
+      NEXT_PUBLIC_ANALYTICS_DEBUG: '1'
+      HCAPTCHA_SECRET: ci-hcaptcha-secret
+      WAITLIST_CONFIRM_TTL_DAYS: '7'
+      FIREBASE_PROJECT_ID: ci-firebase
+      FIREBASE_DB_REGION: eur3
+      FIREBASE_ADMIN_SA_B64: eyJwcm9qZWN0X2lkIjoiY2ktZmlyZWJhc2UifQ==
+      RESEND_API_KEY: ci-resend-key
+      RESEND_FROM: no-reply@ci.louhen.app
+      RESEND_REPLY_TO: hello@ci.louhen.app
+      STATUS_USER: ci-status
+      STATUS_PASS: ci-secret
+      SUPPRESSION_SALT: ci-suppression-salt
+      EMAIL_TRANSPORT: noop
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        env:
+          NODE_ENV: development
+          NPM_CONFIG_PRODUCTION: 'false'
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Start test server
+        run: |
+          npm run start:test-server > server.log 2>&1 &
+          echo $! > server.pid
+
+      - name: Wait for server readiness
+        run: npx --yes wait-on "${{ env.BASE_SERVER_URL }}/waitlist" --timeout 180000
+
+      - name: Run Playwright suite
+        run: |
+          mkdir -p playwright-report
+          npm run test:e2e
+
+      - name: Stop test server
+        if: always()
+        run: |
+          if [ -f server.pid ]; then
+            kill "$(cat server.pid)" >/dev/null 2>&1 || true
+            wait "$(cat server.pid)" 2>/dev/null || true
+            rm server.pid
+          fi
+          if [ -f server.log ]; then
+            echo '--- server.log tail ---' >> "$GITHUB_STEP_SUMMARY"
+            tail -n 100 server.log >> "$GITHUB_STEP_SUMMARY" || true
+          fi
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-e2e-report
+          path: playwright-report/
+          if-no-files-found: ignore
+
+      - name: Upload Playwright results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-e2e-results
+          path: test-results/
+          if-no-files-found: ignore
+
+      - name: Upload server log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-e2e-server-log
+          path: server.log
+          if-no-files-found: ignore
+
+      - name: Job summary
+        if: always()
+        run: |
+          {
+            echo "## Playwright artifacts"
+            echo "- \\`playwright-e2e-report\\`: HTML report"
+            echo "- \\`playwright-e2e-results\\`: raw traces/json"
+            echo "- \\`playwright-e2e-server-log\\`: server output"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  axe:
+    needs: determine
+    if: ${{ needs.determine.outputs.run-axe == 'true' }}
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+      NODE_ENV: production
+      TEST_MODE: '1'
+      APP_BASE_URL: ${{ env.BASE_SERVER_URL }}
+      NEXT_PUBLIC_SITE_URL: ${{ env.BASE_SERVER_URL }}
+      NEXT_PUBLIC_ENV: 'ci'
+      NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
+      NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
+      NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
+      NEXT_PUBLIC_LOCALES: 'en,de'
+      NEXT_PUBLIC_DEFAULT_LOCALE: 'en'
+      NEXT_PUBLIC_ANALYTICS_DISABLED: '0'
+      NEXT_PUBLIC_ANALYTICS_DEBUG: '1'
+      HCAPTCHA_SECRET: ci-hcaptcha-secret
+      WAITLIST_CONFIRM_TTL_DAYS: '7'
+      FIREBASE_PROJECT_ID: ci-firebase
+      FIREBASE_DB_REGION: eur3
+      FIREBASE_ADMIN_SA_B64: eyJwcm9qZWN0X2lkIjoiY2ktZmlyZWJhc2UifQ==
+      RESEND_API_KEY: ci-resend-key
+      RESEND_FROM: no-reply@ci.louhen.app
+      RESEND_REPLY_TO: hello@ci.louhen.app
+      STATUS_USER: ci-status
+      STATUS_PASS: ci-secret
+      SUPPRESSION_SALT: ci-suppression-salt
+      EMAIL_TRANSPORT: noop
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        env:
+          NODE_ENV: development
+          NPM_CONFIG_PRODUCTION: 'false'
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Start test server
+        run: |
+          npm run start:test-server > server.log 2>&1 &
+          echo $! > server.pid
+
+      - name: Wait for server readiness
+        run: npx --yes wait-on "${{ env.BASE_SERVER_URL }}/waitlist" --timeout 180000
+
+      - name: Run accessibility suite
+        run: |
+          mkdir -p playwright-report
+          npm run test:axe
+
+      - name: Stop test server
+        if: always()
+        run: |
+          if [ -f server.pid ]; then
+            kill "$(cat server.pid)" >/dev/null 2>&1 || true
+            wait "$(cat server.pid)" 2>/dev/null || true
+            rm server.pid
+          fi
+          if [ -f server.log ]; then
+            echo '--- server.log tail ---' >> "$GITHUB_STEP_SUMMARY"
+            tail -n 100 server.log >> "$GITHUB_STEP_SUMMARY" || true
+          fi
+
+      - name: Upload accessibility report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-axe-report
+          path: playwright-report/
+          if-no-files-found: ignore
+
+      - name: Upload accessibility results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-axe-results
+          path: test-results/
+          if-no-files-found: ignore
+
+      - name: Upload server log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-axe-server-log
+          path: server.log
+          if-no-files-found: ignore
+
+      - name: Job summary
+        if: always()
+        run: |
+          {
+            echo "## Accessibility artifacts"
+            echo "- \\`playwright-axe-report\\`"
+            echo "- \\`playwright-axe-results\\`"
+            echo "- \\`playwright-axe-server-log\\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  lighthouse:
+    needs: determine
+    if: ${{ needs.determine.outputs.run-lhci == 'true' }}
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+      NODE_ENV: production
+      TEST_MODE: '1'
+      APP_BASE_URL: ${{ env.BASE_SERVER_URL }}
+      NEXT_PUBLIC_SITE_URL: ${{ env.BASE_SERVER_URL }}
+      NEXT_PUBLIC_ENV: 'ci'
+      NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
+      NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
+      NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
+      NEXT_PUBLIC_LOCALES: 'en,de'
+      NEXT_PUBLIC_DEFAULT_LOCALE: 'en'
+      NEXT_PUBLIC_ANALYTICS_DISABLED: '0'
+      NEXT_PUBLIC_ANALYTICS_DEBUG: '1'
+      HCAPTCHA_SECRET: ci-hcaptcha-secret
+      WAITLIST_CONFIRM_TTL_DAYS: '7'
+      FIREBASE_PROJECT_ID: ci-firebase
+      FIREBASE_DB_REGION: eur3
+      FIREBASE_ADMIN_SA_B64: eyJwcm9qZWN0X2lkIjoiY2ktZmlyZWJhc2UifQ==
+      RESEND_API_KEY: ci-resend-key
+      RESEND_FROM: no-reply@ci.louhen.app
+      RESEND_REPLY_TO: hello@ci.louhen.app
+      STATUS_USER: ci-status
+      STATUS_PASS: ci-secret
+      SUPPRESSION_SALT: ci-suppression-salt
+      EMAIL_TRANSPORT: noop
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        env:
+          NODE_ENV: development
+          NPM_CONFIG_PRODUCTION: 'false'
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Start test server
+        run: |
+          npm run start:test-server > server.log 2>&1 &
+          echo $! > server.pid
+
+      - name: Wait for server readiness
+        run: npx --yes wait-on "${{ env.BASE_SERVER_URL }}/waitlist" --timeout 180000
+
+      - name: Run Lighthouse
+        env:
+          LHCI_URL: ${{ env.BASE_SERVER_URL }}/waitlist
+        run: npm run lighthouse
+
+      - name: Stop test server
+        if: always()
+        run: |
+          if [ -f server.pid ]; then
+            kill "$(cat server.pid)" >/dev/null 2>&1 || true
+            wait "$(cat server.pid)" 2>/dev/null || true
+            rm server.pid
+          fi
+          if [ -f server.log ]; then
+            echo '--- server.log tail ---' >> "$GITHUB_STEP_SUMMARY"
+            tail -n 100 server.log >> "$GITHUB_STEP_SUMMARY" || true
+          fi
+
+      - name: Upload Lighthouse results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-results
+          path: .lighthouseci/
+          if-no-files-found: ignore
+
+      - name: Upload server log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-server-log
+          path: server.log
+          if-no-files-found: ignore
+
+      - name: Job summary
+        if: always()
+        run: |
+          {
+            echo "## Lighthouse artifacts"
+            echo "- \\`lighthouse-results\\`"
+            echo "- \\`lighthouse-server-log\\`"
+          } >> "$GITHUB_STEP_SUMMARY"

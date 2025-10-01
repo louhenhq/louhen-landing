@@ -32,11 +32,7 @@ Run dev
     npm run dev
 
 Run full checks before a PR
-    npm run lint
-    npm run build
-    npx playwright test
-    # optional if configured:
-    npm run lhci
+    npm run validate:local
 
 ---
 
@@ -112,19 +108,20 @@ Add guard clauses for missing envs (fail fast with clear, friendly errors).
 
 ## 7) Testing
 
-E2E (Playwright)
-    npx playwright test
+Test matrix
+    npm run test:unit
+    npm run test:e2e
+    npm run test:axe
+    npm run lighthouse
 
-Lint & build
-    npm run lint
-    npm run build
+Need a fresh CI run without pushing? Use the **Run Tests** workflow (Actions tab) or comment
+`/test <suite>` on your PR. Suites: `unit`, `e2e`, `axe`, `lhci`, or `all`.
 
-Accessibility & Perf
-- Lighthouse thresholds on `/`:
-  - Performance ≥ 90
-  - Accessibility ≥ 95
-  - SEO ≥ 95
-  - Best Practices ≥ 95
+Accessibility & Perf budgets (Lighthouse `/waitlist`)
+    Performance ≥ 90
+    Accessibility ≥ 95
+    Best Practices ≥ 95
+    SEO ≥ 95
 
 Negative paths
 - For forms/APIs, include at least one failing test (e.g., invalid email, captcha failure).

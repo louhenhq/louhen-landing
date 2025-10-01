@@ -33,7 +33,8 @@
     "release": "semantic-release",
     "e2e:local": "cross-env NODE_ENV=test APP_BASE_URL=http://localhost:4311 TEST_E2E_SHORTCIRCUIT=true TEST_E2E_BYPASS_TOKEN=e2e-mocked-token HCAPTCHA_SECRET=sk_dummy_for_e2e playwright test --reporter=html --workers=2",
     "e2e:open": "npx playwright show-report",
-    "pw:failures": "node scripts/summarize_playwright_failures.mjs"
+    "pw:failures": "node scripts/summarize_playwright_failures.mjs",
+    "validate:local": "bash scripts/validate-local.sh"
   },
   "dependencies": {
     "firebase-admin": "^13.5.0",

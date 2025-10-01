@@ -97,6 +97,42 @@ npx playwright test tests/e2e/waitlist.flow.spec.ts
 npm run lighthouse
 ```
 
+### Local validation (single command)
+
+Prefer a one-and-done run? Use the bundled validator:
+
+```bash
+npm run validate:local
+```
+
+It builds the production bundle, boots `start:test-server` on `127.0.0.1:4311` with
+`TEST_MODE=1`, waits for `/waitlist`, runs unit + Playwright + axe + Lighthouse suites, then tears
+the server down even if something fails. If the server cannot bind (port already in use) or the
+readiness check times out, stop any existing Next.js process and retry.
+
+### CI on demand
+
+- GitHub UI: Actions → **Run Tests** → choose `unit`, `e2e`, `axe`, `lighthouse`, or `all`.
+- CLI: `gh workflow run run-tests.yml -f suites=all`
+
+Each CI job follows the same loopback flow (install with dev deps → build → start local server →
+wait for readiness → run suite → upload artifacts). Optional inputs `skipE2E`, `skipAxe`, and
+`skipLHCI` let you bypass individual suites when debugging infrastructure issues.
+
+### PR slash commands
+
+Maintainers and organization members can trigger suites directly from a pull-request comment:
+
+```
+/test all
+/test unit
+/test e2e
+/test axe
+/test lhci
+```
+
+The bot dispatches the same workflow_dispatch run and posts results back to the PR once complete.
+
 ## End-to-End Testing Modes
 
 - **Local mode**: Run `npx playwright test` without `E2E_BASE_URL`; Playwright binds to the local dev server on loopback.
