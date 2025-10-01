@@ -55,3 +55,27 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
 
 - **2025-10-01**  
   Method page v1 finalized with localized copy, analytics parity, Playwright coverage, and Lighthouse gates enforced.
+
+---
+
+## Louhen Landing — Design System (Locked 2025-10-01)
+
+- **Principles**: Trust-first storytelling, visual calm, scalability for new product surfaces, and accessibility as a default constraint.  
+- **Typography**: Fraunces (locked headline family, weights 600–700) replaces Recoleta to eliminate licensing friction while preserving the serif character; Inter remains the body/UI family (weights 400/500/600) with shared fallback stacks. Type utilities expose clamp-based sizes, conservative line-height targets, and letter-spacing guidance to prevent layout shift. Implementation is scheduled in [Slice 2 — Typography + Token Wiring](CONTEXT/backlog.md#slice-2-typography--token-wiring).
+- **Color System**: All UI color uses semantic tokens (brand.primary, accent.seasonal, surface.default, feedback.*). Seasonal accent tokens are swappable without changing component primitives; raw hex values remain prohibited in runtime code.
+- **Layout & Spacing**: Components adhere to the 12-column grid with a 1440px content max. Vertical rhythm aligns to an 8-based spacing scale (4 → 96) with section paddings between 80–120px depending on breakpoint. Radii default to `rounded-2xl` primitives; shadows stay in the soft-elevation system defined in tokens.
+- **Motion**: Framer Motion drives interactive states with easing presets and 200–300ms durations; hero Lottie sequences respect a 250KB zipped budget. All flows must honor `prefers-reduced-motion` with fade/opacity fallbacks and no size/weight transitions.
+- **Imagery & Illustration**: Marketing art remains light, airy lifestyle photography with GDPR-compliant sourcing; illustrations stay pastel with consistent stroke weight to match Louhen app iconography.
+- **Internationalization**: Layouts plan for DE-length strings and RTL mirroring; copy decks follow BCP-47 locale keys to match `next-intl` routing.
+- **Dark Mode**: Dark theme ships with system-default detection plus an explicit toggle. Component tokens map 1:1 across light/dark themes, including focus and elevated surfaces.
+- **Alignment with App Tokens**: Landing tokens inherit naming from the core Louhen app (`brand.primary`, `text.muted`, `border.subtle`) to maintain cross-surface consistency and simplify shared tooling.
+
+### Impact
+- Removes paid font licensing risk by locking Fraunces as the serif headline family (Google Fonts) and aligns web typography with Style Dictionary tokens shared with the app.  
+- Provides a single source of truth for layout, tokens, and motion so Slices 1–13 can reference immutable decisions.  
+- Establishes contributor guardrails (PR checklist, README snapshot) that prevent design drift and ensure CI/lint hooks enforce the design contract.
+
+### Risks
+- Typeface swap requires thorough regression of perceived weight/kerning; confirm Fraunces preload/swap strategies stay within CLS budgets.  
+- Hero Lottie and motion micro-interactions must stay within the 250KB zipped payload budget to avoid perf regressions.  
+- Icon and illustration stroke inconsistencies could erode the trust-first principle; enforce shared stroke guides in design reviews.

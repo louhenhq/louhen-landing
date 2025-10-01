@@ -15,6 +15,18 @@
 - [ ] `/method` redirect preserves queries and resolves to the localized canonical with trailing slash.
 - [ ] Validated in sandbox mode (`npm run validate:sandbox`) where applicable (optional for Codex runs).
 
+## Design Integrity Checklist
+- [ ] Uses tokens (no raw hex/radii/shadows).
+- [ ] Typography via utilities and CSS vars (Fraunces headings, Inter body).
+- [ ] Focus-visible styles present on interactive elements.
+- [ ] Dark mode checked or neutral (no regressions).
+- [ ] i18n length tested (DE strings fit) in hero/section titles.
+- [ ] Reduced-motion respects user preference.
+- [ ] Lighthouse mobile ≥ targets (Perf ≥ 90, A11y ≥ 100, SEO ≥ 95) for touched pages.
+- [ ] aXe: 0 critical violations for touched pages.
+
+> If any item cannot be satisfied, include rationale and a follow-up issue link.
+
 ## Checklist (trust, privacy, governance)
 - [ ] **Consent**: Analytics initialize only after opt-in; no surprise trackers added.  
 - [ ] **CSP Nonce**: No inline scripts without a nonce; JSON-LD keeps nonce parity.  

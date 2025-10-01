@@ -14,6 +14,13 @@ Louhen Landing is the official marketing site for Louhen, designed to provide a 
 - **State Management & Analytics:** Custom client-side analytics with consent management
 - **Backend Integrations:** Firebase, Resend, hCaptcha for waitlist and user engagement
 
+## Design System Snapshot
+
+- Louhen Landing design is **locked** as of 2025-10-01; see [`CONTEXT/decision_log.md`](CONTEXT/decision_log.md#louhen-landing--design-system-locked-2025-10-01) and [`CONTEXT/design_system.md`](CONTEXT/design_system.md) for the canonical source of truth.
+- Use semantic tokens, typography utilities, and shared CSS variables; avoid raw hex, ad-hoc radii, or bespoke shadows.
+- Honor accessibility, dark-mode, i18n, and reduced-motion guardrails outlined in Slice plans and the PR checklist.
+- Run existing validation commands—`npm run lint`, `npm run validate:local`, `npm run lighthouse`, etc.—to confirm design integrity before merging.
+
 ## Local Development
 
 To get started locally:
