@@ -323,6 +323,15 @@ jobs:
           LHCI_URL: http://127.0.0.1:4311/waitlist
         run: npm run lighthouse
 
+      - name: Upload Lighthouse report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: lighthouse-report/**
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Stop test server
         if: always()
         run: |

@@ -1,6 +1,7 @@
 const BASE = (process.env.PREVIEW_BASE_URL || process.env.BASE_URL || 'http://localhost:4311').replace(/\/$/, '');
 const DEFAULT_LOCALE = process.env.DEFAULT_LOCALE || 'en';
 const METHOD_URL = `${BASE}/${DEFAULT_LOCALE}/method/`;
+const OUTPUT_DIR = process.env.LIGHTHOUSE_OUTPUT_DIR || 'lighthouse-report';
 module.exports = {
   ci: {
     collect: {
@@ -15,6 +16,11 @@ module.exports = {
       },
       startServerCommand: null,
     },
+    upload: {
+      target: 'filesystem',
+      outputDir: OUTPUT_DIR,
+      formats: ['json', 'html'],
+    },
     assert: {
       assertions: {
         'categories:performance': ['error', { minScore: 0.9 }],
@@ -25,6 +31,5 @@ module.exports = {
         'largest-contentful-paint': ['warn', { maxNumericValue: 2500 }],
       },
     },
-    upload: { target: 'temporary-public-storage' }
   }
 };

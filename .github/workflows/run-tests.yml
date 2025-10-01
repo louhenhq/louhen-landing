@@ -397,6 +397,15 @@ jobs:
           LHCI_URL: ${{ vars.BASE_SERVER_URL }}/waitlist
         run: npm run lighthouse
 
+      - name: Upload Lighthouse report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: lighthouse-report/**
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Stop test server
         if: always()
         run: |
@@ -409,14 +418,6 @@ jobs:
             echo '--- server.log tail ---' >> "$GITHUB_STEP_SUMMARY"
             tail -n 100 server.log >> "$GITHUB_STEP_SUMMARY" || true
           fi
-
-      - name: Upload Lighthouse results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: lighthouse-results
-          path: .lighthouseci/
-          if-no-files-found: ignore
 
       - name: Upload server log
         if: always()
