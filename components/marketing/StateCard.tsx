@@ -31,7 +31,7 @@ export function StateCard({ icon, title, body, ctas, align = 'center' }: StateCa
       <div className={cn(layout.container)}>
         <div className={cn(layout.card, 'mx-auto flex max-w-3xl flex-col gap-xl px-gutter py-2xl sm:px-2xl sm:py-3xl')}>
           <div className={cn('flex flex-col gap-md', alignment)}>
-            {icon ? <div className="text-4xl" aria-hidden>{icon}</div> : null}
+            {icon ? <div className="text-display-lg" aria-hidden>{icon}</div> : null}
             <h1 className={cn(text.heading, 'text-balance')}>{title}</h1>
             {bodyContent}
           </div>

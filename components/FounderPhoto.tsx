@@ -20,13 +20,13 @@ export default function FounderPhoto({ className }: FounderPhotoProps) {
   if (isFallback) {
     return (
       <div
-        className={`flex h-full w-full flex-col items-center justify-center gap-xs rounded-2xl bg-gradient-to-br from-brand-mint/20 via-brand-teal/10 to-brand-secondary/20 px-md text-center text-sm text-text-muted ${
+        className={`flex h-full w-full flex-col items-center justify-center gap-xs rounded-2xl bg-gradient-to-br from-brand-mint/20 via-brand-teal/10 to-brand-secondary/20 px-md text-center text-body text-text-muted ${
           className ? className : ''
         }`}
         role="presentation"
       >
-        <span className="text-base font-medium text-text">Founder & Twins</span>
-        <span className="text-sm text-text-muted/80">(placeholder)</span>
+        <span className="text-label text-text">Founder & Twins</span>
+        <span className="text-body-sm text-text-muted/80">(placeholder)</span>
       </div>
     );
   }

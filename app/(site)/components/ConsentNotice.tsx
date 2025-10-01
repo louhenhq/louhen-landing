@@ -10,13 +10,13 @@ export default function ConsentNotice() {
     <label
       htmlFor="waitlist-consent"
       id="waitlist-consent-help"
-      className="text-xs leading-relaxed text-slate-600"
+      className="text-body-sm leading-relaxed text-text-muted"
     >
       {t.rich('label', {
         privacy: (chunks) => (
           <Link
             href="/privacy"
-            className="font-medium text-slate-900 underline decoration-emerald-500 decoration-2 underline-offset-4 transition-colors duration-150 hover:text-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500"
+            className="font-medium text-text underline decoration-brand-primary decoration-2 underline-offset-4 transition-colors duration-150 hover:text-feedback-success focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
           >
             {chunks}
           </Link>
@@ -24,7 +24,7 @@ export default function ConsentNotice() {
         terms: (chunks) => (
           <Link
             href="/terms"
-            className="font-medium text-slate-900 underline decoration-emerald-500 decoration-2 underline-offset-4 transition-colors duration-150 hover:text-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500"
+            className="font-medium text-text underline decoration-brand-primary decoration-2 underline-offset-4 transition-colors duration-150 hover:text-feedback-success focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
           >
             {chunks}
           </Link>

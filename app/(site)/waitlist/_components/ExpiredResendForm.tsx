@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { track } from '@/lib/clientAnalytics';
+import { buttons, cn, inputs, text } from '@/app/(site)/_lib/ui';
 
 type ExpiredResendFormProps = {
   ttlDays: number;
@@ -129,9 +130,9 @@ export default function ExpiredResendForm({ ttlDays }: ExpiredResendFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} aria-busy={pending} className="mt-6 flex flex-col gap-4" noValidate>
-      <label className="flex flex-col gap-2 text-sm font-medium text-slate-900" htmlFor="resend-email">
-        {waitlistT('resend.email.label')}
+    <form onSubmit={handleSubmit} aria-busy={pending} className="mt-md flex flex-col gap-sm" noValidate>
+      <label className="flex flex-col gap-xs" htmlFor="resend-email">
+        <span className={text.label}>{waitlistT('resend.email.label')}</span>
         <input
           id="resend-email"
           type="email"
@@ -143,25 +144,28 @@ export default function ExpiredResendForm({ ttlDays }: ExpiredResendFormProps) {
           }}
           placeholder={waitlistT('resend.email.placeholder')}
           autoComplete="email"
-          className="rounded-2xl border border-slate-300 px-4 py-3 text-base text-slate-900 transition-shadow duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500"
+          className={inputs}
         />
       </label>
 
-      <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500">
-        <span className="block font-semibold text-slate-700">hCaptcha</span>
-        <span className="mt-1 block">Placeholder — resend wiring lands later.</span>
+      <div className="rounded-2xl border border-dashed border-border bg-bg px-md py-lg text-body-sm text-text-muted">
+        <span className="block text-label text-text">hCaptcha</span>
+        <span className="mt-xs block">Placeholder — resend wiring lands later.</span>
       </div>
 
       <button
         type="submit"
         disabled={disableSubmit}
-        className="inline-flex w-fit items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition-colors duration-150 hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-400"
+        className={cn(buttons.primary, 'w-fit rounded-2xl px-lg py-sm')}
       >
         {pending ? `${waitlistT('expired.resend.cta')}…` : waitlistT('expired.resend.cta')}
       </button>
 
       {message ? (
-        <p role="status" className={`text-sm ${messageTone === 'success' ? 'text-emerald-600' : 'text-rose-600'}`}>
+        <p
+          role="status"
+          className={`text-body-sm ${messageTone === 'success' ? 'text-feedback-success' : 'text-feedback-error'}`}
+        >
           {message}
         </p>
       ) : null}

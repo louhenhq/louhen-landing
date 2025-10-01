@@ -18,13 +18,13 @@ export default function PodiatristBadge({ variant = 'default' }: Props) {
       <button
         type="button"
         className={cn(
-          'flex items-center gap-xs rounded-pill border border-border px-sm py-xs text-xs font-medium text-text hover:border-border-strong',
+          'flex items-center gap-xs rounded-pill border border-border px-sm py-xs text-label text-text hover:border-border-strong',
           variant === 'inline' ? 'bg-bg' : 'bg-bg-card shadow-card'
         )}
         onClick={() => setOpen(true)}
         aria-haspopup="dialog"
       >
-        <span role="img" aria-hidden className="text-base">👣</span>
+        <span role="img" aria-hidden className="text-label leading-none">👣</span>
         {t('badge')}
       </button>
       <TrustModal
@@ -47,13 +47,13 @@ export function LouhenFitBadge({ variant = 'default' }: Props) {
       <button
         type="button"
         className={cn(
-          'flex items-center gap-xs rounded-pill border border-border px-sm py-xs text-xs font-medium text-text hover:border-border-strong',
+          'flex items-center gap-xs rounded-pill border border-border px-sm py-xs text-label text-text hover:border-border-strong',
           variant === 'inline' ? 'bg-bg' : 'bg-bg-card shadow-card'
         )}
         onClick={() => setOpen(true)}
         aria-haspopup="dialog"
       >
-        <span role="img" aria-hidden className="text-base">🛡️</span>
+        <span role="img" aria-hidden className="text-label leading-none">🛡️</span>
         {t('badge')}
       </button>
       <TrustModal

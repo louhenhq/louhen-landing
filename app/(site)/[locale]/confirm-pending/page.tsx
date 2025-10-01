@@ -56,7 +56,7 @@ export default async function ConfirmPendingPage({ params, searchParams }: Props
             <p className={text.body}>{confirmPending.help}</p>
           </div>
           {already && (
-            <p className="rounded-lg border border-status-info/40 bg-status-info/10 px-md py-sm text-sm text-status-info" aria-live="polite">
+            <p className="rounded-lg border border-status-info/40 bg-status-info/10 px-md py-sm text-body-sm text-status-info" aria-live="polite">
               {waitlistErrors.already}
             </p>
           )}

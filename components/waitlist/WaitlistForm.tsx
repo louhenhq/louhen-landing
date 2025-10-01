@@ -5,7 +5,7 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useLocale, useTranslations } from 'next-intl';
 import type { ComponentProps, ForwardRefExoticComponent, RefAttributes } from 'react';
-import { buttons, cn, layout, text } from '@/app/(site)/_lib/ui';
+import { buttons, cn, inputs, layout, text } from '@/app/(site)/_lib/ui';
 import { track } from '@/lib/clientAnalytics';
 
 type HCaptchaModule = typeof import('@hcaptcha/react-hcaptcha');
@@ -165,7 +165,7 @@ export default function WaitlistForm({ defaultEmail = '', source }: WaitlistForm
       <div className={cn(layout.narrow)}>
         <div className={cn(layout.card, 'px-gutter py-2xl sm:px-2xl sm:py-3xl flex flex-col gap-xl')}>
           {!captchaEnabled && isDevLike && (
-            <div className="rounded-2xl border border-status-warning bg-status-warning/10 px-md py-sm text-sm text-status-warning" role="status">
+            <div className="rounded-2xl border border-status-warning bg-status-warning/10 px-md py-sm text-body text-status-warning" role="status">
               {t('warnings.captchaMissing')}
             </div>
           )}
@@ -178,15 +178,15 @@ export default function WaitlistForm({ defaultEmail = '', source }: WaitlistForm
           {status === 'success' ? (
             <div className="flex flex-col gap-md" role="status" aria-live="assertive">
               <div className="inline-flex items-center gap-sm rounded-2xl border border-status-success bg-status-success/10 px-md py-sm text-status-success">
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-status-success text-white" aria-hidden>
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-status-success text-text-inverse" aria-hidden>
                   ✓
                 </span>
                 <div className="flex flex-col">
-                  <strong className="text-base font-semibold text-status-success">{successTitle}</strong>
-                  <span className="text-sm text-status-success/80">{message}</span>
+                  <strong className="text-label text-status-success">{successTitle}</strong>
+                  <span className="text-body-sm text-status-success/80">{message}</span>
                 </div>
               </div>
-              <p className="text-sm text-text-muted">{t('success.followUp')}</p>
+              <p className="text-body text-text-muted">{t('success.followUp')}</p>
             </div>
           ) : (
             <form
@@ -197,7 +197,7 @@ export default function WaitlistForm({ defaultEmail = '', source }: WaitlistForm
               aria-live="polite"
             >
               <label className="flex flex-col gap-xs">
-                <span className="text-sm font-medium text-text">{t('labels.email')}</span>
+                <span className="text-label text-text">{t('labels.email')}</span>
                 <input
                   type="email"
                   name="email"
@@ -210,7 +210,7 @@ export default function WaitlistForm({ defaultEmail = '', source }: WaitlistForm
                   }}
                   onBlur={() => setEmail((value) => value.trim())}
                   aria-invalid={status === 'error'}
-                  className="rounded-2xl border border-border bg-bg px-md py-sm text-base text-text shadow-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
+                  className={cn(inputs, 'shadow-sm')}
                   placeholder={t('placeholders.email')}
                 />
               </label>
@@ -227,7 +227,7 @@ export default function WaitlistForm({ defaultEmail = '', source }: WaitlistForm
                   className="mt-1 h-4 w-4 rounded border-border focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
                   required
                 />
-                <label htmlFor="waitlist-consent" className="text-sm text-text-muted leading-relaxed">
+                <label htmlFor="waitlist-consent" className="text-body text-text-muted">
                   {consentLabel}{' '}
                   <Link prefetch={false} href={`/${locale}/privacy`} className="underline">
                     {t('privacyLinkLabel')}
@@ -238,7 +238,7 @@ export default function WaitlistForm({ defaultEmail = '', source }: WaitlistForm
 
               {captchaEnabled ? (
                 <div className="flex flex-col gap-xs">
-                  <span className="text-sm font-medium text-text">{t('labels.captcha')}</span>
+                  <span className="text-label text-text">{t('labels.captcha')}</span>
                   <div className="rounded-2xl border border-border bg-bg px-md py-sm">
                     <HCaptcha
                       ref={captchaRef}
@@ -257,7 +257,7 @@ export default function WaitlistForm({ defaultEmail = '', source }: WaitlistForm
                   {status === 'loading' ? t('inflight') : t('submit')}
                 </button>
                 {status === 'error' && message ? (
-                  <p className="text-sm text-status-danger" role="alert">
+                  <p className="text-body text-status-danger" role="alert">
                     {message}
                   </p>
                 ) : null}

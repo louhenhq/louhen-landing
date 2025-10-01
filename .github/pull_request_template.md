@@ -17,7 +17,11 @@
 
 ## Design Integrity Checklist
 - [ ] Uses tokens (no raw hex/radii/shadows).
-- [ ] Typography via utilities and CSS vars (Fraunces headings, Inter body).
+- [ ] Headings use `text-display-*` / `text-h3` utilities (Fraunces).
+- [ ] Body/UI uses Inter utilities (`text-body`, `text-body-sm`, `text-label`).
+- [ ] No component-level hardcoded `font-family` or `text-[N]` utilities.
+- [ ] Hero H1 allows 1–2 lines with no overflow/truncation at 320px.
+- [ ] Layout shell helpers (`SiteShell`, `layout.container`/`layout.section`) used; no bespoke max-width/margins; header/footer pass AA contrast + focus-visible.
 - [ ] Focus-visible styles present on interactive elements.
 - [ ] Dark mode checked or neutral (no regressions).
 - [ ] i18n length tested (DE strings fit) in hero/section titles.

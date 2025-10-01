@@ -11,12 +11,12 @@ Epic owner: Marketing Engineering. Reference spec: [`design_system.md`](design_s
   - README, PR checklist, and backlog updated with design guardrails.  
   Links: [`decision_log.md`](decision_log.md#louhen-landing--design-system-locked-2025-10-01), [`design_system.md`](design_system.md), [PR template](../.github/pull_request_template.md).
 
-- **Slice 1 — Token inventory & cleanup** *(Planned)*  
+- **Slice 1 — Token inventory & cleanup** *(Done 2025-10-02)*  
   Acceptance criteria:  
-  - Audit existing Style Dictionary tokens; remove unused values and map to semantic names.  
-  - Document token coverage across light/dark in [`design_system.md#3-color-tokens`](design_system.md#3-color-tokens).  
-  - Add automated lint preventing raw color, radius, or shadow literals.  
-  Links: [`design_system.md#3-color-tokens`](design_system.md#3-color-tokens), [`design_system.md#5-components`](design_system.md#5-components).
+  - Audit existing Style Dictionary tokens; remove unused values and map to semantic names. ✅  
+  - Document token coverage across light/dark in [`design_system.md#3-color-tokens`](design_system.md#3-color-tokens). ✅  
+  - Add automated lint preventing raw color, radius, or shadow literals. ✅  
+  Links: [`design_system.md#3-color-tokens`](design_system.md#3-color-tokens), [`design_system.md#5-components`](design_system.md#5-components), [`design_system.md#13-exceptions`](design_system.md#13-exceptions).
 
 - **Slice 2 — Typography & token wiring** *(Planned)*  
   Acceptance criteria:  

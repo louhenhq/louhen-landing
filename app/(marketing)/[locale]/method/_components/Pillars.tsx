@@ -113,11 +113,11 @@ export default function Pillars() {
             return (
               <article key={pillar.title} className={cn(layout.card, 'flex h-full flex-col gap-sm px-gutter py-xl')}>
                 <header className="flex flex-col gap-xs">
-                  <h3 className="text-xl font-semibold text-text">{pillar.title}</h3>
+                  <h3 className="text-h3 text-text">{pillar.title}</h3>
                   {pillar.badgeLabel ? (
                     <>
                       <span
-                        className="inline-flex w-fit items-center gap-1 rounded-full border border-brand-primary/30 bg-brand-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-primary"
+                        className="inline-flex w-fit items-center gap-1 rounded-full border border-brand-primary/30 bg-brand-primary/10 px-3 py-1 text-meta uppercase tracking-[0.32em] text-brand-primary"
                         role="note"
                         aria-describedby={badgeDescriptionId}
                       >
@@ -131,19 +131,19 @@ export default function Pillars() {
                     </>
                   ) : null}
                 </header>
-                <p className="text-base leading-relaxed text-text-muted">{pillar.body}</p>
+                <p className="text-body text-text-muted">{pillar.body}</p>
                 {index === 1 ? (
                   <div className="rounded-xl border border-border bg-bg-card px-md py-sm text-left">
                     <button
                       type="button"
-                      className="flex w-full items-center justify-between gap-sm text-left text-base font-semibold text-brand-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/40"
+                      className="flex w-full items-center justify-between gap-sm text-left text-label text-brand-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/40"
                       aria-expanded={isDisclosureOpen}
                       aria-controls={disclosureContentId}
                       onClick={() => setIsDisclosureOpen((prev) => !prev)}
                       ref={disclosureButtonRef}
                     >
                       {disclosure.cta}
-                      <span className="text-xl leading-none" aria-hidden="true">
+                      <span className="text-label leading-none" aria-hidden="true">
                         {isDisclosureOpen ? '-' : '+'}
                       </span>
                     </button>
@@ -153,12 +153,12 @@ export default function Pillars() {
                         ref={disclosureContentRef}
                         role="region"
                         tabIndex={-1}
-                        className="mt-3 space-y-3 text-sm leading-relaxed text-text-muted"
+                        className="mt-3 space-y-3 text-body-sm text-text-muted"
                         aria-live="polite"
                         aria-labelledby={disclosureHeadingId}
                         onKeyDown={handleDisclosureKeyDown}
                       >
-                        <h4 id={disclosureHeadingId} className="text-sm font-semibold text-text">
+                        <h4 id={disclosureHeadingId} className="text-label text-text">
                           {disclosure.title}
                         </h4>
                         <p>{disclosure.body}</p>
@@ -166,8 +166,8 @@ export default function Pillars() {
                       </div>
                     ) : null}
                     <noscript>
-                      <div className="mt-3 space-y-3 text-sm leading-relaxed text-text-muted">
-                        <h4 className="text-sm font-semibold text-text">{disclosure.title}</h4>
+                      <div className="mt-3 space-y-3 text-body-sm text-text-muted">
+                        <h4 className="text-label text-text">{disclosure.title}</h4>
                         <p>{disclosure.body}</p>
                         {disclosure.privacyNote ? <p>{disclosure.privacyNote}</p> : null}
                       </div>

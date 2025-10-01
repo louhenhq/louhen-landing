@@ -30,8 +30,8 @@ export default function FaqTeaser({ locale }: FaqTeaserProps) {
         </div>
         <ul className="grid gap-md md:grid-cols-3" role="list">
           {faqLinks.map(({ href, label }) => (
-            <li key={href} className={cn(layout.card, 'px-gutter py-md text-left text-base text-text')}>
-              <Link href={href} className="text-brand-primary underline decoration-2 underline-offset-4">
+            <li key={href} className={cn(layout.card, 'px-gutter py-md text-left text-body text-text')}>
+              <Link href={href} className="text-label text-brand-primary underline decoration-2 underline-offset-4">
                 {label}
               </Link>
             </li>
@@ -40,7 +40,7 @@ export default function FaqTeaser({ locale }: FaqTeaserProps) {
         <div>
           <Link
             href={`/${locale}/waitlist#faq`}
-            className="text-brand-primary font-medium underline decoration-2 underline-offset-4"
+            className="text-label text-brand-primary underline decoration-2 underline-offset-4"
             onClick={() => registerCtaInteraction('faq_teaser')}
           >
             {t('cta')}

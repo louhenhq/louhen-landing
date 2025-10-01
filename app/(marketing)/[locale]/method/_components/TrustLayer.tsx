@@ -12,16 +12,16 @@ export default function TrustLayer() {
       <div className={cn(layout.container, 'flex flex-col gap-xl')}>
         <div className="flex flex-col gap-sm">
           <span className={badges.pill}>{t('badge')}</span>
-          <h2 id="method-trust-title" className={cn(text.heading, 'text-3xl md:text-4xl')}>
+          <h2 id="method-trust-title" className={text.heading}>
             {t('headline')}
           </h2>
-          <p className={cn(text.body)}>{t('body')}</p>
+          <p className={text.body}>{t('body')}</p>
         </div>
         <figure className={cn(layout.card, 'flex flex-col gap-sm px-gutter py-xl')}>
-          <blockquote className="text-lg font-medium leading-relaxed text-text">
+          <blockquote className="text-body text-text font-medium">
             {t('quote')}
           </blockquote>
-          <figcaption className="text-sm text-text-muted">{t('attribution')}</figcaption>
+          <figcaption className="text-meta text-text-muted">{t('attribution')}</figcaption>
         </figure>
         <TrustSchema />
       </div>

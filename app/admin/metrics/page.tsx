@@ -25,7 +25,7 @@ export default async function MetricsPage({ searchParams }: { searchParams: Sear
     return (
       <main className="mx-auto max-w-2xl px-4 py-16">
         <h1 className="text-2xl font-bold">Unauthorized</h1>
-        <p className="mt-2 text-slate-600">Missing or invalid key.</p>
+        <p className="mt-2 text-text-muted">Missing or invalid key.</p>
       </main>
     );
   }
@@ -51,7 +51,7 @@ export default async function MetricsPage({ searchParams }: { searchParams: Sear
     <main className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-12">
       <header className="flex flex-col gap-sm">
         <h1 className="text-3xl font-bold tracking-tight">{resolve(metricsCopy?.title, 'Metrics dashboard')}</h1>
-        <p className="text-sm text-slate-600">{resolve(metricsCopy?.intro, 'Key waitlist metrics updated every 60 seconds.')}</p>
+        <p className="text-sm text-text-muted">{resolve(metricsCopy?.intro, 'Key waitlist metrics updated every 60 seconds.')}</p>
       </header>
 
       <section className="mt-8 grid gap-lg sm:grid-cols-3">

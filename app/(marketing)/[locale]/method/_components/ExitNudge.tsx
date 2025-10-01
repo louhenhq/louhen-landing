@@ -106,14 +106,14 @@ export default function ExitNudge({ faqSelector }: ExitNudgeProps) {
       aria-live="polite"
       data-testid="method-exit-nudge"
     >
-      <div className={cn(layout.container, 'flex flex-col gap-2 text-sm text-text md:flex-row md:items-center md:justify-between')}>
+      <div className={cn(layout.container, 'flex flex-col gap-2 md:flex-row md:items-center md:justify-between')}>
         <div>
-          <span className={cn(text.eyebrow, 'text-brand-primary/80 block')}>{t('title')}</span>
-          <p className="text-text-muted">{t('subtitle')}</p>
+          <span className={cn(text.eyebrow, 'block text-brand-primary/80')}>{t('title')}</span>
+          <p className="text-body text-text">{t('subtitle')}</p>
         </div>
         <button
           type="button"
-          className="mt-2 self-start rounded-md border border-border px-3 py-1 text-xs font-medium text-text transition hover:bg-border/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/40 md:mt-0"
+          className="mt-2 self-start rounded-pill border border-border px-md py-xs text-label text-text transition hover:bg-border/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/40 md:mt-0"
           onClick={handleDismiss}
           aria-label={t('dismissAria')}
         >

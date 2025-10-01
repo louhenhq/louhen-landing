@@ -190,7 +190,7 @@ function renderShare({ state, confirmMessages, shareCopy, locale, code, creditDe
             <p className={text.body}>{body}</p>
           </div>
           {creditDelayed && (
-            <p className="text-sm text-status-warning text-center" aria-live="polite">
+            <p className="text-body-sm text-status-warning text-center" aria-live="polite">
               {shareCopy.verificationPending}
             </p>
           )}

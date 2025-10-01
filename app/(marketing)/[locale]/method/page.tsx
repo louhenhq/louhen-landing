@@ -80,7 +80,7 @@ export default async function MethodPage({ params }: MethodPageProps) {
     <div className={layout.page}>
       <SkipToCtaLink
         targetId="join-waitlist"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-slate-900 focus:px-4 focus:py-2 focus:text-white"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-sm focus:top-sm focus:z-50 focus:rounded-md focus:bg-brand-primary focus:px-sm focus:py-4 focus:text-brand-onPrimary focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-border-focus"
       >
         {t('a11y.skipToCta')}
       </SkipToCtaLink>

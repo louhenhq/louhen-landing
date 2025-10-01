@@ -2,6 +2,7 @@
   "header": {
     "logo": "Louhen",
     "nav": {
+      "aria": "Hauptnavigation",
       "how": "[DE] How it works",
       "story": "[DE] Founder story",
       "faq": "[DE] FAQ",
@@ -100,6 +101,7 @@
     }
   },
   "how": {
+    "eyebrow": "[DE] Wie es funktioniert",
     "headline": "So funktioniert Louhen",
     "intro": "Von den ersten Schritten bis zu wachsenden Füßen — so wird die Suche nach dem perfekten Paar ganz leicht.",
     "stepLabel": "Schritt {step}",
@@ -117,6 +119,9 @@
       "body": "Entdecke Designs, die dein Kind liebt — immer in der richtigen Größe, immer mit der LouhenFit-Garantie."
     },
     "cta": "Warteliste beitreten"
+  },
+  "layout": {
+    "skipToMain": "Zum Hauptinhalt springen"
   },
   "faq": {
     "title": "[DE] Frequently asked questions",
@@ -346,12 +351,19 @@
     }
   },
   "footer": {
+    "trustEyebrow": "[DE] Warum Eltern Louhen vertrauen",
+    "trustHeadline": "[DE] Podolog:innen-geprüfte Passform mit Datenschutz",
+    "trustBody": "[DE] LouhenFit verarbeitet Familienprofile innerhalb der EU und erfüllt die DSGVO.",
+    "legalNavLabel": "[DE] Rechtliche Links",
     "legal": {
+      "heading": "[DE] Rechtliches",
       "privacy": "[DE] Privacy",
       "terms": "[DE] Terms",
       "imprint": "[DE] Imprint",
       "preferences": "[DE] Cookie preferences"
     },
+    "localeLabel": "[DE] Sprache wählen",
+    "dataResidency": "[DE] DSGVO-konform • EU-Datenhaltung",
     "rights": "[DE] All rights reserved"
   },
   "common": {

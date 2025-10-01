@@ -83,8 +83,8 @@ export function SharePanel({ locale, code, copy }: Props) {
       <div className="flex flex-col gap-lg">
         <div className="rounded-3xl border border-border bg-bg-card px-gutter py-2xl shadow-card flex flex-col gap-lg">
           <section className="flex flex-col gap-sm" aria-live="polite">
-            <span className="text-xs text-text-muted uppercase tracking-wide">{copy.linkLabel}</span>
-            <div className="rounded-2xl border border-border bg-bg px-md py-sm text-sm text-text break-all">
+            <span className={cn(text.meta, 'text-text-muted')}>{copy.linkLabel}</span>
+            <div className="rounded-2xl border border-border bg-bg px-md py-sm text-body-sm text-text break-all">
               {shareUrl || copy.codePending}
             </div>
             <div className="flex flex-wrap gap-sm">
@@ -113,12 +113,12 @@ export function SharePanel({ locale, code, copy }: Props) {
                 {copy.nativeShare}
               </button>
             </div>
-            {copyFeedback && <p className="text-sm text-status-success" aria-live="polite">{copyFeedback}</p>}
-            <p className="text-xs text-text-muted">{copy.assurance}</p>
+            {copyFeedback && <p className="text-body-sm text-status-success" aria-live="polite">{copyFeedback}</p>}
+            <p className={cn(text.meta, 'text-text-muted normal-case tracking-normal')}>{copy.assurance}</p>
           </section>
           <section className="flex flex-col gap-sm">
-            <span className="text-xs text-text-muted uppercase tracking-wide">{copy.codeLabel}</span>
-            <div className="rounded-2xl border border-border bg-bg px-md py-sm text-lg font-semibold tracking-[0.3em] text-center">
+            <span className={cn(text.meta, 'text-text-muted')}>{copy.codeLabel}</span>
+            <div className="rounded-2xl border border-border bg-bg px-md py-sm text-h3 font-semibold tracking-[0.3em] text-center">
               {displayCode || copy.codePending}
             </div>
           </section>

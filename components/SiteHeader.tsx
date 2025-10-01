@@ -4,6 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import ThemeToggle from '@/components/ThemeToggle';
 import { SITE_NAME } from '@/constants/site';
+import { buttons } from '@/app/(site)/_lib/ui';
 
 type Props = {
   onboardingEnabled?: boolean;
@@ -12,25 +13,25 @@ type Props = {
 
 export default function SiteHeader({ onboardingEnabled = false }: Props) {
   return (
-    <header className="w-full border-b border-slate-200">
+    <header className="w-full border-b border-border">
       <div className="mx-auto max-w-6xl px-4 py-3 flex items-center gap-4">
         {/* Brand */}
         <div className="flex items-center gap-2">
-          <Link href="/" className="font-semibold text-base md:text-lg">{SITE_NAME}</Link>
+          <Link href="/" className="text-h3 text-text">{SITE_NAME}</Link>
         </div>
 
         {/* Desktop nav */}
         <nav className="ml-auto hidden md:flex items-center gap-4">
-          <Link href="/privacy" prefetch={false} className="text-sm hover:underline">Privacy</Link>
-          <Link href="/terms" prefetch={false} className="text-sm hover:underline">Terms</Link>
-          <Link href="/method" prefetch={false} className="text-sm hover:underline">Method</Link>
-          <Link href="/imprint" prefetch={false} className="text-sm hover:underline">Imprint</Link>
+          <Link href="/privacy" prefetch={false} className="text-label text-text hover:underline">Privacy</Link>
+          <Link href="/terms" prefetch={false} className="text-label text-text hover:underline">Terms</Link>
+          <Link href="/method" prefetch={false} className="text-label text-text hover:underline">Method</Link>
+          <Link href="/imprint" prefetch={false} className="text-label text-text hover:underline">Imprint</Link>
           {onboardingEnabled && (
-            <Link href="/onboarding/account" prefetch={false} className="text-sm hover:underline">
+            <Link href="/onboarding/account" prefetch={false} className="text-label text-text hover:underline">
               Onboarding
             </Link>
           )}
-          <Link href="/preferences" prefetch={false} className="hidden md:inline-flex rounded-xl px-4 py-2 bg-brand-primary text-white hover:opacity-90">
+          <Link href="/preferences" prefetch={false} className={`${buttons.primary} hidden md:inline-flex`}> 
             Join the waitlist
           </Link>
           {/* Theme toggle visible on desktop */}
@@ -46,14 +47,14 @@ export default function SiteHeader({ onboardingEnabled = false }: Props) {
 
       {/* Mobile dropdown / sheet / panel */}
       {/* Ensure your existing mobile panel renders nav links here */}
-      <div className="md:hidden border-t border-slate-200">
+      <div className="md:hidden border-t border-border">
         <nav className="px-4 py-3 flex flex-col gap-2">
-          <Link href="/privacy" prefetch={false} className="text-sm underline">Privacy</Link>
-          <Link href="/terms" prefetch={false} className="text-sm underline">Terms</Link>
-          <Link href="/method" prefetch={false} className="text-sm underline">Method</Link>
-          <Link href="/imprint" prefetch={false} className="text-sm underline">Imprint</Link>
+          <Link href="/privacy" prefetch={false} className="text-label text-text underline">Privacy</Link>
+          <Link href="/terms" prefetch={false} className="text-label text-text underline">Terms</Link>
+          <Link href="/method" prefetch={false} className="text-label text-text underline">Method</Link>
+          <Link href="/imprint" prefetch={false} className="text-label text-text underline">Imprint</Link>
           {onboardingEnabled && (
-            <Link href="/onboarding/account" prefetch={false} className="text-sm underline">
+            <Link href="/onboarding/account" prefetch={false} className="text-label text-text underline">
               Onboarding
             </Link>
           )}

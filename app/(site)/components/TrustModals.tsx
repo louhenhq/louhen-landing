@@ -43,12 +43,12 @@ function TrustModal({ open, title, body, onClose, id }: TrustModalProps) {
       >
         <div className="flex flex-col gap-md">
           <div className="flex items-start justify-between gap-sm">
-            <h2 id={`${id}-title`} className="text-lg font-semibold text-text">{title}</h2>
-            <button type="button" className="text-text-muted" aria-label="Close" onClick={onClose}>
+            <h2 id={`${id}-title`} className="text-h3 text-text">{title}</h2>
+            <button type="button" className="text-label text-text-muted" aria-label="Close" onClick={onClose}>
               ×
             </button>
           </div>
-          <p className="text-sm text-text-muted leading-relaxed">{body}</p>
+          <p className="text-body text-text-muted leading-relaxed">{body}</p>
         </div>
       </div>
     </div>

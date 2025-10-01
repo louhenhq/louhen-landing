@@ -67,15 +67,15 @@ function Progress() {
       {STEPS.map((_, i) => (
         <div key={i} className={`h-1.5 w-16 rounded ${i <= stepIndex ? 'bg-slate-900' : 'bg-slate-200'}`} />
       ))}
-      <span className="ml-2 text-xs text-slate-600">{stepIndex+1}/{STEPS.length}</span>
+      <span className="ml-2 text-xs text-text-muted">{stepIndex+1}/{STEPS.length}</span>
     </div>
   );
 }
 function Badge({ children }: { children: React.ReactNode }) {
-  return <span className="px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-xs text-slate-600">{children}</span>;
+  return <span className="px-2.5 py-1 rounded-full bg-bg border border-border text-xs text-text-muted">{children}</span>;
 }
 function Info({ text }: { text: string }) {
-  return <span className="ml-1 text-slate-500" title={text} aria-label={text}>ℹ️</span>;
+  return <span className="ml-1 text-text-muted" title={text} aria-label={text}>ℹ️</span>;
 }
 function TrustBadges() {
   return (
@@ -92,7 +92,7 @@ function Shell({ title, children }: { title: string; children: React.ReactNode }
   const { stepIndex, prev } = useOnboard();
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
-      <header className="border-b border-slate-200 bg-white/70 backdrop-blur">
+      <header className="border-b border-border bg-bg-card/70 backdrop-blur">
         <div className="mx-auto max-w-5xl px-4 h-14 flex items-center justify-between">
           <div className="font-semibold">Louhen</div>
           <Progress />
@@ -105,7 +105,7 @@ function Shell({ title, children }: { title: string; children: React.ReactNode }
           <button
             type="button"
             onClick={() => (stepIndex === 0 ? router.push('/') : prev())}
-            className="rounded-xl border border-slate-300 px-4 py-2 hover:bg-slate-50"
+            className="rounded-xl border border-border px-4 py-2 hover:bg-bg"
           >
             Back
           </button>
@@ -124,7 +124,7 @@ function StepAccount() {
   const [srMsg, setSrMsg] = React.useState<string>('');
   return (
     <Shell title="Create your account">
-      <p className="mt-2 text-slate-600">We’ll use your email to save progress<Info text="Used only for onboarding and account setup." />.</p>
+      <p className="mt-2 text-text-muted">We’ll use your email to save progress<Info text="Used only for onboarding and account setup." />.</p>
       <form
         className="mt-6 grid gap-4 max-w-md"
         onSubmit={(e) => {
@@ -154,18 +154,18 @@ function StepAccount() {
             aria-describedby={err ? 'acc-email-err' : 'acc-email-hint'}
             ref={emailRef}
             className={`mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-900 ${
-              err ? 'border-rose-400' : 'border-slate-300'
+              err ? 'border-rose-400' : 'border-border'
             }`}
           />
-          <p id="acc-email-hint" className="mt-1 text-xs text-slate-500">We’ll never share your email.</p>
-          {err && <p id="acc-email-err" className="mt-1 text-sm text-rose-600">{err}</p>}
+          <p id="acc-email-hint" className="mt-1 text-xs text-text-muted">We’ll never share your email.</p>
+          {err && <p id="acc-email-err" className="mt-1 text-sm text-feedback-error">{err}</p>}
           {/* Screen-reader live region */}
           <p className="sr-only" role="alert" aria-live="assertive">{srMsg}</p>
         </label>
         <div className="flex gap-3">
-          <button className="rounded-xl bg-slate-900 text-white px-4 py-2 font-semibold hover:opacity-90">Continue</button>
+          <button className="rounded-xl bg-slate-900 text-text-inverse px-4 py-2 font-semibold hover:opacity-90">Continue</button>
           <button type="button" onClick={next}
-            className="rounded-xl border border-slate-300 px-4 py-2 hover:bg-slate-50">Skip for now</button>
+            className="rounded-xl border border-border px-4 py-2 hover:bg-bg">Skip for now</button>
         </div>
       </form>
     </Shell>
@@ -221,7 +221,7 @@ function StepProfile() {
         <label className="block">
           <span className="text-sm font-medium">Child name</span>
           <input value={childName} onChange={(e)=>setChildName(e.target.value)}
-            className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-900" />
+            className="mt-1 w-full rounded-xl border border-border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-900" />
         </label>
         <label className="block">
           <span className="text-sm font-medium">Date of birth</span>
@@ -233,14 +233,14 @@ function StepProfile() {
             aria-describedby={errs.dob ? 'prof-dob-err' : 'prof-dob-hint'}
             ref={dobRef}
             className={`mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-900 ${
-              errs.dob ? 'border-rose-400' : 'border-slate-300'
+              errs.dob ? 'border-rose-400' : 'border-border'
             }`}
           />
-          <p id="prof-dob-hint" className="mt-1 text-xs text-slate-500">Optional. Helps tailor size guidance.</p>
-          {errs.dob && <p id="prof-dob-err" className="mt-1 text-sm text-rose-600">{errs.dob}</p>}
+          <p id="prof-dob-hint" className="mt-1 text-xs text-text-muted">Optional. Helps tailor size guidance.</p>
+          {errs.dob && <p id="prof-dob-err" className="mt-1 text-sm text-feedback-error">{errs.dob}</p>}
         </label>
         <label className="block">
-          <span className="text-sm font-medium">Current shoe size <span className="text-slate-500">(optional)</span></span>
+          <span className="text-sm font-medium">Current shoe size <span className="text-text-muted">(optional)</span></span>
           <input
             value={size}
             onChange={(e)=>setSize(e.target.value)}
@@ -248,21 +248,21 @@ function StepProfile() {
             aria-describedby={errs.size ? 'prof-size-err' : 'prof-size-hint'}
             ref={sizeRef}
             className={`mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-900 ${
-              errs.size ? 'border-rose-400' : 'border-slate-300'
+              errs.size ? 'border-rose-400' : 'border-border'
             }`}
             placeholder="e.g. EU 25"
           />
-          <p id="prof-size-hint" className="mt-1 text-xs text-slate-500">Optional. Example format: “EU 25”.</p>
-          {errs.size && <p id="prof-size-err" className="mt-1 text-sm text-rose-600">{errs.size}</p>}
+          <p id="prof-size-hint" className="mt-1 text-xs text-text-muted">Optional. Example format: “EU 25”.</p>
+          {errs.size && <p id="prof-size-err" className="mt-1 text-sm text-feedback-error">{errs.size}</p>}
           {/* Screen-reader live region */}
           <p className="sr-only" role="alert" aria-live="assertive">{srMsg}</p>
         </label>
         <div className="flex gap-3">
-          <button className="rounded-xl bg-slate-900 text-white px-4 py-2 font-semibold hover:opacity-90">Continue</button>
+          <button className="rounded-xl bg-slate-900 text-text-inverse px-4 py-2 font-semibold hover:opacity-90">Continue</button>
           <button type="button" onClick={next}
-            className="rounded-xl border border-slate-300 px-4 py-2 hover:bg-slate-50">Skip for now</button>
+            className="rounded-xl border border-border px-4 py-2 hover:bg-bg">Skip for now</button>
         </div>
-        {message && <p className="text-sm text-emerald-700" aria-live="polite">{message}</p>}
+        {message && <p className="text-sm text-feedback-success" aria-live="polite">{message}</p>}
       </form>
     </Shell>
   );
@@ -282,7 +282,7 @@ function StepSizing() {
           <legend className="text-sm font-medium">Method</legend>
           <label className="flex items-center gap-2">
             <input type="radio" name="m" checked={method==='scan'} onChange={()=>setMethod('scan')} />
-            <span>Scan with phone <span className="text-slate-500">(coming soon)</span></span>
+            <span>Scan with phone <span className="text-text-muted">(coming soon)</span></span>
           </label>
           <label className="flex items-center gap-2">
             <input type="radio" name="m" checked={method==='manual'} onChange={()=>setMethod('manual')} />
@@ -307,11 +307,11 @@ function StepSizing() {
               aria-describedby={err ? 'sz-mm-err' : 'sz-mm-hint'}
               ref={mmRef}
               className={`mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-900 ${
-                err ? 'border-rose-400' : 'border-slate-300'
+                err ? 'border-rose-400' : 'border-border'
               }`}
             />
-            <p id="sz-mm-hint" className="mt-1 text-xs text-slate-500">Typical range: 110–200 mm for ages 1–6.</p>
-            {err && <p id="sz-mm-err" className="mt-1 text-sm text-rose-600">{err}</p>}
+            <p id="sz-mm-hint" className="mt-1 text-xs text-text-muted">Typical range: 110–200 mm for ages 1–6.</p>
+            {err && <p id="sz-mm-err" className="mt-1 text-sm text-feedback-error">{err}</p>}
             {/* Screen-reader live region */}
             <p className="sr-only" role="alert" aria-live="assertive">{srMsg}</p>
           </label>
@@ -330,19 +330,19 @@ function StepSizing() {
               set('sizing', { method, footLengthMm: method==='manual' ? mm : undefined });
               next();
             }}
-            className="rounded-xl bg-slate-900 text-white px-4 py-2 font-semibold hover:opacity-90"
+            className="rounded-xl bg-slate-900 text-text-inverse px-4 py-2 font-semibold hover:opacity-90"
           >
             Continue
           </button>
           <button
             onClick={() => next()}
-            className="rounded-xl border border-slate-300 px-4 py-2 hover:bg-slate-50"
+            className="rounded-xl border border-border px-4 py-2 hover:bg-bg"
           >
             Skip for now
           </button>
         </div>
 
-        <div className="text-sm text-slate-600 mt-2">
+        <div className="text-sm text-text-muted mt-2">
           <strong>Why this matters:</strong> Good fit supports healthy growth and comfort.
         </div>
       </div>
@@ -354,13 +354,13 @@ function StepBrowse() {
   const { account, profile, sizing } = useOnboard();
   return (
     <Shell title="All set — let’s browse!">
-      <div className="mt-6 grid gap-2 text-slate-700">
+      <div className="mt-6 grid gap-2 text-text">
         <div>Account: <span className="font-mono">{account.email || '—'}</span></div>
         <div>Child: <span className="font-mono">{profile.childName || '—'}</span></div>
         <div>Sizing: <span className="font-mono">{sizing.method || '—'}</span></div>
       </div>
       <div className="mt-6">
-        <Link href="/" className="rounded-xl bg-slate-900 text-white px-4 py-2 font-semibold hover:opacity-90">Start browsing</Link>
+        <Link href="/" className="rounded-xl bg-slate-900 text-text-inverse px-4 py-2 font-semibold hover:opacity-90">Start browsing</Link>
       </div>
     </Shell>
   );

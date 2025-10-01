@@ -3,29 +3,39 @@ export function cn(...classes: Array<string | false | null | undefined>) {
 }
 
 export const layout = {
-  page: 'bg-bg text-text min-h-screen',
-  container: 'mx-auto w-full max-w-6xl px-gutter',
+  shell: 'flex min-h-screen flex-col bg-bg text-text',
+  page: 'min-h-screen bg-bg text-text',
+  main: 'flex-1',
+  container: 'mx-auto w-full max-w-[min(100%,var(--layout-max-width))] px-gutter',
   narrow: 'mx-auto w-full max-w-3xl px-gutter',
-  section: 'py-2xl md:py-3xl',
+  section:
+    'py-[var(--layout-section-padding-clamp)] scroll-mt-[calc(var(--layout-header-height)+var(--spacing-24))]',
+  grid: 'grid gap-y-xl gap-x-gutter md:grid-cols-12',
   stackLg: 'flex flex-col gap-xl',
   stackMd: 'flex flex-col gap-lg',
-  card: 'rounded-3xl border border-border bg-bg-card shadow-card',
+  card: 'rounded-2xl border border-border bg-bg-card shadow-card',
 };
 
 export const text = {
-  eyebrow: 'text-sm uppercase tracking-wide text-text-muted',
-  heading: 'text-4xl md:text-5xl font-semibold leading-[1.05] tracking-tight text-balance',
-  subheading: 'text-lg md:text-xl text-text-muted leading-relaxed text-balance',
-  body: 'text-base text-text-muted leading-relaxed',
+  eyebrow: 'text-meta tracking-[0.32em] uppercase text-text-muted',
+  hero: 'text-display-xl text-balance text-text',
+  heading: 'text-display-lg text-balance text-text',
+  subheading: 'text-body text-text-muted',
+  body: 'text-body text-text',
+  bodyMuted: 'text-body text-text-muted',
+  label: 'text-label text-text',
+  meta: 'text-meta text-text-muted',
 };
 
 export const buttons = {
-  primary: 'inline-flex items-center justify-center rounded-pill bg-brand-primary px-lg py-sm text-base font-medium text-white transition-opacity duration-base hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus',
-  secondary: 'inline-flex items-center justify-center rounded-pill border border-border px-lg py-sm text-base font-medium text-text transition-colors duration-base hover:border-border-strong focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus',
+  primary:
+    'inline-flex items-center justify-center gap-xs rounded-pill bg-brand-primary px-lg py-sm text-label text-brand-onPrimary transition-opacity duration-base hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus disabled:cursor-not-allowed disabled:opacity-60',
+  secondary:
+    'inline-flex items-center justify-center gap-xs rounded-pill border border-border px-lg py-sm text-label text-text transition-colors duration-base hover:border-border-strong focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus disabled:cursor-not-allowed disabled:opacity-60',
 };
 
 export const badges = {
-  pill: 'inline-flex items-center gap-xs rounded-pill border border-border bg-bg-card px-sm py-xs text-sm font-medium text-text transition-colors duration-base hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus',
+  pill: 'inline-flex items-center gap-xs rounded-pill border border-border bg-bg-card px-sm py-xs text-body-sm font-medium text-text transition-colors duration-base hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus',
 };
 
 export const surfaces = {
@@ -33,5 +43,12 @@ export const surfaces = {
 };
 
 export const shadows = {
-  soft: 'shadow-[0_24px_48px_-28px_rgba(15,23,42,0.35)]',
+  soft: 'shadow-card',
+  elevated: 'shadow-elevated',
 };
+
+export const focusRing = 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus focus-visible:shadow-[var(--shadow-focus)]';
+
+export const inputs = 'rounded-2xl border border-border bg-bg px-md py-sm text-body text-text placeholder:text-text-muted/80 transition-shadow duration-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus focus-visible:shadow-[var(--shadow-focus)]';
+
+export const helperText = 'text-body-sm text-text-muted';

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { buttons, cn } from '@/app/(site)/_lib/ui';
+import { buttons, cn, inputs } from '@/app/(site)/_lib/ui';
 import { track } from '@/lib/clientAnalytics';
 
 export default function ConfirmResendForm() {
@@ -41,14 +41,14 @@ export default function ConfirmResendForm() {
   return (
     <form className="mt-lg flex flex-col gap-sm md:flex-row md:items-center" onSubmit={handleSubmit} aria-busy={pending}>
       <label className="flex w-full flex-col gap-xs md:max-w-sm">
-        <span className="text-sm font-medium text-text">{waitlistT('email')}</span>
+        <span className="text-label text-text font-medium">{waitlistT('email')}</span>
         <input
           type="email"
           required
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           autoComplete="email"
-          className="rounded-lg border border-border bg-bg px-md py-sm text-base text-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
+          className={cn(inputs, 'rounded-lg')}
         />
       </label>
       <div className="flex items-center gap-sm md:mt-[30px]">
@@ -56,10 +56,10 @@ export default function ConfirmResendForm() {
           {t('cta')}
         </button>
         {status === 'success' && (
-          <span className="text-sm text-status-success" aria-live="polite">{t('sent')}</span>
+          <span className="text-body-sm text-status-success" aria-live="polite">{t('sent')}</span>
         )}
         {status === 'error' && (
-          <span className="text-sm text-status-danger" aria-live="polite">{t('error')}</span>
+          <span className="text-body-sm text-status-danger" aria-live="polite">{t('error')}</span>
         )}
       </div>
     </form>

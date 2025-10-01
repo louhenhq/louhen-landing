@@ -11,9 +11,9 @@ export default async function WaitlistExpiredPage() {
   const ttlDays = getWaitlistConfirmTtlDays();
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-6 py-12 text-slate-800">
-      <h1 className="text-2xl font-semibold tracking-tight text-slate-900">{t('expired.title')}</h1>
-      <p className="text-base text-slate-600">{t('expired.subtitle')}</p>
+    <main className="mx-auto flex w-full max-w-3xl flex-col gap-sm px-md py-xl text-text">
+      <h1 className="text-display-lg text-text">{t('expired.title')}</h1>
+      <p className="text-body text-text-muted">{t('expired.subtitle')}</p>
       <ExpiredResendForm ttlDays={ttlDays} />
     </main>
   );

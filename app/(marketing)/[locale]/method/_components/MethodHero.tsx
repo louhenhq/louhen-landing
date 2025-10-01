@@ -30,7 +30,7 @@ export default function MethodHero({ locale, childName }: MethodHeroProps) {
           {t('eyebrow') ? (
             <span className={cn(text.eyebrow, 'text-brand-primary/80')}>{t('eyebrow')}</span>
           ) : null}
-          <h1 id="method-hero-title" className={cn(text.heading, 'text-balance')}>
+          <h1 id="method-hero-title" className={cn(text.hero, 'text-balance')}>
             {t('title')}
           </h1>
           <p className={cn(text.subheading, 'text-balance')}>
@@ -46,7 +46,7 @@ export default function MethodHero({ locale, childName }: MethodHeroProps) {
           >
             {t('cta')}
           </Link>
-          <p className="max-w-2xl text-sm text-text-muted">{t('trustLine')}</p>
+          <p className="max-w-2xl text-body-sm text-text-muted">{t('trustLine')}</p>
         </div>
         <div
           className="relative h-44 w-full max-w-3xl overflow-hidden rounded-3xl border border-border bg-bg-card shadow-card"

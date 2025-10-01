@@ -25,13 +25,13 @@ export default function Hero({ onJoinClick }: HeroProps) {
 
   return (
     <section className={cn(layout.section, 'bg-bg')}>
-      <div className={cn(layout.container, 'text-center flex flex-col items-center gap-xl')}>
-        <div className="flex flex-col items-center gap-md">
-          <p className={cn(text.eyebrow, 'text-brand-teal')}>Louhen</p>
-          <h1 className={cn(text.heading, 'max-w-3xl')}>{t('h1')}</h1>
-          <p className={cn(text.subheading, 'max-w-2xl')}>{t('sub')}</p>
+      <div className={cn(layout.container, layout.grid, 'items-center text-center md:text-left')}>
+        <div className="md:col-span-10 md:col-start-2 lg:col-span-8 lg:col-start-3 flex flex-col items-center gap-md md:items-start">
+          <p className={cn(text.eyebrow, 'text-brand-primary')}>Louhen</p>
+          <h1 className={cn(text.hero, 'max-w-3xl text-balance')}>{t('h1')}</h1>
+          <p className={cn(text.subheading, 'max-w-2xl text-balance')}>{t('sub')}</p>
         </div>
-        <div className="flex flex-col items-center gap-sm sm:flex-row sm:gap-md">
+        <div className="md:col-span-6 md:col-start-4 lg:col-span-4 lg:col-start-5 mt-lg flex flex-col items-center gap-sm sm:flex-row sm:justify-center sm:gap-md md:items-stretch md:justify-start">
           <button type="button" className={buttons.primary} onClick={onCtaClick}>
             {t('cta')}
           </button>
@@ -39,17 +39,19 @@ export default function Hero({ onJoinClick }: HeroProps) {
             {t('secondary')}
           </a>
         </div>
-        <HeroTwinBadge />
-        <div className="flex flex-col items-center gap-sm">
-          <span className="text-sm text-text-muted">{t('trust')}</span>
-          <div className="flex flex-wrap items-center justify-center gap-sm text-xs uppercase tracking-wide text-text-muted">
-            {trustBadges.map((badge: string) => (
-              <span key={badge} className="rounded-pill border border-border px-md py-xs">
-                {badge}
-              </span>
-            ))}
-            <PodiatristBadge variant="inline" />
-            <LouhenFitBadge variant="inline" />
+        <div className="md:col-span-12 mt-lg flex flex-col items-center gap-sm md:items-start">
+          <HeroTwinBadge />
+          <div className="flex flex-col items-center gap-sm md:flex-row md:flex-wrap md:items-center md:gap-sm">
+            <span className={text.bodyMuted}>{t('trust')}</span>
+            <div className="flex flex-wrap items-center justify-center gap-sm text-meta text-text-muted md:justify-start">
+              {trustBadges.map((badge: string) => (
+                <span key={badge} className="rounded-pill border border-border px-md py-xs">
+                  {badge}
+                </span>
+              ))}
+              <PodiatristBadge variant="inline" />
+              <LouhenFitBadge variant="inline" />
+            </div>
           </div>
         </div>
       </div>

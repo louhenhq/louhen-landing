@@ -18,7 +18,7 @@ export default function PrivacyRibbonLink({ href, children }: Props) {
     <Link
       href={href}
       onClick={handleClick}
-      className="inline-flex items-center gap-xs text-sm font-medium text-brand-primary underline-offset-4 transition-colors hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
+      className="inline-flex items-center gap-xs text-label text-brand-primary underline-offset-4 transition-colors hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
     >
       {children}
     </Link>

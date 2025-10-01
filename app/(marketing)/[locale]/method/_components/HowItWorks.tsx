@@ -41,7 +41,7 @@ export default function HowItWorks({ childName }: HowItWorksProps) {
           <h2 id="method-how-title" className={cn(text.heading, 'text-balance')}>
             {t('title')}
           </h2>
-          {hasXpTeaser ? <p className="mt-sm text-sm text-text-muted">{xpTeaser}</p> : null}
+          {hasXpTeaser ? <p className="mt-sm text-body-sm text-text-muted">{xpTeaser}</p> : null}
         </div>
         <ol className="grid gap-lg md:grid-cols-2 xl:grid-cols-5" role="list">
           {steps.map((step, index) => (
@@ -50,11 +50,11 @@ export default function HowItWorks({ childName }: HowItWorksProps) {
               className={cn(layout.card, 'flex h-full flex-col gap-sm px-gutter py-xl')}
               aria-label={`Step ${index + 1} of ${steps.length}: ${step.title}`}
             >
-              <div className="text-sm font-semibold uppercase tracking-wide text-brand-primary" aria-hidden="true">
+              <div className="text-label uppercase tracking-[0.24em] text-brand-primary" aria-hidden="true">
                 {String(index + 1).padStart(2, '0')}
               </div>
-              <h3 className="text-lg font-semibold text-text">{step.title}</h3>
-              <p className="text-base leading-relaxed text-text-muted">{step.body}</p>
+              <h3 className="text-h3 text-text">{step.title}</h3>
+              <p className="text-body text-text-muted">{step.body}</p>
             </li>
           ))}
         </ol>

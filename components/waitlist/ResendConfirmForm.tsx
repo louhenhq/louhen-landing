@@ -2,7 +2,7 @@
 
 import React, { useState, type ChangeEvent, type FormEvent } from 'react';
 import { useLocale } from 'next-intl';
-import { buttons, cn, layout, text } from '@/app/(site)/_lib/ui';
+import { buttons, cn, inputs, layout, text } from '@/app/(site)/_lib/ui';
 import { track } from '@/lib/clientAnalytics';
 
 export type ResendConfirmStrings = {
@@ -80,17 +80,17 @@ export function ResendConfirmForm({ strings }: ResendConfirmFormProps) {
 
   return (
     <div className={cn(layout.card, 'mx-auto flex max-w-3xl flex-col gap-md px-gutter py-2xl sm:px-2xl')}>
-      <h2 className={cn(text.heading, 'text-2xl')}>{strings.title}</h2>
+      <h2 className={text.heading}>{strings.title}</h2>
       <p className={cn(text.body)}>{strings.description}</p>
       <form onSubmit={handleSubmit} className="flex flex-col gap-md" noValidate>
         <label className="flex flex-col gap-xs">
-          <span className="text-sm font-medium text-text">{strings.email.label}</span>
+          <span className={text.label}>{strings.email.label}</span>
           <input
             type="email"
             required
             value={email}
             onChange={(event: ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
-            className="rounded-2xl border border-border bg-bg px-md py-sm text-base text-text shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
+            className={inputs}
             placeholder={strings.email.placeholder}
           />
         </label>
@@ -103,7 +103,7 @@ export function ResendConfirmForm({ strings }: ResendConfirmFormProps) {
             {status === 'loading' ? strings.submit + '…' : strings.submit}
           </button>
           {message ? (
-            <p className={cn('text-sm', status === 'success' ? 'text-status-success' : 'text-status-danger')} aria-live="polite">
+            <p className={cn('text-body-sm', status === 'success' ? 'text-status-success' : 'text-status-danger')} aria-live="polite">
               {message}
             </p>
           ) : null}

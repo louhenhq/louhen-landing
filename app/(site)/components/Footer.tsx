@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { cn, layout } from '@/app/(site)/_lib/ui';
+import { cn, layout, text } from '@/app/(site)/_lib/ui';
 import { LEGAL_ENTITY } from '@/constants/site';
 import { useConsent } from '@/components/ConsentProvider';
+import LocaleSwitcher from '@/app/(site)/components/LocaleSwitcher';
 
 export default function Footer() {
   const t = useTranslations('footer');
@@ -12,23 +13,45 @@ export default function Footer() {
   const { openManager } = useConsent();
 
   return (
-    <footer className={cn(layout.section, 'border-t border-border bg-bg')}>
-      <div className={cn(layout.container, 'flex flex-col gap-md text-sm text-text-muted md:flex-row md:items-center md:justify-between')}>
-        <p>© {year} {LEGAL_ENTITY}. {t('rights')}.</p>
-        <nav className="flex flex-wrap items-center gap-md" aria-label="Footer">
-          <Link href="/privacy" prefetch={false} className="hover:text-text">
-            {t('legal.privacy')}
-          </Link>
-          <Link href="/terms" prefetch={false} className="hover:text-text">
-            {t('legal.terms')}
-          </Link>
-          <Link href="/imprint" prefetch={false} className="hover:text-text">
-            {t('legal.imprint')}
-          </Link>
-          <button type="button" className="text-left text-text-muted hover:text-text underline" onClick={openManager}>
-            {t('legal.preferences')}
-          </button>
-        </nav>
+    <footer className={cn('border-t border-border/50 bg-bg/90 backdrop-blur-sm')}
+    >
+      <div className={cn(layout.container, 'flex flex-col gap-xl py-[calc(var(--layout-section-padding-clamp)/1.5)]')}>
+        <div className={cn(layout.grid, 'items-start gap-y-lg')}>
+          <div className="md:col-span-7 lg:col-span-6">
+            <p className={cn(text.meta, 'text-brand-primary/80')}>{t('trustEyebrow')}</p>
+            <p className={cn(text.heading, 'mt-xs text-text')}>{t('trustHeadline')}</p>
+            <p className={cn(text.bodyMuted, 'mt-sm max-w-prose')}>{t('trustBody')}</p>
+          </div>
+          <nav className="flex flex-col gap-sm md:col-span-5 lg:col-span-4" aria-label={t('legalNavLabel')}>
+            <p className={cn(text.label, 'text-text')}>{t('legal.heading')}</p>
+            <Link href="/privacy" prefetch={false} className="text-label text-text-muted transition-colors hover:text-text">
+              {t('legal.privacy')}
+            </Link>
+            <Link href="/terms" prefetch={false} className="text-label text-text-muted transition-colors hover:text-text">
+              {t('legal.terms')}
+            </Link>
+            <Link href="/imprint" prefetch={false} className="text-label text-text-muted transition-colors hover:text-text">
+              {t('legal.imprint')}
+            </Link>
+            <button
+              type="button"
+              className="w-fit text-left text-label text-brand-primary underline decoration-2 underline-offset-4 transition-colors hover:text-brand-primary/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
+              onClick={openManager}
+            >
+              {t('legal.preferences')}
+            </button>
+          </nav>
+        </div>
+        <div className="flex flex-col gap-sm border-t border-border/40 pt-sm text-body-sm text-text-muted md:flex-row md:items-center md:justify-between">
+          <p>
+            © {year} {LEGAL_ENTITY}. {t('rights')}.
+          </p>
+          <div className="flex flex-wrap items-center gap-sm">
+            <LocaleSwitcher id="footer-locale" label={t('localeLabel')} />
+            <span aria-hidden="true" className="text-border">•</span>
+            <span>{t('dataResidency')}</span>
+          </div>
+        </div>
       </div>
     </footer>
   );

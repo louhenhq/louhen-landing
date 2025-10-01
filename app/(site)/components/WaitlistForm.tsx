@@ -3,7 +3,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import ConsentNotice from '@/app/(site)/components/ConsentNotice';
+import { buttons, focusRing, inputs, layout } from '@/app/(site)/_lib/ui';
 import { track } from '@/lib/clientAnalytics';
+import { cn } from '@/app/(site)/_lib/ui';
 
 type WaitlistFormProps = {
   defaultEmail?: string;
@@ -137,15 +139,16 @@ export default function WaitlistForm({
 
   return (
     <form
+      id="waitlist-form"
       onSubmit={handleSubmit}
       aria-describedby={error ? 'waitlist-error' : undefined}
       aria-busy={isSubmitting}
-      className="mx-auto mt-10 w-full max-w-xl rounded-3xl border border-slate-200 bg-white px-6 py-8 shadow-lg"
+      className={cn(layout.card, 'w-full px-lg py-xl')}
       noValidate
     >
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-md">
         <div>
-          <label htmlFor="waitlist-email" className="text-sm font-medium text-slate-900">
+          <label htmlFor="waitlist-email" className={text.label}>
             {t('email.label')}
           </label>
           <input
@@ -166,16 +169,16 @@ export default function WaitlistForm({
             ]
               .filter(Boolean)
               .join(' ') || undefined}
-            className="mt-2 w-full rounded-2xl border border-slate-300 px-4 py-3 text-base text-slate-900 transition-shadow duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500"
+            className={cn('mt-xs w-full', inputs)}
           />
           {showInlineEmailError ? (
-            <p id="waitlist-email-inline-error" className="mt-2 text-sm text-rose-600" role="alert">
+            <p id="waitlist-email-inline-error" className="mt-xs text-body-sm text-feedback-error" role="alert">
               {errorsT('email.invalid')}
             </p>
           ) : null}
         </div>
 
-        <div className="flex items-start gap-3">
+        <div className="flex items-start gap-sm">
           <input
             id="waitlist-consent"
             name="consent"
@@ -186,18 +189,18 @@ export default function WaitlistForm({
               setError(null);
             }}
             required
-            className="mt-1 h-5 w-5 rounded border border-slate-300 accent-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500"
+            className={cn('mt-[calc(var(--spacing-8)/2)] h-5 w-5 rounded-md border border-border accent-brand bg-bg', focusRing)}
           />
           <ConsentNotice />
         </div>
 
-        <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500">
-          <span className="block font-semibold text-slate-700">hCaptcha</span>
-          <span className="mt-1 block">Placeholder — integration arrives with backend slice.</span>
+        <div className="rounded-2xl border border-dashed border-feedback-info-border bg-feedback-info-surface px-md py-lg text-body-sm text-text-muted">
+          <span className="block text-label text-text">hCaptcha</span>
+          <span className="mt-xs block">Placeholder — integration arrives with backend slice.</span>
         </div>
 
         {showUrgencyBadge ? (
-          <p className="text-sm font-medium text-emerald-600" role="status">
+          <p className="text-body-sm font-medium text-feedback-success" role="status">
             {t('urgency.badge')}
           </p>
         ) : null}
@@ -205,19 +208,19 @@ export default function WaitlistForm({
         <button
           type="submit"
           disabled={disableSubmit}
-          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition-colors duration-150 hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-400"
+          className={cn(buttons.primary, 'px-lg py-sm')}
         >
           {isSubmitting ? `${t('submit.cta')}…` : t('submit.cta')}
         </button>
 
         {error ? (
-          <p id="waitlist-error" role="alert" className="text-sm text-rose-600">
+          <p id="waitlist-error" role="alert" className="text-body-sm text-feedback-error">
             {error}
           </p>
         ) : null}
 
         {successMessage ? (
-          <p role="status" data-testid="waitlist-success-message" className="text-sm text-emerald-600">
+          <p role="status" data-testid="waitlist-success-message" className="text-body-sm text-feedback-success">
             {successMessage}
           </p>
         ) : null}

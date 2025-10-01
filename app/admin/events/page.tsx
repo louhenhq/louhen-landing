@@ -32,7 +32,7 @@ export default async function EventsAdminPage({ searchParams }: { searchParams: 
     return (
       <main className="mx-auto max-w-2xl px-4 py-16">
         <h1 className="text-2xl font-bold">Unauthorized</h1>
-        <p className="mt-2 text-slate-600">Missing or invalid key.</p>
+        <p className="mt-2 text-text-muted">Missing or invalid key.</p>
       </main>
     );
   }
@@ -50,9 +50,9 @@ export default async function EventsAdminPage({ searchParams }: { searchParams: 
       <div className="flex items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Recent Events</h1>
-          <p className="mt-2 text-slate-600 text-sm">Showing latest {rows.length}. Use the secret ?key=… to access.</p>
+          <p className="mt-2 text-text-muted text-sm">Showing latest {rows.length}. Use the secret ?key=… to access.</p>
         </div>
-        <div className="text-sm text-slate-500">ordered by createdAt desc</div>
+        <div className="text-sm text-text-muted">ordered by createdAt desc</div>
       </div>
       <div className="mt-4 text-sm">
         <a href={`/admin?key=${encodeURIComponent(adminKey)}`} className="underline">Back to admin</a>
@@ -64,7 +64,7 @@ export default async function EventsAdminPage({ searchParams }: { searchParams: 
       <form method="get" className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
         <input type="hidden" name="key" value={adminKey} />
         <div>
-          <label className="block text-xs text-slate-500 mb-1">Event</label>
+          <label className="block text-xs text-text-muted mb-1">Event</label>
           <select name="event" defaultValue={eventName || ''} className="w-full border rounded-lg px-3 py-2">
             <option value="">All</option>
             <option value="page_view">page_view</option>
@@ -84,11 +84,11 @@ export default async function EventsAdminPage({ searchParams }: { searchParams: 
           </select>
         </div>
         <div>
-          <label className="block text-xs text-slate-500 mb-1">Search (path/ref/utm)</label>
+          <label className="block text-xs text-text-muted mb-1">Search (path/ref/utm)</label>
           <input type="text" name="q" defaultValue={q || ''} placeholder="e.g. prelaunch or /?utm_" className="w-full border rounded-lg px-3 py-2" />
         </div>
         <div>
-          <label className="block text-xs text-slate-500 mb-1">Limit</label>
+          <label className="block text-xs text-text-muted mb-1">Limit</label>
           <select name="limit" defaultValue={String(limit)} className="w-full border rounded-lg px-3 py-2">
             <option value="50">50</option>
             <option value="100">100</option>
@@ -99,12 +99,12 @@ export default async function EventsAdminPage({ searchParams }: { searchParams: 
         <div className="flex items-center gap-2">
           <input id="errors" type="checkbox" name="errors" value="1" defaultChecked={errorsOnly} className="h-4 w-4" />
           <label htmlFor="errors" className="text-sm">Errors only</label>
-          <button type="submit" className="ml-auto inline-flex items-center rounded-lg px-3 py-2 text-sm bg-slate-900 text-white">Apply</button>
+          <button type="submit" className="ml-auto inline-flex items-center rounded-lg px-3 py-2 text-sm bg-slate-900 text-text-inverse">Apply</button>
         </div>
       </form>
-      <div className="mt-6 overflow-x-auto rounded-xl border border-slate-200 bg-white">
+      <div className="mt-6 overflow-x-auto rounded-xl border border-border bg-bg-card">
         <table className="min-w-full text-xs sm:text-sm">
-          <thead className="bg-slate-50 text-slate-700">
+          <thead className="bg-bg text-text">
             <tr>
               <th className="px-3 py-2 text-left">When</th>
               <th className="px-3 py-2 text-left">Event</th>
@@ -123,17 +123,17 @@ export default async function EventsAdminPage({ searchParams }: { searchParams: 
             {(rows as EventRow[]).map((r: EventRow) => {
               const createdIso = r.createdAt ? toIso(r.createdAt) : (r.ts ? new Date(r.ts).toISOString() : '');
               return (
-                <tr key={r.id} className="border-t border-slate-100 align-top">
+                <tr key={r.id} className="border-t border-border align-top">
                   <td className="px-3 py-2 whitespace-nowrap tabular-nums">{createdIso ? new Date(createdIso).toLocaleString() : '—'}</td>
                   <td className="px-3 py-2">{r.name}</td>
                   <td className="px-3 py-2 font-mono text-[11px] sm:text-xs max-w-[16rem] truncate" title={r.path}>{r.path || '—'}</td>
                   <td className="px-3 py-2">{r.variant || '—'}</td>
                   <td className="px-3 py-2 font-mono text-[11px] sm:text-xs">{r.id2 || '—'}</td>
                   <td className="px-3 py-2">{r.ok === undefined ? '—' : r.ok ? 'yes' : 'no'}</td>
-                  <td className="px-3 py-2 text-rose-700">{r.error || '—'}</td>
+                  <td className="px-3 py-2 text-feedback-error">{r.error || '—'}</td>
                   <td className="px-3 py-2 font-mono text-[11px] sm:text-xs">{r.ip_hash || '—'}</td>
                   <td className="px-3 py-2">
-                    <div className="text-[11px] sm:text-xs text-slate-600">
+                    <div className="text-[11px] sm:text-xs text-text-muted">
                       {r.utm_source || r.utm_medium || r.utm_campaign || r.utm_content || r.utm_term ? (
                         <>
                           {r.utm_source && <span><b>src</b>={r.utm_source} </span>}
@@ -152,7 +152,7 @@ export default async function EventsAdminPage({ searchParams }: { searchParams: 
             })}
             {rows.length === 0 && (
               <tr>
-                <td className="px-3 py-4 text-slate-500" colSpan={11}>
+                <td className="px-3 py-4 text-text-muted" colSpan={11}>
                   No data yet.
                 </td>
               </tr>
@@ -163,7 +163,7 @@ export default async function EventsAdminPage({ searchParams }: { searchParams: 
       <div className="mt-4 flex items-center justify-end gap-3">
         {nextCursor && (
           <a
-            className="inline-flex items-center rounded-lg px-3 py-2 text-sm bg-slate-100 border"
+            className="inline-flex items-center rounded-lg px-3 py-2 text-sm bg-bg border"
             href={`/admin/events?key=${encodeURIComponent(adminKey)}&limit=${limit}${eventName ? `&event=${encodeURIComponent(eventName)}` : ''}${q ? `&q=${encodeURIComponent(q)}` : ''}${errorsOnly ? '&errors=1' : ''}&cursor=${encodeURIComponent(nextCursor)}`}
           >
             Next →

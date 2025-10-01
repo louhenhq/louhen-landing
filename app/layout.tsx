@@ -2,6 +2,7 @@ import './globals.css'
 import './styles/tokens.css'
 import type { Metadata, Viewport } from 'next'
 import { headers } from 'next/headers'
+import { Fraunces, Inter } from 'next/font/google'
 import ThemeInit from '@/components/ThemeInit'
 import { ConsentProvider } from '@/components/ConsentProvider'
 import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/SeoJsonLd'
@@ -9,6 +10,29 @@ import { SITE_NAME } from '@/constants/site'
 import { getServerConsent } from '@/lib/consent/state'
 import { NonceProvider } from '@/lib/csp/nonce-context'
 import tokens from '@louhen/design-tokens/build/web/tokens.json' assert { type: 'json' }
+
+const headingFont = Fraunces({
+  subsets: ['latin'],
+  weight: ['600', '700'],
+  axes: ['opsz'],
+  display: 'swap',
+  style: ['normal'],
+  preload: true,
+  variable: '--font-heading',
+  adjustFontFallback: 'Times New Roman',
+  fallback: ['Iowan Old Style', 'Palatino Linotype', 'Palatino', 'Times New Roman', 'serif'],
+});
+
+const bodyFont = Inter({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  display: 'swap',
+  preload: true,
+  style: ['normal'],
+  variable: '--font-body',
+  adjustFontFallback: 'Arial',
+  fallback: ['Inter', 'Segoe UI', 'Helvetica Neue', 'Arial', 'system-ui', 'sans-serif'],
+});
 
 const tokenValues = tokens as Record<string, unknown> & {
   color?: {
@@ -104,7 +128,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const searchActionUrl = `${baseUrl}/search?q={search_term_string}`
 
   return (
-    <html lang="en">
+    <html lang="en" className={`${headingFont.variable} ${bodyFont.variable}`}>
       <head>
         {/* iOS PWA / status bar styling */}
         <meta name="apple-mobile-web-app-capable" content="yes" />

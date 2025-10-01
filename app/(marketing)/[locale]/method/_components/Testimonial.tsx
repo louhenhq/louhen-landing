@@ -9,10 +9,10 @@ export default function Testimonial() {
   return (
     <section className={cn(layout.section, 'bg-bg')} aria-labelledby="method-testimonial-title">
       <div className={cn(layout.container, 'flex flex-col gap-md')}>
-        <h2 id="method-testimonial-title" className={cn(text.heading, 'text-2xl md:text-3xl')}>
+        <h2 id="method-testimonial-title" className={text.heading}>
           {t('attribution')}
         </h2>
-        <blockquote className={cn(layout.card, 'px-gutter py-xl text-lg font-medium leading-relaxed text-text')}>
+        <blockquote className={cn(layout.card, 'px-gutter py-xl text-body text-text font-medium')}>
           {t('quote')}
         </blockquote>
       </div>

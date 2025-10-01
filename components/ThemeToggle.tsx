@@ -15,10 +15,10 @@ export default function ThemeToggle() {
   }, []);
 
   return (
-    <div className="flex items-center gap-2 text-sm">
+    <div className="flex items-center gap-2 text-body text-text">
       <label className="sr-only">Theme</label>
       <select
-        className="border rounded px-2 py-1"
+        className="rounded-2xl border border-border bg-bg px-sm py-xs text-label text-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
         value={theme}
         onChange={(e: ChangeEvent<HTMLSelectElement>) => {
           const v = e.target.value as 'system'|'light'|'dark';
@@ -34,7 +34,7 @@ export default function ThemeToggle() {
 
       <label className="sr-only">Contrast</label>
       <select
-        className="border rounded px-2 py-1"
+        className="rounded-2xl border border-border bg-bg px-sm py-xs text-label text-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
         value={contrast}
         onChange={(e: ChangeEvent<HTMLSelectElement>) => {
           const v = e.target.value as 'system'|'normal'|'more';
@@ -49,7 +49,7 @@ export default function ThemeToggle() {
       </select>
 
       <button
-        className="border rounded px-2 py-1"
+        className="rounded-2xl border border-border px-sm py-xs text-label text-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
         onClick={() => {
           setThemeState('system');
           setContrastState('system');

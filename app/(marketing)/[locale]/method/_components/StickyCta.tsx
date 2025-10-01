@@ -44,7 +44,7 @@ export default function StickyCta({ locale }: StickyCtaProps) {
       )}
       data-testid="method-sticky-cta"
     >
-      <div className="rounded-2xl bg-slate-900/95 p-4 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-slate-900/80">
+      <div className="rounded-2xl bg-brand-primary/95 p-4 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-brand-primary/80">
         <Link
           href={`/${locale}/waitlist`}
           className={buttons.primary}

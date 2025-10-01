@@ -1,7 +1,8 @@
 /* CODEx: map design tokens into Tailwind theme via CSS variables */
 import type { Config } from 'tailwindcss'
 
-const withVar = (name: string) => `var(${name})`
+const withVar = (name: string, fallback?: string) =>
+  fallback ? `var(${name}, ${fallback})` : `var(${name})`
 
 export default {
   content: [
@@ -12,6 +13,29 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        heading: [
+          'var(--font-heading)',
+          'Fraunces',
+          'Iowan Old Style',
+          'Palatino Linotype',
+          'Palatino',
+          'Times New Roman',
+          'ui-serif',
+          'serif',
+        ],
+        sans: [
+          'var(--font-body)',
+          'Inter',
+          'Segoe UI',
+          'Helvetica Neue',
+          'Arial',
+          'system-ui',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'sans-serif',
+        ],
+      },
       colors: {
         // semantic palettes (light/dark/hc come from :root data-attrs)
         bg: {
@@ -28,37 +52,187 @@ export default {
         },
         border: {
           DEFAULT: withVar('--semantic-color-border-subtle'),
+          subtle: withVar('--semantic-color-border-subtle'),
           strong: withVar('--semantic-color-border-strong'),
           focus: withVar('--semantic-color-border-focus'),
         },
         status: {
           success: withVar('--semantic-color-status-success'),
           warning: withVar('--semantic-color-status-warning'),
+          error: withVar('--semantic-color-status-error'),
           info: withVar('--semantic-color-status-info'),
-          danger: withVar('--semantic-color-status-danger'),
+        },
+        feedback: {
+          success: withVar('--color-feedback-success'),
+          'success-surface': withVar('--color-feedback-success-surface'),
+          'success-border': withVar('--color-feedback-success-border'),
+          warning: withVar('--color-feedback-warning'),
+          'warning-surface': withVar('--color-feedback-warning-surface'),
+          'warning-border': withVar('--color-feedback-warning-border'),
+          error: withVar('--color-feedback-error'),
+          'error-surface': withVar('--color-feedback-error-surface'),
+          'error-border': withVar('--color-feedback-error-border'),
+          info: withVar('--color-feedback-info'),
+          'info-surface': withVar('--color-feedback-info-surface'),
+          'info-border': withVar('--color-feedback-info-border'),
         },
         brand: {
-          primary: withVar('--color-light-primary'),
-          secondary: withVar('--color-light-secondary'),
-          coral: withVar('--color-brand-coral'),
-          mint: withVar('--color-brand-mint'),
-          teal: withVar('--color-brand-teal'),
+          primary: withVar('--color-brand-primary'),
+          secondary: withVar('--color-brand-secondary'),
+          muted: withVar('--color-brand-muted'),
+          accent: withVar('--color-brand-accent'),
+          onPrimary: withVar('--color-brand-on-primary'),
+          onAccent: withVar('--color-brand-on-accent'),
+        },
+        neutral: {
+          0: withVar('--color-neutral-0'),
+          10: withVar('--color-neutral-10'),
+          20: withVar('--color-neutral-20'),
+          30: withVar('--color-neutral-30'),
+          40: withVar('--color-neutral-40'),
+          50: withVar('--color-neutral-50'),
+          60: withVar('--color-neutral-60'),
+          70: withVar('--color-neutral-70'),
+          80: withVar('--color-neutral-80'),
+          90: withVar('--color-neutral-90'),
+          100: withVar('--color-neutral-100'),
+        },
+        slate: {
+          50: withVar('--color-neutral-10'),
+          100: withVar('--color-neutral-20'),
+          200: withVar('--color-neutral-30'),
+          300: withVar('--color-neutral-40'),
+          400: withVar('--color-neutral-50'),
+          500: withVar('--color-neutral-60'),
+          600: withVar('--color-neutral-70'),
+          700: withVar('--color-neutral-80'),
+          800: withVar('--color-neutral-90'),
+          900: withVar('--color-neutral-100'),
+        },
+        emerald: {
+          50: withVar('--color-feedback-success-surface'),
+          200: withVar('--color-feedback-success-border'),
+          500: withVar('--color-feedback-success'),
+          600: withVar('--color-feedback-success'),
+          700: withVar('--color-feedback-success'),
+        },
+        amber: {
+          50: withVar('--color-feedback-warning-surface'),
+          200: withVar('--color-feedback-warning-border'),
+          600: withVar('--color-feedback-warning'),
+        },
+        rose: {
+          50: withVar('--color-feedback-error-surface'),
+          200: withVar('--color-feedback-error-border'),
+          400: withVar('--color-feedback-error'),
+          500: withVar('--color-feedback-error'),
+          600: withVar('--color-feedback-error'),
+        },
+        white: withVar('--color-neutral-0'),
+        black: withVar('--color-neutral-100'),
+        shadow: {
+          focus: withVar('--shadow-focus'),
         },
       },
+      fontSize: {
+        'display-xl': [
+          'clamp(2.5rem, 1.65rem + 2.8vw, 3.5rem)',
+          {
+            lineHeight: '1.1',
+            letterSpacing: '-0.02em',
+            fontWeight: '700',
+            fontFamily: 'var(--font-heading)',
+            fontOpticalSizing: 'auto',
+            fontVariationSettings: '"opsz" 48',
+          },
+        ],
+        'display-lg': [
+          'clamp(2rem, 1.45rem + 1.6vw, 2.75rem)',
+          {
+            lineHeight: '1.18',
+            letterSpacing: '-0.015em',
+            fontWeight: '600',
+            fontFamily: 'var(--font-heading)',
+            fontOpticalSizing: 'auto',
+            fontVariationSettings: '"opsz" 40',
+          },
+        ],
+        h3: [
+          'clamp(1.75rem, 1.45rem + 0.6vw, 2.125rem)',
+          {
+            lineHeight: '1.24',
+            letterSpacing: '-0.01em',
+            fontWeight: '600',
+            fontFamily: 'var(--font-heading)',
+            fontOpticalSizing: 'auto',
+            fontVariationSettings: '"opsz" 32',
+          },
+        ],
+        body: [
+          '1rem',
+          {
+            lineHeight: '1.6',
+            letterSpacing: '-0.01em',
+            fontWeight: '400',
+            fontFamily: 'var(--font-body)',
+          },
+        ],
+        'body-sm': [
+          '0.9375rem',
+          {
+            lineHeight: '1.5',
+            letterSpacing: '-0.005em',
+            fontWeight: '400',
+            fontFamily: 'var(--font-body)',
+          },
+        ],
+        label: [
+          '1rem',
+          {
+            lineHeight: '1.35',
+            letterSpacing: '0.015em',
+            fontWeight: '600',
+            fontFamily: 'var(--font-body)',
+          },
+        ],
+        meta: [
+          '0.8125rem',
+          {
+            lineHeight: '1.4',
+            letterSpacing: '0.075em',
+            fontWeight: '500',
+            fontFamily: 'var(--font-body)',
+          },
+        ],
+      },
+      accentColor: {
+        brand: withVar('--color-brand-primary'),
+        success: withVar('--color-feedback-success'),
+        info: withVar('--color-feedback-info'),
+      },
       spacing: {
-        xs: withVar('--spacing-xs'),
-        sm: withVar('--spacing-sm'),
-        md: withVar('--spacing-md'),
-        lg: withVar('--spacing-lg'),
-        xl: withVar('--spacing-xl'),
-        '2xl': withVar('--spacing-xxl'),
-        '3xl': withVar('--spacing-xxxl'),
+        xs: withVar('--spacing-alias-xs'),
+        sm: withVar('--spacing-alias-sm'),
+        md: withVar('--spacing-alias-md'),
+        lg: withVar('--spacing-alias-lg'),
+        xl: withVar('--spacing-alias-xl'),
+        '2xl': withVar('--spacing-alias-2xl'),
         gutter: withVar('--spacing-gutter'),
+        4: withVar('--spacing-4'),
+        8: withVar('--spacing-8'),
+        16: withVar('--spacing-16'),
+        24: withVar('--spacing-24'),
+        32: withVar('--spacing-32'),
+        48: withVar('--spacing-48'),
+        64: withVar('--spacing-64'),
       },
       borderRadius: {
+        DEFAULT: withVar('--radii-md'),
         sm: withVar('--radii-sm'),
         md: withVar('--radii-md'),
         lg: withVar('--radii-lg'),
+        xl: withVar('--radii-xl'),
+        '2xl': withVar('--radii-2xl'),
         pill: withVar('--radii-pill'),
       },
       zIndex: {
@@ -67,7 +241,15 @@ export default {
         toast: 'var(--z-index-toast)',
       },
       boxShadow: {
-        card: '0 1px 2px 0 rgb(0 0 0 / 0.04), 0 1px 3px 0 rgb(0 0 0 / 0.08)',
+        DEFAULT: withVar('--shadow-card'),
+        sm: withVar('--shadow-card'),
+        md: withVar('--shadow-card'),
+        lg: withVar('--shadow-elevated'),
+        xl: withVar('--shadow-elevated'),
+        '2xl': withVar('--shadow-elevated'),
+        card: withVar('--shadow-card'),
+        elevated: withVar('--shadow-elevated'),
+        focus: withVar('--shadow-focus'),
       },
       transitionDuration: {
         fast: 'var(--motion-dur-fast)',

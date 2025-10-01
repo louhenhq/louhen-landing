@@ -23,13 +23,15 @@ export default function HowItWorks() {
         <div className="grid gap-lg md:grid-cols-3">
           {steps.map((step: Step, index: number) => (
             <article key={step.title} className={cn(layout.card, 'h-full px-gutter py-xl')}>
-              <div className="text-sm font-semibold text-brand-primary">{String(index + 1).padStart(2, '0')}</div>
-              <h3 className="mt-sm text-xl font-semibold text-text">{step.title}</h3>
-              <p className="mt-sm text-sm text-text-muted leading-relaxed">{step.body}</p>
+              <div className="text-label uppercase tracking-[0.24em] text-brand-primary">
+                {String(index + 1).padStart(2, '0')}
+              </div>
+              <h3 className="mt-sm text-h3 text-text">{step.title}</h3>
+              <p className="mt-sm text-body text-text-muted">{step.body}</p>
             </article>
           ))}
         </div>
-        <p className="text-sm text-text-muted">{t('trust')}</p>
+        <p className="text-body text-text-muted">{t('trust')}</p>
       </div>
     </section>
   );

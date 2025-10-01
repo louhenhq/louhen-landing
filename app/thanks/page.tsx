@@ -1,6 +1,7 @@
 "use client";
 import Link from 'next/link';
 import * as React from 'react';
+import { buttons, cn, inputs, text } from '@/app/(site)/_lib/ui';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -16,31 +17,33 @@ export default function ThanksPage({ searchParams }: { searchParams: Record<stri
 
   return (
     <main className="mx-auto max-w-md px-4 py-16">
-      <h1 className="text-2xl font-bold">{confirmed ? 'Confirmed 🎉' : 'You’re almost done'}</h1>
+      <h1 className="text-display-lg text-text">{confirmed ? 'Confirmed 🎉' : 'You’re almost done'}</h1>
       {!confirmed && (
-        <p className="mt-2 text-slate-600">Check your inbox to confirm your email. Once confirmed, share your referral link below.</p>
+        <p className="mt-2 text-body text-text-muted">Check your inbox to confirm your email. Once confirmed, share your referral link below.</p>
       )}
-      <p className="mt-4">Share your referral link:</p>
-      <p className="mt-2 font-mono break-all border rounded-lg p-3 bg-white">{link}</p>
+      <p className="mt-4 text-body text-text">Share your referral link:</p>
+      <p className="mt-2 font-mono break-all border border-border rounded-lg p-3 bg-bg-card text-body text-text">{link}</p>
       <div className="mt-4 flex gap-2">
         <a
-          className="underline"
+          className="text-label text-brand-primary underline"
           href={`https://wa.me/?text=${encodeURIComponent(link)}`}
           target="_blank"
           rel="noopener noreferrer"
         >
           WhatsApp
         </a>
-        <a className="underline" href={`sms:&body=${encodeURIComponent(link)}`}>SMS</a>
+        <a className="text-label text-brand-primary underline" href={`sms:&body=${encodeURIComponent(link)}`}>SMS</a>
         <button
-          className="underline"
+          className="text-label text-brand-primary underline"
           onClick={async () => {
             try { await navigator.clipboard.writeText(link); alert('Copied'); } catch {}
           }}
         >Copy</button>
       </div>
       {!confirmed && <ResendForm />}
-      <p className="mt-6"><Link className="underline" href="/">Back to home</Link></p>
+      <p className="mt-6 text-body">
+        <Link className="underline text-brand-primary" href="/">Back to home</Link>
+      </p>
     </main>
   );
 }
@@ -50,7 +53,7 @@ function ResendForm() {
   const [msg, setMsg] = React.useState<string | null>(null);
   return (
     <form
-      className="mt-6 flex gap-2 items-center"
+      className="mt-6 flex items-center gap-2"
       onSubmit={async (e) => {
         e.preventDefault();
         try {
@@ -65,9 +68,15 @@ function ResendForm() {
         }
       }}
     >
-      <input className="flex-1 border rounded-lg px-3 py-2" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
-      <button className="px-3 py-2 rounded-lg border" type="submit">Resend confirmation</button>
-      {msg && <span className="text-xs text-slate-600 ml-2">{msg}</span>}
+      <input
+        className={cn(inputs, 'flex-1 rounded-lg')}
+        type="email"
+        placeholder="you@example.com"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      <button className={cn(buttons.secondary, 'rounded-lg px-sm py-xs')} type="submit">Resend confirmation</button>
+      {msg && <span className="ml-2 text-body-sm text-text-muted">{msg}</span>}
     </form>
   );
 }

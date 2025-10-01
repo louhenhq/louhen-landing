@@ -2,6 +2,7 @@
   "header": {
     "logo": "Louhen",
     "nav": {
+      "aria": "Primary",
       "how": "How it works",
       "story": "Founder story",
       "faq": "FAQ",
@@ -100,6 +101,7 @@
     }
   },
   "how": {
+    "eyebrow": "How it works",
     "headline": "How Louhen Works",
     "intro": "From first steps to growing feet — here’s how we make finding the perfect pair effortless.",
     "stepLabel": "Step {step}",
@@ -117,6 +119,9 @@
       "body": "Explore designs your child will love — always in the right size, always backed by the LouhenFit Guarantee."
     },
     "cta": "Join the waitlist"
+  },
+  "layout": {
+    "skipToMain": "Skip to main content"
   },
   "faq": {
     "title": "Frequently asked questions",
@@ -346,12 +351,19 @@
     }
   },
   "footer": {
+    "trustEyebrow": "Why parents trust Louhen",
+    "trustHeadline": "Podiatrist-led sizing with privacy built in",
+    "trustBody": "LouhenFit keeps family data in the EU and follows GDPR so every profile stays protected.",
+    "legalNavLabel": "Legal links",
     "legal": {
+      "heading": "Legal",
       "privacy": "Privacy",
       "terms": "Terms",
       "imprint": "Imprint",
       "preferences": "Cookie preferences"
     },
+    "localeLabel": "Select language",
+    "dataResidency": "GDPR-compliant • EU data residency",
     "rights": "All rights reserved"
   },
   "common": {

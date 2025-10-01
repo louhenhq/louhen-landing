@@ -17,9 +17,24 @@ Louhen Landing is the official marketing site for Louhen, designed to provide a 
 ## Design System Snapshot
 
 - Louhen Landing design is **locked** as of 2025-10-01; see [`CONTEXT/decision_log.md`](CONTEXT/decision_log.md#louhen-landing--design-system-locked-2025-10-01) and [`CONTEXT/design_system.md`](CONTEXT/design_system.md) for the canonical source of truth.
-- Use semantic tokens, typography utilities, and shared CSS variables; avoid raw hex, ad-hoc radii, or bespoke shadows.
+- All color/spacing/radius/shadow values come from `@louhen/design-tokens`; use the semantic utilities (`bg-bg`, `text-text`, `border-border`, `spacing.*`, `buttons.primary`) instead of bespoke values.
+- The `scripts/guard-hex.mjs` pre-commit hook blocks raw hex codes—route palette updates through the tokens package and re-run `npm run build --workspace @louhen/design-tokens`.
 - Honor accessibility, dark-mode, i18n, and reduced-motion guardrails outlined in Slice plans and the PR checklist.
 - Run existing validation commands—`npm run lint`, `npm run validate:local`, `npm run lighthouse`, etc.—to confirm design integrity before merging.
+
+### Using the type scale
+- `text-display-xl` powers hero H1s (Fraunces 700, clamp with `opsz` 48); keep hero wrappers around `max-w-3xl` so EN/DE copy sits on 1–2 lines.
+- `text-display-lg` is the section H2 / method hero size; `text-h3` covers card and inline headings.
+- `text-body` is default paragraph copy; `text-body-sm` is for helper text, secondary labels, and captions.
+- `text-label` is the only interactive text size (≥16px) for buttons, nav, inputs; `text-meta` handles eyebrows/meta with uppercase tracking.
+- All typography must use these utilities—no `text-[N]`, inline `font-family`, or font-weight/size animations.
+
+### Using the layout shell
+- Wrap landing pages in the `SiteShell` component; pass the sticky `Header`, `Footer`, and `layout.skipToMain` copy so skip links always work.
+- Containers come from `layout.container`/`layout.grid`; never hand-roll `max-w` or gutter spacing. Section padding comes from `layout.section` (80–120px clamp).
+- Keep hero, story, trust, and waitlist blocks on the 12-column grid—use column spans like `md:col-span-7` instead of bespoke margins.
+- Header stays translucent with shadow on scroll; footer uses the trust copy + legal links in the README/CONTEXT spec. Adjustments must preserve AA contrast and focus-visible rings.
+- Anchor targets (`#how`, `#story`, `#waitlist`, `#faq`) should land on elements with our shell helpers so the sticky nav never obscures content.
 
 ## Local Development
 

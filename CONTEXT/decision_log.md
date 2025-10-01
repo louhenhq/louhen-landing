@@ -62,8 +62,9 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
 
 - **Principles**: Trust-first storytelling, visual calm, scalability for new product surfaces, and accessibility as a default constraint.  
 - **Typography**: Fraunces (locked headline family, weights 600–700) replaces Recoleta to eliminate licensing friction while preserving the serif character; Inter remains the body/UI family (weights 400/500/600) with shared fallback stacks. Type utilities expose clamp-based sizes, conservative line-height targets, and letter-spacing guidance to prevent layout shift. Implementation is scheduled in [Slice 2 — Typography + Token Wiring](CONTEXT/backlog.md#slice-2-typography--token-wiring).
-- **Color System**: All UI color uses semantic tokens (brand.primary, accent.seasonal, surface.default, feedback.*). Seasonal accent tokens are swappable without changing component primitives; raw hex values remain prohibited in runtime code.
-- **Layout & Spacing**: Components adhere to the 12-column grid with a 1440px content max. Vertical rhythm aligns to an 8-based spacing scale (4 → 96) with section paddings between 80–120px depending on breakpoint. Radii default to `rounded-2xl` primitives; shadows stay in the soft-elevation system defined in tokens.
+- **Color System**: All UI color uses semantic tokens (brand.*, neutral.*, background.*, text.*, border.*, feedback.*). Seasonal accent tokens are swappable without changing component primitives; raw hex values remain prohibited in runtime code.
+- **Layout & Spacing**: Components adhere to the 12-column grid with a 1440px content max. Vertical rhythm uses the locked 4 → 64 spacing scale (0.25rem → 4rem) with tokenised gutters and paddings. Radii default to `--radii-2xl`; shadows stay in the `--shadow-card` / `--shadow-elevated` system.
+- **Token Exposure**: `@louhen/design-tokens` now emits CSS variables consumed in Next.js (`/public/tokens/*.css`) and Tailwind. Legacy utility names (`slate-*`, `emerald-*`) are aliased to the new semantic tokens until admin tooling migrates.
 - **Motion**: Framer Motion drives interactive states with easing presets and 200–300ms durations; hero Lottie sequences respect a 250KB zipped budget. All flows must honor `prefers-reduced-motion` with fade/opacity fallbacks and no size/weight transitions.
 - **Imagery & Illustration**: Marketing art remains light, airy lifestyle photography with GDPR-compliant sourcing; illustrations stay pastel with consistent stroke weight to match Louhen app iconography.
 - **Internationalization**: Layouts plan for DE-length strings and RTL mirroring; copy decks follow BCP-47 locale keys to match `next-intl` routing.
@@ -73,9 +74,17 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
 ### Impact
 - Removes paid font licensing risk by locking Fraunces as the serif headline family (Google Fonts) and aligns web typography with Style Dictionary tokens shared with the app.  
 - Provides a single source of truth for layout, tokens, and motion so Slices 1–13 can reference immutable decisions.  
+- Delivers semantic design tokens (color/spacing/radius/shadow) as CSS variables + Tailwind utilities, eliminating hardcoded literals across the landing codebase.  
 - Establishes contributor guardrails (PR checklist, README snapshot) that prevent design drift and ensure CI/lint hooks enforce the design contract.
 
 ### Risks
 - Typeface swap requires thorough regression of perceived weight/kerning; confirm Fraunces preload/swap strategies stay within CLS budgets.  
 - Hero Lottie and motion micro-interactions must stay within the 250KB zipped payload budget to avoid perf regressions.  
-- Icon and illustration stroke inconsistencies could erode the trust-first principle; enforce shared stroke guides in design reviews.
+- Icon and illustration stroke inconsistencies could erode the trust-first principle; enforce shared stroke guides in design reviews.  
+- Tailwind legacy aliases may mask improper usage; track residual `slate-*`/`emerald-*` utilities and migrate to explicit semantic classes during admin polish.
+
+- **2025-10-03**  
+  Slice 2 ships the locked Fraunces + Inter pairing via `--font-heading` / `--font-body`, adds the `text-display-xl` → `text-meta` utility scale, and replaces ad-hoc font sizing across the landing experience.
+
+- **2025-10-04**  
+  Slice 3 introduces the SiteShell (12-col grid, 1440px max), translucent sticky header with locale switcher, and accessible footer with GDPR reassurance. All landing sections now consume the shared layout helpers and section rhythm.

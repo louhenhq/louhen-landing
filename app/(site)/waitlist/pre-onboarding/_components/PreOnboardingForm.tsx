@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { track } from '@/lib/clientAnalytics';
+import { buttons, cn, inputs, text } from '@/app/(site)/_lib/ui';
 
 const MAX_CHILDREN = 5;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/u;
@@ -219,9 +220,14 @@ export default function PreOnboardingForm({ canSubmit, initialDraft }: PreOnboar
   }
 
   return (
-    <form className="grid gap-8" onSubmit={handleSubmit} noValidate aria-describedby={message ? 'preonboarding-feedback' : undefined}>
-      <div className="grid gap-2">
-        <label htmlFor="parent-first-name" className="text-sm font-medium text-slate-900">
+    <form
+      className="grid gap-lg"
+      onSubmit={handleSubmit}
+      noValidate
+      aria-describedby={message ? 'preonboarding-feedback' : undefined}
+    >
+      <div className="grid gap-xs">
+        <label htmlFor="parent-first-name" className={text.label}>
           {t('parent.firstName.label')}
         </label>
         <input
@@ -230,24 +236,24 @@ export default function PreOnboardingForm({ canSubmit, initialDraft }: PreOnboar
           value={parentFirstName}
           onChange={(event) => setParentFirstName(event.target.value)}
           placeholder={t('parent.firstName.placeholder')}
-          className="rounded-2xl border border-slate-300 px-4 py-3 text-base text-slate-900 transition-shadow duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500"
+          className={cn(inputs, 'px-md py-sm')}
         />
         {fieldErrors.parentFirstName ? (
-          <p className="text-sm text-rose-600" role="alert">
+          <p className="text-body-sm text-feedback-error" role="alert">
             {fieldErrors.parentFirstName}
           </p>
         ) : null}
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid gap-sm">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+          <h2 className={cn(text.meta, 'text-text-muted uppercase tracking-[0.24em]')}>
             {t('child.section')}
           </h2>
           <button
             type="button"
             onClick={appendChild}
-            className="text-sm font-medium text-emerald-600 hover:text-emerald-500 disabled:text-slate-400"
+            className="text-label font-medium text-feedback-success hover:text-feedback-success disabled:text-text-muted"
             disabled={children.length >= MAX_CHILDREN}
           >
             {t('child.add')}
@@ -257,10 +263,10 @@ export default function PreOnboardingForm({ canSubmit, initialDraft }: PreOnboar
         {children.map((child, index) => {
           const errors = fieldErrors.children[index] ?? {};
           return (
-            <fieldset key={index} className="rounded-2xl border border-slate-200 p-4">
-              <legend className="text-sm font-semibold text-slate-700">{t('child.legend', { index: index + 1 })}</legend>
-              <div className="mt-3 grid gap-4 md:grid-cols-2">
-                <label className="grid gap-2 text-sm font-medium text-slate-900" htmlFor={`child-name-${index}`}>
+            <fieldset key={index} className="rounded-2xl border border-border p-md">
+              <legend className="text-label font-semibold text-text">{t('child.legend', { index: index + 1 })}</legend>
+              <div className="mt-sm grid gap-sm md:grid-cols-2">
+                <label className="grid gap-xs text-label text-text" htmlFor={`child-name-${index}`}>
                   {t('child.name.label')}
                   <input
                     id={`child-name-${index}`}
@@ -268,16 +274,16 @@ export default function PreOnboardingForm({ canSubmit, initialDraft }: PreOnboar
                     value={child.name}
                     onChange={(event) => updateChild(index, { name: event.target.value })}
                     aria-invalid={Boolean(errors.name)}
-                    className="rounded-2xl border border-slate-300 px-4 py-3 text-base text-slate-900 transition-shadow duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500"
+                    className={cn(inputs, 'px-md py-sm')}
                   />
                   {errors.name ? (
-                    <span className="text-sm text-rose-600" role="alert">
+                    <span className="text-body-sm text-feedback-error" role="alert">
                       {errors.name}
                     </span>
                   ) : null}
                 </label>
 
-                <label className="grid gap-2 text-sm font-medium text-slate-900" htmlFor={`child-birthday-${index}`}>
+                <label className="grid gap-xs text-label text-text" htmlFor={`child-birthday-${index}`}>
                   {t('child.birthday.label')}
                   <input
                     id={`child-birthday-${index}`}
@@ -285,16 +291,16 @@ export default function PreOnboardingForm({ canSubmit, initialDraft }: PreOnboar
                     value={child.birthday}
                     onChange={(event) => updateChild(index, { birthday: event.target.value })}
                     aria-invalid={Boolean(errors.birthday)}
-                    className="rounded-2xl border border-slate-300 px-4 py-3 text-base text-slate-900 transition-shadow duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500"
+                    className={cn(inputs, 'px-md py-sm')}
                   />
                   {errors.birthday ? (
-                    <span className="text-sm text-rose-600" role="alert">
+                    <span className="text-body-sm text-feedback-error" role="alert">
                       {errors.birthday}
                     </span>
                   ) : null}
                 </label>
 
-                <label className="grid gap-2 text-sm font-medium text-slate-900" htmlFor={`child-weight-${index}`}>
+                <label className="grid gap-xs text-label text-text" htmlFor={`child-weight-${index}`}>
                   {t('child.weight.label')}
                   <input
                     id={`child-weight-${index}`}
@@ -305,16 +311,16 @@ export default function PreOnboardingForm({ canSubmit, initialDraft }: PreOnboar
                     onChange={(event) => updateChild(index, { weight: event.target.value })}
                     aria-invalid={Boolean(errors.weight)}
                     placeholder={t('child.weight.placeholder')}
-                    className="rounded-2xl border border-slate-300 px-4 py-3 text-base text-slate-900 transition-shadow duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500"
+                    className={cn(inputs, 'px-md py-sm')}
                   />
                   {errors.weight ? (
-                    <span className="text-sm text-rose-600" role="alert">
+                    <span className="text-body-sm text-feedback-error" role="alert">
                       {errors.weight}
                     </span>
                   ) : null}
                 </label>
 
-                <label className="grid gap-2 text-sm font-medium text-slate-900" htmlFor={`child-shoesize-${index}`}>
+                <label className="grid gap-xs text-label text-text" htmlFor={`child-shoesize-${index}`}>
                   {t('child.shoeSize.label')}
                   <input
                     id={`child-shoesize-${index}`}
@@ -322,7 +328,7 @@ export default function PreOnboardingForm({ canSubmit, initialDraft }: PreOnboar
                     value={child.shoeSize}
                     onChange={(event) => updateChild(index, { shoeSize: event.target.value })}
                     placeholder={t('child.shoeSize.placeholder')}
-                    className="rounded-2xl border border-slate-300 px-4 py-3 text-base text-slate-900 transition-shadow duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500"
+                    className={cn(inputs, 'px-md py-sm')}
                   />
                 </label>
               </div>
@@ -330,7 +336,7 @@ export default function PreOnboardingForm({ canSubmit, initialDraft }: PreOnboar
                 <button
                   type="button"
                   onClick={() => removeChild(index)}
-                  className="mt-4 text-sm font-medium text-rose-600 hover:text-rose-500"
+                  className="mt-sm text-label font-medium text-feedback-error hover:text-feedback-error"
                 >
                   {t('child.remove', { index: index + 1 })}
                 </button>
@@ -340,21 +346,25 @@ export default function PreOnboardingForm({ canSubmit, initialDraft }: PreOnboar
         })}
       </div>
 
-      <div className="grid gap-2">
+      <div className="grid gap-xs">
         <button
           type="submit"
           disabled={disableSubmit}
-          className="inline-flex w-fit items-center justify-center rounded-2xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition-colors duration-150 hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-400"
+          className={cn(buttons.primary, 'w-fit rounded-2xl px-lg py-sm')}
         >
           {status === 'saving' ? `${t('save.cta')}…` : t('save.cta')}
         </button>
         {message ? (
-          <p id="preonboarding-feedback" className={`text-sm ${status === 'success' ? 'text-emerald-600' : 'text-rose-600'}`} role="status">
+          <p
+            id="preonboarding-feedback"
+            className={`text-body-sm ${status === 'success' ? 'text-feedback-success' : 'text-feedback-error'}`}
+            role="status"
+          >
             {message}
           </p>
         ) : null}
         {!canSubmit ? (
-          <p className="text-sm text-slate-500" role="alert">
+          <p className="text-body-sm text-text-muted" role="alert">
             {t('errors.session')}
           </p>
         ) : null}

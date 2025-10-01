@@ -17,34 +17,34 @@ export default async function WaitlistPreOnboardingPage() {
   const preOnboarded = draft ? true : canSubmit ? await hasPreOnboarded(sessionId!) : false;
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-6 py-12 text-slate-800">
-      <header className="max-w-2xl space-y-3">
-        <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium uppercase tracking-wide text-emerald-700">
+    <main className="mx-auto flex w-full max-w-4xl flex-col gap-lg px-md py-xl text-text">
+      <header className="max-w-2xl space-y-sm">
+        <span className="inline-flex items-center gap-xs rounded-full border border-feedback-success-border bg-feedback-success-surface px-sm py-4 text-meta font-medium uppercase tracking-[0.24em] text-feedback-success">
           {t('badge')}
         </span>
-        <h1 className="text-3xl font-semibold tracking-tight text-slate-900">{t('title')}</h1>
-        <p className="text-base text-slate-600">{t('subtitle')}</p>
+        <h1 className="text-display-lg text-text">{t('title')}</h1>
+        <p className="text-body text-text-muted">{t('subtitle')}</p>
       </header>
 
-      <div className="grid gap-6 rounded-3xl border border-slate-200 bg-white px-6 py-8 shadow-lg">
+      <div className="grid gap-md rounded-2xl border border-border bg-bg-card px-md py-lg shadow-card">
         {preOnboarded ? (
-          <div className="space-y-4" role="status">
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          <div className="space-y-sm" role="status">
+            <div className="rounded-2xl border border-feedback-success-border bg-feedback-success-surface px-sm py-sm text-body-sm text-feedback-success">
               {t('status.completed')}
             </div>
-            <p className="text-sm text-slate-600">{t('status.editHint')}</p>
+            <p className="text-body-sm text-text-muted">{t('status.editHint')}</p>
             <PreOnboardingForm canSubmit={canSubmit} initialDraft={draft || undefined} />
           </div>
         ) : canSubmit ? (
           <PreOnboardingForm canSubmit={canSubmit} initialDraft={draft || undefined} />
         ) : (
-          <div className="space-y-4" role="alert">
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+          <div className="space-y-sm" role="alert">
+            <div className="rounded-2xl border border-feedback-warning-border bg-feedback-warning-surface px-sm py-sm text-body-sm text-feedback-warning">
               {t('errors.session')}
             </div>
             <Link
               href="/waitlist"
-              className="inline-flex w-fit items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition-colors duration-150 hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500"
+              className="inline-flex w-fit items-center justify-center rounded-2xl bg-brand-primary px-lg py-sm text-label text-brand-onPrimary transition-opacity duration-base hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
             >
               {t('actions.returnToWaitlist')}
             </Link>
@@ -52,17 +52,17 @@ export default async function WaitlistPreOnboardingPage() {
         )}
       </div>
 
-      <section className="rounded-3xl border border-dashed border-slate-200 bg-slate-50 px-6 py-6 text-sm text-slate-600">
-        <h2 className="text-base font-semibold text-slate-900">{t('incentive.title')}</h2>
-        <p className="mt-2 text-sm text-slate-600">{t('incentive.body')}</p>
-        <p className="mt-4 text-xs uppercase tracking-wide text-slate-500">{t('privacy.label')}</p>
-        <p className="text-sm text-slate-500">{t('privacy.body')}</p>
+      <section className="rounded-2xl border border-dashed border-border bg-bg px-md py-md text-body text-text-muted">
+        <h2 className="text-h3 text-text">{t('incentive.title')}</h2>
+        <p className="mt-xs text-body text-text-muted">{t('incentive.body')}</p>
+        <p className={cn('mt-sm text-meta text-text-muted uppercase tracking-[0.24em]')}>{t('privacy.label')}</p>
+        <p className="text-body text-text-muted">{t('privacy.body')}</p>
       </section>
 
       <div>
         <Link
           href="/waitlist/success"
-          className="inline-flex w-fit items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition-colors duration-150 hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500"
+          className="inline-flex w-fit items-center justify-center rounded-2xl bg-brand-primary px-lg py-sm text-label text-brand-onPrimary transition-opacity duration-base hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
         >
           {tWaitlist('success.return')}
         </Link>
