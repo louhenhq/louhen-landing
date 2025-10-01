@@ -42,6 +42,7 @@ jobs:
       - name: Install dependencies
         env:
           NODE_ENV: development
+          NPM_CONFIG_PRODUCTION: 'false'
         run: npm ci
 
       - name: Build design tokens
@@ -124,6 +125,7 @@ jobs:
       - name: Install dependencies
         env:
           NODE_ENV: development
+          NPM_CONFIG_PRODUCTION: 'false'
         run: npm ci
 
       - name: Build
@@ -236,6 +238,7 @@ jobs:
       - name: Install dependencies
         env:
           NODE_ENV: development
+          NPM_CONFIG_PRODUCTION: 'false'
         run: npm ci
 
       - name: Build
