@@ -2,27 +2,39 @@ import { Buffer } from 'node:buffer';
 import { defineConfig, devices } from '@playwright/test';
 import type { PlaywrightTestConfig } from '@playwright/test';
 
-const baseURL = process.env.BASE_URL ?? 'http://127.0.0.1:4311';
+const isSandbox = process.env.SANDBOX_VALIDATION === '1';
+const sandboxBaseURL = process.env.PREVIEW_BASE_URL;
+const defaultBaseURL = process.env.BASE_URL ?? 'http://localhost:4311';
+const baseURL = isSandbox ? sandboxBaseURL : defaultBaseURL;
 const shouldSkipWebServer = process.env.PLAYWRIGHT_SKIP === '1';
 
 const statusUser = process.env.STATUS_USER ?? process.env.CI_STATUS_USER ?? 'status-ops';
 const statusPass = process.env.STATUS_PASS ?? process.env.CI_STATUS_PASS ?? 'status-secret';
 
+if (isSandbox && (!sandboxBaseURL || sandboxBaseURL.trim().length === 0)) {
+  throw new Error('SANDBOX_VALIDATION=1 requires PREVIEW_BASE_URL to be set.');
+}
+
+const resolvedBaseURL = baseURL ?? defaultBaseURL;
+
 const testEnv = {
-  BASE_URL: baseURL,
-  APP_BASE_URL: baseURL,
+  BASE_URL: resolvedBaseURL,
+  APP_BASE_URL: resolvedBaseURL,
   TEST_MODE: '1',
   TEST_E2E_SHORTCIRCUIT: 'true',
   TEST_E2E_BYPASS_TOKEN: 'e2e-mocked-token',
   NEXT_PUBLIC_ENV: process.env.NEXT_PUBLIC_ENV ?? 'ci',
-  NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? baseURL,
+  NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? resolvedBaseURL,
   NEXT_PUBLIC_HCAPTCHA_SITE_KEY: process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY ?? 'test_site_key',
   NEXT_PUBLIC_WAITLIST_URGENCY: process.env.NEXT_PUBLIC_WAITLIST_URGENCY ?? 'true',
-  NEXT_PUBLIC_ANALYTICS_DISABLED: process.env.NEXT_PUBLIC_ANALYTICS_DISABLED ?? '0',
-  NEXT_PUBLIC_ANALYTICS_DEBUG: process.env.NEXT_PUBLIC_ANALYTICS_DEBUG ?? '1',
+  NEXT_PUBLIC_ANALYTICS_DISABLED: process.env.NEXT_PUBLIC_ANALYTICS_DISABLED ?? '1',
+  NEXT_PUBLIC_ANALYTICS_DEBUG: process.env.NEXT_PUBLIC_ANALYTICS_DEBUG ?? '0',
   NEXT_PUBLIC_COMMIT_SHA: process.env.NEXT_PUBLIC_COMMIT_SHA ?? 'playwright-ci',
   NEXT_PUBLIC_LOCALES: process.env.NEXT_PUBLIC_LOCALES ?? 'en,de',
   NEXT_PUBLIC_DEFAULT_LOCALE: process.env.NEXT_PUBLIC_DEFAULT_LOCALE ?? 'en',
+  DEFAULT_LOCALE: process.env.DEFAULT_LOCALE ?? 'en',
+  NEXT_PUBLIC_METHOD_STICKY_CTA: process.env.NEXT_PUBLIC_METHOD_STICKY_CTA ?? 'true',
+  NEXT_PUBLIC_METHOD_EXIT_NUDGE: process.env.NEXT_PUBLIC_METHOD_EXIT_NUDGE ?? 'true',
   HCAPTCHA_SECRET: process.env.HCAPTCHA_SECRET ?? 'test_secret',
   WAITLIST_CONFIRM_TTL_DAYS: process.env.WAITLIST_CONFIRM_TTL_DAYS ?? '7',
   FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID ?? 'ci-firebase',
@@ -32,6 +44,7 @@ const testEnv = {
   RESEND_FROM: process.env.RESEND_FROM ?? 'no-reply@ci.louhen.app',
   RESEND_REPLY_TO: process.env.RESEND_REPLY_TO ?? 'hello@ci.louhen.app',
   NODE_ENV: 'production',
+  NEXT_TELEMETRY_DISABLED: process.env.NEXT_TELEMETRY_DISABLED ?? '1',
   SUPPRESSION_SALT: process.env.SUPPRESSION_SALT ?? 'test-salt',
   EMAIL_TRANSPORT: process.env.EMAIL_TRANSPORT ?? 'noop',
   STATUS_USER: statusUser,
@@ -54,7 +67,7 @@ const config: PlaywrightTestConfig = {
     ['json'],
   ],
   use: {
-    baseURL,
+    baseURL: resolvedBaseURL,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -86,19 +99,22 @@ if (shouldSkipWebServer) {
       use: { ...devices['Desktop Chrome'] },
     },
   ];
-  config.webServer = {
-    command: 'npm run start:test-server',
-    url: baseURL,
-    reuseExistingServer: !process.env.CI,
-    timeout: 180_000,
-    env: {
-      ...testEnv,
-      BASE_URL: baseURL,
-      APP_BASE_URL: baseURL,
-      NEXT_PUBLIC_SITE_URL: baseURL,
-      NODE_ENV: 'production',
-    },
-  };
+
+  if (!isSandbox) {
+    config.webServer = {
+      command: 'npm run start:test',
+      url: resolvedBaseURL,
+      reuseExistingServer: true,
+      timeout: 180_000,
+      env: {
+        ...testEnv,
+        BASE_URL: resolvedBaseURL,
+        APP_BASE_URL: resolvedBaseURL,
+        NEXT_PUBLIC_SITE_URL: resolvedBaseURL,
+        NODE_ENV: 'production',
+      },
+    };
+  }
 }
 
 export default defineConfig(config);

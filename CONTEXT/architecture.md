@@ -21,6 +21,11 @@ High-level map of routes, data flow, environment setup, security, observability,
 - (Optional) `app/api/resend-confirm/route.ts`  
   POST endpoint to re-send confirmation email if token expired or lost (guarded by rate limit).
 
+### Method Page — Personalisation & Flags
+- Personalised copy derives from session user context; prefer SSR-safe read of child profiles (id, firstName) from the existing auth/session provider. Do not block render; if missing, fall back to generic strings.
+- Feature flags: `method.stickyCta`, `method.exitNudge`. Default: enabled on staging, disabled on production until QA sign-off.
+- Performance budget: do not add new client libraries beyond the already-approved Framer Motion; gate animations behind the reduced-motion media query.
+
 ---
 
 ## 2) Data Flow — Waitlist

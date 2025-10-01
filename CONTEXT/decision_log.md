@@ -33,3 +33,25 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
   Added `/CONTEXT` bundle with agents.md, project_overview.md, decision_log.md, etc. Codex workflow formalized.  
 
 ---
+
+## 2025-10-01 — Method Page Scope & Rules (LOCKED)
+
+- Route: /[locale]/method/
+- Purpose: Trust + education + conversion (waitlist).
+- Content blocks: Hero, Trust Strip, Pillars (Scan/Engine/Guarantee), “See the science” disclosure (collapsed by default), How-it-works timeline (5 steps), Testimonial (1), Founder note, FAQ teaser (≥3 links), Final CTA.
+- Personalisation: If user logged-in with ≥1 child profile → inject first child’s first name into hero subcopy and 1x timeline line. Fallback to generic if none.
+- Mobile CTA: Sticky CTA appears after 25% scroll; respects safe-area and reduced-motion.
+- Nudge: If user reaches FAQ without any prior CTA click → inline “exit/scroll” nudge (dismissible). Feature-flagged.
+- Icons/visuals: Use illustrations (no stock photos); child-friendly, warm style.
+- Accessibility: WCAG 2.2 AA; include skip-to-CTA link; timeline announces “Step X of 5”.
+- Analytics events (names LOCKED):
+  - method_hero_waitlist_click
+  - method_faq_teaser_waitlist_click
+  - method_sticky_waitlist_click
+  - method_exit_nudge_shown
+- Quality bars: Lighthouse SEO ≥95, A11y ≥90, Perf ≥90.
+
+---
+
+- **2025-10-01**  
+  Method page v1 finalized with localized copy, analytics parity, Playwright coverage, and Lighthouse gates enforced.

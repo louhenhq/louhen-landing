@@ -5,13 +5,23 @@ if (process.env.SKIP_LHCI === '1') {
   process.exit(0);
 }
 
-const defaultTarget = 'http://127.0.0.1:4311/waitlist';
+const isSandbox = process.env.SANDBOX_VALIDATION === '1';
+const previewBase = process.env.PREVIEW_BASE_URL;
+const defaultBase = process.env.BASE_URL || 'http://localhost:4311';
+const defaultLocale = process.env.DEFAULT_LOCALE || 'en';
+
+if (isSandbox && (!previewBase || previewBase.trim().length === 0)) {
+  console.error('SANDBOX_VALIDATION=1 requires PREVIEW_BASE_URL to be set.');
+  process.exit(1);
+}
+
+const targetBase = (isSandbox ? previewBase : defaultBase).replace(/\/$/, '');
+const defaultTarget = `${targetBase}/${defaultLocale}/method/`;
 const overrideUrl = process.env.LHCI_URL;
 
-const args = ['npx', 'lhci', 'autorun', '--config=.lighthouserc.json'];
+const args = ['npx', 'lhci', 'autorun', '--config=.lighthouserc.cjs'];
 
 if (overrideUrl && overrideUrl.length > 0) {
-  args.push(`--collect.url=${overrideUrl}`);
   console.log(`Running Lighthouse for ${overrideUrl} (override)`);
 } else {
   console.log(`Running Lighthouse using config default ${defaultTarget}`);

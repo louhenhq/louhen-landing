@@ -365,6 +365,9 @@
     }
   },
   "method": {
+    "a11y": {
+      "skipToCta": "Skip to Join Waitlist"
+    },
     "seo": {
       "title": "Louhen Method — Fit intelligence for growing feet",
       "description": "Discover how Louhen blends kid-safe scanning, fit science, and privacy-first data to recommend shoes families trust."
@@ -372,7 +375,11 @@
     "hero": {
       "eyebrow": "The Louhen Method",
       "title": "Fit intelligence that keeps up with growing feet.",
-      "subtitle": "We pair quick scans with podiatrist-reviewed data so every recommendation feels personal, safe, and ready for play."
+      "subtitle_generic": "We pair quick scans with podiatrist-reviewed data so every recommendation feels personal, safe, and ready for play.",
+      "subtitle_personalized": "We pair quick scans with podiatrist-reviewed data so every recommendation feels personal to {name}.",
+      "cta": "Join the waitlist",
+      "trustLine": "Trusted by podiatrists and loved by families.",
+      "imageAlt": "Illustration of a parent guiding a child through a Louhen foot scan"
     },
     "pillars": {
       "title": "What powers every Louhen recommendation",
@@ -382,26 +389,40 @@
           "body": "Capture a 3D foot profile with any phone in under a minute. No raw images ever leave your device."
         },
         {
-          "title": "Verified fit science",
-          "body": "LouhenFit balances length, width, and instep data against real-world footwear benchmarks."
+          "title": "LouhenFit engine",
+          "body": "Measurements translate into the inside of real shoes so length, width, and wiggle room align before you order."
         },
         {
           "title": "Adaptive personalization",
           "body": "Profiles learn from wear feedback, surfacing styles that match growth patterns and preferences."
         },
         {
-          "title": "Trust built-in",
-          "body": "Privacy-first defaults, transparent size notes, and return-ready guidance keep families in control."
+          "title": "LouhenFit guarantee",
+          "body": "If the first pair doesn’t feel right, LouhenFit covers the return and tunes the next recommendation with you.",
+          "badgeLabel": "Covered by LouhenFit",
+          "badgeTooltip": "Free returns and a guided re-check whenever the fit feels off."
         }
-      ]
+      ],
+      "engine": {
+        "scienceDisclosure": {
+          "title": "See the science",
+          "body": "Every scan becomes a map of interior shoe space, matching length, width, and instep room before the box ships. Wear check-ins from families feed the engine, so each suggestion gets smarter.",
+          "privacyNote": "We only sync scans after you say so. <privacyLink>Read how we protect families in our privacy policy</privacyLink>."
+        }
+      }
+    },
+    "scienceDisclosure": {
+      "cta": "See the science"
     },
     "how": {
       "title": "How it works",
+      "defaultChildName": "your child",
+      "xpTeaser": "Earn XP for your first scan and unlock fit tips sooner.",
       "steps": [
-        {
-          "title": "Start with a scan or size",
-          "body": "Create a child profile with measurements or their current best-fit pair."
-        },
+    {
+      "title": "Start with a scan or size",
+      "body": "Create a child profile with measurements or customise it for {name}."
+    },
         {
           "title": "Louhen builds the fit profile",
           "body": "We analyze growth history, support needs, and activity goals."
@@ -413,6 +434,10 @@
         {
           "title": "You review, they explore",
           "body": "Order with clarity and simple wear checks to confirm comfort at home."
+        },
+        {
+          "title": "Keep the journey going",
+          "body": "Join the waitlist to unlock invites, tips, and surprise drops."
         }
       ]
     },
@@ -423,9 +448,28 @@
       "quote": "“We never guess sizes anymore. Louhen explains why a shoe fits so I can say yes with confidence.”",
       "attribution": "Maya, mom of two explorers"
     },
+    "testimonial": {
+      "quote": "“Louhen shows the data so I don’t second-guess the size anymore.”",
+      "attribution": "Jon, dad of a fearless runner"
+    },
+    "founder": {
+      "title": "From our family to yours",
+      "body": "Louhen began when our twins needed their first shoes. We wanted every parent to feel confident before hitting checkout."
+    },
+    "faqTeaser": {
+      "title": "Have questions?",
+      "subtitle": "We collected the most common topics from families like yours.",
+      "linkOnboarding": "How does onboarding work?",
+      "linkGuarantee": "What is the LouhenFit guarantee?",
+      "linkPrivacy": "How do you protect data?",
+      "cta": "Explore the FAQ",
+      "dismiss": "Dismiss",
+      "dismissAria": "Dismiss exit reminder"
+    },
     "cta": {
       "title": "Be first to try Louhen for your family.",
-      "button": "Join the waitlist"
+      "button": "Join the waitlist",
+      "final": "Join the Waitlist"
     }
   }
 }

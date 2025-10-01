@@ -19,15 +19,15 @@ function cleanup {
 trap cleanup EXIT
 
 echo "🚀 Building application..."
-npm run build
+npm run build:test
 
-echo "🟢 Starting test server on 127.0.0.1:4311"
-npm run start:test-server >"$SERVER_LOG" 2>&1 &
+echo "🟢 Starting test server on localhost:4311"
+npm run start:test >"$SERVER_LOG" 2>&1 &
 SERVER_PID=$!
 echo "    PID: $SERVER_PID (logs: $SERVER_LOG)"
 
 echo "⏳ Waiting for readiness..."
-npx --yes wait-on http://127.0.0.1:4311/waitlist
+npx --yes wait-on http://localhost:4311/waitlist
 
 echo "✅ Server ready — running unit tests"
 npm run test:unit

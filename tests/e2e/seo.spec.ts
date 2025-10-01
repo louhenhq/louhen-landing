@@ -65,8 +65,9 @@ test.describe('SEO metadata', () => {
     expect(jsonLdContent.some((content) => content.includes('"@type":"WebSite"'))).toBeTruthy();
   });
 
-  test('method page has canonical URL and breadcrumb JSON-LD', async ({ page }) => {
+  test('method page has canonical URL and structured data', async ({ page }) => {
     await page.goto('/method');
+    await expect(page).toHaveURL(/\/en\/method\/$/);
 
     const metaDescriptions = await page
       .locator('meta[name="description"]')
@@ -76,7 +77,7 @@ test.describe('SEO metadata', () => {
     const canonical = page.locator('link[rel="canonical"]');
     const canonicalHref = await canonical.getAttribute('href');
     const canonicalParts = getCanonicalParts(canonicalHref);
-    expect(canonicalParts.path).toBe('/method');
+    expect(canonicalParts.path).toBe('/en/method');
     expect(allowedHosts).toContain(canonicalParts.host);
 
     const jsonLdContent = await page
@@ -84,5 +85,14 @@ test.describe('SEO metadata', () => {
       .evaluateAll((nodes) => nodes.map((node) => node.textContent || ''));
 
     expect(jsonLdContent.some((content) => content.includes('"@type":"BreadcrumbList"'))).toBeTruthy();
+    expect(jsonLdContent.some((content) => content.includes('"@type":"TechArticle"'))).toBeTruthy();
+  });
+
+  test('legacy method path preserves query params after redirect', async ({ page }) => {
+    await page.goto('/method?utm_source=test&utm_medium=playwright&foo=bar');
+    await expect(page).toHaveURL(/\/en\/method\/?\?(.+&)?utm_source=test(&|$)/);
+    const currentUrl = new URL(page.url());
+    expect(currentUrl.searchParams.get('foo')).toBe('bar');
+    expect(currentUrl.searchParams.get('utm_medium')).toBe('playwright');
   });
 });

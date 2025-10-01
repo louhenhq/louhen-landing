@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { NextResponse } from 'next/server';
-import { __test as waitlistTestUtils, markExpiredByTokenHash, upsertPending } from '@/lib/firestore/waitlist';
+import { markExpiredByTokenHash, upsertPending } from '@/lib/firestore/waitlist';
 import { createTokenLookupHash } from '@/lib/security/tokens';
 
 export async function POST(request: Request) {

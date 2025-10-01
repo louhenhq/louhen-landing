@@ -3,6 +3,22 @@ export type TestimonialIndex = 0 | 1 | 2;
 
 type NoProps = Record<never, never>;
 
+export type MethodEventName =
+  | 'method_hero_waitlist_click'
+  | 'method_faq_teaser_waitlist_click'
+  | 'method_sticky_waitlist_click'
+  | 'method_exit_nudge_shown';
+
+export type MethodEventPosition = 'hero' | 'faq_teaser' | 'sticky' | 'nudge';
+
+export type MethodAnalyticsPayload<P extends MethodEventPosition = MethodEventPosition> = {
+  locale: string;
+  route: string;
+  position: P;
+  variant_personalized: boolean;
+  timestamp: string;
+};
+
 export type AnalyticsEventName =
   | 'page_view'
   | 'cta_click'
@@ -35,7 +51,8 @@ export type AnalyticsEventName =
   | 'trust_logo_click'
   | 'trust_podiatrist_learn_more'
   | 'testimonial_view'
-  | 'privacy_ribbon_click';
+  | 'privacy_ribbon_click'
+  | MethodEventName;
 
 export interface AnalyticsEventPropsMap {
   page_view: { path?: string; page?: string; variant?: string; ref?: string | null };
@@ -70,6 +87,10 @@ export interface AnalyticsEventPropsMap {
   trust_podiatrist_learn_more: NoProps;
   testimonial_view: { ix: TestimonialIndex };
   privacy_ribbon_click: NoProps;
+  method_hero_waitlist_click: MethodAnalyticsPayload<'hero'>;
+  method_faq_teaser_waitlist_click: MethodAnalyticsPayload<'faq_teaser'>;
+  method_sticky_waitlist_click: MethodAnalyticsPayload<'sticky'>;
+  method_exit_nudge_shown: MethodAnalyticsPayload<'nudge'>;
 }
 
 export type AnalyticsEventPayload<E extends AnalyticsEventName = AnalyticsEventName> = {

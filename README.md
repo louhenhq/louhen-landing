@@ -105,10 +105,24 @@ Prefer a one-and-done run? Use the bundled validator:
 npm run validate:local
 ```
 
-It builds the production bundle, boots `start:test-server` on `127.0.0.1:4311` with
+It builds the production bundle, boots `start:test` on `localhost:4311` with
 `TEST_MODE=1`, waits for `/waitlist`, runs unit + Playwright + axe + Lighthouse suites, then tears
 the server down even if something fails. If the server cannot bind (port already in use) or the
 readiness check times out, stop any existing Next.js process and retry.
+
+### Sandbox validation (staging)
+
+Need to validate from a sandbox or remote environment where ports are locked down? Target staging instead:
+
+```bash
+npm run validate:sandbox
+```
+
+This command sets `SANDBOX_VALIDATION=1` and `PREVIEW_BASE_URL=https://staging.louhen.app`, disables analytics, and runs lint, i18n parity, Playwright (smoke + accessibility), and Lighthouse directly against the preview deployment. No local Next.js server is started.
+
+Use `validate:local` during normal development; reserve `validate:sandbox` for Codex or other non-loopback environments.
+
+Need to point at a different preview? Override the default with `PREVIEW_BASE_URL=https://my-preview.example`.
 
 ### CI on demand
 

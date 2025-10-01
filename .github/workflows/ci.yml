@@ -88,16 +88,21 @@ jobs:
       CI: true
       NODE_ENV: production
       TEST_MODE: '1'
-      APP_BASE_URL: http://127.0.0.1:4311
-      NEXT_PUBLIC_SITE_URL: http://127.0.0.1:4311
+      APP_BASE_URL: http://localhost:4311
+      NEXT_PUBLIC_SITE_URL: http://localhost:4311
       NEXT_PUBLIC_ENV: 'ci'
       NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
       NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
       NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
       NEXT_PUBLIC_LOCALES: 'en,de'
       NEXT_PUBLIC_DEFAULT_LOCALE: 'en'
-      NEXT_PUBLIC_ANALYTICS_DISABLED: '0'
-      NEXT_PUBLIC_ANALYTICS_DEBUG: '1'
+      NEXT_PUBLIC_ANALYTICS_DISABLED: '1'
+      NEXT_PUBLIC_ANALYTICS_DEBUG: '0'
+      NEXT_PUBLIC_METHOD_STICKY_CTA: 'true'
+      NEXT_PUBLIC_METHOD_EXIT_NUDGE: 'true'
+      NEXT_TELEMETRY_DISABLED: '1'
+      DEFAULT_LOCALE: 'en'
+      BASE_URL: http://localhost:4311
       HCAPTCHA_SECRET: ci-hcaptcha-secret
       WAITLIST_CONFIRM_TTL_DAYS: '7'
       FIREBASE_PROJECT_ID: ci-firebase
@@ -129,7 +134,7 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npm run build
+        run: npm run build:test
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -142,30 +147,10 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: Start test server
-        run: |
-          npm run start:test-server > server.log 2>&1 &
-          echo $! > server.pid
-
-      - name: Wait for server readiness
-        run: npx --yes wait-on http://127.0.0.1:4311/waitlist --timeout 180000
-
       - name: Run Playwright E2E suite
         run: |
           mkdir -p playwright-report
           npx playwright test --project chromium --reporter=html,json --workers=2 | tee playwright-report/report.json
-
-      - name: Stop test server
-        if: always()
-        run: |
-          if [ -f server.pid ]; then
-            kill "$(cat server.pid)" || true
-            rm server.pid
-          fi
-          if [ -f server.log ]; then
-            echo '--- server.log tail ---'
-            tail -n 200 server.log || true
-          fi
 
       - name: Upload Playwright report
         if: always()
@@ -183,13 +168,6 @@ jobs:
           path: test-results/
           if-no-files-found: ignore
 
-      - name: Upload server log
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-e2e-server-log
-          path: server.log
-          if-no-files-found: ignore
 
 
   accessibility-tests:
@@ -201,16 +179,21 @@ jobs:
       CI: true
       NODE_ENV: production
       TEST_MODE: '1'
-      APP_BASE_URL: http://127.0.0.1:4311
-      NEXT_PUBLIC_SITE_URL: http://127.0.0.1:4311
+      APP_BASE_URL: http://localhost:4311
+      NEXT_PUBLIC_SITE_URL: http://localhost:4311
       NEXT_PUBLIC_ENV: 'ci'
       NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
       NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
       NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
       NEXT_PUBLIC_LOCALES: 'en,de'
       NEXT_PUBLIC_DEFAULT_LOCALE: 'en'
-      NEXT_PUBLIC_ANALYTICS_DISABLED: '0'
-      NEXT_PUBLIC_ANALYTICS_DEBUG: '1'
+      NEXT_PUBLIC_ANALYTICS_DISABLED: '1'
+      NEXT_PUBLIC_ANALYTICS_DEBUG: '0'
+      NEXT_PUBLIC_METHOD_STICKY_CTA: 'true'
+      NEXT_PUBLIC_METHOD_EXIT_NUDGE: 'true'
+      NEXT_TELEMETRY_DISABLED: '1'
+      DEFAULT_LOCALE: 'en'
+      BASE_URL: http://localhost:4311
       HCAPTCHA_SECRET: ci-hcaptcha-secret
       WAITLIST_CONFIRM_TTL_DAYS: '7'
       FIREBASE_PROJECT_ID: ci-firebase
@@ -242,7 +225,7 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npm run build
+        run: npm run build:test
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -255,30 +238,10 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: Start test server
-        run: |
-          npm run start:test-server > server.log 2>&1 &
-          echo $! > server.pid
-
-      - name: Wait for server readiness
-        run: npx --yes wait-on http://127.0.0.1:4311/waitlist --timeout 180000
-
       - name: Run accessibility suite
         run: |
           mkdir -p playwright-report
           npx playwright test --project accessibility --reporter=html,json --workers=2 | tee playwright-report/report.json
-
-      - name: Stop test server
-        if: always()
-        run: |
-          if [ -f server.pid ]; then
-            kill "$(cat server.pid)" || true
-            rm server.pid
-          fi
-          if [ -f server.log ]; then
-            echo '--- server.log tail ---'
-            tail -n 200 server.log || true
-          fi
 
       - name: Upload accessibility report
         if: always()
@@ -296,13 +259,6 @@ jobs:
           path: test-results/
           if-no-files-found: ignore
 
-      - name: Upload server log
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-axe-server-log
-          path: server.log
-          if-no-files-found: ignore
 
 
   lighthouse:

@@ -1,3 +1,7 @@
+// DEPRECATED: This legacy Method page is kept temporarily to support the
+// /method redirect while the localized route migrates. Remove after the
+// 301 redirect and localized implementation are fully deployed.
+
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import { BreadcrumbJsonLd } from '@/components/SeoJsonLd'

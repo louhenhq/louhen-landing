@@ -1,14 +1,35 @@
 import type { MetadataRoute } from 'next';
+import { locales } from '@/next-intl.locales';
+
+const FALLBACK_SITE_URL = 'https://louhen-landing.vercel.app';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://louhen-landing.vercel.app';
-  const pages = ['', '/method', '/privacy', '/terms', '/imprint'];
+  const rawBase = process.env.NEXT_PUBLIC_SITE_URL?.trim() || FALLBACK_SITE_URL;
+  const baseUrl = rawBase.replace(/\/$/, '');
   const now = new Date().toISOString();
 
-  return pages.map((p) => ({
-    url: `${base}${p}`,
+  const localizedPaths = ['', 'method/', 'privacy/', 'terms/', 'imprint/'];
+
+  const entries: MetadataRoute.Sitemap = [];
+
+  entries.push({
+    url: `${baseUrl}/`,
     lastModified: now,
     changeFrequency: 'weekly',
-    priority: p === '' ? 1 : 0.6,
-  }));
+    priority: 1,
+  });
+
+  for (const locale of locales) {
+    for (const path of localizedPaths) {
+      const pathname = path ? `/${locale}/${path}` : `/${locale}/`;
+      entries.push({
+        url: `${baseUrl}${pathname}`,
+        lastModified: now,
+        changeFrequency: path.includes('method') ? 'monthly' : 'weekly',
+        priority: path === '' ? 0.8 : path.includes('method') ? 0.6 : 0.5,
+      });
+    }
+  }
+
+  return entries;
 }

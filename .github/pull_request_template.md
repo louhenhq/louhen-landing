@@ -6,6 +6,15 @@
 ## Summary
 - What changed & why (1–2 lines):
 
+## Method Page Checklist (mark if this PR touches `/[locale]/method/`)
+- [ ] i18n parity: EN/DE keys for `method.*` are complete and updated.
+- [ ] Links resolve: FAQ teaser links, privacy disclosure link, and final CTA anchor (`#join-waitlist`).
+- [ ] Analytics events: hero/FAQ/sticky/nudge emit with the expected payload (`locale`, `route`, `position`, `variant_personalized`, `timestamp`).
+- [ ] Reduced motion respected; `tests/e2e/method-accessibility.spec.ts` passes without a11y violations.
+- [ ] Lighthouse thresholds met on `/{DEFAULT_LOCALE}/method/` (Perf ≥90, SEO ≥95, A11y ≥90, Best Practices ≥90).
+- [ ] `/method` redirect preserves queries and resolves to the localized canonical with trailing slash.
+- [ ] Validated in sandbox mode (`npm run validate:sandbox`) where applicable (optional for Codex runs).
+
 ## Checklist (trust, privacy, governance)
 - [ ] **Consent**: Analytics initialize only after opt-in; no surprise trackers added.  
 - [ ] **CSP Nonce**: No inline scripts without a nonce; JSON-LD keeps nonce parity.  

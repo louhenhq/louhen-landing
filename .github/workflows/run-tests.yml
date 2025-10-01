@@ -21,7 +21,7 @@ on:
         default: false
 
 env:
-  BASE_SERVER_URL: http://127.0.0.1:4311
+  BASE_SERVER_URL: http://localhost:4311
 
 jobs:
   determine:
@@ -98,8 +98,13 @@ jobs:
       NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
       NEXT_PUBLIC_LOCALES: 'en,de'
       NEXT_PUBLIC_DEFAULT_LOCALE: 'en'
-      NEXT_PUBLIC_ANALYTICS_DISABLED: '0'
-      NEXT_PUBLIC_ANALYTICS_DEBUG: '1'
+      NEXT_PUBLIC_ANALYTICS_DISABLED: '1'
+      NEXT_PUBLIC_ANALYTICS_DEBUG: '0'
+      NEXT_PUBLIC_METHOD_STICKY_CTA: 'true'
+      NEXT_PUBLIC_METHOD_EXIT_NUDGE: 'true'
+      NEXT_TELEMETRY_DISABLED: '1'
+      DEFAULT_LOCALE: 'en'
+      BASE_URL: ${{ env.BASE_SERVER_URL }}
       HCAPTCHA_SECRET: ci-hcaptcha-secret
       WAITLIST_CONFIRM_TTL_DAYS: '7'
       FIREBASE_PROJECT_ID: ci-firebase
@@ -129,31 +134,10 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npm run build
-
-      - name: Start test server
-        run: |
-          npm run start:test-server > server.log 2>&1 &
-          echo $! > server.pid
-
-      - name: Wait for server readiness
-        run: npx --yes wait-on "${{ env.BASE_SERVER_URL }}/waitlist" --timeout 180000
+        run: npm run build:test
 
       - name: Run unit tests
         run: npm run test:unit
-
-      - name: Stop test server
-        if: always()
-        run: |
-          if [ -f server.pid ]; then
-            kill "$(cat server.pid)" >/dev/null 2>&1 || true
-            wait "$(cat server.pid)" 2>/dev/null || true
-            rm server.pid
-          fi
-          if [ -f server.log ]; then
-            echo '--- server.log tail ---' >> "$GITHUB_STEP_SUMMARY"
-            tail -n 100 server.log >> "$GITHUB_STEP_SUMMARY" || true
-          fi
 
   e2e:
     needs: determine
@@ -171,8 +155,13 @@ jobs:
       NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
       NEXT_PUBLIC_LOCALES: 'en,de'
       NEXT_PUBLIC_DEFAULT_LOCALE: 'en'
-      NEXT_PUBLIC_ANALYTICS_DISABLED: '0'
-      NEXT_PUBLIC_ANALYTICS_DEBUG: '1'
+      NEXT_PUBLIC_ANALYTICS_DISABLED: '1'
+      NEXT_PUBLIC_ANALYTICS_DEBUG: '0'
+      NEXT_PUBLIC_METHOD_STICKY_CTA: 'true'
+      NEXT_PUBLIC_METHOD_EXIT_NUDGE: 'true'
+      NEXT_TELEMETRY_DISABLED: '1'
+      DEFAULT_LOCALE: 'en'
+      BASE_URL: ${{ env.BASE_SERVER_URL }}
       HCAPTCHA_SECRET: ci-hcaptcha-secret
       WAITLIST_CONFIRM_TTL_DAYS: '7'
       FIREBASE_PROJECT_ID: ci-firebase
@@ -202,7 +191,7 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npm run build
+        run: npm run build:test
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -215,31 +204,10 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: Start test server
-        run: |
-          npm run start:test-server > server.log 2>&1 &
-          echo $! > server.pid
-
-      - name: Wait for server readiness
-        run: npx --yes wait-on "${{ env.BASE_SERVER_URL }}/waitlist" --timeout 180000
-
       - name: Run Playwright suite
         run: |
           mkdir -p playwright-report
           npm run test:e2e
-
-      - name: Stop test server
-        if: always()
-        run: |
-          if [ -f server.pid ]; then
-            kill "$(cat server.pid)" >/dev/null 2>&1 || true
-            wait "$(cat server.pid)" 2>/dev/null || true
-            rm server.pid
-          fi
-          if [ -f server.log ]; then
-            echo '--- server.log tail ---' >> "$GITHUB_STEP_SUMMARY"
-            tail -n 100 server.log >> "$GITHUB_STEP_SUMMARY" || true
-          fi
 
       - name: Upload Playwright report
         if: always()
@@ -257,14 +225,6 @@ jobs:
           path: test-results/
           if-no-files-found: ignore
 
-      - name: Upload server log
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-e2e-server-log
-          path: server.log
-          if-no-files-found: ignore
-
       - name: Job summary
         if: always()
         run: |
@@ -272,7 +232,6 @@ jobs:
             echo "## Playwright artifacts"
             echo "- \\`playwright-e2e-report\\`: HTML report"
             echo "- \\`playwright-e2e-results\\`: raw traces/json"
-            echo "- \\`playwright-e2e-server-log\\`: server output"
           } >> "$GITHUB_STEP_SUMMARY"
 
   axe:
@@ -291,8 +250,13 @@ jobs:
       NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
       NEXT_PUBLIC_LOCALES: 'en,de'
       NEXT_PUBLIC_DEFAULT_LOCALE: 'en'
-      NEXT_PUBLIC_ANALYTICS_DISABLED: '0'
-      NEXT_PUBLIC_ANALYTICS_DEBUG: '1'
+      NEXT_PUBLIC_ANALYTICS_DISABLED: '1'
+      NEXT_PUBLIC_ANALYTICS_DEBUG: '0'
+      NEXT_PUBLIC_METHOD_STICKY_CTA: 'true'
+      NEXT_PUBLIC_METHOD_EXIT_NUDGE: 'true'
+      NEXT_TELEMETRY_DISABLED: '1'
+      DEFAULT_LOCALE: 'en'
+      BASE_URL: ${{ env.BASE_SERVER_URL }}
       HCAPTCHA_SECRET: ci-hcaptcha-secret
       WAITLIST_CONFIRM_TTL_DAYS: '7'
       FIREBASE_PROJECT_ID: ci-firebase
@@ -335,31 +299,10 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: Start test server
-        run: |
-          npm run start:test-server > server.log 2>&1 &
-          echo $! > server.pid
-
-      - name: Wait for server readiness
-        run: npx --yes wait-on "${{ env.BASE_SERVER_URL }}/waitlist" --timeout 180000
-
       - name: Run accessibility suite
         run: |
           mkdir -p playwright-report
           npm run test:axe
-
-      - name: Stop test server
-        if: always()
-        run: |
-          if [ -f server.pid ]; then
-            kill "$(cat server.pid)" >/dev/null 2>&1 || true
-            wait "$(cat server.pid)" 2>/dev/null || true
-            rm server.pid
-          fi
-          if [ -f server.log ]; then
-            echo '--- server.log tail ---' >> "$GITHUB_STEP_SUMMARY"
-            tail -n 100 server.log >> "$GITHUB_STEP_SUMMARY" || true
-          fi
 
       - name: Upload accessibility report
         if: always()
@@ -377,14 +320,6 @@ jobs:
           path: test-results/
           if-no-files-found: ignore
 
-      - name: Upload server log
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-axe-server-log
-          path: server.log
-          if-no-files-found: ignore
-
       - name: Job summary
         if: always()
         run: |
@@ -392,7 +327,6 @@ jobs:
             echo "## Accessibility artifacts"
             echo "- \\`playwright-axe-report\\`"
             echo "- \\`playwright-axe-results\\`"
-            echo "- \\`playwright-axe-server-log\\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
   lighthouse:
