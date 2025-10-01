@@ -40,6 +40,8 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
+        env:
+          NODE_ENV: development
         run: npm ci
 
       - name: Build design tokens
@@ -120,6 +122,8 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
+        env:
+          NODE_ENV: development
         run: npm ci
 
       - name: Build
@@ -230,6 +234,8 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
+        env:
+          NODE_ENV: development
         run: npm ci
 
       - name: Build
