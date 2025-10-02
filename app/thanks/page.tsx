@@ -1,7 +1,7 @@
 "use client";
 import Link from 'next/link';
 import * as React from 'react';
-import { buttons, cn, inputs, text } from '@/app/(site)/_lib/ui';
+import { buttons, cn, inputs } from '@/app/(site)/_lib/ui';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';

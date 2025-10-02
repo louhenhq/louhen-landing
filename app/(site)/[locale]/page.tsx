@@ -4,6 +4,16 @@ import ReferralAttribution from '@/app/(site)/components/ReferralAttribution'
 import { SITE_NAME } from '@/constants/site'
 import { loadMessages } from '@/lib/intl/loadMessages'
 import type { SupportedLocale } from '@/next-intl.locales'
+import {
+  SUPPORTED_LOCALES,
+  DEFAULT_LOCALE,
+} from '@/lib/i18n/locales'
+import {
+  buildAlternateLanguageMap,
+  buildCanonicalPath,
+  buildCanonicalUrl,
+  resolveSiteBaseUrl,
+} from '@/lib/i18n/metadata'
 
 type PageProps = {
   params: Promise<{ locale: SupportedLocale }>;
@@ -16,19 +26,20 @@ function firstParam(value: string | string[] | undefined): string | null {
   return null;
 }
 
-const FALLBACK_SITE_URL = 'https://louhen-landing.vercel.app'
-
 export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const [{ locale }, resolvedSearchParams] = await Promise.all([params, searchParams])
-  const messages = (await loadMessages(locale)) as Record<string, unknown>
+  const supported = SUPPORTED_LOCALES.some((entry) => entry.value === locale) ? locale : DEFAULT_LOCALE.value
+  const messages = (await loadMessages(supported)) as Record<string, unknown>
   const heroMessages = (messages.hero ?? {}) as Record<string, unknown>
   const heroSubtitle = typeof heroMessages.sub === 'string'
     ? heroMessages.sub
     : 'Louhen pairs podiatrist-backed comfort with adaptive sizing to keep every step confident.'
   const defaultTitle = `${SITE_NAME} — Personal style. Effortless fit.`
   const defaultDescription = heroSubtitle
-  const baseUrl = (process.env.APP_BASE_URL?.trim() || process.env.NEXT_PUBLIC_SITE_URL?.trim() || FALLBACK_SITE_URL).replace(/\/$/, '')
-  const canonicalPath = `/${locale}`
+  const baseUrl = resolveSiteBaseUrl()
+  const canonicalPath = buildCanonicalPath(supported, '/')
+  const canonicalUrl = buildCanonicalUrl(supported, '/')
+  const languages = buildAlternateLanguageMap('/')
   const ref = firstParam(resolvedSearchParams.ref)
 
   if (!ref) {
@@ -37,11 +48,12 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
       description: defaultDescription,
       alternates: {
         canonical: canonicalPath,
+        languages,
       },
       openGraph: {
         title: defaultTitle,
         description: defaultDescription,
-        url: canonicalPath,
+        url: canonicalUrl,
       },
       twitter: {
         title: defaultTitle,
@@ -55,15 +67,16 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   const invitedDescription = typeof og?.description === 'string'
     ? og.description
     : 'Join through their link to unlock early rewards and smarter sizing for every outfit.'
-  const sharePath = `/${locale}?ref=${encodeURIComponent(ref)}`
+  const sharePath = `${canonicalPath}?ref=${encodeURIComponent(ref)}`
   const fullUrl = `${baseUrl}${sharePath}`
-  const imageUrl = `${baseUrl}/opengraph-image?locale=${locale}&ref=${encodeURIComponent(ref)}`
+  const imageUrl = `${baseUrl}/opengraph-image?locale=${supported}&ref=${encodeURIComponent(ref)}`
 
   return {
     title: invitedTitle,
     description: invitedDescription,
     alternates: {
       canonical: canonicalPath,
+      languages,
     },
     openGraph: {
       title: invitedTitle,
@@ -81,7 +94,8 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
 
 export default async function LocaleLandingPage({ params, searchParams }: PageProps) {
   const [{ locale }, resolvedSearchParams] = await Promise.all([params, searchParams]);
-  const messages = (await loadMessages(locale)) as Record<string, unknown>;
+  const supported = SUPPORTED_LOCALES.some((entry) => entry.value === locale) ? locale : DEFAULT_LOCALE.value;
+  const messages = (await loadMessages(supported)) as Record<string, unknown>;
   const referralToast = ((messages.referral ?? {}) as Record<string, unknown>).appliedToast;
   const toastMessage = typeof referralToast === 'string' ? referralToast : null;
 

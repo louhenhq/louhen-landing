@@ -1,9 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { buttons, cn } from '@/app/(site)/_lib/ui';
+import { cn } from '@/app/(site)/_lib/ui';
+import { Button } from '@/components/ui';
 import { useMethodExperience } from './MethodExperienceProvider';
 
 type StickyCtaProps = {
@@ -45,15 +45,16 @@ export default function StickyCta({ locale }: StickyCtaProps) {
       data-testid="method-sticky-cta"
     >
       <div className="rounded-2xl bg-brand-primary/95 p-4 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-brand-primary/80">
-        <Link
+        <Button
+          as="a"
           href={`/${locale}/waitlist`}
-          className={buttons.primary}
-          prefetch={false}
           aria-label={t('button')}
+          prefetch={false}
           onClick={() => registerCtaInteraction('sticky')}
+          className="w-full"
         >
           {t('button')}
-        </Link>
+        </Button>
       </div>
     </div>
   );

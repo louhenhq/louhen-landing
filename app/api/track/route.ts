@@ -63,17 +63,6 @@ export async function POST(req: NextRequest) {
   }
   const data = raw;
 
-  // Safe log for now
-  console.log('[track]', {
-    name: data.name,
-    path: data.path,
-    id: data.id,
-    ok: data.ok,
-    error: data.error,
-    variant: data.variant,
-    ts: data.ts,
-  });
-
   // ---- Persist to Firestore if service account is configured ----
   try {
     if (process.env.FIREBASE_SERVICE_ACCOUNT) {

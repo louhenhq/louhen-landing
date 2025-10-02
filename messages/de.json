@@ -3,52 +3,117 @@
     "logo": "Louhen",
     "nav": {
       "aria": "Hauptnavigation",
-      "how": "[DE] How it works",
-      "story": "[DE] Founder story",
-      "faq": "[DE] FAQ",
+      "how": "So funktioniert Louhen",
+      "story": "Gründerstory",
+      "faq": "FAQ",
       "legal": {
-        "privacy": "[DE] Privacy",
-        "terms": "[DE] Terms",
-        "imprint": "[DE] Imprint"
+        "privacy": "Datenschutz",
+        "terms": "Nutzungsbedingungen",
+        "imprint": "Impressum"
       }
     },
-    "cta": "[DE] Join waitlist",
+    "cta": "Zur Warteliste",
     "locale": {
-      "label": "[DE] Language",
-      "en": "English",
-      "de": "Deutsch"
+      "label": "Sprache",
+      "announce": "Sprache auf {locale} umgestellt."
+    }
+  },
+  "localeSuggestion": {
+    "title": "Lieber auf {locale} weiterstöbern?",
+    "body": {
+      "cookie": "Du nutzt Louhen normalerweise auf {locale}. Mit einem Tipp bist du wieder dort.",
+      "acceptLanguage": "Dein Browser ist auf {locale} eingestellt. Wechsel dorthin für vertraute Inhalte."
+    },
+    "action": "Zu {locale} wechseln",
+    "dismiss": "Hier bleiben"
+  },
+  "theme": {
+    "label": "Darstellung",
+    "system": "System",
+    "light": "Hell",
+    "dark": "Dunkel",
+    "announce": {
+      "system": "Darstellung folgt der Systemeinstellung.",
+      "light": "Heller Modus aktiviert.",
+      "dark": "Dunkler Modus aktiviert."
+    }
+  },
+  "trustCopy": {
+    "fitTitle": "LouhenFit",
+    "fitGuarantee": "Abgedeckt durch LouhenFit – kostenlose Rücksendungen garantiert.",
+    "fitDetail": "LouhenFit schützt jede Bestellung – kostenlose Rücksendungen, bis alles passt.",
+    "fitCard": "LouhenFit übernimmt die erste Rücksendung kostenlos, damit wir die Passform gemeinsam feinjustieren.",
+    "gdprTitle": "DSGVO & Datenschutz",
+    "gdpr": "Deine Daten sind sicher – DSGVO-konform. Wir verkaufen keine personenbezogenen Daten.",
+    "gdprDetail": "Wir speichern Profile ausschließlich in der EU und du behältst jederzeit die Kontrolle.",
+    "payment": "Deine Zahlung ist geschützt. Abgewickelt von Adyen mit Bankensicherheit.",
+    "coverage": {
+      "coveredNamed": "{name} ist durch LouhenFit abgedeckt – die erste Rücksendung ist kostenlos, bis alles passt.",
+      "covered": "Dieses Profil ist durch LouhenFit abgedeckt – die erste Rücksendung ist kostenlos, bis alles passt.",
+      "notCoveredNamed": "{name} ist noch nicht durch LouhenFit abgedeckt. Wir begleiten euch mit behutsamen Fit-Tipps, bis die Abdeckung erweitert wird.",
+      "notCovered": "Dieses Profil ist noch nicht durch LouhenFit abgedeckt. Wir begleiten euch mit behutsamen Fit-Tipps, bis die Abdeckung erweitert wird."
     }
   },
   "hero": {
-    "h1": "[DE] Personal style. Effortless fit.",
-    "sub": "[DE] Louhen pairs smart sizing with curated pieces so every outfit just works.",
-    "cta": "[DE] Join the waitlist",
-    "secondary": "[DE] See how it works",
-    "trust": "[DE] LouhenFit protects every order — free returns until it fits.",
+    "h1": "Individueller Stil. Mühelose Passform.",
+    "sub": "Louhen verbindet intelligente Größenberatung mit kuratierten Looks – damit jedes Outfit einfach passt.",
+    "cta": "Zur Warteliste",
+    "secondary": "So funktioniert Louhen",
+    "microTrust": "Abgedeckt durch LouhenFit – kostenlose Rücksendungen garantiert.",
+    "trust": "LouhenFit schützt jede Bestellung – kostenlose Rücksendungen, bis alles passt.",
     "badge": {
       "label": "Besonderes Geschenk für Zwillingseltern — nach unten scrollen",
       "aria": "Zum Gutschein für Zwillingseltern scrollen"
+    },
+    "media": {
+      "placeholderLabel": "LouhenFit in Bewegung",
+      "placeholderBody": "Intelligente Passform und kuratierte Looks sorgen gemeinsam für entspannte Schritte."
     }
   },
   "trust": {
     "badges": {
-      "gdpr": "[DE] EU GDPR compliant",
-      "louhenfit": "[DE] Powered by LouhenFit",
-      "parentsFirst": "[DE] Parents-first sizing"
+      "gdpr": "GDPR-konform in der EU",
+      "louhenfit": "Mit LouhenFit abgesichert",
+      "parentsFirst": "Passform zuerst für Eltern"
     },
     "podiatrist": {
-      "badge": "[DE] Podiatrist reviewed",
-      "title": "[DE] Approved by European podiatrists",
-      "body": "[DE] Our sizing guidance is checked with practising podiatrists to support healthy foot development for growing kids."
+      "badge": "Von Podolog:innen geprüft",
+      "title": "Von europäischen Podolog:innen empfohlen",
+      "body": "Unsere Passformempfehlungen werden gemeinsam mit praktizierenden Podolog:innen validiert, damit wachsende Kinderfüße gesund bleiben."
     },
     "louhenfit": {
-      "badge": "[DE] LouhenFit guarantee",
-      "title": "[DE] Fit guaranteed with LouhenFit",
-      "body": "[DE] If the first pair misses, returns are free and we fast-track a better fit using detailed fit feedback."
+      "badge": "LouhenFit-Garantie",
+      "title": "Passgarantie mit LouhenFit",
+      "body": "Wenn das erste Paar nicht passt, ist die Rücksendung kostenlos und wir verfeinern die nächste Empfehlung mit deinem Feedback."
     },
     "bar": {
-      "aria": "Ausgewählte Partnerlogos",
-      "logoAria": "Mehr über Louhen bei {brand}"
+      "heading": "Darum vertrauen Eltern Louhen",
+      "items": {
+        "podiatrist": {
+          "label": "Von Podologen bestätigt",
+          "description": "Passform geprüft von Expert:innen",
+          "aria": "Von Podologen bestätigt – unsere Passform-Empfehlungen werden von praktizierenden Podolog:innen geprüft."
+        },
+        "privacy": {
+          "label": "GDPR-datensicher",
+          "description": "Speicherung nur in der EU",
+          "aria": "GDPR-datensicher – wir speichern Familiendaten ausschließlich in der EU und du behältst die Kontrolle.",
+          "modalTitle": "Datenschutz nach GDPR",
+          "modalBody": "Louhen speichert Profile und Passformdaten ausschließlich auf EU-Servern. Familien können ihre Daten jederzeit exportieren oder löschen, und wir verkaufen oder teilen keine Profile mit Werbetreibenden."
+        },
+        "returns": {
+          "label": "Kostenlose Rücksendung mit LouhenFit",
+          "description": "Abgedeckt bis alles passt",
+          "aria": "Kostenlose Rücksendung mit LouhenFit – das erste Paar ist abgedeckt, bis der Sitz stimmt."
+        },
+        "adyen": {
+          "label": "Zahlungen über Adyen",
+          "description": "Zahlungssicherheit auf Bankniveau",
+          "aria": "Zahlungen über Adyen – der Checkout läuft über die PCI-Level-1-Plattform von Adyen.",
+          "modalTitle": "Gesichert durch Adyen",
+          "modalBody": "Alle Zahlungen laufen über die PCI-Level-1-Plattform von Adyen, dieselbe Infrastruktur wie bei führenden Händlern. Starke Kundenauthentifizierung und Betrugserkennung schützen jede Louhen-Bestellung."
+        }
+      }
     },
     "podiatristCard": {
       "title": "Unterstützt von Podologen",
@@ -81,10 +146,10 @@
     }
   },
   "founder": {
-    "title": "[DE] Why we started Louhen",
-    "body": "[DE] Founder story placeholder text.",
-    "more": "[DE] Read more",
-    "less": "[DE] Show less",
+    "title": "Warum wir Louhen gegründet haben",
+    "body": "Unsere Zwillinge brauchten ihre ersten Schuhe, doch im Fachgeschäft warteten lange Schlangen, hektische Anproben und nur grobe Messpunkte. Wir wollten, dass Eltern schon vor dem Kauf wissen, wie sich ein Schuh anfühlt – ohne Stress und ohne Ratespiel.",
+    "more": "Mehr erfahren",
+    "less": "Weniger anzeigen",
     "headline": "Unsere Geschichte begann mit Zwillingen",
     "p1": "Als unsere Zwillingsjungen, Louis und Henry, ihre ersten Schritte machten, wollten wir die perfekten Schuhe finden. Eine Physiotherapeutin empfahl ein kleines Fachgeschäft – die Besitzer waren freundlich, aber die Erfahrung war stressig: lange Wartezeiten, nur zwei Modelle, gemessen wurden nur Länge und Breite.",
     "p2": "Uns wurde klar, wie viel Rätselraten Eltern beim Schuhkauf haben. Wir dachten: Es muss einen besseren Weg geben – einer, der Passform mühelos macht und die Auswahl inspiriert.",
@@ -101,54 +166,70 @@
     }
   },
   "how": {
-    "eyebrow": "[DE] Wie es funktioniert",
-    "headline": "So funktioniert Louhen",
-    "intro": "Von den ersten Schritten bis zu wachsenden Füßen — so wird die Suche nach dem perfekten Paar ganz leicht.",
-    "stepLabel": "Schritt {step}",
-    "scan": {
-      "title": "Die Füße deines Kindes erfassen",
-      "body": "Geführter Fußscan oder schnelle manuelle Eingabe. Genaues Messen bedeutet gesunde Schritte von Anfang an."
-    },
-    "recommend": {
-      "title": "Intelligentes Passform-Matching",
-      "body": "Unsere KI kombiniert podiatrische Erkenntnisse mit dem Profil deines Kindes, um Schuhe zu empfehlen, die wirklich passen.",
-      "trust": "Unterstützt von Podologen"
-    },
-    "fit": {
-      "title": "Stil trifft Sicherheit",
-      "body": "Entdecke Designs, die dein Kind liebt — immer in der richtigen Größe, immer mit der LouhenFit-Garantie."
-    },
-    "cta": "Warteliste beitreten"
+    "title": "So funktioniert Louhen",
+    "subtitle": "Drei ruhige Schritte vom Scan zu glücklichen Füßen.",
+    "steps": [
+      {
+        "id": "scan",
+        "title": "In Minuten scannen",
+        "body": "Erfasse die Passform mit dem geführten Scan oder wenigen Maßen.",
+        "illustrationLabel": "Illustration: Eltern scannen die Füße eines Kindes",
+        "link": {
+          "label": "So funktioniert das Messen",
+          "href": "method#scan"
+        }
+      },
+      {
+        "id": "match",
+        "title": "Smartes Matching",
+        "body": "LouhenFit gleicht das Profil mit echten Schuhinnenräumen ab und empfiehlt passende Styles.",
+        "illustrationLabel": "Illustration: Kuratierte Empfehlungen auf einem Smartphone",
+        "link": {
+          "label": "Zur Fit-Engine",
+          "href": "method#engine"
+        }
+      },
+      {
+        "id": "happy",
+        "title": "Glückliche Füße",
+        "body": "Neue Paare fühlen sich sofort gut an und Feedback hält jede Empfehlung stimmig.",
+        "illustrationLabel": "Illustration: Kind freut sich über passende Schuhe",
+        "link": {
+          "label": "LouhenFit-Garantie",
+          "href": "method#louhenfit"
+        }
+      }
+    ]
   },
   "layout": {
     "skipToMain": "Zum Hauptinhalt springen"
   },
   "faq": {
-    "title": "[DE] Frequently asked questions",
+    "title": "Häufig gestellte Fragen",
     "items": {
       "who": {
-        "q": "[DE] Who is Louhen for?",
-        "a": "[DE] Families who want shoes that support growing feet without the guesswork."
+        "q": "Für wen ist Louhen?",
+        "a": "Für Familien, die wachsende Füße unterstützen möchten – ohne sich auf Glückstreffer zu verlassen."
       },
       "what": {
-        "q": "[DE] What is LouhenFit?",
-        "a": "[DE] A promise that the first pair fits. If not, we cover returns and send the next best match."
+        "q": "Was ist LouhenFit?",
+        "a": "Eine Passform-Garantie: Passt das erste Paar nicht, übernehmen wir die Rücksendung und schicken die nächste Empfehlung mit deinem Feedback."
       },
       "referrals": {
-        "q": "[DE] How do referrals work?",
-        "a": "[DE] Join the waitlist to receive a personal link — you and a friend earn credit when they confirm."
+        "q": "Wie funktionieren Empfehlungen?",
+        "a": "Trete der Warteliste bei, um deinen persönlichen Link zu erhalten – du und eine Freund:in erhaltet Guthaben, sobald sie bestätigt."
       },
       "brands": {
-        "q": "[DE] Do you support multiple brands?",
-        "a": "[DE] We partner with leading kids’ brands and map each shoe down to internal dimensions."
+        "q": "Unterstützt ihr mehrere Marken?",
+        "a": "Ja. Wir arbeiten mit führenden Kindermarken zusammen und kartieren jedes Modell bis zu den Innenmaßen."
       },
       "data": {
-        "q": "[DE] How do you handle data?",
-        "a": "[DE] We only collect what we need, store IPs hashed unless you consent, and never sell your data."
+        "q": "Wie geht ihr mit Daten um?",
+        "a": "Wir erheben nur, was nötig ist, speichern IPs gehasht – sofern du nicht zustimmst – und verkaufen keine Daten."
       },
       "launch": {
-        "q": "[DE] When will Louhen launch?",
-        "a": "[DE] We’re onboarding families in waves. Join the waitlist to be notified first."
+        "q": "Wann startet Louhen?",
+        "a": "Wir onboarden Familien in Wellen. Trag dich in die Warteliste ein, um zuerst informiert zu werden."
       }
     }
   },
@@ -159,7 +240,7 @@
       "labels": {
         "email": "E-Mail-Adresse",
         "consent": "Ich möchte Wartelisten-Updates von Louhen erhalten und akzeptiere die",
-        "captcha": "Bestätige, dass du kein Roboter bist"
+        "captcha": "Sicherheitsprüfung"
       },
       "placeholders": {
         "email": "du@example.com"
@@ -170,18 +251,40 @@
       "success": {
         "title": "Posteingang prüfen",
         "body": "Wir haben dir gerade eine Bestätigungs-E-Mail geschickt.",
-        "followUp": "Nicht erhalten? Suche nach „Louhen“ im Spam- oder Promotions-Ordner und füge uns zu deinen Kontakten hinzu."
+        "followUp": "Nicht erhalten? Suche nach „Louhen“ im Spam- oder Promotions-Ordner und füge uns zu deinen Kontakten hinzu.",
+        "resend": {
+          "cta": "Weitere Bestätigung anfordern",
+          "hint": "Brauchst du einen neuen Link? Löse die Captcha-Aufgabe erneut und sende das Formular noch einmal."
+        }
       },
       "warnings": {
         "captchaMissing": "hCaptcha ist nicht konfiguriert. Setze NEXT_PUBLIC_HCAPTCHA_SITE_KEY, um Bestätigungen zu aktivieren."
       },
       "errors": {
+        "summaryTitle": "Bitte korrigiere die markierten Angaben",
+        "emailRequired": "Bitte gib deine E-Mail-Adresse ein.",
+        "emailInvalid": "Diese E-Mail-Adresse wirkt nicht gültig.",
+        "consent": "Bitte bestätige, dass du Wartelisten-Updates erhalten möchtest.",
+        "captchaRequired": "Bitte löse die Captcha-Aufgabe.",
+        "captchaFailed": "Captcha-Verifizierung fehlgeschlagen. Versuche es erneut.",
         "default": "Etwas ist schiefgelaufen. Bitte versuche es noch einmal.",
         "rateLimited": "Zu viele Versuche. Bitte warte einen Moment und probiere es erneut.",
-        "captcha": "Captcha-Verifizierung fehlgeschlagen. Bitte versuche es erneut.",
         "expired": "Dieser Bestätigungslink ist abgelaufen. Bitte melde dich erneut an.",
         "invalid": "Wir konnten diese E-Mail nicht verarbeiten. Prüfe die Schreibweise und versuche es erneut.",
         "network": "Keine Verbindung zum Server. Bitte überprüfe deine Internetverbindung."
+      },
+      "reassurance": {
+        "title": "Warum Eltern mitmachen",
+        "items": [
+          "LouhenFit übernimmt die erste Rücksendung kostenlos.",
+          "Alle Daten bleiben in der EU – strikt nach GDPR.",
+          "Podolog:innen prüfen jede Passformempfehlung."
+        ],
+        "podiatrist": {
+          "title": "Von Podolog:innen bestätigt",
+          "body": "Tippe, um zu erfahren, wie unsere Fachleute jede Empfehlung begleiten.",
+          "aria": "Details zur podologischen Freigabe öffnen"
+        }
       }
     },
     "toast": {
@@ -254,120 +357,120 @@
   },
   "confirm": {
     "success": {
-      "title": "[DE] You’re confirmed!",
-      "body": "[DE] Your spot is secured. We’ll be in touch with next steps soon."
+      "title": "Du bist bestätigt!",
+      "body": "Dein Platz ist gesichert. Wir melden uns bald mit den nächsten Schritten."
     },
     "expired": {
-      "title": "[DE] Confirmation link expired",
-      "body": "[DE] Request a new email below and finish joining the waitlist."
+      "title": "Bestätigungslink abgelaufen",
+      "body": "Fordere unten eine neue E-Mail an und schließe deine Anmeldung ab."
     },
     "already": {
-      "title": "[DE] Already confirmed",
-      "body": "[DE] This email is already part of the waitlist. See you soon!"
+      "title": "Schon bestätigt",
+      "body": "Diese E-Mail steht bereits auf der Warteliste. Bis bald!"
     },
     "invalid": {
-      "title": "[DE] We couldn’t validate that link",
-      "body": "[DE] Check that you copied the full URL or request another confirmation email below."
+      "title": "Link konnte nicht geprüft werden",
+      "body": "Bitte prüfe, ob du die vollständige URL kopiert hast, oder fordere unten eine neue Bestätigung an."
     },
     "resend": {
-      "cta": "[DE] Resend confirmation",
-      "sent": "[DE] If that email exists, a new link is on its way.",
-      "error": "[DE] We couldn’t send the email. Please try again later."
+      "cta": "Bestätigung erneut senden",
+      "sent": "Wenn diese Adresse auf der Warteliste steht, ist eine neue E-Mail bereits unterwegs.",
+      "error": "Die E-Mail konnte nicht gesendet werden. Bitte versuche es später erneut."
     }
   },
   "confirmPending": {
-    "title": "[DE] Check your inbox",
-    "help": "[DE] Open the confirmation email to secure your place. Didn’t get it?"
+    "title": "Posteingang prüfen",
+    "help": "Öffne die Bestätigungs-E-Mail, um deinen Platz zu sichern. Nicht erhalten?"
   },
   "consent": {
     "banner": {
-      "title": "[DE] We use cookies for analytics",
-      "body": "[DE] We’d like to measure how visitors use Louhen so we can improve the experience.",
-      "accept": "[DE] Accept analytics",
-      "decline": "[DE] Decline",
-      "manage": "[DE] Manage later"
+      "title": "Wir verwenden Cookies für Analysen",
+      "body": "Wir möchten verstehen, wie Besuchende Louhen nutzen, um die Erfahrung zu verbessern.",
+      "accept": "Analyse erlauben",
+      "decline": "Ablehnen",
+      "manage": "Später verwalten"
     },
     "manage": {
-      "title": "[DE] Cookie preferences",
-      "description": "[DE] Enable analytics cookies to help us understand what’s working.",
-      "analytics": "[DE] Allow anonymous analytics",
-      "cancel": "[DE] Cancel",
-      "save": "[DE] Save",
-      "close": "[DE] Close"
+      "title": "Cookie-Einstellungen",
+      "description": "Aktiviere Analyse-Cookies, damit wir sehen, was funktioniert.",
+      "analytics": "Anonyme Analysen erlauben",
+      "cancel": "Abbrechen",
+      "save": "Speichern",
+      "close": "Schließen"
     }
   },
   "share": {
-    "title": "[DE] Share & earn",
-    "subtitle": "[DE] Invite friends with your link and you’ll both receive rewards when they place their first order.",
-    "linkLabel": "[DE] Referral link",
-    "codeLabel": "[DE] Referral code",
-    "copyLink": "[DE] Copy link",
-    "copyCode": "[DE] Copy code",
-    "copied": "[DE] Copied!",
-    "nativeShare": "[DE] Share",
-    "codePending": "[DE] Your referral code will appear here soon.",
-    "qr": "[DE] Show QR code",
-    "verificationPending": "[DE] Referral will be verified shortly.",
-    "assurance": "[DE] LouhenFit protects every invitee with free returns on their first pair."
+    "title": "Teilen & belohnen",
+    "subtitle": "Lade Freund:innen mit deinem Link ein und ihr erhaltet beide eine Belohnung, sobald sie ihre erste Bestellung abschließen.",
+    "linkLabel": "Empfehlungslink",
+    "codeLabel": "Empfehlungscode",
+    "copyLink": "Link kopieren",
+    "copyCode": "Code kopieren",
+    "copied": "Kopiert!",
+    "nativeShare": "Teilen",
+    "codePending": "Dein Empfehlungscode erscheint in Kürze hier.",
+    "qr": "QR-Code anzeigen",
+    "verificationPending": "Empfehlung wird gerade geprüft.",
+    "assurance": "LouhenFit schützt jede eingeladene Person mit kostenlosen Rücksendungen beim ersten Paar."
   },
   "referral": {
-    "appliedToast": "[DE] Referral applied — thanks for supporting your friend!"
+    "appliedToast": "Empfehlung aktiviert – danke fürs Weiterempfehlen!"
   },
   "og": {
     "default": {
-      "title": "[DE] Personal style. Effortless fit.",
-      "description": "[DE] Louhen pairs podiatrist-backed comfort with adaptive sizing to keep you moving."
+      "title": "Individueller Stil. Mühelose Passform.",
+      "description": "Louhen verbindet podologisch geprüften Komfort mit adaptiver Passform, damit du in Bewegung bleibst."
     },
     "invited": {
-      "title": "[DE] A friend invited you to Louhen",
-      "description": "[DE] Join through their link to unlock early rewards and smarter sizing for every outfit."
+      "title": "Eine Freund:in hat dich zu Louhen eingeladen",
+      "description": "Nutze ihren Link, um frühzeitige Vorteile und smartere Passform-Empfehlungen freizuschalten."
     }
   },
   "admin": {
     "metrics": {
-      "title": "[DE] Metrics dashboard",
-      "intro": "[DE] Key waitlist metrics updated every 60 seconds.",
+      "title": "Metriken-Dashboard",
+      "intro": "Wichtige Wartelistenkennzahlen, aktualisiert alle 60 Sekunden.",
       "totals": {
-        "signups": "[DE] Signups",
-        "confirmed": "[DE] Confirmed",
-        "conversion": "[DE] Conversion"
+        "signups": "Anmeldungen",
+        "confirmed": "Bestätigt",
+        "conversion": "Conversion"
       },
-      "topReferrers": "[DE] Top referrers",
-      "blocks": "[DE] Referral blocks",
-      "trend": "[DE] 14-day trend",
-      "noReferrers": "[DE] No referral data yet.",
-      "noBlocks": "[DE] No blocked referrals recorded.",
-      "noTrend": "[DE] No events recorded in this window.",
-      "reason": "[DE] Reason",
-      "count": "[DE] Count",
-      "date": "[DE] Date",
-      "codeLabel": "[DE] Code",
-      "signupsLabel": "[DE] Signups",
-      "confirmedLabel": "[DE] Confirmed",
+      "topReferrers": "Top-Empfehlungen",
+      "blocks": "Gesperrte Empfehlungen",
+      "trend": "14-Tage-Trend",
+      "noReferrers": "Noch keine Empfehlungsdaten.",
+      "noBlocks": "Keine blockierten Empfehlungen.",
+      "noTrend": "In diesem Zeitraum wurden keine Ereignisse erfasst.",
+      "reason": "Grund",
+      "count": "Anzahl",
+      "date": "Datum",
+      "codeLabel": "Code",
+      "signupsLabel": "Anmeldungen",
+      "confirmedLabel": "Bestätigt",
       "sparkline": {
-        "signups": "[DE] 14-day Signups",
-        "confirms": "[DE] 14-day Confirmations"
+        "signups": "Anmeldungen (14 Tage)",
+        "confirms": "Bestätigungen (14 Tage)"
       }
     }
   },
   "footer": {
-    "trustEyebrow": "[DE] Warum Eltern Louhen vertrauen",
-    "trustHeadline": "[DE] Podolog:innen-geprüfte Passform mit Datenschutz",
-    "trustBody": "[DE] LouhenFit verarbeitet Familienprofile innerhalb der EU und erfüllt die DSGVO.",
-    "legalNavLabel": "[DE] Rechtliche Links",
+    "trustEyebrow": "Warum Eltern Louhen vertrauen",
+    "trustHeadline": "Podolog:innen-geprüfte Passform mit Datenschutz",
+    "trustBody": "LouhenFit verarbeitet Familienprofile innerhalb der EU und erfüllt die DSGVO.",
+    "legalNavLabel": "Rechtliche Links",
     "legal": {
-      "heading": "[DE] Rechtliches",
-      "privacy": "[DE] Privacy",
-      "terms": "[DE] Terms",
-      "imprint": "[DE] Imprint",
-      "preferences": "[DE] Cookie preferences"
+      "heading": "Rechtliches",
+      "privacy": "Datenschutz",
+      "terms": "Nutzungsbedingungen",
+      "imprint": "Impressum",
+      "preferences": "Cookie-Einstellungen"
     },
-    "localeLabel": "[DE] Sprache wählen",
-    "dataResidency": "[DE] DSGVO-konform • EU-Datenhaltung",
-    "rights": "[DE] All rights reserved"
+    "localeLabel": "Sprache wählen",
+    "dataResidency": "DSGVO-konform • EU-Datenhaltung",
+    "rights": "Alle Rechte vorbehalten"
   },
   "common": {
-    "learnMore": "[DE] Learn more"
+    "learnMore": "Mehr erfahren"
   },
   "voucher": {
     "share": {

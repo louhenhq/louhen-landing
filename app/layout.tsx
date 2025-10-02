@@ -1,7 +1,7 @@
 import './globals.css'
 import './styles/tokens.css'
 import type { Metadata, Viewport } from 'next'
-import { headers } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { Fraunces, Inter } from 'next/font/google'
 import ThemeInit from '@/components/ThemeInit'
 import { ConsentProvider } from '@/components/ConsentProvider'
@@ -9,30 +9,49 @@ import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/SeoJsonLd'
 import { SITE_NAME } from '@/constants/site'
 import { getServerConsent } from '@/lib/consent/state'
 import { NonceProvider } from '@/lib/csp/nonce-context'
+import { buildAlternateLanguageMap } from '@/lib/i18n/metadata'
 import tokens from '@louhen/design-tokens/build/web/tokens.json' assert { type: 'json' }
+import {
+  CONTRAST_COOKIE,
+  ContrastPreference,
+  THEME_COOKIE,
+  ThemePreference,
+} from '@/lib/theme/constants'
+import { DEFAULT_LOCALE } from '@/lib/i18n/locales'
 
-const headingFont = Fraunces({
-  subsets: ['latin'],
-  weight: ['600', '700'],
-  axes: ['opsz'],
-  display: 'swap',
-  style: ['normal'],
-  preload: true,
-  variable: '--font-heading',
-  adjustFontFallback: 'Times New Roman',
-  fallback: ['Iowan Old Style', 'Palatino Linotype', 'Palatino', 'Times New Roman', 'serif'],
-});
+const USE_REMOTE_FONTS = process.env.NEXT_USE_REMOTE_FONTS !== 'false';
 
-const bodyFont = Inter({
-  subsets: ['latin'],
-  weight: ['400', '500', '600'],
-  display: 'swap',
-  preload: true,
-  style: ['normal'],
-  variable: '--font-body',
-  adjustFontFallback: 'Arial',
-  fallback: ['Inter', 'Segoe UI', 'Helvetica Neue', 'Arial', 'system-ui', 'sans-serif'],
-});
+let headingFont: ReturnType<typeof Fraunces>;
+if (USE_REMOTE_FONTS) {
+  headingFont = Fraunces({
+    subsets: ['latin'],
+    weight: 'variable',
+    display: 'swap',
+    style: ['normal'],
+    preload: true,
+    variable: '--font-heading',
+    adjustFontFallback: 'Times New Roman',
+    fallback: ['Iowan Old Style', 'Palatino Linotype', 'Palatino', 'Times New Roman', 'serif'],
+  });
+} else {
+  headingFont = { className: '', variable: '--font-heading', style: {} } as ReturnType<typeof Fraunces>;
+}
+
+let bodyFont: ReturnType<typeof Inter>;
+if (USE_REMOTE_FONTS) {
+  bodyFont = Inter({
+    subsets: ['latin'],
+    weight: 'variable',
+    display: 'swap',
+    preload: true,
+    style: ['normal'],
+    variable: '--font-body',
+    adjustFontFallback: 'Arial',
+    fallback: ['Inter', 'Segoe UI', 'Helvetica Neue', 'Arial', 'system-ui', 'sans-serif'],
+  });
+} else {
+  bodyFont = { className: '', variable: '--font-body', style: {} } as ReturnType<typeof Inter>;
+}
 
 const tokenValues = tokens as Record<string, unknown> & {
   color?: {
@@ -76,6 +95,7 @@ export const metadata: Metadata = {
   applicationName: SITE_NAME,
   alternates: {
     canonical: '/',
+    languages: buildAlternateLanguageMap('/'),
   },
   icons: {
     icon: [
@@ -120,6 +140,75 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const consentHeaders = await headers();
   const consent = getServerConsent(consentHeaders);
   const nonce = consentHeaders.get('x-csp-nonce') ?? undefined;
+  const cookieStore = cookies();
+
+  const rawThemePref = (cookieStore.get(THEME_COOKIE)?.value as ThemePreference | undefined) ?? 'system';
+  const themePref: ThemePreference =
+    rawThemePref === 'light' || rawThemePref === 'dark' ? rawThemePref : 'system';
+
+  const rawContrastPref = (cookieStore.get(CONTRAST_COOKIE)?.value as ContrastPreference | undefined) ?? 'system';
+  const contrastPref: ContrastPreference =
+    rawContrastPref === 'normal' || rawContrastPref === 'more' ? rawContrastPref : 'system';
+
+  const clientThemeHint = consentHeaders.get('sec-ch-prefers-color-scheme')?.toLowerCase();
+  const systemTheme = clientThemeHint === 'dark' ? 'dark' : clientThemeHint === 'light' ? 'light' : undefined;
+
+  const clientContrastHint = consentHeaders.get('sec-ch-prefers-contrast')?.toLowerCase();
+  const forcedColors = consentHeaders.get('sec-ch-forced-colors')?.toLowerCase();
+  const systemContrast =
+    forcedColors === 'active' || clientContrastHint === 'more' ? 'more' : clientContrastHint === 'less' ? 'normal' : undefined;
+
+  const initialThemeAttr = themePref === 'system' ? systemTheme : themePref;
+  const initialContrastAttr = contrastPref === 'system' ? systemContrast : contrastPref;
+  const initialColorScheme = initialThemeAttr === 'dark' ? 'dark' : 'light';
+
+  const themeScript = `(() => {
+    try {
+      const doc = document.documentElement;
+      const pref = ${JSON.stringify(themePref)};
+      const contrastPref = ${JSON.stringify(contrastPref)};
+      const darkQuery = ${JSON.stringify('(prefers-color-scheme: dark)')};
+      const contrastQuery = ${JSON.stringify('(prefers-contrast: more)')};
+      const forcedQuery = ${JSON.stringify('(forced-colors: active)')};
+      const prefersDark = window.matchMedia && window.matchMedia(darkQuery).matches;
+      const prefersHighContrast =
+        (window.matchMedia && window.matchMedia(forcedQuery).matches) ||
+        (window.matchMedia && window.matchMedia(contrastQuery).matches);
+
+      doc.setAttribute('data-theme-mode', pref);
+      doc.setAttribute('data-contrast-mode', contrastPref);
+
+      if (pref === 'dark') {
+        doc.setAttribute('data-theme', 'dark');
+      } else if (pref === 'light') {
+        doc.setAttribute('data-theme', 'light');
+      } else if (pref === 'system') {
+        if (prefersDark) {
+          doc.setAttribute('data-theme', 'dark');
+        } else {
+          doc.removeAttribute('data-theme');
+        }
+      }
+
+      if (contrastPref === 'more') {
+        doc.setAttribute('data-contrast', 'more');
+      } else if (contrastPref === 'normal') {
+        doc.setAttribute('data-contrast', 'normal');
+      } else if (contrastPref === 'system') {
+        if (prefersHighContrast) {
+          doc.setAttribute('data-contrast', 'more');
+        } else {
+          doc.removeAttribute('data-contrast');
+        }
+      }
+
+      const appliedTheme = doc.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+      doc.style.colorScheme = appliedTheme;
+    } catch (e) {
+      // no-op
+    }
+  })();`;
+
   const shouldNoIndex = typeof process.env.VERCEL_ENV === 'string' && process.env.VERCEL_ENV !== 'production'
   const sameAsProfiles = [
     'https://www.linkedin.com/company/louhen',
@@ -128,15 +217,28 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const searchActionUrl = `${baseUrl}/search?q={search_term_string}`
 
   return (
-    <html lang="en" className={`${headingFont.variable} ${bodyFont.variable}`}>
+    <html
+      lang={DEFAULT_LOCALE.language}
+      data-theme-mode={themePref}
+      data-theme={initialThemeAttr ?? undefined}
+      data-contrast-mode={contrastPref}
+      data-contrast={initialContrastAttr ?? undefined}
+      className={`${headingFont.variable} ${bodyFont.variable}`}
+      style={{ colorScheme: initialColorScheme }}
+    >
       <head>
         {/* iOS PWA / status bar styling */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="theme-color" content={THEME_COLOR_LIGHT} media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content={THEME_COLOR_DARK} media="(prefers-color-scheme: dark)" />
+        <meta name="color-scheme" content="light dark" />
         <meta name="description" content={defaultDescription} key="global-description" />
         {shouldNoIndex ? <meta name="robots" content="noindex,nofollow" /> : null}
+        <script
+          id="theme-pref-init"
+          dangerouslySetInnerHTML={{ __html: themeScript }}
+        />
         <OrganizationJsonLd
           name={SITE_NAME}
           url={baseUrl}
@@ -151,13 +253,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           nonce={nonce}
         />
       </head>
-      <body
-        className="min-h-screen antialiased font-sans"
-        style={{
-          background: 'var(--color-background-canvas, var(--semantic-color-bg-page))',
-          color: 'var(--color-text-default, var(--semantic-color-text-body))',
-        }}
-      >
+      <body className="min-h-screen antialiased font-sans">
         <NonceProvider nonce={nonce}>
           <ConsentProvider initialConsent={consent}>
             {/* Apply theme/contrast on first paint + react to system changes */}

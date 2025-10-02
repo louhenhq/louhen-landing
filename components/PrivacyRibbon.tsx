@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from 'next-intl';
 
 export default function PrivacyRibbon() {
   const t = useTranslations('trust.privacy');
+  const trustCopy = useTranslations('trustCopy');
   const locale = useLocale();
 
   return (
@@ -18,7 +19,7 @@ export default function PrivacyRibbon() {
               <path d="M10 12l2 2 4-4" />
             </svg>
           </span>
-          <p className="text-body text-text">{t('body')}</p>
+          <p className="text-body text-text">{trustCopy('gdpr')}</p>
         </div>
         <PrivacyRibbonLink href={`/${locale}/privacy`}>{t('cta')}</PrivacyRibbonLink>
       </div>

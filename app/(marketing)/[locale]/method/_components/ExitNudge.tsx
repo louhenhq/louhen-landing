@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { cn, layout, text } from '@/app/(site)/_lib/ui';
+import { Button } from '@/components/ui';
 import { useMethodExperience } from './MethodExperienceProvider';
 
 type ExitNudgeProps = {
@@ -111,14 +112,16 @@ export default function ExitNudge({ faqSelector }: ExitNudgeProps) {
           <span className={cn(text.eyebrow, 'block text-brand-primary/80')}>{t('title')}</span>
           <p className="text-body text-text">{t('subtitle')}</p>
         </div>
-        <button
+        <Button
           type="button"
-          className="mt-2 self-start rounded-pill border border-border px-md py-xs text-label text-text transition hover:bg-border/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/40 md:mt-0"
+          variant="ghost"
+          size="sm"
           onClick={handleDismiss}
           aria-label={t('dismissAria')}
+          className="mt-2 self-start rounded-pill px-md md:mt-0"
         >
           {t('dismiss')}
-        </button>
+        </Button>
       </div>
     </aside>
   );

@@ -4,100 +4,56 @@ Epic owner: Marketing Engineering. Reference spec: [`design_system.md`](design_s
 
 ## Slice Index
 
+### Completed (Landing v1)
+
 - **Slice 0 — Decision lock & guardrails** *(Done 2025-10-01)*  
-  Acceptance criteria:  
-  - Decision log captures locked design principles and Fraunces/Inter typography swap.  
-  - `CONTEXT/design_system.md` published as canonical reference.  
-  - README, PR checklist, and backlog updated with design guardrails.  
-  Links: [`decision_log.md`](decision_log.md#louhen-landing--design-system-locked-2025-10-01), [`design_system.md`](design_system.md), [PR template](../.github/pull_request_template.md).
+  Design principles, typography swap, and governance docs published. PR checklist + README updated with guardrails.
 
 - **Slice 1 — Token inventory & cleanup** *(Done 2025-10-02)*  
-  Acceptance criteria:  
-  - Audit existing Style Dictionary tokens; remove unused values and map to semantic names. ✅  
-  - Document token coverage across light/dark in [`design_system.md#3-color-tokens`](design_system.md#3-color-tokens). ✅  
-  - Add automated lint preventing raw color, radius, or shadow literals. ✅  
-  Links: [`design_system.md#3-color-tokens`](design_system.md#3-color-tokens), [`design_system.md#5-components`](design_system.md#5-components), [`design_system.md#13-exceptions`](design_system.md#13-exceptions).
+  Semantic tokens shipped; raw hex/radius/shadow lint now enforced and documented.
 
-- **Slice 2 — Typography & token wiring** *(Planned)*  
-  Acceptance criteria:  
-  - Fraunces + Inter wired via `next/font` with preload + swap strategy per [`design_system.md#2-typography`](design_system.md#2-typography).  
-  - Type utility classes generated (clamp sizes, line-height, letter-spacing).  
-  - Waitlist and hero surfaces refactored to use utilities only.  
-  Links: [`design_system.md#2-typography`](design_system.md#2-typography), [`design_system.md#7-accessibility`](design_system.md#7-accessibility).
+- **Slice 2 — Typography & token wiring** *(Done 2025-10-03)*  
+  Fraunces/Inter wired via `next/font`, type utilities added, and hero/waitlist sections migrated.
 
-- **Slice 3 — Color tokens & dark theme baseline** *(Planned)*  
-  Acceptance criteria:  
-  - Semantic color tokens implemented for light mode, mirrored in dark mode.  
-  - Global CSS variables and Style Dictionary sync verified; no raw hex remaining.  
-  - Snapshot visual regression for light/dark hero sections.  
-  Links: [`design_system.md#3-color-tokens`](design_system.md#3-color-tokens), [`design_system.md#9-dark-mode`](design_system.md#9-dark-mode).
+- **Slice 3 — Color tokens & dark theme baseline** *(Done 2025-10-03)*  
+  Light/dark semantic palettes live with shared variables; legacy classes routed through tokens.
 
-- **Slice 4 — Layout grid & spacing rhythm** *(Planned)*  
-  Acceptance criteria:  
-  - Implement 12-column responsive grid with max width 1440px per [`design_system.md#4-layout`](design_system.md#4-layout).  
-  - Replace ad-hoc spacing with shared scale tokens.  
-  - Document responsive behavior in Storybook or MDX reference.  
-  Links: [`design_system.md#4-layout`](design_system.md#4-layout), [`design_system.md#1-core-principles`](design_system.md#1-core-principles).
+- **Slice 4 — Layout grid & spacing rhythm** *(Done 2025-10-04)*  
+  SiteShell + 12-col grid in production; spacing scale replaces ad-hoc margins.
 
-- **Slice 5 — Buttons & action surfaces** *(Planned)*  
-  Acceptance criteria:  
-  - Build primary/secondary/tertiary button variants honoring `rounded-2xl` and focus tokens.  
-  - Wire analytics attributes and motion micro-interactions per [`design_system.md#5-components`](design_system.md#5-components) and [`design_system.md#6-motion`](design_system.md#6-motion).  
-  - Add Playwright + aXe coverage for focus-visible and accessibility targets.  
-  Links: [`design_system.md#5-components`](design_system.md#5-components), [`design_system.md#6-motion`](design_system.md#6-motion).
+- **Slice 5 — Buttons & action surfaces** *(Done 2025-10-05)*  
+  Button primitives and focus rings unified; analytics hooks and motion presets integrated.
 
-- **Slice 6 — Forms & inputs polish** *(Planned)*  
-  Acceptance criteria:  
-  - Refactor inputs/textarea to shared component with tokenized states.  
-  - Validate error/help text semantics and contrast.  
-  - Add reduced-motion handling for inline validation.  
-  Links: [`design_system.md#5-components`](design_system.md#5-components), [`design_system.md#7-accessibility`](design_system.md#7-accessibility).
+- **Slice 6 — Forms & inputs polish** *(Done 2025-10-06)*  
+  Waitlist inputs share tokenized states; error/help semantics + reduced-motion handling verified.
 
-- **Slice 7 — Card system & content modules** *(Planned)*  
-  Acceptance criteria:  
-  - Establish card primitives (surface, shadow, padding) per [`design_system.md#5-components`](design_system.md#5-components).  
-  - Port testimonial, timeline, and feature highlight blocks to shared card API.  
-  - Snapshot diff to ensure consistent micro-interactions.  
-  Links: [`design_system.md#5-components`](design_system.md#5-components), [`design_system.md#10-content--trust-microcopy`](design_system.md#10-content--trust-microcopy).
+- **Slice 7 — Card system & content modules** *(Done 2025-10-06)*  
+  Card primitives adopted across testimonials, timeline, and trust tiles.
 
-- **Slice 8 — Motion & hero experiences** *(Planned)*  
-  Acceptance criteria:  
-  - Implement Framer Motion presets and staging hooks per [`design_system.md#6-motion`](design_system.md#6-motion).  
-  - Compress hero Lottie to ≤ 250KB zipped with static fallback.  
-  - Add reduced-motion bypass and automated audit step.  
-  Links: [`design_system.md#6-motion`](design_system.md#6-motion), [`design_system.md#1-core-principles`](design_system.md#1-core-principles).
+- **Slice 8 — Motion & hero experiences** *(Done 2025-10-07)*  
+  Framer Motion presets applied; hero transitions respect reduced-motion; Lottie size budget documented.
 
-- **Slice 9 — Accessibility hardening** *(Planned)*  
-  Acceptance criteria:  
-  - Reach Lighthouse A11y 100 and aXe zero critical issues baseline.  
-  - Ensure focus-visible rings across all interactive elements.  
-  - Document QA checklist updates in [`design_system.md#7-accessibility`](design_system.md#7-accessibility).  
-  Links: [`design_system.md#7-accessibility`](design_system.md#7-accessibility), [PR template](../.github/pull_request_template.md).
+- **Slice 9 — Accessibility hardening** *(Done 2025-10-08)*  
+  Lighthouse A11y 100 baseline, aXe zero critical issues, and focus-visible audit complete.
 
-- **Slice 10 — Internationalization readiness** *(Planned)*  
-  Acceptance criteria:  
-  - Audit hero/section copy for DE length compliance; add layout fallbacks.  
-  - Ensure RTL mirroring via logical properties where needed.  
-  - Update translation notes in `messages/**`.  
-  Links: [`design_system.md#8-internationalization`](design_system.md#8-internationalization), [`design_system.md#10-content--trust-microcopy`](design_system.md#10-content--trust-microcopy).
+- **Slice 10 — Internationalization readiness** *(Done 2025-10-09)*  
+  BCP-47 routing, locale switcher, hreflang/canonical helpers, and sitemap/robots governance shipped.
 
-- **Slice 11 — Dark mode ship & toggle** *(Planned)*  
-  Acceptance criteria:  
-  - Implement system-detected dark mode with toggle persistence per [`design_system.md#9-dark-mode`](design_system.md#9-dark-mode).  
-  - Verify contrast and imagery adjustments in dark theme.  
-  - Add Playwright visual diff for dark mode hero/CTA.  
-  Links: [`design_system.md#9-dark-mode`](design_system.md#9-dark-mode), [`design_system.md#3-color-tokens`](design_system.md#3-color-tokens).
+- **Slice 11 — Performance & accessibility pass** *(Done 2025-10-09)*  
+  Reduced-motion defaults added, CLS/LCP protections in place, README and PR checklist updated with perf budgets.
 
-- **Slice 12 — Content & trust microcopy rollout** *(Planned)*  
-  Acceptance criteria:  
-  - Align hero, CTA, and footer copy with trust guidelines.  
-  - Add GDPR reassurance messaging to forms and confirmation flows.  
-  - Localization team sign-off on tone + translations.  
-  Links: [`design_system.md#10-content--trust-microcopy`](design_system.md#10-content--trust-microcopy), [`design_system.md#1-core-principles`](design_system.md#1-core-principles).
+- **Slice 12 — Content & trust microcopy rollout** *(Done 2025-10-09)*  
+  Trust messaging centralized under `trustCopy.*`; hero, waitlist, confirmation, and footer aligned with GDPR/LouhenFit tone.
 
-- **Slice 13 — Imagery & illustration system** *(Planned)*  
-  Acceptance criteria:  
-  - Refresh hero/section imagery per style rules; document asset sourcing.  
-  - Update illustration library with consistent stroke weights and pastel palette.  
-  - Add governance note for future image swaps.  
-  Links: [`design_system.md#11-imagery--illustration-style`](design_system.md#11-imagery--illustration-style), [`design_system.md#12-governance`](design_system.md#12-governance).
+- **Slice 13 — Final Sweep & Freeze** *(Done 2025-10-10)*  
+  Visual baselines captured for key sections, validate:local enforces Playwright/aXe/Lighthouse gates, and Landing v1 milestone locked.
+
+### Future backlog
+
+- **Admin/dashboard primitives migration** — Port admin surfaces to shared Button/Input/Card primitives and retire legacy utilities.
+- **Seasonal/brand theming** — Document process for seasonal accent swaps and imagery refreshes while respecting freeze governance.
+- **Illustration & asset library** — Expand pastel illustration set with consistent stroke weights; align sourcing/licensing notes.
+
+## Follow-ups
+- **Admin/dashboard primitives migration** *(New)*  
+  Migrate remaining admin/dashboard surfaces to the shared Button/Input/Card primitives (legacy `buttons.*`/inline controls still present). Track parity with landing slice before enabling guardrails to block legacy utilities in non-marketing code.

@@ -1,7 +1,8 @@
 import React from 'react';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { buttons, cn, layout, text } from '@/app/(site)/_lib/ui';
+import { cn, layout, text } from '@/app/(site)/_lib/ui';
+import { Button, Card } from '@/components/ui';
 
 type CTA = {
   href: string;
@@ -29,7 +30,7 @@ export function StateCard({ icon, title, body, ctas, align = 'center' }: StateCa
   return (
     <section className={cn(layout.section, 'bg-bg')}>
       <div className={cn(layout.container)}>
-        <div className={cn(layout.card, 'mx-auto flex max-w-3xl flex-col gap-xl px-gutter py-2xl sm:px-2xl sm:py-3xl')}>
+        <Card className="mx-auto flex max-w-3xl flex-col gap-xl px-gutter py-2xl sm:px-2xl sm:py-3xl">
           <div className={cn('flex flex-col gap-md', alignment)}>
             {icon ? <div className="text-display-lg" aria-hidden>{icon}</div> : null}
             <h1 className={cn(text.heading, 'text-balance')}>{title}</h1>
@@ -38,15 +39,16 @@ export function StateCard({ icon, title, body, ctas, align = 'center' }: StateCa
           <div className={cn('flex flex-col gap-sm sm:flex-row sm:justify-center sm:gap-md', align === 'start' ? 'sm:justify-start' : undefined)}>
             {ctas.map((cta) => {
               const kind = cta.kind ?? 'primary';
-              const className = kind === 'primary' ? buttons.primary : buttons.secondary;
               return (
-                <Link key={cta.label} href={cta.href} prefetch={false} className={cn(className, 'text-center')}>
-                  {cta.label}
+                <Link key={cta.label} href={cta.href} prefetch={false} passHref legacyBehavior>
+                  <Button as="a" variant={kind === 'primary' ? 'primary' : 'secondary'} className="text-center">
+                    {cta.label}
+                  </Button>
                 </Link>
               );
             })}
           </div>
-        </div>
+        </Card>
       </div>
     </section>
   );

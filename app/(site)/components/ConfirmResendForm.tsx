@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { buttons, cn, inputs } from '@/app/(site)/_lib/ui';
+import { Button, Input } from '@/components/ui';
 import { track } from '@/lib/clientAnalytics';
 
 export default function ConfirmResendForm() {
@@ -42,19 +42,19 @@ export default function ConfirmResendForm() {
     <form className="mt-lg flex flex-col gap-sm md:flex-row md:items-center" onSubmit={handleSubmit} aria-busy={pending}>
       <label className="flex w-full flex-col gap-xs md:max-w-sm">
         <span className="text-label text-text font-medium">{waitlistT('email')}</span>
-        <input
+        <Input
           type="email"
           required
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           autoComplete="email"
-          className={cn(inputs, 'rounded-lg')}
+          className="rounded-2xl"
         />
       </label>
       <div className="flex items-center gap-sm md:mt-[30px]">
-        <button type="submit" disabled={pending || email === ''} className={cn(buttons.secondary, 'whitespace-nowrap')}>
+        <Button type="submit" variant="secondary" disabled={pending || email === ''} loading={pending} className="whitespace-nowrap">
           {t('cta')}
-        </button>
+        </Button>
         {status === 'success' && (
           <span className="text-body-sm text-status-success" aria-live="polite">{t('sent')}</span>
         )}

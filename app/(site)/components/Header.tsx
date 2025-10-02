@@ -3,8 +3,11 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { buttons, cn, layout } from '@/app/(site)/_lib/ui';
+import { Button } from '@/components/ui';
+import { cn, layout } from '@/app/(site)/_lib/ui';
+import ThemeToggle from '@/components/ThemeToggle';
 import LocaleSwitcher from '@/app/(site)/components/LocaleSwitcher';
+import { usePrefersReducedMotion } from '@/app/(site)/_lib/usePrefersReducedMotion';
 
 type HeaderProps = {
   onCta?: () => void;
@@ -13,6 +16,7 @@ type HeaderProps = {
 export default function Header({ onCta }: HeaderProps) {
   const t = useTranslations('header');
   const [isElevated, setIsElevated] = useState(false);
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -27,7 +31,8 @@ export default function Header({ onCta }: HeaderProps) {
   function handleScrollToForm() {
     const form = document.getElementById('waitlist-form');
     if (form) {
-      form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const behavior: ScrollBehavior = prefersReducedMotion ? 'auto' : 'smooth';
+      form.scrollIntoView({ behavior, block: 'start' });
       const firstInput = form.querySelector('input, select, textarea, button') as HTMLElement | null;
       if (firstInput) firstInput.focus({ preventScroll: true });
     }
@@ -57,23 +62,21 @@ export default function Header({ onCta }: HeaderProps) {
           </a>
         </nav>
         <div className="flex items-center gap-sm">
-          <button
-            type="button"
-            className={cn(buttons.primary, 'hidden lg:inline-flex')}
-            onClick={handleScrollToForm}
-          >
+          <ThemeToggle className="hidden lg:flex" />
+          <Button className="hidden lg:inline-flex" onClick={handleScrollToForm}>
             {t('cta')}
-          </button>
+          </Button>
           <LocaleSwitcher label={t('locale.label')} />
         </div>
       </div>
       <div className={cn(layout.container, 'pb-sm lg:hidden')}>
         <div className="flex items-center gap-sm">
-          <button type="button" className={cn(buttons.primary, 'flex-1')} onClick={handleScrollToForm}>
+          <Button className="flex-1" onClick={handleScrollToForm}>
             {t('cta')}
-          </button>
+          </Button>
           <LocaleSwitcher id="locale-switcher-mobile" label={t('locale.label')} className="flex-shrink-0" />
         </div>
+        <ThemeToggle className="mt-sm" />
       </div>
     </header>
   );

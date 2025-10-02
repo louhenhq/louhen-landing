@@ -5,6 +5,13 @@
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import { BreadcrumbJsonLd } from '@/components/SeoJsonLd'
+import { DEFAULT_LOCALE } from '@/lib/i18n/locales'
+import {
+  buildAlternateLanguageMap,
+  buildCanonicalPath,
+  buildCanonicalUrl,
+  resolveSiteBaseUrl,
+} from '@/lib/i18n/metadata'
 
 const trustPillars = [
   {
@@ -30,28 +37,39 @@ const dimensionHighlights = [
   'Fit profile updates automatically as your child grows',
 ]
 
-const FALLBACK_SITE_URL = 'https://louhen-landing.vercel.app'
-const rawBaseUrl = process.env.APP_BASE_URL?.trim() || process.env.NEXT_PUBLIC_SITE_URL?.trim() || FALLBACK_SITE_URL
-const baseUrl = rawBaseUrl.replace(/\/$/, '')
-const methodUrl = `${baseUrl}/method`
+const baseUrl = resolveSiteBaseUrl()
+const methodPath = buildCanonicalPath(DEFAULT_LOCALE.value, '/method/')
+const methodUrl = buildCanonicalUrl(DEFAULT_LOCALE.value, '/method/')
 const methodTitle = 'Our Method'
 const methodDescription = 'See how Louhen captures precise shoe dimensions and builds trust into every recommendation.'
 
 export function generateMetadata(): Metadata {
+  const languages = buildAlternateLanguageMap('/method/');
+
   return {
     title: methodTitle,
     description: methodDescription,
     alternates: {
-      canonical: '/method',
+      canonical: methodPath,
+      languages,
     },
     openGraph: {
       title: `${methodTitle} — Louhen`,
       description: methodDescription,
-      url: '/method',
+      url: methodUrl,
+      images: [
+        {
+          url: `${baseUrl}/opengraph-image.png`,
+          width: 1200,
+          height: 630,
+          alt: methodTitle,
+        },
+      ],
     },
     twitter: {
       title: `${methodTitle} — Louhen`,
       description: methodDescription,
+      images: [`${baseUrl}/opengraph-image.png`],
     },
   }
 }

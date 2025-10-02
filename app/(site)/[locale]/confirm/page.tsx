@@ -2,6 +2,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 import { FieldValue } from 'firebase-admin/firestore';
+import { createTranslator, type AbstractIntlMessages } from 'next-intl';
 import { initAdmin } from '@/lib/firebaseAdmin';
 import { sha256Hex } from '@/lib/crypto/token';
 import ConfirmResendForm from '@/app/(site)/components/ConfirmResendForm';
@@ -68,7 +69,12 @@ function getConfirmMessages(localeMessages: Record<string, unknown>): ConfirmMes
   };
 }
 
-function getShareCopy(localeMessages: Record<string, unknown>): ShareCopy {
+function getShareCopy(localeMessages: Record<string, unknown>, locale: SupportedLocale): ShareCopy {
+  const trustCopy = createTranslator({
+    locale,
+    messages: localeMessages as AbstractIntlMessages,
+    namespace: 'trustCopy',
+  });
   const fallback: ShareCopy = {
     title: 'Share & earn',
     subtitle: 'Invite friends with your link and you’ll both receive rewards when they place their first order.',
@@ -81,7 +87,7 @@ function getShareCopy(localeMessages: Record<string, unknown>): ShareCopy {
     codePending: 'Your referral code will appear here soon.',
     qr: 'Show QR code',
     verificationPending: 'Referral will be verified shortly.',
-    assurance: 'LouhenFit protects every invitee with free returns on their first pair.',
+    assurance: trustCopy('coverage.covered'),
   };
   const share = (localeMessages.share ?? {}) as Partial<ShareCopy>;
   return { ...fallback, ...share };
@@ -93,7 +99,7 @@ export default async function ConfirmPage({ params, searchParams }: ConfirmPageP
   const localeMessages = await loadMessages(locale);
   const baseMessages = localeMessages as Record<string, unknown>;
   const confirmMessages = getConfirmMessages(baseMessages);
-  const shareCopy = getShareCopy(baseMessages);
+  const shareCopy = getShareCopy(baseMessages, locale);
 
   if (!token || token.length < 20) {
     return renderInfo('invalid', confirmMessages);

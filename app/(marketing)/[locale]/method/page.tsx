@@ -21,6 +21,11 @@ import ExitNudge from './_components/ExitNudge';
 import { MethodExperienceProvider } from './_components/MethodExperienceProvider';
 import SkipToCtaLink from './_components/SkipToCtaLink';
 import { buildMethodTechArticleSchema } from './articleSchema';
+import {
+  buildCanonicalPath,
+  buildCanonicalUrl,
+  resolveSiteBaseUrl,
+} from '@/lib/i18n/metadata';
 
 export const runtime = 'nodejs';
 
@@ -35,11 +40,9 @@ export default async function MethodPage({ params }: MethodPageProps) {
 
   const t = await getTranslations({ locale, namespace: 'method' });
 
-  const FALLBACK_SITE_URL = 'https://louhen-landing.vercel.app';
-  const rawBaseUrl = process.env.APP_BASE_URL?.trim() || process.env.NEXT_PUBLIC_SITE_URL?.trim() || FALLBACK_SITE_URL;
-  const baseUrl = rawBaseUrl.replace(/\/$/, '');
-  const localizedPath = `/${locale}/method/`;
-  const articleUrl = `${baseUrl}${localizedPath}`;
+  const baseUrl = resolveSiteBaseUrl();
+  const localizedPath = buildCanonicalPath(locale, '/method/');
+  const articleUrl = buildCanonicalUrl(locale, '/method/');
 
   const pillarTitles = (() => {
     const raw = t.raw('pillars.items');

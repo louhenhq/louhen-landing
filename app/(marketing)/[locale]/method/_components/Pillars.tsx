@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState, useId, type KeyboardEvent } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { cn, layout, text } from '@/app/(site)/_lib/ui';
+import { Button, Card } from '@/components/ui';
 
 type Pillar = {
   title: string;
@@ -111,11 +112,12 @@ export default function Pillars() {
             const badgeDescriptionId = pillar.badgeTooltip ? `${badgeIdPrefix}-${index}` : undefined;
 
             return (
-              <article key={pillar.title} className={cn(layout.card, 'flex h-full flex-col gap-sm px-gutter py-xl')}>
-                <header className="flex flex-col gap-xs">
-                  <h3 className="text-h3 text-text">{pillar.title}</h3>
-                  {pillar.badgeLabel ? (
-                    <>
+              <article key={pillar.title} className="h-full">
+                <Card className="flex h-full flex-col gap-sm px-gutter py-xl">
+                  <header className="flex flex-col gap-xs">
+                    <h3 className="text-h3 text-text">{pillar.title}</h3>
+                    {pillar.badgeLabel ? (
+                      <>
                       <span
                         className="inline-flex w-fit items-center gap-1 rounded-full border border-brand-primary/30 bg-brand-primary/10 px-3 py-1 text-meta uppercase tracking-[0.32em] text-brand-primary"
                         role="note"
@@ -129,51 +131,57 @@ export default function Pillars() {
                         </span>
                       ) : null}
                     </>
-                  ) : null}
-                </header>
-                <p className="text-body text-text-muted">{pillar.body}</p>
-                {index === 1 ? (
-                  <div className="rounded-xl border border-border bg-bg-card px-md py-sm text-left">
-                    <button
-                      type="button"
-                      className="flex w-full items-center justify-between gap-sm text-left text-label text-brand-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/40"
-                      aria-expanded={isDisclosureOpen}
-                      aria-controls={disclosureContentId}
-                      onClick={() => setIsDisclosureOpen((prev) => !prev)}
-                      ref={disclosureButtonRef}
-                    >
-                      {disclosure.cta}
-                      <span className="text-label leading-none" aria-hidden="true">
-                        {isDisclosureOpen ? '-' : '+'}
-                      </span>
-                    </button>
-                    {isDisclosureOpen ? (
-                      <div
-                        id={disclosureContentId}
-                        ref={disclosureContentRef}
-                        role="region"
-                        tabIndex={-1}
-                        className="mt-3 space-y-3 text-body-sm text-text-muted"
-                        aria-live="polite"
-                        aria-labelledby={disclosureHeadingId}
-                        onKeyDown={handleDisclosureKeyDown}
-                      >
-                        <h4 id={disclosureHeadingId} className="text-label text-text">
-                          {disclosure.title}
-                        </h4>
-                        <p>{disclosure.body}</p>
-                        {disclosure.privacyNote ? <p>{disclosure.privacyNote}</p> : null}
-                      </div>
                     ) : null}
-                    <noscript>
-                      <div className="mt-3 space-y-3 text-body-sm text-text-muted">
-                        <h4 className="text-label text-text">{disclosure.title}</h4>
-                        <p>{disclosure.body}</p>
-                        {disclosure.privacyNote ? <p>{disclosure.privacyNote}</p> : null}
-                      </div>
-                    </noscript>
-                  </div>
-                ) : null}
+                  </header>
+                  <p className="text-body text-text-muted">{pillar.body}</p>
+                  {index === 1 ? (
+                    <Card
+                      variant="outline"
+                      className="px-md py-sm text-left"
+                    >
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="flex w-full items-center justify-between gap-sm px-0 text-label text-brand-primary"
+                        aria-expanded={isDisclosureOpen}
+                        aria-controls={disclosureContentId}
+                        onClick={() => setIsDisclosureOpen((prev) => !prev)}
+                        ref={disclosureButtonRef}
+                      >
+                        {disclosure.cta}
+                        <span className="text-label leading-none" aria-hidden="true">
+                          {isDisclosureOpen ? '-' : '+'}
+                        </span>
+                      </Button>
+                      {isDisclosureOpen ? (
+                        <div
+                          id={disclosureContentId}
+                          ref={disclosureContentRef}
+                          role="region"
+                          tabIndex={-1}
+                          className="mt-3 space-y-3 text-body-sm text-text-muted"
+                          aria-live="polite"
+                          aria-labelledby={disclosureHeadingId}
+                          onKeyDown={handleDisclosureKeyDown}
+                        >
+                          <h4 id={disclosureHeadingId} className="text-label text-text">
+                            {disclosure.title}
+                          </h4>
+                          <p>{disclosure.body}</p>
+                          {disclosure.privacyNote ? <p>{disclosure.privacyNote}</p> : null}
+                        </div>
+                      ) : null}
+                      <noscript>
+                        <div className="mt-3 space-y-3 text-body-sm text-text-muted">
+                          <h4 className="text-label text-text">{disclosure.title}</h4>
+                          <p>{disclosure.body}</p>
+                          {disclosure.privacyNote ? <p>{disclosure.privacyNote}</p> : null}
+                        </div>
+                      </noscript>
+                    </Card>
+                  ) : null}
+                </Card>
               </article>
             );
           })}

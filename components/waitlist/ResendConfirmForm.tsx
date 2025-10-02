@@ -2,7 +2,8 @@
 
 import React, { useState, type ChangeEvent, type FormEvent } from 'react';
 import { useLocale } from 'next-intl';
-import { buttons, cn, inputs, layout, text } from '@/app/(site)/_lib/ui';
+import { cn, text } from '@/app/(site)/_lib/ui';
+import { Button, Card, Input } from '@/components/ui';
 import { track } from '@/lib/clientAnalytics';
 
 export type ResendConfirmStrings = {
@@ -79,29 +80,30 @@ export function ResendConfirmForm({ strings }: ResendConfirmFormProps) {
   }
 
   return (
-    <div className={cn(layout.card, 'mx-auto flex max-w-3xl flex-col gap-md px-gutter py-2xl sm:px-2xl')}>
+    <Card className="mx-auto flex max-w-3xl flex-col gap-md px-gutter py-2xl sm:px-2xl">
       <h2 className={text.heading}>{strings.title}</h2>
       <p className={cn(text.body)}>{strings.description}</p>
       <form onSubmit={handleSubmit} className="flex flex-col gap-md" noValidate>
         <label className="flex flex-col gap-xs">
           <span className={text.label}>{strings.email.label}</span>
-          <input
+          <Input
             type="email"
             required
             value={email}
             onChange={(event: ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
-            className={inputs}
             placeholder={strings.email.placeholder}
           />
         </label>
         <div className="flex flex-col gap-sm sm:flex-row sm:items-center sm:gap-md">
-          <button
+          <Button
             type="submit"
-            className={cn(buttons.primary, 'sm:w-auto')}
+            className="sm:w-auto"
             disabled={status === 'loading' || email.trim() === ''}
+            loading={status === 'loading'}
+            loadingLabel={strings.submit}
           >
-            {status === 'loading' ? strings.submit + '…' : strings.submit}
-          </button>
+            {strings.submit}
+          </Button>
           {message ? (
             <p className={cn('text-body-sm', status === 'success' ? 'text-status-success' : 'text-status-danger')} aria-live="polite">
               {message}
@@ -109,7 +111,7 @@ export function ResendConfirmForm({ strings }: ResendConfirmFormProps) {
           ) : null}
         </div>
       </form>
-    </div>
+    </Card>
   );
 }
 

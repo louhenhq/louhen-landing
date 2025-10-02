@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { cn, layout, text } from '@/app/(site)/_lib/ui';
+import { Card } from '@/components/ui';
 
 type Step = {
   title: string;
@@ -45,16 +46,17 @@ export default function HowItWorks({ childName }: HowItWorksProps) {
         </div>
         <ol className="grid gap-lg md:grid-cols-2 xl:grid-cols-5" role="list">
           {steps.map((step, index) => (
-            <li
-              key={step.title}
-              className={cn(layout.card, 'flex h-full flex-col gap-sm px-gutter py-xl')}
-              aria-label={`Step ${index + 1} of ${steps.length}: ${step.title}`}
-            >
-              <div className="text-label uppercase tracking-[0.24em] text-brand-primary" aria-hidden="true">
-                {String(index + 1).padStart(2, '0')}
-              </div>
-              <h3 className="text-h3 text-text">{step.title}</h3>
-              <p className="text-body text-text-muted">{step.body}</p>
+            <li key={step.title}>
+              <Card
+                className="flex h-full flex-col gap-sm px-gutter py-xl"
+                aria-label={`Step ${index + 1} of ${steps.length}: ${step.title}`}
+              >
+                <div className="text-label uppercase tracking-[0.24em] text-brand-primary" aria-hidden="true">
+                  {String(index + 1).padStart(2, '0')}
+                </div>
+                <h3 className="text-h3 text-text">{step.title}</h3>
+                <p className="text-body text-text-muted">{step.body}</p>
+              </Card>
             </li>
           ))}
         </ol>

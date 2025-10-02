@@ -1,6 +1,7 @@
-import { type NextRequest } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 import createIntlMiddleware from 'next-intl/middleware';
 import { config as intlRoutingConfig } from './next-intl.config';
+import { SUPPORTED_LOCALES, isSupportedLocale } from './lib/i18n/locales';
 
 const intlMiddleware = createIntlMiddleware({
   ...intlRoutingConfig,
@@ -47,6 +48,21 @@ export function middleware(request: NextRequest) {
   const nonce = generateNonce();
   request.headers.set('x-csp-nonce', nonce);
 
+  const pathname = request.nextUrl.pathname;
+  const rawLocaleMatch = pathname.match(/^\/([A-Za-z]{2}-[A-Za-z]{2})(?=\/|$)/);
+
+  if (rawLocaleMatch) {
+    const rawLocale = rawLocaleMatch[1];
+    const normalizedLocale = rawLocale.toLowerCase();
+
+    if (rawLocale !== normalizedLocale && isSupportedLocale(normalizedLocale)) {
+      const updatedPathname = pathname.replace(`/${rawLocale}`, `/${normalizedLocale}`);
+      const url = request.nextUrl.clone();
+      url.pathname = updatedPathname;
+      return NextResponse.redirect(url, 308);
+    }
+  }
+
   const response = intlMiddleware(request);
 
   if (!shouldHandleHtml(request)) {
@@ -67,5 +83,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/(en|de)', '/(en|de)/:path*'],
+  matcher: ['/', '/(de-de|en-de|fr-fr)', '/(de-de|en-de|fr-fr)/:path*'],
 };

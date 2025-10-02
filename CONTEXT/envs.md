@@ -10,6 +10,10 @@
 - Update production secrets in Vercel before launch; preview stays isolated to the staging branch.
 - Any change to environment variables requires a redeploy to ensure functions and static prerenders pick up new values.
 
+### Crawling toggle
+
+- `NEXT_PUBLIC_ALLOW_INDEXING` — set to `true` on production once launch is approved. When unset/false or in non-production environments, `robots.txt` returns `Disallow: /` and omits the sitemap.
+
 ## Waitlist rate limiting
 
 - `WAITLIST_RATE_SUBMITS_PER_HOUR_PER_IP` — soft cap for `/api/waitlist` submissions per IP per hour (defaults to `10` when unset or invalid).

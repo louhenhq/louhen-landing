@@ -13,7 +13,7 @@ export function generateStaticParams() {
 }
 
 const SUPPORTED_LOCALES = new Set<SupportedLocale>(locales);
-const FALLBACK_LOCALE: SupportedLocale = 'en';
+const FALLBACK_LOCALE: SupportedLocale = 'en-de';
 
 function isMessagesObject(value: unknown): value is AbstractIntlMessages {
   return typeof value === 'object' && value !== null && !Array.isArray(value);

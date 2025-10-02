@@ -1,9 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { buttons, cn, layout, text } from '@/app/(site)/_lib/ui';
+import { cn, layout, text } from '@/app/(site)/_lib/ui';
+import { Button } from '@/components/ui';
 import type { SupportedLocale } from '@/next-intl.locales';
 import { track } from '@/lib/clientAnalytics';
 import { useMethodExperience } from './MethodExperienceProvider';
@@ -24,7 +24,11 @@ export default function MethodHero({ locale, childName }: MethodHeroProps) {
   const subtitle = childName ? t('subtitle_personalized', { name: childName }) : t('subtitle_generic');
 
   return (
-    <section className={cn(layout.section, 'bg-bg')} aria-labelledby="method-hero-title">
+    <section
+      className={cn(layout.section, 'bg-bg')}
+      aria-labelledby="method-hero-title"
+      data-testid="method-hero"
+    >
       <div className={cn(layout.container, 'flex flex-col items-center gap-xl text-center')}>
         <div className="flex max-w-3xl flex-col gap-md">
           {t('eyebrow') ? (
@@ -38,14 +42,14 @@ export default function MethodHero({ locale, childName }: MethodHeroProps) {
           </p>
         </div>
         <div className="flex flex-col items-center gap-md">
-          <Link
+          <Button
+            as="a"
             href={`/${locale}/waitlist`}
-            className={buttons.primary}
             prefetch={false}
             onClick={() => registerCtaInteraction('hero')}
           >
             {t('cta')}
-          </Link>
+          </Button>
           <p className="max-w-2xl text-body-sm text-text-muted">{t('trustLine')}</p>
         </div>
         <div

@@ -1,11 +1,35 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { createTranslator } from 'next-intl';
 import PreOnboardingForm from '@/app/(site)/waitlist/pre-onboarding/_components/PreOnboardingForm';
 import { loadWaitlistMessages } from '@/app/(site)/waitlist/_lib/messages';
 import { readWaitlistSession } from '@/lib/waitlist/session';
 import { getPreOnboardingDraft, hasPreOnboarded } from '@/lib/firestore/waitlist';
+import { cn } from '@/app/(site)/_lib/ui';
+import { buildPathForLocale } from '@/lib/i18n/locales';
+import {
+  buildAlternateLanguageMap,
+  buildCanonicalPath,
+} from '@/lib/i18n/metadata';
 
 export const dynamic = 'force-dynamic';
+
+const PAGE_PATH = '/waitlist/pre-onboarding/';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { locale, messages } = await loadWaitlistMessages();
+  const t = createTranslator({ locale, messages, namespace: 'preonboarding' });
+  const languages = buildAlternateLanguageMap(PAGE_PATH);
+
+  return {
+    title: t('title'),
+    description: t('subtitle'),
+    alternates: {
+      canonical: buildCanonicalPath(locale, PAGE_PATH),
+      languages,
+    },
+  };
+}
 
 export default async function WaitlistPreOnboardingPage() {
   const { locale, messages } = await loadWaitlistMessages();
@@ -43,7 +67,7 @@ export default async function WaitlistPreOnboardingPage() {
               {t('errors.session')}
             </div>
             <Link
-              href="/waitlist"
+              href={buildPathForLocale(locale, '/waitlist/')}
               className="inline-flex w-fit items-center justify-center rounded-2xl bg-brand-primary px-lg py-sm text-label text-brand-onPrimary transition-opacity duration-base hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
             >
               {t('actions.returnToWaitlist')}
@@ -61,7 +85,7 @@ export default async function WaitlistPreOnboardingPage() {
 
       <div>
         <Link
-          href="/waitlist/success"
+          href={buildPathForLocale(locale, '/waitlist/success/')}
           className="inline-flex w-fit items-center justify-center rounded-2xl bg-brand-primary px-lg py-sm text-label text-brand-onPrimary transition-opacity duration-base hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
         >
           {tWaitlist('success.return')}

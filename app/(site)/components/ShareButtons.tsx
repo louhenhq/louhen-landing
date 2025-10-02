@@ -1,6 +1,7 @@
 'use client';
 
 import type { ButtonHTMLAttributes } from 'react';
+import { Button } from '@/components/ui';
 
 export type ShareButton = {
   id: string;
@@ -24,16 +25,16 @@ export default function ShareButtons({ title, buttons }: ShareButtonsProps) {
       ) : null}
       <div className="mt-sm flex flex-wrap gap-sm">
         {buttons.map(({ id, label, href, onClick }) => (
-          <button
+          <Button
             key={id}
-            type="button"
+            variant="secondary"
+            size="sm"
             onClick={onClick}
-            className="rounded-pill border border-border px-md py-xs text-label text-text transition-colors duration-base hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus disabled:cursor-not-allowed disabled:opacity-60"
             aria-label={href ? `${label} (disabled placeholder)` : label}
             disabled
           >
             {label}
-          </button>
+          </Button>
         ))}
       </div>
     </section>

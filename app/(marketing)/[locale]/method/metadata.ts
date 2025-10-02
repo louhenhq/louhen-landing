@@ -1,6 +1,12 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import { locales, type SupportedLocale } from '@/next-intl.locales';
+import type { SupportedLocale } from '@/next-intl.locales';
+import {
+  buildAlternateLanguageMap,
+  buildCanonicalPath,
+  buildCanonicalUrl,
+  resolveSiteBaseUrl,
+} from '@/lib/i18n/metadata';
 
 type MethodPageProps = {
   params: Promise<{ locale: SupportedLocale }>;
@@ -12,15 +18,11 @@ export async function generateMetadata({ params }: MethodPageProps): Promise<Met
 
   const title = t('seo.title');
   const description = t('seo.description');
-  const localizedPath = `/${locale}/method/`;
-  const baseUrlRaw = process.env.APP_BASE_URL?.trim() || process.env.NEXT_PUBLIC_SITE_URL?.trim() || 'https://louhen-landing.vercel.app';
-  const baseUrl = baseUrlRaw.replace(/\/$/, '');
+  const baseUrl = resolveSiteBaseUrl();
+  const localizedPath = buildCanonicalPath(locale, '/method/');
+  const canonicalUrl = buildCanonicalUrl(locale, '/method/');
   const imageUrl = `${baseUrl}/opengraph-image.png`;
-  const languages = locales.reduce<Record<string, string>>((acc, code) => {
-    acc[code] = `/${code}/method/`;
-    return acc;
-  }, {});
-  languages['x-default'] = '/method/';
+  const languages = buildAlternateLanguageMap('/method/');
 
   return {
     title,
@@ -32,7 +34,7 @@ export async function generateMetadata({ params }: MethodPageProps): Promise<Met
     openGraph: {
       title,
       description,
-      url: `${baseUrl}${localizedPath}`,
+      url: canonicalUrl,
       locale,
       type: 'article',
       images: [

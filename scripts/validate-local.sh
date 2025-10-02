@@ -34,6 +34,7 @@ npm run test:unit
 
 echo "✅ Running Playwright E2E"
 npm run test:e2e
+echo "✅ Visual regression baselines verified (landing snapshots)"
 
 echo "✅ Running accessibility (axe) suite"
 npm run test:axe

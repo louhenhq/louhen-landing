@@ -31,6 +31,55 @@ body {
   font-optical-sizing: auto;
 }
 
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --background: var(--semantic-dark-color-bg-page);
+  --foreground: var(--semantic-dark-color-text-body);
+
+  --semantic-color-bg-page: var(--semantic-dark-color-bg-page);
+  --semantic-color-bg-card: var(--semantic-dark-color-bg-card);
+  --semantic-color-bg-raised: var(--semantic-dark-color-bg-raised);
+  --semantic-color-bg-overlay: var(--semantic-dark-color-bg-overlay);
+
+  --semantic-color-text-body: var(--semantic-dark-color-text-body);
+  --semantic-color-text-muted: var(--semantic-dark-color-text-muted);
+  --semantic-color-text-inverse: var(--semantic-dark-color-text-inverse);
+  --semantic-color-text-link: var(--semantic-dark-color-text-link);
+
+  --semantic-color-border-subtle: var(--semantic-dark-color-border-subtle);
+  --semantic-color-border-strong: var(--semantic-dark-color-border-strong);
+  --semantic-color-border-focus: var(--semantic-dark-color-border-focus);
+
+  --semantic-color-status-success: var(--semantic-dark-color-status-success);
+  --semantic-color-status-warning: var(--semantic-dark-color-status-warning);
+  --semantic-color-status-error: var(--semantic-dark-color-status-error);
+  --semantic-color-status-info: var(--semantic-dark-color-status-info);
+
+  --semantic-color-button-primary-bg: var(--semantic-dark-color-button-primary-bg);
+  --semantic-color-button-primary-fg: var(--semantic-dark-color-button-primary-fg);
+  --semantic-color-button-secondary-bg: var(--semantic-dark-color-button-secondary-bg);
+  --semantic-color-button-secondary-fg: var(--semantic-dark-color-button-secondary-fg);
+
+  --color-background-canvas: var(--semantic-dark-color-bg-page);
+  --color-background-surface: var(--semantic-dark-color-bg-card);
+  --color-background-raised: var(--semantic-dark-color-bg-raised);
+  --color-background-overlay: var(--semantic-dark-color-bg-overlay);
+
+  --color-text-default: var(--semantic-dark-color-text-body);
+  --color-text-muted: var(--semantic-dark-color-text-muted);
+  --color-text-inverse: var(--semantic-dark-color-text-inverse);
+  --color-text-link: var(--semantic-dark-color-text-link);
+
+  --color-border-subtle: var(--semantic-dark-color-border-subtle);
+  --color-border-strong: var(--semantic-dark-color-border-strong);
+  --color-border-focus: var(--semantic-dark-color-border-focus);
+
+  color-scheme: dark;
+}
+
 .skip-link {
   position: absolute;
   top: var(--spacing-16);

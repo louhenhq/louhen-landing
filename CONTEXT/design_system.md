@@ -60,10 +60,45 @@ This document is the single source of truth for Louhen Landing design decisions.
 - **Accessible anchor targets**: All shell regions expose IDs (`#how`, `#story`, `#waitlist`, `#faq`) with `scroll-margin-top` tied to the header height so skipping or jumping never hides content behind the sticky nav.
 
 ## 5. Components
-- **Buttons**: Primary, secondary, tertiary variants; `rounded-2xl` corners; `shadow-card` by default; focus ring uses `border.focus` + `shadow.focus`. Utilities live in `app/(site)/_lib/ui.ts`—reuse instead of inlining classes.
-- **Inputs**: Base, inline, and textarea share `--radii-2xl`, `border.subtle`, and spacing tokens (`px-md`, `py-sm`). Error/help text uses `text.feedback.*` and `text-text-muted` utilities.
-- **Cards**: Use elevated surface tokens (`bg-bg-card`, `bg-bg`), consistent padding (16px → 24px tokens), and `shadow-card`; hover motion stays within opacity/translate limits.
-- **Micro-interactions**: Hover/focus states animate opacity/position ≤ 200ms with ease-out curves; no color transitions outside token palette.
+
+### UI primitives (locked)
+- **Button**: Variants `primary` (brand fill), `secondary` (outline), `ghost` (chromeless), `destructive` (error) share `--radii-2xl` corners and tokenised shadows. Sizes `sm` (`text-body-sm`), `md`, `lg` control vertical rhythm; `loading` toggles `aria-busy`, Spinner, and pointer lock. `as="a"` preserves focus/role rules and applies `aria-disabled` when `disabled`/`loading`.
+- **Input**: Leverages semantic border/focus tokens; `invalid` sets `aria-invalid` + feedback colors. Consumers must bind visible `<label>` and pipe `aria-describedby` to helper/error copy. Works for text/email/password while keeping native autocomplete attributes.
+- **Checkbox**: Enlarged 20px control with semantic border/fill, tokenised focus ring, and hidden check indicator; `invalid` mirrors feedback styling. Pair with `<label htmlFor>` for clickable copy.
+- **Card**: Variants `surface`, `outline`, `ghost` replace bespoke radius/shadow usage. `interactive` (or `as="button"|"a"`) enables subtle lift via `motion.cardLift`, respects `prefers-reduced-motion`, and retains focus ring coverage.
+- **Motion helpers**: `motion.interactive` and `motion.cardLift` live in `app/(site)/_lib/ui.ts` and gate hover/entrance translations behind reduced-motion checks; no bespoke `transition-*` combos outside these helpers.
+
+### Hero
+- Composition locks to the 12-column shell: text column spans 5–6 columns, media column spans the remainder with tokenised gutter spacing and `layout.section` rhythm.
+- Headline uses `text-display-xl` (Fraunces) with `text-balance`; subline stays in `text-body` muted; CTA stack uses primary + secondary button primitives.
+- A micro-trust line (`text-meta`, neutral tokens) sits directly under the CTA stating “Covered by LouhenFit — free returns, guaranteed.”
+- Media area reserves explicit aspect ratio (`>= 4/5`) and min-height to avoid CLS; ship a Lottie container with gradient fallback until the animation is ready.
+- Honor `prefers-reduced-motion`: fade/translate entrance only when motion is allowed, no size/weight animation.
+- i18n guardrail: EN + DE copy must wrap in ≤2 lines at 320px; allow soft-break hints rather than shrinking type.
+
+### Trust Bar
+- Sits directly beneath the hero and reuses `layout.section` (with optional `pt-0`) plus `layout.container`/`layout.grid` to stay on the 12-column rhythm.
+- Exactly four reassurance tiles: podiatrist approved, GDPR/data safety, free returns with LouhenFit, and payments handled by Adyen.
+- Tiles use neutral surfaces (`bg-bg-card`, `border-border`, `shadow-card`), 24px monochrome line icons, and `text-label` + `text-body-sm` copy; no brand gradients or loud colours.
+- Each tile exposes an `aria-label` covering the full statement, opens the relevant trust modal on click, and keeps visible focus via the tokenised outline/shadow.
+- Responsive behaviour: single column on narrow screens, 2x2 grid from >=480px, 4-up row on desktop; no horizontal overflow.
+- Motion budget mirrors the hero: opacity/translate entrance only when motion is allowed; modals fade in without parallax. EN/DE strings must stay within two lines at 320px.
+
+### How-it-Works
+- Lives after the trust bar on landing, sharing the 12-column shell with `layout.section` + `layout.grid` (heading column + 3-up card grid).
+- Exactly three steps (Scan, Match, Happy feet) with `text-h3` titles and `text-body` muted copy; supplementary link uses button/link primitives with visible focus.
+- Illustration slot per card reserves a fixed aspect ratio (>= 4/3) with neutral placeholder graphics to prevent CLS until real art ships.
+- Cards reuse `layout.card` tokens, keep gap-based spacing, and animate entrance with opacity/translate only when motion is allowed (prefer-reduced-motion skips animation).
+- Accessibility: section labelled via visible H2, cards expose semantic headings plus optional descriptive `sr-only` text for the illustration; links meet focus + AA contrast requirements.
+- Copy guardrails: EN/DE titles ≤ ~35 characters; body text ≤ two lines at 320px; link labels short verbs + nouns (no truncation).
+
+### Waitlist CTA
+- Section uses the shell grid (form spans 6–7 columns, reassurance aside spans the remainder) with `layout.section` rhythm and semantic heading tied to the skip link.
+- Form stack order: email input, consent checkbox, inline hCaptcha container (declares min-height to prevent CLS), primary CTA button.
+- Inputs/checkboxes must use the shared primitives; attach labels + `aria-describedby` so helpers/errors are announced, and keep consent copy inside the same block.
+- Client validation surfaces a `role="alert"` summary plus field-level errors; focus jumps to the first invalid control. Success places focus on the confirmation heading and offers resend guidance.
+- hCaptcha honours theme (light/dark) and `prefers-reduced-motion`; avoid scroll jumps by resetting tokens only after acknowledged states.
+- EN/DE copy fits at 320px; no raw hex/spacing; all colors, radii, and shadows come from tokens.
 
 ## 6. Motion
 - **Framework**: Framer Motion + tokenized easing (`motion.curve.standard`, `motion.curve.entrance`).
@@ -74,7 +109,7 @@ This document is the single source of truth for Louhen Landing design decisions.
 
 ## 7. Accessibility
 - **Color contrast**: AA compliance; AAA for primary body copy when feasible.
-- **Typography**: Minimum body size 16px; interactive targets ≥ 44px in one dimension.
+- **Typography**: Minimum body size 16px; interactive targets >= 44px in one dimension.
 - **Focus**: Always use `:focus-visible` rings aligned with token colors; no focus suppression.
 - **Navigation**: Logical tab order, skip-links where sections exceed 5 components.
 - **Testing**: aXe and Lighthouse a11y audits must pass with zero critical issues before merge.
@@ -86,9 +121,12 @@ This document is the single source of truth for Louhen Landing design decisions.
 - **Content ops**: Copy updates flow through `messages/**` JSON with translation notes.
 
 ## 9. Dark Mode
-- **Default**: Match system preference on first load; provide in-page toggle persisting via cookie/local storage.
-- **Tokens**: Define `color-scheme: light dark` pairs; map `surface`, `border`, `text`, and `feedback` tokens explicitly.
-- **Imagery**: Supply dark-friendly assets where contrast drops below thresholds; avoid pure-black backgrounds.
+- **Mechanics**: `<html>` carries `data-theme-mode="system|light|dark"` and `data-theme="dark"` when the dark palette is active. A `<script>` in the document head runs before hydration to apply the correct mode using the `lh_theme`/`lh_contrast` cookies + `prefers-color-scheme`, eliminating FOUC.
+- **Tokens**: `globals.css` remaps semantic tokens under `[data-theme="dark"]` so components stay token-driven (backgrounds, text, borders, focus rings, button colors, status surfaces). No runtime hex overrides.
+- **Toggle**: `ThemeToggle` lives in the header, offering System → Light → Dark. Selections persist via cookies (180-day TTL) and update `data-theme-mode`; “System” always defers to the OS on reload.
+- **Accessibility**: Dark theme must keep AA contrast for body copy, controls, borders, and focus outlines. The toggle announces changes via `aria-live` and respects `prefers-reduced-motion`.
+- **Browser hints**: `<meta name="color-scheme" content="light dark">` and `document.documentElement.style.colorScheme` ensure form controls follow the active theme.
+- **Imagery**: Keep photography/illustrations neutral; never invert assets via CSS. Prefer adding neutral surfaces if additional contrast is required.
 
 ## 10. Content & Trust Microcopy
 - **Tone**: Warm, confident, human; avoid jargon.
@@ -107,6 +145,34 @@ This document is the single source of truth for Louhen Landing design decisions.
 - **Review**: Tag design, accessibility, and engineering leads; secure approval before implementation.  
 - **Checklists**: Update `.github/pull_request_template.md` if new guardrails or validation steps are required.  
 - **Token changes**: Any new or renamed token requires (1) an issue describing the gap, (2) updates to `@louhen/design-tokens`, this document, and the decision log, and (3) verification that guard scripts (`scripts/guard-hex.mjs`) still pass.
+
+## 12a. i18n & Locale Chrome (Locked 2025-10-10)
+
+- **Pathing**: All localized routes use lowercase BCP-47 prefixes (`/{language}-{region}/…`). The root `/` is x-default and renders the market-default locale (`de-de`). Legacy slugs (`/en/`, `/de/`, `/method`) must 301 to their canonical prefixes, and middleware normalizes uppercase segments.
+- **Switcher UX**: The header/footer switcher keeps focus, announces changes politely, and preserves the current path/query/hash. Switching writes the `louhen_locale` cookie (TTL 365d, scope `/`, SameSite=Lax) before navigating; scroll position is retained when no hash is present.
+- **Locale detection**: `/` never auto-redirects bots. Humans see a suggestion banner prioritising `louhen_locale`, then `Accept-Language`. Suggestions must be dismissible and copy sourced from translations.
+- **SEO**: Canonical + hreflang tags are generated via shared helpers. Every page emits alternates for all supported locales plus `x-default`, and Open Graph URLs are canonical. `robots.txt` disallows crawling unless `VERCEL_ENV=production` *and* `NEXT_PUBLIC_ALLOW_INDEXING=true`.
+- **Sitemaps**: `app/sitemap.ts` enumerates every localized URL with alternates. Adding a locale in `SUPPORTED_LOCALES` automatically expands sitemap and metadata outputs—no manual duplication.
+- **Content governance**: EN/DE strings must fit hero/H2 wrappers at 320px. New locales ship with placeholder markers (`[FR]`) until copy review. Run `npm run i18n:check` and mobile audits before merging.
+- **Bot policy**: No geo redirects or Accept-Language auto-handoffs for crawlers (`bot`, `crawler`, `spider`, etc.). Unknown agents fall back to human suggestion flow.
+
+## 12b. Performance & Accessibility Budgets (Locked 2025-10-10)
+
+- **Core metrics**: CLS ≤ 0.05 (target ≈0), LCP ≤ 2.5s on throttled mobile (3G/4× CPU). Hero/media containers require explicit aspect ratios and min-heights; fonts preload once with `display: swap` and fallback metrics set.
+- **Lighthouse gates**: Mobile runs must score Performance ≥ 90, Accessibility = 100, SEO ≥ 95, Best Practices ≥ 90. Budgets enforced via `lighthouserc.cjs`; do not lower thresholds.
+- **Automation**: `npm run validate:local` builds, runs unit + Playwright + axe, and captures Lighthouse artifacts (`lighthouse-report/`, `playwright-report/`). Attach artifacts to PRs touching marketing routes.
+- **Motion & focus**: All smooth scrolling and staged animations honour `prefers-reduced-motion` with instant fallbacks. Focus rings remain visible; no `outline: none`.
+- **Media hygiene**: Use `next/image` or explicit `width`/`height`; lazy-load non-critical assets. Lottie/JSON animation payloads ≤150 KB and gated behind intersection observers; disable under reduced motion.
+- **Network hints**: Preconnect only critical origins (fonts, hCaptcha). Avoid new third-party scripts without perf review. Static assets must ship with long-lived immutable caching.
+
+## 12c. Trust Microcopy (Locked 2025-10-10)
+
+- **Canonical keys**: Use `trustCopy.fitGuarantee` (hero micro-trust), `trustCopy.fitDetail` (supporting copy), `trustCopy.gdpr`/`gdprDetail`, `trustCopy.payment`, and `trustCopy.coverage.*` for coverage states. Never hardcode LouhenFit/GDPR/payment reassurance in components.
+- **Surfaces**: Hero micro-trust, waitlist reassurance cards, privacy ribbon, waitlist success/confirmation flows, and future checkout/returns banners all read from these keys. Payment reassurance must mention Adyen.
+- **Tone**: Warm, parent-first, calm. Keep lines ≤2 on 320px, use `text-meta`/`text-body-sm`, neutral tokens only. No jargon or fear-based language; emphasise support and transparency.
+- **Coverage messaging**: Show whether each profile is covered by LouhenFit. Use named variants (`coverage.coveredNamed`, `coverage.notCoveredNamed`) when a child’s name is available; default to generic keys otherwise.
+- **Accessibility**: Make reassurance copy screen-reader friendly (no duplicate announcements). Links to Privacy/Terms/Adyen must be focusable with visible rings.
+- **Ops note**: When running builds/tests in offline environments, set `NEXT_USE_REMOTE_FONTS=false` to fall back to system fonts before capturing baselines.
 
 ## 13. Exceptions
 - **Emails**: Transational email templates use inline styles to satisfy ESP requirements; colors come from generated `lib/email/colors.ts` and mirror the token palette.

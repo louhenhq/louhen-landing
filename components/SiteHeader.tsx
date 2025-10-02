@@ -4,7 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import ThemeToggle from '@/components/ThemeToggle';
 import { SITE_NAME } from '@/constants/site';
-import { buttons } from '@/app/(site)/_lib/ui';
+import { Button } from '@/components/ui';
 
 type Props = {
   onboardingEnabled?: boolean;
@@ -31,8 +31,10 @@ export default function SiteHeader({ onboardingEnabled = false }: Props) {
               Onboarding
             </Link>
           )}
-          <Link href="/preferences" prefetch={false} className={`${buttons.primary} hidden md:inline-flex`}> 
-            Join the waitlist
+          <Link href="/preferences" prefetch={false} passHref legacyBehavior>
+            <Button as="a" className="hidden md:inline-flex">
+              Join the waitlist
+            </Button>
           </Link>
           {/* Theme toggle visible on desktop */}
           <ThemeToggle />

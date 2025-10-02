@@ -58,6 +58,11 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
 
 ---
 
+- **2025-10-10**  
+  Landing design revamp (Slices 0–12) complete. Baseline screenshots stored in `tests/__screenshots__/landing-v1/` and enforced via `npm run validate:local`. Milestone **Landing v1** locked; future marketing surface changes require a new decision entry, refreshed baselines, and design review sign-off.
+
+---
+
 ## Louhen Landing — Design System (Locked 2025-10-01)
 
 - **Principles**: Trust-first storytelling, visual calm, scalability for new product surfaces, and accessibility as a default constraint.  

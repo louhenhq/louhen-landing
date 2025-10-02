@@ -3,8 +3,21 @@
 import { useCallback, useMemo } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { cn } from '@/app/(site)/_lib/ui';
-import { locales, defaultLocale, type SupportedLocale } from '@/next-intl.locales';
+import {
+  SUPPORTED_LOCALES,
+  DEFAULT_LOCALE,
+  isSupportedLocale,
+  buildPathForLocale,
+  buildLocaleCookie,
+  type AppLocale,
+} from '@/lib/i18n/locales';
+
+type LocaleOption = {
+  value: AppLocale;
+  label: string;
+};
 
 type LocaleSwitcherProps = {
   id?: string;
@@ -18,43 +31,50 @@ export default function LocaleSwitcher({ id = 'locale-switcher', className, labe
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const activeLocale: SupportedLocale = locales.includes(locale as SupportedLocale)
-    ? (locale as SupportedLocale)
-    : defaultLocale;
+  const [announcement, setAnnouncement] = useState('');
 
-  const options = useMemo(
+  const activeLocale: AppLocale = isSupportedLocale(locale) ? locale : DEFAULT_LOCALE.value;
+
+  const options: LocaleOption[] = useMemo(
     () =>
-      locales.map((value) => ({
-        value,
-        label: t(value, { default: value.toUpperCase() }),
+      SUPPORTED_LOCALES.map((entry) => ({
+        value: entry.value,
+        label: entry.nativeName,
       })),
-    [t]
+    []
   );
 
   const navigateToLocale = useCallback(
     (nextLocale: string) => {
       if (nextLocale === activeLocale) return;
-      if (!locales.includes(nextLocale as SupportedLocale)) return;
+      if (!isSupportedLocale(nextLocale)) return;
 
       const params = searchParams?.toString();
       const query = params ? `?${params}` : '';
-      const segments = pathname.split('/').filter(Boolean);
-      const hasLocaleSegment = segments.length > 0 && locales.includes(segments[0] as SupportedLocale);
-      const withoutLocale = hasLocaleSegment ? `/${segments.slice(1).join('/')}` : pathname;
-      const normalized = withoutLocale === '' ? '/' : withoutLocale;
-      const target = nextLocale === defaultLocale ? normalized : `/${nextLocale}${normalized === '/' ? '' : normalized}`;
-
-      router.push(`${target}${query}`);
+      const hash = typeof window !== 'undefined' ? window.location.hash : '';
+      const targetPath = buildPathForLocale(nextLocale, pathname);
+      const serialized = buildLocaleCookie(nextLocale);
+      const secure = typeof window !== 'undefined' && window.location.protocol === 'https:' ? '; Secure' : '';
+      document.cookie = `${serialized}${secure}`;
+      const message = t('announce', { locale: options.find((opt) => opt.value === nextLocale)?.label ?? nextLocale });
+      setAnnouncement(message);
+      const destination = `${targetPath}${query}${hash}`;
+      const shouldScroll = hash.length === 0;
+      router.push(destination, { scroll: shouldScroll });
     },
-    [activeLocale, pathname, router, searchParams]
+    [activeLocale, pathname, router, searchParams, options, t]
   );
+
+  useEffect(() => {
+    setAnnouncement('');
+  }, []);
 
   return (
     <label className={cn('inline-flex items-center gap-xs text-label text-text', className)} htmlFor={id}>
-      <span className="sr-only">{label ?? 'Change language'}</span>
+      <span className="sr-only">{label ?? t('label')}</span>
       <select
         id={id}
-        aria-label={label ?? 'Change language'}
+        aria-label={label ?? t('label')}
         className="rounded-2xl border border-border bg-bg px-sm py-xs text-label text-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
         value={activeLocale}
         onChange={(event) => navigateToLocale(event.target.value)}
@@ -65,6 +85,9 @@ export default function LocaleSwitcher({ id = 'locale-switcher', className, labe
           </option>
         ))}
       </select>
+      <span aria-live="polite" className="sr-only">
+        {announcement}
+      </span>
     </label>
   );
 }

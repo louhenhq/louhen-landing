@@ -15,7 +15,7 @@ export default function SiteShell({ header, footer, children, skipToMainLabel }:
         {skipToMainLabel}
       </a>
       {header}
-      <main id="main-content" className={layout.main}>
+      <main id="main-content" tabIndex={-1} className={layout.main}>
         {children}
       </main>
       {footer}

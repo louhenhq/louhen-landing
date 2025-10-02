@@ -27,6 +27,13 @@ export const text = {
   meta: 'text-meta text-text-muted',
 };
 
+export const motion = {
+  interactive:
+    'transition-[background-color,border-color,box-shadow,transform,opacity] duration-200 ease-out motion-safe:hover:-translate-y-[1px] motion-safe:active:translate-y-0 motion-reduce:transform-none motion-reduce:duration-150',
+  cardLift:
+    'transition-[box-shadow,transform,opacity] duration-200 ease-out motion-safe:hover:-translate-y-1 motion-safe:hover:shadow-elevated motion-reduce:transform-none motion-reduce:hover:shadow-card',
+};
+
 export const buttons = {
   primary:
     'inline-flex items-center justify-center gap-xs rounded-pill bg-brand-primary px-lg py-sm text-label text-brand-onPrimary transition-opacity duration-base hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus disabled:cursor-not-allowed disabled:opacity-60',

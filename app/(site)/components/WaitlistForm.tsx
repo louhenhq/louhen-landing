@@ -3,9 +3,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import ConsentNotice from '@/app/(site)/components/ConsentNotice';
-import { buttons, focusRing, inputs, layout } from '@/app/(site)/_lib/ui';
+import { Button, Card, Checkbox, Input } from '@/components/ui';
 import { track } from '@/lib/clientAnalytics';
-import { cn } from '@/app/(site)/_lib/ui';
 
 type WaitlistFormProps = {
   defaultEmail?: string;
@@ -30,14 +29,17 @@ export default function WaitlistForm({
   const [email, setEmail] = useState(defaultEmail);
   const [consent, setConsent] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; consent?: string }>({});
+  const [formError, setFormError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [hasUtm, setHasUtm] = useState(false);
 
   const emailTrimmed = email.trim();
   const emailTouched = email.length > 0;
   const emailIsValid = useMemo(() => (emailTrimmed ? isValidEmail(emailTrimmed) : false), [emailTrimmed]);
-  const showInlineEmailError = emailTouched && !emailIsValid;
+  const inlineEmailError = emailTouched && !emailIsValid ? errorsT('email.invalid') : undefined;
+  const emailError = fieldErrors.email ?? inlineEmailError;
+  const consentError = fieldErrors.consent;
   const hasRef = useMemo(() => Boolean(source && source.trim()), [source]);
 
   useEffect(() => {
@@ -57,25 +59,33 @@ export default function WaitlistForm({
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
+    setFieldErrors({});
+    setFormError(null);
+
     if (!emailTrimmed) {
-      setError(errorsT('required'));
+      const message = errorsT('required');
+      setFieldErrors({ email: message });
+      setFormError(message);
       setSuccessMessage(null);
       return;
     }
 
     if (!isValidEmail(emailTrimmed)) {
-      setError(errorsT('email.invalid'));
+      const message = errorsT('email.invalid');
+      setFieldErrors({ email: message });
+      setFormError(message);
       setSuccessMessage(null);
       return;
     }
 
     if (!consent) {
-      setError(errorsT('required'));
+      const message = errorsT('required');
+      setFieldErrors({ consent: message });
+      setFormError(message);
       setSuccessMessage(null);
       return;
     }
 
-    setError(null);
     setIsSubmitting(true);
 
     void track({ name: 'waitlist_signup_submitted', locale, hasUtm, hasRef });
@@ -108,12 +118,14 @@ export default function WaitlistForm({
 
       if (!response.ok) {
         if (response.status === 429) {
-          setError(errorsT('rateLimited'));
+          setFieldErrors({});
+          setFormError(errorsT('rateLimited'));
           setSuccessMessage(null);
           return;
         }
 
-        setError(errorsT('generic'));
+        setFieldErrors({});
+        setFormError(errorsT('generic'));
         setSuccessMessage(null);
         return;
       }
@@ -121,6 +133,8 @@ export default function WaitlistForm({
       const payload = { email: emailTrimmed, consent: true, locale, source: source ?? undefined };
       onSubmit?.(payload);
 
+      setFieldErrors({});
+      setFormError(null);
       setSuccessMessage(t('success.subtitle'));
       setEmail('');
       setConsent(false);
@@ -128,7 +142,8 @@ export default function WaitlistForm({
       console.error('[waitlist:submit]', {
         message: requestError instanceof Error ? requestError.message : 'unknown_error',
       });
-      setError(errorsT('generic'));
+      setFieldErrors({});
+      setFormError(errorsT('generic'));
       setSuccessMessage(null);
     } finally {
       setIsSubmitting(false);
@@ -138,12 +153,13 @@ export default function WaitlistForm({
   const disableSubmit = isSubmitting || !emailTrimmed || !emailIsValid || !consent;
 
   return (
-    <form
+    <Card
+      as="form"
       id="waitlist-form"
       onSubmit={handleSubmit}
-      aria-describedby={error ? 'waitlist-error' : undefined}
+      aria-describedby={formError ? 'waitlist-error' : undefined}
       aria-busy={isSubmitting}
-      className={cn(layout.card, 'w-full px-lg py-xl')}
+      className="w-full px-lg py-xl"
       noValidate
     >
       <div className="flex flex-col gap-md">
@@ -151,47 +167,53 @@ export default function WaitlistForm({
           <label htmlFor="waitlist-email" className={text.label}>
             {t('email.label')}
           </label>
-          <input
+          <Input
             id="waitlist-email"
             name="email"
             type="email"
             value={email}
             onChange={(event) => {
               setEmail(event.target.value);
-              setError(null);
+              setFieldErrors((prev) => ({ ...prev, email: undefined }));
+              setFormError(null);
               setSuccessMessage(null);
             }}
             autoComplete="email"
             placeholder={t('email.placeholder')}
-            aria-describedby={[
-              showInlineEmailError ? 'waitlist-email-inline-error' : null,
-              error ? 'waitlist-error' : null,
-            ]
-              .filter(Boolean)
-              .join(' ') || undefined}
-            className={cn('mt-xs w-full', inputs)}
+            aria-describedby={emailError ? 'waitlist-email-error' : undefined}
+            invalid={Boolean(emailError)}
+            className="mt-xs"
           />
-          {showInlineEmailError ? (
-            <p id="waitlist-email-inline-error" className="mt-xs text-body-sm text-feedback-error" role="alert">
-              {errorsT('email.invalid')}
+          {emailError ? (
+            <p id="waitlist-email-error" className="mt-xs text-body-sm text-feedback-error" role="alert">
+              {emailError}
             </p>
           ) : null}
         </div>
 
-        <div className="flex items-start gap-sm">
-          <input
-            id="waitlist-consent"
-            name="consent"
-            type="checkbox"
-            checked={consent}
-            onChange={(event) => {
-              setConsent(event.target.checked);
-              setError(null);
-            }}
-            required
-            className={cn('mt-[calc(var(--spacing-8)/2)] h-5 w-5 rounded-md border border-border accent-brand bg-bg', focusRing)}
-          />
-          <ConsentNotice />
+        <div className="flex flex-col gap-xs">
+          <div className="flex items-start gap-sm">
+            <Checkbox
+              id="waitlist-consent"
+              name="consent"
+              checked={consent}
+              onChange={(event) => {
+                setConsent(event.target.checked);
+                setFieldErrors((prev) => ({ ...prev, consent: undefined }));
+                setFormError(null);
+                setSuccessMessage(null);
+              }}
+              required
+              invalid={Boolean(consentError)}
+              aria-describedby={consentError ? 'waitlist-consent-error' : undefined}
+            />
+            <ConsentNotice />
+          </div>
+          {consentError ? (
+            <p id="waitlist-consent-error" className="text-body-sm text-feedback-error" role="alert">
+              {consentError}
+            </p>
+          ) : null}
         </div>
 
         <div className="rounded-2xl border border-dashed border-feedback-info-border bg-feedback-info-surface px-md py-lg text-body-sm text-text-muted">
@@ -205,17 +227,13 @@ export default function WaitlistForm({
           </p>
         ) : null}
 
-        <button
-          type="submit"
-          disabled={disableSubmit}
-          className={cn(buttons.primary, 'px-lg py-sm')}
-        >
-          {isSubmitting ? `${t('submit.cta')}…` : t('submit.cta')}
-        </button>
+        <Button type="submit" disabled={disableSubmit} loading={isSubmitting}>
+          {t('submit.cta')}
+        </Button>
 
-        {error ? (
+        {formError ? (
           <p id="waitlist-error" role="alert" className="text-body-sm text-feedback-error">
-            {error}
+            {formError}
           </p>
         ) : null}
 
@@ -225,6 +243,6 @@ export default function WaitlistForm({
           </p>
         ) : null}
       </div>
-    </form>
+    </Card>
   );
 }

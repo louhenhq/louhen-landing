@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { cn, layout, text } from '@/app/(site)/_lib/ui';
+import { Card } from '@/components/ui';
 import { useMethodExperience } from './MethodExperienceProvider';
 
 type FaqTeaserProps = {
@@ -30,10 +31,12 @@ export default function FaqTeaser({ locale }: FaqTeaserProps) {
         </div>
         <ul className="grid gap-md md:grid-cols-3" role="list">
           {faqLinks.map(({ href, label }) => (
-            <li key={href} className={cn(layout.card, 'px-gutter py-md text-left text-body text-text')}>
-              <Link href={href} className="text-label text-brand-primary underline decoration-2 underline-offset-4">
-                {label}
-              </Link>
+            <li key={href} className="text-left">
+              <Card className="h-full px-gutter py-md text-body text-text">
+                <Link href={href} className="text-label text-brand-primary underline decoration-2 underline-offset-4">
+                  {label}
+                </Link>
+              </Card>
             </li>
           ))}
         </ul>

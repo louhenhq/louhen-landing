@@ -2,9 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import ShareTwinVoucherButton from '@/components/ShareTwinVoucherButton';
-import { badges, buttons, cn, layout, shadows, text } from '@/app/(site)/_lib/ui';
+import { badges, text } from '@/app/(site)/_lib/ui';
 import { useTranslations } from 'next-intl';
 import { track } from '@/lib/clientAnalytics';
+import { Button, Card } from '@/components/ui';
 
 export default function FounderStoryWithVoucher() {
   const t = useTranslations('founder');
@@ -40,7 +41,7 @@ export default function FounderStoryWithVoucher() {
         <p className={text.body}>{t('p3')}</p>
       </div>
 
-      <div className={cn(layout.card, shadows.soft, 'flex flex-col gap-md rounded-2xl p-lg')}>
+      <Card className="flex flex-col gap-md p-lg">
         <span className={`${badges.pill} w-fit bg-brand-teal/10 text-brand-teal`}>
           <span aria-hidden="true">👶👶</span>
           <span>{t('voucher.badge')}</span>
@@ -51,30 +52,35 @@ export default function FounderStoryWithVoucher() {
           <p className={text.body}>{t('voucher.body')}</p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-sm rounded-xl border border-border bg-bg px-md py-sm">
-          <button
+        <Card
+          variant="outline"
+          className="flex flex-wrap items-center gap-sm border-border px-md py-sm"
+        >
+          <Button
             type="button"
+            variant="secondary"
+            size="sm"
             onClick={handleCopy}
-            className="inline-flex items-center gap-xs rounded-xl border border-dashed border-border-strong bg-bg-card px-md py-2 font-mono text-label tracking-[0.3em] text-text transition-colors duration-base hover:border-border focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
             aria-label={t('voucher.copyAria')}
+            className="border-dashed font-mono tracking-[0.3em]"
           >
             TWINS5
-          </button>
+          </Button>
           <span className="text-body-sm text-text-muted">{t('voucher.hint')}</span>
           <span className="text-body-sm text-status-success" role="status" aria-live="polite">
             {copied ? t('voucher.copied') : ''}
           </span>
-        </div>
+        </Card>
 
         <div className="flex flex-col gap-3 sm:flex-row">
-          <a href="#waitlist" className={`${buttons.primary} w-full sm:w-auto`}>
+          <Button as="a" href="#waitlist" size="md" className="w-full sm:w-auto">
             {t('voucher.cta')}
-          </a>
+          </Button>
           <ShareTwinVoucherButton className="w-full sm:w-auto" />
         </div>
 
         <p className="text-body-sm text-text-muted">{t('voucher.tc')}</p>
-      </div>
+      </Card>
     </div>
   );
 }

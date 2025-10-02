@@ -1,10 +1,35 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { createTranslator } from 'next-intl';
 import { loadWaitlistMessages } from '@/app/(site)/waitlist/_lib/messages';
 import { readWaitlistSession } from '@/lib/waitlist/session';
 import { hasPreOnboarded } from '@/lib/firestore/waitlist';
+import { buildPathForLocale } from '@/lib/i18n/locales';
+import {
+  buildAlternateLanguageMap,
+  buildCanonicalPath,
+} from '@/lib/i18n/metadata';
 
 export const dynamic = 'force-dynamic';
+
+const PAGE_PATH = '/waitlist/already-confirmed/';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { locale, messages } = await loadWaitlistMessages();
+  const t = createTranslator({ locale, messages, namespace: 'waitlist' });
+  const title = t('already.title');
+  const description = t('already.subtitle');
+  const languages = buildAlternateLanguageMap(PAGE_PATH);
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: buildCanonicalPath(locale, PAGE_PATH),
+      languages,
+    },
+  };
+}
 
 export default async function WaitlistAlreadyConfirmedPage() {
   const { locale, messages } = await loadWaitlistMessages();
@@ -25,7 +50,7 @@ export default async function WaitlistAlreadyConfirmedPage() {
         </p>
       ) : (
         <Link
-          href="/waitlist/pre-onboarding"
+          href={buildPathForLocale(locale, '/waitlist/pre-onboarding/')}
           className="inline-flex w-fit items-center justify-center rounded-2xl bg-brand-primary px-lg py-sm text-label text-brand-onPrimary transition-opacity duration-base hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
         >
           {t('success.preOnboarding.cta')}

@@ -5,6 +5,7 @@ const withVar = (name: string, fallback?: string) =>
   fallback ? `var(${name}, ${fallback})` : `var(${name})`
 
 export default {
+  darkMode: ['class', '[data-theme="dark"]'],
   content: [
     './app/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
