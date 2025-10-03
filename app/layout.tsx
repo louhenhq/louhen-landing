@@ -51,6 +51,8 @@ const metadataBaseUrl = `${baseUrl}/`
 const defaultDescription =
   'Join the Louhen waitlist and get smarter sizing, curated looks, and fit feedback that improves with every try.'
 
+const allowIndexOverride = process.env.LH_ALLOW_INDEX === 'true'
+
 export const metadata: Metadata = {
   metadataBase: new URL(metadataBaseUrl),
   title: {
@@ -175,7 +177,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     }
   })();`;
 
-  const shouldNoIndex = typeof process.env.VERCEL_ENV === 'string' && process.env.VERCEL_ENV !== 'production'
+  const shouldNoIndex =
+    !allowIndexOverride && typeof process.env.VERCEL_ENV === 'string' && process.env.VERCEL_ENV !== 'production'
   const sameAsProfiles = [
     'https://www.linkedin.com/company/louhen',
     'https://www.instagram.com/louhen',
@@ -201,8 +204,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <meta name="color-scheme" content="light dark" />
         <meta name="description" content={defaultDescription} key="global-description" />
         {shouldNoIndex ? <meta name="robots" content="noindex,nofollow" /> : null}
+        {!shouldNoIndex && allowIndexOverride ? <meta name="robots" content="index,follow" /> : null}
         <script
           id="theme-pref-init"
+          nonce={nonce}
           dangerouslySetInnerHTML={{ __html: themeScript }}
         />
         <OrganizationJsonLd

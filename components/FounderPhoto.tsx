@@ -8,9 +8,10 @@ const ALT_TEXT = 'Martin Weis with his twin sons Louis and Henry';
 
 type FounderPhotoProps = {
   className?: string;
+  priority?: boolean;
 };
 
-export default function FounderPhoto({ className }: FounderPhotoProps) {
+export default function FounderPhoto({ className, priority = false }: FounderPhotoProps) {
   const [isFallback, setIsFallback] = useState(false);
 
   const handleError = useCallback(() => {
@@ -40,7 +41,9 @@ export default function FounderPhoto({ className }: FounderPhotoProps) {
       sizes="(min-width: 1024px) 50vw, 100vw"
       className={`h-full w-full rounded-2xl object-cover ${className ?? ''}`.trim()}
       onError={handleError}
-      loading="lazy"
+      priority={priority}
+      fetchPriority={priority ? 'high' : undefined}
+      loading={priority ? undefined : 'lazy'}
     />
   );
 }

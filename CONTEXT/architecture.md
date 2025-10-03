@@ -119,6 +119,14 @@ Required env vars (all set in Vercel):
 
 Fail fast on missing envs with clear server-side error logs (no secrets echoed).
 
+---
+
+## 6) CSP & Inline Scripts
+
+- Middleware issues a strict CSP with per-request nonces. All inline scripts **must** set `nonce={nonce}` from the request headers and render via helpers like `SeoJsonLd`.
+- Do not add raw `<script>` tags or inline event handlers; encapsulate logic in React components or external modules so the nonce is applied automatically.
+- JSON-LD helpers (`OrganizationJsonLd`, `BreadcrumbJsonLd`, `TechArticleJsonLd`, etc.) already inject the correct nonce — reuse them instead of hand-writing `<script>` blocks.
+
 ### DNS / Environment Addendum
 
 - Apex `louhen.app` must point to `76.76.21.21` (A record, DNS only) once production goes live.

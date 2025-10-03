@@ -1,6 +1,8 @@
 import { LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE, COOKIE_PATH, COOKIE_SAME_SITE } from '../theme/constants';
 
-export type AppLocale = 'en-de' | 'de-de' | 'fr-fr';
+export const FULL_LOCALES = ['en-de', 'de-de'] as const;
+
+export type AppLocale = (typeof FULL_LOCALES)[number];
 
 export type LocaleDescriptor = {
   value: AppLocale;
@@ -20,7 +22,7 @@ export const SUPPORTED_LOCALES: LocaleDescriptor[] = [
     language: 'en',
     region: 'DE',
     hrefLang: 'en-DE',
-    isDefault: false,
+    isDefault: true,
   },
   {
     value: 'de-de',
@@ -29,20 +31,16 @@ export const SUPPORTED_LOCALES: LocaleDescriptor[] = [
     language: 'de',
     region: 'DE',
     hrefLang: 'de-DE',
-    isDefault: true,
-  },
-  {
-    value: 'fr-fr',
-    label: 'Français (France)',
-    nativeName: 'Français (France)',
-    language: 'fr',
-    region: 'FR',
-    hrefLang: 'fr-FR',
     isDefault: false,
   },
 ];
 
 export const DEFAULT_LOCALE = SUPPORTED_LOCALES.find((entry) => entry.isDefault) ?? SUPPORTED_LOCALES[0];
+
+export const SHORT_TO_FULL: Record<string, AppLocale> = {
+  en: 'en-de',
+  de: 'de-de',
+};
 
 export const LOCALE_SEGMENT_PATTERN = /^\/([a-z]{2}-[a-z]{2})(?=\/|$)/;
 
@@ -86,11 +84,8 @@ export function splitLocale(locale: AppLocale): { language: string; region: stri
 export function buildPathForLocale(targetLocale: AppLocale, pathname: string): string {
   const normalizedPath = normalizePathname(pathname);
   const withoutLocale = normalizedPath.replace(LOCALE_SEGMENT_PATTERN, '');
-  const isRoot = withoutLocale === '/' || withoutLocale === '';
-  if (isRoot) {
-    return targetLocale === DEFAULT_LOCALE.value ? '/' : `/${targetLocale}/`;
-  }
-  return targetLocale === DEFAULT_LOCALE.value ? withoutLocale : `/${targetLocale}${withoutLocale}`;
+  const suffix = withoutLocale === '/' || withoutLocale === '' ? '/' : withoutLocale;
+  return `/${targetLocale}${suffix}`;
 }
 
 export function buildUrlForLocale(baseUrl: string, targetLocale: AppLocale, pathname: string): string {

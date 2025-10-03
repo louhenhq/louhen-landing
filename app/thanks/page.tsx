@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import * as React from 'react';
 import { buttons, cn, inputs } from '@/app/(site)/_lib/ui';
+import { DEFAULT_LOCALE } from '@/lib/i18n/locales';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -11,7 +12,7 @@ export default function ThanksPage({ searchParams }: { searchParams: Record<stri
   const confirmed = String(searchParams.confirmed) === '1';
   const base = process.env.NEXT_PUBLIC_SITE_URL || '';
   const url = new URL(base || 'http://localhost');
-  url.pathname = '/';
+  url.pathname = `/${DEFAULT_LOCALE.value}/`;
   if (code) url.searchParams.set('ref', code);
   const link = url.toString();
 
@@ -42,7 +43,9 @@ export default function ThanksPage({ searchParams }: { searchParams: Record<stri
       </div>
       {!confirmed && <ResendForm />}
       <p className="mt-6 text-body">
-        <Link className="underline text-brand-primary" href="/">Back to home</Link>
+        <Link className="underline text-brand-primary" href={`/${DEFAULT_LOCALE.value}/`}>
+          Back to home
+        </Link>
       </p>
     </main>
   );

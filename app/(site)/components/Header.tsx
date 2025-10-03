@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Button } from '@/components/ui';
 import { cn, layout } from '@/app/(site)/_lib/ui';
 import ThemeToggle from '@/components/ThemeToggle';
 import LocaleSwitcher from '@/app/(site)/components/LocaleSwitcher';
 import { usePrefersReducedMotion } from '@/app/(site)/_lib/usePrefersReducedMotion';
+import { buildPathForLocale, DEFAULT_LOCALE, type AppLocale, FULL_LOCALES } from '@/lib/i18n/locales';
 
 type HeaderProps = {
   onCta?: () => void;
@@ -15,6 +16,9 @@ type HeaderProps = {
 
 export default function Header({ onCta }: HeaderProps) {
   const t = useTranslations('header');
+  const rawLocale = useLocale();
+  const activeLocale = (FULL_LOCALES.includes(rawLocale as AppLocale) ? (rawLocale as AppLocale) : DEFAULT_LOCALE.value) as AppLocale;
+  const homeHref = buildPathForLocale(activeLocale, '/');
   const [isElevated, setIsElevated] = useState(false);
   const prefersReducedMotion = usePrefersReducedMotion();
 
@@ -47,7 +51,7 @@ export default function Header({ onCta }: HeaderProps) {
       )}
     >
       <div className={cn(layout.container, 'flex h-[var(--layout-header-height)] items-center justify-between gap-sm')}>
-        <Link href="/" prefetch={false} className="text-h3 text-text">
+        <Link href={homeHref} prefetch={false} className="text-h3 text-text">
           {t('logo')}
         </Link>
         <nav className="hidden items-center gap-lg lg:flex" aria-label={t('nav.aria')}>

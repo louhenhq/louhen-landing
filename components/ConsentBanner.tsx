@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useRef } from 'react';
 
 const BUTTON_CLASSES =
-  'inline-flex items-center justify-center rounded-pill border border-border px-md py-xs text-label transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-60';
+  'inline-flex items-center justify-center rounded-pill border border-border min-h-[44px] min-w-[44px] px-lg py-sm text-label transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-60';
 
 const PRIMARY_BUTTON_CLASSES = `${BUTTON_CLASSES} bg-brand-primary text-brand-onPrimary border-brand-primary hover:opacity-90`;
 const SECONDARY_BUTTON_CLASSES = `${BUTTON_CLASSES} bg-bg-card text-text border-border hover:bg-bg`;
@@ -19,7 +19,7 @@ type ConsentBannerProps = {
   onLearnMoreHref?: string;
 };
 
-export default function ConsentBanner({ open, onAccept, onReject, onLearnMoreHref = '/method' }: ConsentBannerProps) {
+export default function ConsentBanner({ open, onAccept, onReject, onLearnMoreHref = '/en-de/method' }: ConsentBannerProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const firstButtonRef = useRef<HTMLButtonElement | null>(null);
   const lastActiveElement = useRef<Element | null>(null);
@@ -105,7 +105,7 @@ export default function ConsentBanner({ open, onAccept, onReject, onLearnMoreHre
           <button type="button" className={SECONDARY_BUTTON_CLASSES} onClick={onReject}>
             Reject non-essential
           </button>
-          <Link className="text-label text-brand-primary underline" href={onLearnMoreHref}>
+          <Link className="touch-target touch-padding text-label text-brand-primary underline" href={onLearnMoreHref}>
             Learn about our Method
           </Link>
         </div>

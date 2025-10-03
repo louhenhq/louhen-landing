@@ -11,7 +11,7 @@ if (process.env.SKIP_LHCI === '1') {
 const isSandbox = process.env.SANDBOX_VALIDATION === '1';
 const previewBase = process.env.PREVIEW_BASE_URL;
 const defaultBase = process.env.BASE_URL || 'http://localhost:4311';
-const defaultLocale = (process.env.DEFAULT_LOCALE || 'en').trim() || 'en';
+const canonicalPath = '/en-de/method';
 
 if (isSandbox && (!previewBase || previewBase.trim().length === 0)) {
   console.error('SANDBOX_VALIDATION=1 requires PREVIEW_BASE_URL to be set.');
@@ -26,7 +26,7 @@ function buildDefaultTarget() {
   const base = sanitizeBase(isSandbox ? previewBase : defaultBase);
   try {
     const url = new URL(base); // ensures valid base
-    url.pathname = `/${defaultLocale.replace(/^\/+|\/+$/g, '')}/method/`;
+    url.pathname = canonicalPath;
     return url.toString();
   } catch (error) {
     console.error('Invalid BASE_URL/PREVIEW_BASE_URL provided for Lighthouse:', error.message);
@@ -34,43 +34,59 @@ function buildDefaultTarget() {
   }
 }
 
-function sanitizeOverride(raw, fallback) {
-  if (!raw || raw.trim().length === 0) return fallback;
+function normalizeUrl(raw) {
+  const url = new URL(raw);
+  url.pathname = url.pathname.replace(/\/+/g, '/');
+  url.pathname = url.pathname.replace(/\/$/, '');
+  return url.toString();
+}
+
+function resolveTargetUrl() {
+  const defaultTarget = buildDefaultTarget();
+  if (!process.env.LHCI_URL || process.env.LHCI_URL.trim().length === 0) {
+    return normalizeUrl(defaultTarget);
+  }
+
   try {
-    const url = new URL(raw.trim());
-    // Collapse duplicate slashes in pathname while preserving leading slash
-    url.pathname = url.pathname.replace(/\/+/g, '/');
-    if (!url.pathname.endsWith('/')) url.pathname += '/';
-    return url.toString();
+    return normalizeUrl(process.env.LHCI_URL.trim());
   } catch (error) {
-    console.warn(`Invalid LHCI_URL '${raw}'. Falling back to default target.`);
-    return fallback;
+    console.warn(`Invalid LHCI_URL '${process.env.LHCI_URL}'. Falling back to default target.`);
+    return normalizeUrl(defaultTarget);
   }
 }
 
-const defaultTarget = buildDefaultTarget();
-const targetUrl = sanitizeOverride(process.env.LHCI_URL, defaultTarget);
-process.env.LHCI_URL = targetUrl;
+async function waitForOk(initialUrl, timeoutMs = 45_000) {
+  const deadline = Date.now() + timeoutMs;
+  let currentUrl = initialUrl;
+  let lastError = null;
 
-async function ensureReachable(url, attempts = 10) {
-  for (let i = 1; i <= attempts; i += 1) {
+  while (Date.now() < deadline) {
     try {
-      const response = await fetch(url, { method: 'GET', redirect: 'manual' });
-      if (response.status >= 200 && response.status < 400) {
-        return true;
-      }
-      console.warn(`Attempt ${i}/${attempts}: Received status ${response.status} from ${url}`);
-    } catch (error) {
-      console.warn(`Attempt ${i}/${attempts}: Failed to reach ${url} (${error.message})`);
-    }
-    await sleep(3000);
-  }
-  return false;
-}
+      const response = await fetch(currentUrl, { method: 'GET', redirect: 'manual' });
 
-if (!(await ensureReachable(targetUrl))) {
-  console.error(`Unable to reach ${targetUrl}. Is the preview/local server running?`);
-  process.exit(1);
+      if ([301, 302, 307, 308].includes(response.status)) {
+        const location = response.headers.get('location');
+        if (location) {
+          currentUrl = normalizeUrl(new URL(location, currentUrl).toString());
+          continue;
+        }
+      }
+
+      if (response.status === 200) {
+        return currentUrl;
+      }
+
+      lastError = new Error(`Received status ${response.status}`);
+      console.warn(`Waiting for ${currentUrl}: ${lastError.message}`);
+    } catch (error) {
+      lastError = error;
+      console.warn(`Waiting for ${currentUrl}: ${error.message}`);
+    }
+
+    await sleep(1500);
+  }
+
+  throw lastError ?? new Error(`Timed out waiting for ${initialUrl}`);
 }
 
 const outputDir = process.env.LIGHTHOUSE_OUTPUT_DIR || 'lighthouse-report';
@@ -81,6 +97,24 @@ fs.mkdirSync(resolvedOutputDir, { recursive: true });
 
 const args = ['npx', 'lhci', 'autorun', '--config=lighthouserc.cjs', `--upload.outputDir=${resolvedOutputDir}`];
 
-console.log(`Running Lighthouse for ${targetUrl}`);
+const requestedTarget = resolveTargetUrl();
 
-execSync(args.join(' '), { stdio: 'inherit' });
+let finalTarget;
+try {
+  finalTarget = await waitForOk(requestedTarget);
+} catch (error) {
+  console.error(`Unable to reach ${requestedTarget}: ${error.message}`);
+  process.exit(1);
+}
+
+process.env.LHCI_URL = finalTarget;
+
+console.log(`Resolved Lighthouse target: ${finalTarget}`);
+console.log('Running Lighthouse audit via LHCI...');
+
+const childEnv = {
+  ...process.env,
+  LH_ALLOW_INDEX: 'true',
+};
+
+execSync(args.join(' '), { stdio: 'inherit', env: childEnv });

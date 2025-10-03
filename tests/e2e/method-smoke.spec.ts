@@ -1,8 +1,8 @@
 import { expect, test } from '@playwright/test';
 
-test.describe('/en/method page smoke test', () => {
+test.describe('/en-de/method page smoke test', () => {
   test('renders localized hero, skip link, and CTA target', async ({ page }) => {
-    await page.goto('/en/method/');
+    await page.goto('/en-de/method/');
     const title = await page.title();
     expect(title).toMatch(/Method/i);
     expect(title).toMatch(/Louhen/i);
@@ -21,25 +21,25 @@ test.describe('/en/method page smoke test', () => {
     ];
 
     for (const linkName of faqLinks) {
-      await page.goto('/en/method/');
+      await page.goto('/en-de/method/');
       await Promise.all([
-        page.waitForURL(/\/en\/waitlist(\?|#|$)/),
+        page.waitForURL(/\/en-de\/waitlist(\?|#|$)/),
         page.getByRole('link', { name: linkName }).click(),
       ]);
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
       await page.goBack();
-      await page.waitForURL(/\/en\/method\/?$/);
+      await page.waitForURL(/\/en-de\/method\/?$/);
     }
   });
 
   test('Science disclosure privacy link is locale aware', async ({ page }) => {
-    await page.goto('/en/method/');
+    await page.goto('/en-de/method/');
     const disclosureButton = page.getByRole('button', { name: /See the science/i });
     await disclosureButton.click();
     await expect(page.getByRole('region', { name: /See the science/i })).toBeVisible();
 
     await Promise.all([
-      page.waitForURL(/\/en\/privacy\/?$/),
+      page.waitForURL(/\/en-de\/privacy\/?$/),
       page.getByRole('link', { name: /privacy policy/i }).click(),
     ]);
 

@@ -1,14 +1,18 @@
 'use client';
 
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { cn, layout, text } from '@/app/(site)/_lib/ui';
 import { LEGAL_ENTITY } from '@/constants/site';
 import { useConsent } from '@/components/ConsentProvider';
 import LocaleSwitcher from '@/app/(site)/components/LocaleSwitcher';
+import { buildPathForLocale, DEFAULT_LOCALE, FULL_LOCALES, type AppLocale } from '@/lib/i18n/locales';
 
 export default function Footer() {
   const t = useTranslations('footer');
+  const rawLocale = useLocale();
+  const activeLocale = (FULL_LOCALES.includes(rawLocale as AppLocale) ? (rawLocale as AppLocale) : DEFAULT_LOCALE.value) as AppLocale;
+  const to = (pathname: string) => buildPathForLocale(activeLocale, pathname);
   const year = new Date().getFullYear();
   const { openManager } = useConsent();
 
@@ -26,18 +30,30 @@ export default function Footer() {
           </div>
           <nav className="flex flex-col gap-sm md:col-span-5 lg:col-span-4" aria-label={t('legalNavLabel')}>
             <p className={cn(text.label, 'text-text')}>{t('legal.heading')}</p>
-            <Link href="/privacy" prefetch={false} className="text-label text-text-muted transition-colors hover:text-text">
+            <Link
+              href={to('/privacy')}
+              prefetch={false}
+              className="touch-target touch-padding text-label text-text-muted transition-colors hover:text-text"
+            >
               {t('legal.privacy')}
             </Link>
-            <Link href="/terms" prefetch={false} className="text-label text-text-muted transition-colors hover:text-text">
+            <Link
+              href={to('/terms')}
+              prefetch={false}
+              className="touch-target touch-padding text-label text-text-muted transition-colors hover:text-text"
+            >
               {t('legal.terms')}
             </Link>
-            <Link href="/imprint" prefetch={false} className="text-label text-text-muted transition-colors hover:text-text">
+            <Link
+              href={to('/imprint')}
+              prefetch={false}
+              className="touch-target touch-padding text-label text-text-muted transition-colors hover:text-text"
+            >
               {t('legal.imprint')}
             </Link>
             <button
               type="button"
-              className="w-fit text-left text-label text-brand-primary underline decoration-2 underline-offset-4 transition-colors hover:text-brand-primary/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
+              className="touch-target touch-padding w-fit text-left text-label text-brand-primary underline decoration-2 underline-offset-4 transition-colors hover:text-brand-primary/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
               onClick={openManager}
             >
               {t('legal.preferences')}

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { DEFAULT_LOCALE } from '@/lib/i18n/locales';
 
 type Step = 'account' | 'profile' | 'sizing' | 'browse';
 const STEPS: Step[] = ['account','profile','sizing','browse'];
@@ -360,7 +361,12 @@ function StepBrowse() {
         <div>Sizing: <span className="font-mono">{sizing.method || '—'}</span></div>
       </div>
       <div className="mt-6">
-        <Link href="/" className="rounded-xl bg-slate-900 text-text-inverse px-4 py-2 font-semibold hover:opacity-90">Start browsing</Link>
+        <Link
+          href={`/${DEFAULT_LOCALE.value}/`}
+          className="rounded-xl bg-slate-900 text-text-inverse px-4 py-2 font-semibold hover:opacity-90"
+        >
+          Start browsing
+        </Link>
       </div>
     </Shell>
   );

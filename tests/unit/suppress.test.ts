@@ -32,6 +32,7 @@ vi.mock('firebase-admin/firestore', () => ({
 vi.stubEnv('SUPPRESSION_SALT', 'test-salt');
 
 import { buildUnsubUrl, signUnsubToken, verifyUnsubToken } from '@/lib/email/tokens';
+import { DEFAULT_LOCALE } from '@/lib/i18n/locales';
 import { hashEmail, isSuppressed, shouldSend, upsertSuppression } from '@/lib/email/suppress';
 
 const TEST_EMAIL = 'User@example.com ';
@@ -86,6 +87,8 @@ describe('unsubscribe tokens', () => {
   it('builds unsubscribe URL with token', () => {
     vi.stubEnv('APP_BASE_URL', 'https://louhen.eu');
     const url = buildUnsubUrl('tester@example.com', 'all');
-    expect(url).toMatch(/^https:\/\/louhen\.eu\/unsubscribe\?token=/);
+    const locale = DEFAULT_LOCALE.value;
+    const pattern = new RegExp(`^https://louhen\\.eu/${locale}/unsubscribe\\?token=`);
+    expect(url).toMatch(pattern);
   });
 });

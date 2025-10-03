@@ -47,7 +47,7 @@ test.describe('Unsubscribe flow', () => {
 
     await expectSuppressed(request, email);
 
-    await page.goto('/unsubscribe?status=manual-success');
+    await page.goto('/en-de/unsubscribe?status=manual-success');
     await expect(page.getByText(/Thanks! Your unsubscribe request/i)).toBeVisible();
   });
 });

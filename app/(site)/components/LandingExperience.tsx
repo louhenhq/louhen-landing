@@ -133,7 +133,7 @@ export default function LandingExperience() {
       <section id="story" className={cn(layout.section, surfaces.subtle)}>
         <div className={cn(layout.container, layout.grid, 'items-start')}>
           <div className="overflow-hidden rounded-2xl md:col-span-5 lg:col-span-4">
-            <FounderPhoto />
+            <FounderPhoto priority />
           </div>
           <div className="md:col-span-7 lg:col-span-6">
             <FounderStoryWithVoucher />

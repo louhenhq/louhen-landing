@@ -38,13 +38,13 @@ const dimensionHighlights = [
 ]
 
 const baseUrl = resolveSiteBaseUrl()
-const methodPath = buildCanonicalPath(DEFAULT_LOCALE.value, '/method/')
-const methodUrl = buildCanonicalUrl(DEFAULT_LOCALE.value, '/method/')
+const methodPath = buildCanonicalPath(DEFAULT_LOCALE.value, '/method')
+const methodUrl = buildCanonicalUrl(DEFAULT_LOCALE.value, '/method')
 const methodTitle = 'Our Method'
 const methodDescription = 'See how Louhen captures precise shoe dimensions and builds trust into every recommendation.'
 
 export function generateMetadata(): Metadata {
-  const languages = buildAlternateLanguageMap('/method/');
+  const languages = buildAlternateLanguageMap('/method');
 
   return {
     title: methodTitle,

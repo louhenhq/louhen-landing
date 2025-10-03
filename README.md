@@ -24,6 +24,8 @@ Louhen Landing is the official marketing site for Louhen, designed to provide a 
 
 ## Adding a locale
 
+> Current production locales: `/en-de/*` (default, English content for the German market) and `/de-de/*` (German copy). Short segments (`/en`, `/de`) are auto-redirected to the canonical variant, and loopback hosts bypass HTTPS/HSTS to keep automation green.
+
 1. Register the locale in `lib/i18n/locales.ts` with its BCP-47 code, native label, region, and `hrefLang` (use lowercase `language-region`).
 2. Add the translation bundle under `messages/{locale}.json` and fill any route-specific namespaces (`i18n/{language}/**` for waitlist flows). Use placeholder markers (`[FR]`) until copy is confirmed.
 3. Run `npm run i18n:check` to ensure required keys exist and keep EN/DE parity for locked slices.
@@ -172,6 +174,27 @@ npx playwright test tests/e2e/waitlist.flow.spec.ts
 npm run lighthouse
 ```
 
+`npm run lighthouse` expects a production server to be listening on `http://localhost:4311`.
+Start it in another terminal with `PORT=4311 NODE_ENV=production npx next start -p 4311` and
+then run the command above. The helper script waits until the chosen URL responds with `200`
+before launching LHCI. By default it targets `http://localhost:4311/en-de/method`; override the
+target with `LHCI_URL=http://localhost:4311/de-de/method npm run lighthouse` when you need the
+alternate locale. Routing runs with `localePrefix = "always"`, so `/en-de/*` remains the canonical
+segment even for the default locale. Middleware bypasses HTTPS/HSTS enforcement on loopback hosts,
+so there are no Chrome interstitials during local audits. The script sets `LH_ALLOW_INDEX=true`
+for its child process so preview-era `noindex` directives are lifted (middleware + robots.txt allow
+crawling), and it exercises Lighthouse in a desktop profile with provided throttling for repeatable
+local scores.
+When robots.txt is requested locally, it derives the sitemap URL from the incoming protocol/host
+headers (falling back to `BASE_URL` or `http://localhost:4311`), so Lighthouse sees
+`http://localhost:4311/sitemap.xml` while remote environments produce the correct absolute origin.
+
+#### Playwright run modes
+- **Local webServer mode** (default): in one terminal run `npm run serve:prod` (the script first frees port 4311 via `kill -9 $(lsof -tiTCP:4311)` on macOS, then launches `next start`). With `BASE_URL` unset, run `npm run test:e2e` and Playwright will boot the local server for you when needed.
+- **External target mode**: when the environment cannot bind to port 4311, point Playwright at an already-running deployment with `BASE_URL=http://localhost:4311/en-de/ npm run test:e2e:external`. Any fully-qualified origin works (preview URLs, staging hosts, etc.) as long as it already serves the `/en-de/*` routes.
+
+For manual local smoke testing you can still hit `npm run serve:prod` directly; the kill-and-restart line keeps the experience idempotent.
+
 ### Local validation (single command)
 
 Prefer a one-and-done run? Use the bundled validator:
@@ -198,6 +221,14 @@ This command sets `SANDBOX_VALIDATION=1` and `PREVIEW_BASE_URL=https://staging.l
 Use `validate:local` during normal development; reserve `validate:sandbox` for Codex or other non-loopback environments.
 
 Need to point at a different preview? Override the default with `PREVIEW_BASE_URL=https://my-preview.example`.
+
+### Reviewer checklist
+- [ ] Playwright supports BASE_URL external mode (no webServer spawn when set).
+- [ ] Local mode passes: serve:prod + test:e2e green.
+- [ ] Lighthouse runs on /en-de/method (or LHCI_URL override), no interstitials.
+- [ ] Docs updated for the two modes and port-free one-liner.
+- [ ] E2E tests and SEO/unit specs assume full-locale prefixes only.
+- [ ] Fonts load from /fonts/** only; no Google Fonts requests.
 
 ### CI on demand
 

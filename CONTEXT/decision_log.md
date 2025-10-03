@@ -93,3 +93,6 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
 
 - **2025-10-04**  
   Slice 3 introduces the SiteShell (12-col grid, 1440px max), translucent sticky header with locale switcher, and accessible footer with GDPR reassurance. All landing sections now consume the shared layout helpers and section rhythm.
+ 
+- **2025-10-07**  
+  Middleware locks `localePrefix = 'always'`, passes through already-localised `/en-de/*` and `/de-de/*` requests without rewrites, and upgrades `/en`, `/de`, and bare routes to their canonical `/en-de/*` counterparts. Loopback hosts continue to bypass HTTPS/HSTS so automation never encounters Chrome interstitials. Lighthouse defaults to `http://localhost:4311/en-de/method`, waits for a `200`, and can still be overridden with `LHCI_URL` when targeting other locales.

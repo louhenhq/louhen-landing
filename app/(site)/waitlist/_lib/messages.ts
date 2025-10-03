@@ -13,7 +13,6 @@ const FALLBACK_LOCALE: SupportedLocale = 'en-de';
 const WAITLIST_NAMESPACE: Record<SupportedLocale, AbstractIntlMessages> = {
   'en-de': waitlistEn as AbstractIntlMessages,
   'de-de': waitlistDe as AbstractIntlMessages,
-  'fr-fr': waitlistEn as AbstractIntlMessages,
 };
 
 function selectWaitlistMessages(locale: SupportedLocale): AbstractIntlMessages {

@@ -2,37 +2,61 @@ import { Buffer } from 'node:buffer';
 import { defineConfig, devices } from '@playwright/test';
 import type { PlaywrightTestConfig } from '@playwright/test';
 
+const FALLBACK_ORIGIN = 'http://localhost:4311';
+const LOCALE_SEGMENT_PATTERN = /(\/en-de|\/de-de)$/;
+
+function normalizeBase(value?: string | null) {
+  return value?.trim().replace(/\/+$/, '') ?? '';
+}
+
+function ensureLocaleBase(value: string) {
+  const normalized = normalizeBase(value) || FALLBACK_ORIGIN;
+  if (LOCALE_SEGMENT_PATTERN.test(normalized)) {
+    return normalized;
+  }
+  return `${normalized}/en-de`;
+}
+
+function withTrailingSlash(value: string) {
+  return value.endsWith('/') ? value : `${value}/`;
+}
+
 const isSandbox = process.env.SANDBOX_VALIDATION === '1';
 const sandboxBaseURL = process.env.PREVIEW_BASE_URL;
-const defaultBaseURL = process.env.BASE_URL ?? 'http://localhost:4311';
-const baseURL = isSandbox ? sandboxBaseURL : defaultBaseURL;
 const shouldSkipWebServer = process.env.PLAYWRIGHT_SKIP === '1';
 
 const statusUser = process.env.STATUS_USER ?? process.env.CI_STATUS_USER ?? 'status-ops';
 const statusPass = process.env.STATUS_PASS ?? process.env.CI_STATUS_PASS ?? 'status-secret';
 
-if (isSandbox && (!sandboxBaseURL || sandboxBaseURL.trim().length === 0)) {
+const sandboxOrigin = normalizeBase(sandboxBaseURL);
+if (isSandbox && !sandboxOrigin) {
   throw new Error('SANDBOX_VALIDATION=1 requires PREVIEW_BASE_URL to be set.');
 }
 
-const resolvedBaseURL = baseURL ?? defaultBaseURL;
+const baseOverride = normalizeBase(process.env.BASE_URL);
+const hasBaseOverride = baseOverride.length > 0;
+
+const defaultOrigin = sandboxOrigin || normalizeBase(process.env.APP_BASE_URL) || FALLBACK_ORIGIN;
+const targetOrigin = hasBaseOverride ? baseOverride : defaultOrigin;
+const canonicalBaseURL = withTrailingSlash(ensureLocaleBase(targetOrigin));
+const useExternalTarget = hasBaseOverride || isSandbox;
 
 const testEnv = {
-  BASE_URL: resolvedBaseURL,
-  APP_BASE_URL: resolvedBaseURL,
+  BASE_URL: targetOrigin,
+  APP_BASE_URL: targetOrigin,
   TEST_MODE: '1',
   TEST_E2E_SHORTCIRCUIT: 'true',
   TEST_E2E_BYPASS_TOKEN: 'e2e-mocked-token',
   NEXT_PUBLIC_ENV: process.env.NEXT_PUBLIC_ENV ?? 'ci',
-  NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? resolvedBaseURL,
+  NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? targetOrigin,
   NEXT_PUBLIC_HCAPTCHA_SITE_KEY: process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY ?? 'test_site_key',
   NEXT_PUBLIC_WAITLIST_URGENCY: process.env.NEXT_PUBLIC_WAITLIST_URGENCY ?? 'true',
   NEXT_PUBLIC_ANALYTICS_DISABLED: process.env.NEXT_PUBLIC_ANALYTICS_DISABLED ?? '1',
   NEXT_PUBLIC_ANALYTICS_DEBUG: process.env.NEXT_PUBLIC_ANALYTICS_DEBUG ?? '0',
   NEXT_PUBLIC_COMMIT_SHA: process.env.NEXT_PUBLIC_COMMIT_SHA ?? 'playwright-ci',
-  NEXT_PUBLIC_LOCALES: process.env.NEXT_PUBLIC_LOCALES ?? 'en,de',
-  NEXT_PUBLIC_DEFAULT_LOCALE: process.env.NEXT_PUBLIC_DEFAULT_LOCALE ?? 'en',
-  DEFAULT_LOCALE: process.env.DEFAULT_LOCALE ?? 'en',
+  NEXT_PUBLIC_LOCALES: process.env.NEXT_PUBLIC_LOCALES ?? 'en-de,de-de',
+  NEXT_PUBLIC_DEFAULT_LOCALE: process.env.NEXT_PUBLIC_DEFAULT_LOCALE ?? 'en-de',
+  DEFAULT_LOCALE: process.env.DEFAULT_LOCALE ?? 'en-de',
   NEXT_PUBLIC_METHOD_STICKY_CTA: process.env.NEXT_PUBLIC_METHOD_STICKY_CTA ?? 'true',
   NEXT_PUBLIC_METHOD_EXIT_NUDGE: process.env.NEXT_PUBLIC_METHOD_EXIT_NUDGE ?? 'true',
   HCAPTCHA_SECRET: process.env.HCAPTCHA_SECRET ?? 'test_secret',
@@ -67,7 +91,7 @@ const config: PlaywrightTestConfig = {
     ['json'],
   ],
   use: {
-    baseURL: resolvedBaseURL,
+    baseURL: canonicalBaseURL,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -100,17 +124,17 @@ if (shouldSkipWebServer) {
     },
   ];
 
-  if (!isSandbox) {
+  if (!useExternalTarget) {
     config.webServer = {
       command: 'npm run start:test',
-      url: resolvedBaseURL,
+      url: canonicalBaseURL,
       reuseExistingServer: true,
       timeout: 180_000,
       env: {
         ...testEnv,
-        BASE_URL: resolvedBaseURL,
-        APP_BASE_URL: resolvedBaseURL,
-        NEXT_PUBLIC_SITE_URL: resolvedBaseURL,
+        BASE_URL: targetOrigin,
+        APP_BASE_URL: targetOrigin,
+        NEXT_PUBLIC_SITE_URL: targetOrigin,
         NODE_ENV: 'production',
       },
     };

@@ -48,9 +48,9 @@ const variantClasses: Record<ButtonVariant, string> = {
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
-  sm: 'h-9 px-md text-body-sm font-medium',
-  md: 'h-11 px-lg text-label font-semibold',
-  lg: 'h-12 px-xl text-label font-semibold',
+  sm: 'px-md py-xs text-body-sm font-medium',
+  md: 'px-lg py-sm text-label font-semibold',
+  lg: 'px-xl py-sm text-label font-semibold',
 };
 
 function Spinner() {
@@ -84,6 +84,7 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
 
   const baseClasses = cn(
     'inline-flex items-center justify-center gap-sm rounded-2xl',
+    'min-h-[44px] min-w-[44px]',
     'shadow-card',
     motion.interactive,
     focusRing,

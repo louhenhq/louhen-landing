@@ -9,7 +9,7 @@ const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
 const nextConfig: NextConfig = {
   async redirects() {
-    const legacyLocaleRedirects = ['en', 'de', 'fr'].flatMap((legacy) => {
+    const legacyLocaleRedirects = ['en', 'de'].flatMap((legacy) => {
       const target = SUPPORTED_LOCALES.find((value) => value.startsWith(`${legacy}-`));
       if (!target) return [];
       return [
@@ -29,7 +29,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/method',
-        destination: `/${DEFAULT_LOCALE}/method/`,
+        destination: `/${DEFAULT_LOCALE}/method`,
         permanent: true,
       },
       ...legacyLocaleRedirects,

@@ -9,4 +9,7 @@ npm run build:test
 npx playwright test tests/e2e/landing.screenshots.spec.ts --project=chromium --update-snapshots
 ```
 
+If the middleware or locale prefix changes (for example, swapping the canonical test path between
+`/en-de/*` and `/de-de/*`), refresh these baselines after capturing the new localized URLs.
+
 The Playwright test `tests/e2e/landing.screenshots.spec.ts` compares new runs against these files during `npm run validate:local`.

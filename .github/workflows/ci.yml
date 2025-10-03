@@ -25,8 +25,8 @@ jobs:
       NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
       NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
       NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
-      NEXT_PUBLIC_LOCALES: 'en,de'
-      NEXT_PUBLIC_DEFAULT_LOCALE: 'en'
+      NEXT_PUBLIC_LOCALES: 'en-de,de-de'
+      NEXT_PUBLIC_DEFAULT_LOCALE: 'en-de'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -93,14 +93,14 @@ jobs:
       NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
       NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
       NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
-      NEXT_PUBLIC_LOCALES: 'en,de'
-      NEXT_PUBLIC_DEFAULT_LOCALE: 'en'
+      NEXT_PUBLIC_LOCALES: 'en-de,de-de'
+      NEXT_PUBLIC_DEFAULT_LOCALE: 'en-de'
       NEXT_PUBLIC_ANALYTICS_DISABLED: '1'
       NEXT_PUBLIC_ANALYTICS_DEBUG: '0'
       NEXT_PUBLIC_METHOD_STICKY_CTA: 'true'
       NEXT_PUBLIC_METHOD_EXIT_NUDGE: 'true'
       NEXT_TELEMETRY_DISABLED: '1'
-      DEFAULT_LOCALE: 'en'
+      DEFAULT_LOCALE: 'en-de'
       BASE_URL: http://localhost:4311
       HCAPTCHA_SECRET: ci-hcaptcha-secret
       WAITLIST_CONFIRM_TTL_DAYS: '7'
@@ -145,6 +145,8 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
+      # For runners that cannot bind localhost:4311, deploy the app first and replace this step with:
+      #   BASE_URL=${{ env.APP_BASE_URL }}/en-de/ npm run test:e2e:external
       - name: Run Playwright E2E suite
         run: |
           mkdir -p playwright-report
@@ -183,14 +185,14 @@ jobs:
       NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
       NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
       NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
-      NEXT_PUBLIC_LOCALES: 'en,de'
-      NEXT_PUBLIC_DEFAULT_LOCALE: 'en'
+      NEXT_PUBLIC_LOCALES: 'en-de,de-de'
+      NEXT_PUBLIC_DEFAULT_LOCALE: 'en-de'
       NEXT_PUBLIC_ANALYTICS_DISABLED: '1'
       NEXT_PUBLIC_ANALYTICS_DEBUG: '0'
       NEXT_PUBLIC_METHOD_STICKY_CTA: 'true'
       NEXT_PUBLIC_METHOD_EXIT_NUDGE: 'true'
       NEXT_TELEMETRY_DISABLED: '1'
-      DEFAULT_LOCALE: 'en'
+      DEFAULT_LOCALE: 'en-de'
       BASE_URL: http://localhost:4311
       HCAPTCHA_SECRET: ci-hcaptcha-secret
       WAITLIST_CONFIRM_TTL_DAYS: '7'
@@ -273,8 +275,8 @@ jobs:
       NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
       NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
       NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
-      NEXT_PUBLIC_LOCALES: 'en,de'
-      NEXT_PUBLIC_DEFAULT_LOCALE: 'en'
+      NEXT_PUBLIC_LOCALES: 'en-de,de-de'
+      NEXT_PUBLIC_DEFAULT_LOCALE: 'en-de'
       NEXT_PUBLIC_ANALYTICS_DISABLED: '0'
       NEXT_PUBLIC_ANALYTICS_DEBUG: '1'
       HCAPTCHA_SECRET: ci-hcaptcha-secret

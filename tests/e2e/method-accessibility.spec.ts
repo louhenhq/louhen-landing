@@ -1,9 +1,9 @@
 import { expect, test } from '@playwright/test';
 
-test.describe('/en/method accessibility flows', () => {
+test.describe('/en-de/method accessibility flows', () => {
   test('keyboard navigation and dismissible elements behave accessibly', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
-    await page.goto('/en/method/');
+    await page.goto('/en-de/method/');
 
     const skipLink = page.getByRole('link', { name: /Skip to Join Waitlist/i });
     await page.keyboard.press('Tab');

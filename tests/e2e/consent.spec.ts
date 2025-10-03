@@ -9,7 +9,7 @@ function getBanner(page: import('@playwright/test').Page) {
 test.describe('Consent banner', () => {
   test('accepting consent hides banner and persists choice', async ({ context, page }) => {
     await context.clearCookies();
-    await page.goto('/');
+    await page.goto('/en-de/');
 
     const dialog = getBanner(page);
     await expect(dialog).toBeVisible();

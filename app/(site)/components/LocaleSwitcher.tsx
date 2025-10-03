@@ -70,12 +70,15 @@ export default function LocaleSwitcher({ id = 'locale-switcher', className, labe
   }, []);
 
   return (
-    <label className={cn('inline-flex items-center gap-xs text-label text-text', className)} htmlFor={id}>
+    <label
+      className={cn('inline-flex items-center gap-xs text-label text-text', className)}
+      htmlFor={id}
+    >
       <span className="sr-only">{label ?? t('label')}</span>
       <select
         id={id}
         aria-label={label ?? t('label')}
-        className="rounded-2xl border border-border bg-bg px-sm py-xs text-label text-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
+        className="min-h-[44px] rounded-2xl border border-border bg-bg px-sm py-xs text-label text-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
         value={activeLocale}
         onChange={(event) => navigateToLocale(event.target.value)}
       >

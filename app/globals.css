@@ -40,3 +40,15 @@ body {
   font-family: var(--typography-font-family-sans);
   font-optical-sizing: auto;
 }
+
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.touch-padding {
+  padding: 0.5rem 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
