@@ -103,9 +103,9 @@ type LocaleSuggestionState = {
 };
 
 export default async function RootLandingPage({ searchParams }: RootPageProps) {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const localeCookie = cookieStore.get(LOCALE_COOKIE)?.value ?? null;
-  const headerStore = headers();
+  const headerStore = await headers();
   const ua = headerStore.get('user-agent') ?? '';
   const acceptLanguageHeader = headerStore.get('accept-language');
   const isBot = BOT_REGEX.test(ua.toLowerCase());

@@ -20,6 +20,7 @@ type BaseButtonProps = {
   leftIcon?: ReactNode;
   rightIcon?: ReactNode;
   className?: string;
+  disabled?: boolean;
 };
 
 type ButtonAsButton = BaseButtonProps &
@@ -30,6 +31,7 @@ type ButtonAsButton = BaseButtonProps &
 type ButtonAsAnchor = BaseButtonProps &
   Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'className'> & {
     as: 'a';
+    prefetch?: boolean;
   };
 
 export type ButtonProps = ButtonAsButton | ButtonAsAnchor;
@@ -102,8 +104,11 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
   );
 
   if (isAnchor) {
-    const anchorProps = rest as AnchorHTMLAttributes<HTMLAnchorElement>;
-    const { onClick, role, tabIndex, ...anchorRest } = anchorProps;
+    const anchorProps = rest as AnchorHTMLAttributes<HTMLAnchorElement> & {
+      prefetch?: boolean;
+    };
+    const { onClick, role, tabIndex, prefetch, ...anchorRest } = anchorProps;
+    void prefetch;
     const anchorDisabled = isDisabled || !anchorProps.href;
 
     const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {

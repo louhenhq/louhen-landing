@@ -15,8 +15,18 @@ export default {
   theme: {
     extend: {
       fontFamily: {
+        display: [
+          'var(--typography-font-family-display)',
+          'Fraunces',
+          'Iowan Old Style',
+          'Palatino Linotype',
+          'Palatino',
+          'Times New Roman',
+          'ui-serif',
+          'serif',
+        ],
         heading: [
-          'var(--font-heading)',
+          'var(--typography-font-family-display)',
           'Fraunces',
           'Iowan Old Style',
           'Palatino Linotype',
@@ -26,7 +36,7 @@ export default {
           'serif',
         ],
         sans: [
-          'var(--font-body)',
+          'var(--typography-font-family-sans)',
           'Inter',
           'Segoe UI',
           'Helvetica Neue',
@@ -142,7 +152,7 @@ export default {
             lineHeight: '1.1',
             letterSpacing: '-0.02em',
             fontWeight: '700',
-            fontFamily: 'var(--font-heading)',
+            fontFamily: 'var(--typography-font-family-display)',
             fontOpticalSizing: 'auto',
             fontVariationSettings: '"opsz" 48',
           },
@@ -153,7 +163,7 @@ export default {
             lineHeight: '1.18',
             letterSpacing: '-0.015em',
             fontWeight: '600',
-            fontFamily: 'var(--font-heading)',
+            fontFamily: 'var(--typography-font-family-display)',
             fontOpticalSizing: 'auto',
             fontVariationSettings: '"opsz" 40',
           },
@@ -164,7 +174,7 @@ export default {
             lineHeight: '1.24',
             letterSpacing: '-0.01em',
             fontWeight: '600',
-            fontFamily: 'var(--font-heading)',
+            fontFamily: 'var(--typography-font-family-display)',
             fontOpticalSizing: 'auto',
             fontVariationSettings: '"opsz" 32',
           },
@@ -175,7 +185,7 @@ export default {
             lineHeight: '1.6',
             letterSpacing: '-0.01em',
             fontWeight: '400',
-            fontFamily: 'var(--font-body)',
+            fontFamily: 'var(--typography-font-family-sans)',
           },
         ],
         'body-sm': [
@@ -184,7 +194,7 @@ export default {
             lineHeight: '1.5',
             letterSpacing: '-0.005em',
             fontWeight: '400',
-            fontFamily: 'var(--font-body)',
+            fontFamily: 'var(--typography-font-family-sans)',
           },
         ],
         label: [
@@ -193,7 +203,7 @@ export default {
             lineHeight: '1.35',
             letterSpacing: '0.015em',
             fontWeight: '600',
-            fontFamily: 'var(--font-body)',
+            fontFamily: 'var(--typography-font-family-sans)',
           },
         ],
         meta: [
@@ -202,7 +212,7 @@ export default {
             lineHeight: '1.4',
             letterSpacing: '0.075em',
             fontWeight: '500',
-            fontFamily: 'var(--font-body)',
+            fontFamily: 'var(--typography-font-family-sans)',
           },
         ],
       },

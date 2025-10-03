@@ -5,7 +5,7 @@ Baseline screenshots for key landing sections (hero, trust bar, how-it-works, wa
 Generate or refresh baselines with:
 
 ```
-NEXT_USE_REMOTE_FONTS=true npm run build:test
+npm run build:test
 npx playwright test tests/e2e/landing.screenshots.spec.ts --project=chromium --update-snapshots
 ```
 

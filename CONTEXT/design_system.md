@@ -9,7 +9,7 @@ This document is the single source of truth for Louhen Landing design decisions.
 - **Accessibility**: WCAG 2.2 AA is the floor; plan for AAA typography where feasible.
 
 ## 2. Typography
-- **Families**: `--font-heading` locks Fraunces Variable (opsz axis on) at weights 600–700 with fallbacks `Iowan Old Style`, `Palatino Linotype`, `Palatino`, `Times New Roman`, `ui-serif`, `serif`. `--font-body` locks Inter at weights 400/500/600 with fallbacks `Inter`, `Segoe UI`, `Helvetica Neue`, `Arial`, `system-ui`, `sans-serif`.
+- **Families**: `--typography-font-family-display` maps to Fraunces Variable (opsz axis on) at weights 600–700 with fallbacks `Iowan Old Style`, `Palatino Linotype`, `Palatino`, `Times New Roman`, `ui-serif`, `serif`. `--typography-font-family-sans` maps to Inter at weights 400/500/600 with fallbacks `Inter`, `Segoe UI`, `Helvetica Neue`, `Arial`, `system-ui`, `sans-serif`.
 - **Utilities**: Tailwind exports the fixed scale; do not invent alternates.
   - `text-display-xl` — Hero H1 / marquee surfaces. `clamp(2.5rem, 1.65rem + 2.8vw, 3.5rem)`, Fraunces 700, line-height 1.1, letter-spacing −0.02em, `opsz` 48.
   - `text-display-lg` — Section H2. `clamp(2rem, 1.45rem + 1.6vw, 2.75rem)`, Fraunces 600, line-height 1.18, letter-spacing −0.015em, `opsz` 40.
@@ -18,7 +18,7 @@ This document is the single source of truth for Louhen Landing design decisions.
   - `text-body-sm` — Supporting copy (labels, helper text). 0.9375rem Inter 400, line-height 1.5, letter-spacing −0.005em.
   - `text-label` — Buttons, inputs, nav items. 1rem Inter 600, line-height 1.35, letter-spacing 0.015em.
   - `text-meta` — Eyebrows/meta. 0.8125rem Inter 500, line-height 1.4, letter-spacing 0.075em (safe uppercase).
-- **CLS protections**: Fraunces + Inter are self-hosted via `next/font` with `font-display: swap` + build-time preload. Root fallbacks on `--font-heading` / `--font-body` mirror the live metrics, so CLS under throttled 3G stays ≈0; keep hero and CTA containers sized so fallback text cannot reflow on swap.
+- **CLS protections**: Fraunces + Inter are self-hosted via `next/font/local` with `font-display: swap` + build-time preload. Root fallbacks on `--typography-font-family-display` / `--typography-font-family-sans` mirror the live metrics, so CLS under throttled 3G stays ≈0; keep hero and CTA containers sized so fallback text cannot reflow on swap.
 - **Usage rules**: All runtime typography must use the utilities above; no `text-[N]`, inline `font-family`, or font-size/weight animation. Respect `prefers-reduced-motion` by animating opacity/transform only.
 - **Internationalisation**: Hero and H2 copy must read cleanly in EN + DE, allowing 1–2 lines at 320px. Never truncate; let the clamp scale and `text-balance` handle wrapping.
 

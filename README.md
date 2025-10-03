@@ -38,7 +38,7 @@ Louhen Landing is the official marketing site for Louhen, designed to provide a 
 - **Animation hygiene**: All smooth scrolling and entrance animations must respect `prefers-reduced-motion`. Use `behavior: 'auto'` fallbacks, keep focus rings visible, and avoid new JS-driven animation on the critical path.
 - **Media**: Size all hero/section media explicitly (`next/image` or width/height), lazy-load non-critical assets, and keep Lottie/JSON payloads under 150 KB (defer + disable for reduced motion).
 - **Tooling**: Lighthouse assertions live in `lighthouserc.cjs`; do not relax thresholds. Update that file (and this README) if budgets change via the governance process.
-- When running in environments without Google Fonts access, set `NEXT_USE_REMOTE_FONTS=false` so builds/tests fall back to system fonts.
+- Variable fonts (Inter + Fraunces) are bundled in `public/fonts`; `npm run build` runs `scripts/check-fonts.mjs` to ensure they are present.
 
 ## Trust copy usage
 

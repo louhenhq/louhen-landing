@@ -37,7 +37,7 @@ const captchaSiteKey = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY?.trim() ?? '';
 const captchaEnabled = captchaSiteKey.length > 0;
 const isDevLike = process.env.NODE_ENV !== 'production';
 
-type SubmitState = 'idle' | 'loading' | 'success';
+type SubmitState = 'idle' | 'loading' | 'success' | 'error';
 
 type FieldErrors = {
   email?: string;

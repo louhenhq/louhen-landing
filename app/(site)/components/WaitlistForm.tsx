@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import ConsentNotice from '@/app/(site)/components/ConsentNotice';
 import { Button, Card, Checkbox, Input } from '@/components/ui';
+import { text } from '@/app/(site)/_lib/ui';
 import { track } from '@/lib/clientAnalytics';
 
 type WaitlistFormProps = {

@@ -35,7 +35,7 @@ export default async function MetricsPage({ searchParams }: { searchParams: Sear
     getTopReferrers(),
     getBlocks(),
     getTrendDaily(),
-    loadMessages('en'),
+    loadMessages('en-de'),
   ]);
 
   const metricsCopy = ((messages as Record<string, unknown>).admin as Record<string, unknown> | undefined)?.metrics as Record<string, unknown> | undefined;

@@ -2,7 +2,7 @@ import './globals.css'
 import './styles/tokens.css'
 import type { Metadata, Viewport } from 'next'
 import { cookies, headers } from 'next/headers'
-import { Fraunces, Inter } from 'next/font/google'
+import { fraunces, inter } from './(site)/fonts'
 import ThemeInit from '@/components/ThemeInit'
 import { ConsentProvider } from '@/components/ConsentProvider'
 import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/SeoJsonLd'
@@ -18,40 +18,6 @@ import {
   ThemePreference,
 } from '@/lib/theme/constants'
 import { DEFAULT_LOCALE } from '@/lib/i18n/locales'
-
-const USE_REMOTE_FONTS = process.env.NEXT_USE_REMOTE_FONTS !== 'false';
-
-let headingFont: ReturnType<typeof Fraunces>;
-if (USE_REMOTE_FONTS) {
-  headingFont = Fraunces({
-    subsets: ['latin'],
-    weight: 'variable',
-    display: 'swap',
-    style: ['normal'],
-    preload: true,
-    variable: '--font-heading',
-    adjustFontFallback: 'Times New Roman',
-    fallback: ['Iowan Old Style', 'Palatino Linotype', 'Palatino', 'Times New Roman', 'serif'],
-  });
-} else {
-  headingFont = { className: '', variable: '--font-heading', style: {} } as ReturnType<typeof Fraunces>;
-}
-
-let bodyFont: ReturnType<typeof Inter>;
-if (USE_REMOTE_FONTS) {
-  bodyFont = Inter({
-    subsets: ['latin'],
-    weight: 'variable',
-    display: 'swap',
-    preload: true,
-    style: ['normal'],
-    variable: '--font-body',
-    adjustFontFallback: 'Arial',
-    fallback: ['Inter', 'Segoe UI', 'Helvetica Neue', 'Arial', 'system-ui', 'sans-serif'],
-  });
-} else {
-  bodyFont = { className: '', variable: '--font-body', style: {} } as ReturnType<typeof Inter>;
-}
 
 const tokenValues = tokens as Record<string, unknown> & {
   color?: {
@@ -140,7 +106,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const consentHeaders = await headers();
   const consent = getServerConsent(consentHeaders);
   const nonce = consentHeaders.get('x-csp-nonce') ?? undefined;
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
 
   const rawThemePref = (cookieStore.get(THEME_COOKIE)?.value as ThemePreference | undefined) ?? 'system';
   const themePref: ThemePreference =
@@ -223,7 +189,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       data-theme={initialThemeAttr ?? undefined}
       data-contrast-mode={contrastPref}
       data-contrast={initialContrastAttr ?? undefined}
-      className={`${headingFont.variable} ${bodyFont.variable}`}
+      className={`${fraunces.variable} ${inter.variable}`}
       style={{ colorScheme: initialColorScheme }}
     >
       <head>

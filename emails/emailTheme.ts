@@ -13,8 +13,8 @@ export type EmailPalette = Readonly<{
   badgeText: string;
   success: string;
   warning: string;
-  danger: string;
-}>;
+  error: string;
+}>; 
 
 const hexToRgb = (hex: string) => {
   const normalized = hex.replace('#', '').trim();

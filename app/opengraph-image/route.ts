@@ -9,7 +9,7 @@ export const runtime = 'edge';
 export const size = { width: 1200, height: 630 } as const;
 export const contentType = 'image/png';
 
-const DEFAULT_LOCALE: SupportedLocale = 'en';
+const DEFAULT_LOCALE: SupportedLocale = 'en-de';
 
 function resolveLocale(input: string | null): SupportedLocale {
   if (!input) return DEFAULT_LOCALE;

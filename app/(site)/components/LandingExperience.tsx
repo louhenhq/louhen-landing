@@ -13,7 +13,7 @@ import FounderStoryWithVoucher from '@/components/FounderStoryWithVoucher';
 import FaqTwinsVoucherSchema from '@/components/FaqTwinsVoucherSchema';
 import HowItWorks from '@/components/HowItWorks';
 import FounderPhoto from '@/components/FounderPhoto';
-import PodiatristBadge from '@/components/PodiatristBadge';
+import PodiatristBadge from '@/app/(site)/components/PodiatristBadge';
 import TrustBar from '@/components/TrustBar';
 import TestimonialCards from '@/components/TestimonialCards';
 import PrivacyRibbon from '@/components/PrivacyRibbon';

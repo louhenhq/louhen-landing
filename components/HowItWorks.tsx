@@ -51,44 +51,48 @@ export default function HowItWorks() {
   const steps = useMemo<Step[]>(() => {
     const raw = t.raw('steps');
     if (!Array.isArray(raw)) return [];
-    return raw
-      .map((entry, index) => {
-        if (!entry || typeof entry !== 'object') return null;
-        const record = entry as Record<string, unknown>;
-        const title = typeof record.title === 'string' ? record.title : null;
-        const body = typeof record.body === 'string' ? record.body : null;
-        if (!title || !body) return null;
-        const id = typeof record.id === 'string' && record.id.length > 0 ? record.id : `step-${index + 1}`;
-        const illustrationLabel = typeof record.illustrationLabel === 'string' ? record.illustrationLabel : undefined;
 
-        let link: Step['link'];
-        const linkRecord = record.link && typeof record.link === 'object' ? (record.link as Record<string, unknown>) : null;
-        const linkLabel =
-          typeof record.linkLabel === 'string'
-            ? record.linkLabel
-            : linkRecord && typeof linkRecord.label === 'string'
-              ? (linkRecord.label as string)
-              : undefined;
-        const linkHrefRaw =
-          typeof record.linkHref === 'string'
-            ? record.linkHref
-            : linkRecord && typeof linkRecord.href === 'string'
-              ? (linkRecord.href as string)
-              : undefined;
-        const resolvedHref = resolveLocaleHref(locale, linkHrefRaw);
-        if (linkLabel && resolvedHref) {
-          link = { label: linkLabel, href: resolvedHref };
-        }
+    const normalized: Step[] = [];
 
-        return {
-          id,
-          title,
-          body,
-          illustrationLabel,
-          link,
-        } satisfies Step;
-      })
-      .filter((step): step is Step => step !== null);
+    raw.forEach((entry, index) => {
+      if (!entry || typeof entry !== 'object') return;
+      const record = entry as Record<string, unknown>;
+      const title = typeof record.title === 'string' ? record.title : null;
+      const body = typeof record.body === 'string' ? record.body : null;
+      if (!title || !body) return;
+
+      const id = typeof record.id === 'string' && record.id.length > 0 ? record.id : `step-${index + 1}`;
+      const illustrationLabel = typeof record.illustrationLabel === 'string' ? record.illustrationLabel : undefined;
+
+      let link: Step['link'];
+      const linkRecord = record.link && typeof record.link === 'object' ? (record.link as Record<string, unknown>) : null;
+      const linkLabel =
+        typeof record.linkLabel === 'string'
+          ? record.linkLabel
+          : linkRecord && typeof linkRecord.label === 'string'
+            ? (linkRecord.label as string)
+            : undefined;
+      const linkHrefRaw =
+        typeof record.linkHref === 'string'
+          ? record.linkHref
+          : linkRecord && typeof linkRecord.href === 'string'
+            ? (linkRecord.href as string)
+            : undefined;
+      const resolvedHref = resolveLocaleHref(locale, linkHrefRaw);
+      if (linkLabel && resolvedHref) {
+        link = { label: linkLabel, href: resolvedHref };
+      }
+
+      normalized.push({
+        id,
+        title,
+        body,
+        illustrationLabel,
+        link,
+      });
+    });
+
+    return normalized;
   }, [locale, t]);
 
   return (

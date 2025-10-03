@@ -89,7 +89,7 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
 - Tailwind legacy aliases may mask improper usage; track residual `slate-*`/`emerald-*` utilities and migrate to explicit semantic classes during admin polish.
 
 - **2025-10-03**  
-  Slice 2 ships the locked Fraunces + Inter pairing via `--font-heading` / `--font-body`, adds the `text-display-xl` → `text-meta` utility scale, and replaces ad-hoc font sizing across the landing experience.
+  Slice 2 ships the locked Fraunces + Inter pairing via `--typography-font-family-display` / `--typography-font-family-sans`, adds the `text-display-xl` → `text-meta` utility scale, and replaces ad-hoc font sizing across the landing experience.
 
 - **2025-10-04**  
   Slice 3 introduces the SiteShell (12-col grid, 1440px max), translucent sticky header with locale switcher, and accessible footer with GDPR reassurance. All landing sections now consume the shared layout helpers and section rhythm.

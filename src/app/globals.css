@@ -2,8 +2,24 @@
 
 
 :root {
-  --font-heading: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Times New Roman', serif;
-  --font-body: 'Inter', 'Segoe UI', 'Helvetica Neue', Arial, system-ui, sans-serif;
+  --typography-font-family-sans: var(
+    --font-sans,
+    'Inter',
+    'Segoe UI',
+    'Helvetica Neue',
+    'Arial',
+    'system-ui',
+    'sans-serif'
+  );
+  --typography-font-family-display: var(
+    --font-display,
+    'Fraunces',
+    'Iowan Old Style',
+    'Palatino Linotype',
+    'Palatino',
+    'Times New Roman',
+    'serif'
+  );
   --background: var(--semantic-color-bg-page);
   --foreground: var(--semantic-color-text-body);
   --layout-max-width: 90rem;
@@ -20,14 +36,14 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-body);
-  --font-serif: var(--font-heading);
+  --font-sans: var(--typography-font-family-sans);
+  --font-serif: var(--typography-font-family-display);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-body);
+  font-family: var(--typography-font-family-sans);
   font-optical-sizing: auto;
 }
 
