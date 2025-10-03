@@ -21,6 +21,7 @@ import ExitNudge from './_components/ExitNudge';
 import { MethodExperienceProvider } from './_components/MethodExperienceProvider';
 import SkipToCtaLink from './_components/SkipToCtaLink';
 import { buildMethodTechArticleSchema } from './articleSchema';
+import { buildMethodOgImageUrl } from './ogImage';
 import {
   buildCanonicalPath,
   buildCanonicalUrl,
@@ -44,31 +45,33 @@ export default async function MethodPage({ params }: MethodPageProps) {
   const localizedPath = buildCanonicalPath(locale, '/method/');
   const articleUrl = buildCanonicalUrl(locale, '/method/');
 
-  const pillarTitles = (() => {
-    const raw = t.raw('pillars.items');
+  const pillarTitles = [
+    t('pillars.data.title'),
+    t('pillars.trust.title'),
+    t('pillars.discovery.title'),
+  ].filter((value) => value.trim().length > 0);
+
+  const stepTitles = (() => {
+    const raw = t.raw('steps.items');
     if (!Array.isArray(raw)) return [] as string[];
     return raw
       .map((item) => (item && typeof item === 'object' ? (item as { title?: unknown }).title : undefined))
       .filter((value): value is string => typeof value === 'string' && value.trim().length > 0);
   })();
 
-  const howTitles = (() => {
-    const raw = t.raw('how.steps');
-    if (!Array.isArray(raw)) return [] as string[];
-    return raw
-      .map((item) => (item && typeof item === 'object' ? (item as { title?: unknown }).title : undefined))
-      .filter((value): value is string => typeof value === 'string' && value.trim().length > 0);
-  })();
+  const metaTitle = t('meta.title');
+  const metaDescription = t('meta.description');
+  const ogImageUrl = buildMethodOgImageUrl(baseUrl, locale, metaTitle, metaDescription);
 
   const schema = buildMethodTechArticleSchema({
     url: articleUrl,
     headline: t('hero.title'),
-    description: t('seo.description'),
+    description: metaDescription,
     locale,
-    sections: [...pillarTitles, ...howTitles, t('trust.headline'), t('faqTeaser.title')],
+    sections: [...pillarTitles, ...stepTitles, t('trust.headline'), t('faqTeaser.title')],
     baseUrl,
     brandName: 'Louhen',
-    image: `${baseUrl}/opengraph-image.png`,
+    image: ogImageUrl,
     datePublished: '2025-01-15T00:00:00.000Z',
     dateModified: '2025-01-15T00:00:00.000Z',
   });

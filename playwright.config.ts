@@ -3,22 +3,9 @@ import { defineConfig, devices } from '@playwright/test';
 import type { PlaywrightTestConfig } from '@playwright/test';
 
 const FALLBACK_ORIGIN = 'http://localhost:4311';
-const LOCALE_SEGMENT_PATTERN = /(\/en-de|\/de-de)$/;
 
-function normalizeBase(value?: string | null) {
+function normalizeOrigin(value?: string | null) {
   return value?.trim().replace(/\/+$/, '') ?? '';
-}
-
-function ensureLocaleBase(value: string) {
-  const normalized = normalizeBase(value) || FALLBACK_ORIGIN;
-  if (LOCALE_SEGMENT_PATTERN.test(normalized)) {
-    return normalized;
-  }
-  return `${normalized}/en-de`;
-}
-
-function withTrailingSlash(value: string) {
-  return value.endsWith('/') ? value : `${value}/`;
 }
 
 const isSandbox = process.env.SANDBOX_VALIDATION === '1';
@@ -28,18 +15,15 @@ const shouldSkipWebServer = process.env.PLAYWRIGHT_SKIP === '1';
 const statusUser = process.env.STATUS_USER ?? process.env.CI_STATUS_USER ?? 'status-ops';
 const statusPass = process.env.STATUS_PASS ?? process.env.CI_STATUS_PASS ?? 'status-secret';
 
-const sandboxOrigin = normalizeBase(sandboxBaseURL);
+const sandboxOrigin = normalizeOrigin(sandboxBaseURL);
 if (isSandbox && !sandboxOrigin) {
   throw new Error('SANDBOX_VALIDATION=1 requires PREVIEW_BASE_URL to be set.');
 }
 
-const baseOverride = normalizeBase(process.env.BASE_URL);
-const hasBaseOverride = baseOverride.length > 0;
-
-const defaultOrigin = sandboxOrigin || normalizeBase(process.env.APP_BASE_URL) || FALLBACK_ORIGIN;
-const targetOrigin = hasBaseOverride ? baseOverride : defaultOrigin;
-const canonicalBaseURL = withTrailingSlash(ensureLocaleBase(targetOrigin));
-const useExternalTarget = hasBaseOverride || isSandbox;
+const explicitOrigin = normalizeOrigin(process.env.BASE_URL);
+const defaultOrigin = sandboxOrigin || normalizeOrigin(process.env.APP_BASE_URL) || FALLBACK_ORIGIN;
+const targetOrigin = explicitOrigin || defaultOrigin;
+const useExternalTarget = Boolean(explicitOrigin) || isSandbox;
 
 const testEnv = {
   BASE_URL: targetOrigin,
@@ -91,7 +75,7 @@ const config: PlaywrightTestConfig = {
     ['json'],
   ],
   use: {
-    baseURL: canonicalBaseURL,
+    baseURL: explicitOrigin || FALLBACK_ORIGIN,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -127,7 +111,7 @@ if (shouldSkipWebServer) {
   if (!useExternalTarget) {
     config.webServer = {
       command: 'npm run start:test',
-      url: canonicalBaseURL,
+      url: targetOrigin,
       reuseExistingServer: true,
       timeout: 180_000,
       env: {

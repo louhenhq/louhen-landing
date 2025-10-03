@@ -36,6 +36,18 @@ function fontWeight(name: string): number {
   return Number(token(name));
 }
 
+function truncate(value: string, limit: number): string {
+  if (value.length <= limit) return value;
+  return `${value.slice(0, limit - 1).trimEnd()}…`;
+}
+
+function resolveTextParam(raw: string | null, fallback: string, limit: number): string {
+  if (!raw) return fallback;
+  const trimmed = raw.trim();
+  if (!trimmed) return fallback;
+  return truncate(trimmed, limit);
+}
+
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const locale = resolveLocale(url.searchParams.get('locale'));
@@ -46,8 +58,11 @@ export async function GET(request: Request) {
   const invitedBlock = og.invited as Record<string, unknown> | undefined;
   const block = ref ? invitedBlock : defaultBlock;
 
-  const title = typeof block?.title === 'string' ? block.title : 'Louhen';
-  const description = typeof block?.description === 'string' ? block.description : 'Tailored comfort backed by podiatrists.';
+  const fallbackTitle = typeof block?.title === 'string' ? block.title : 'Louhen';
+  const fallbackDescription = typeof block?.description === 'string' ? block.description : 'Tailored comfort backed by podiatrists.';
+
+  const title = resolveTextParam(url.searchParams.get('title'), fallbackTitle, 120);
+  const description = resolveTextParam(url.searchParams.get('description'), fallbackDescription, 200);
 
   const gradientStart = token('--color-brand-teal');
   const gradientEnd = token('--color-brand-mint');

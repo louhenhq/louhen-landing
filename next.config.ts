@@ -26,14 +26,7 @@ const nextConfig: NextConfig = {
       ];
     });
 
-    return [
-      {
-        source: '/method',
-        destination: `/${DEFAULT_LOCALE}/method`,
-        permanent: true,
-      },
-      ...legacyLocaleRedirects,
-    ];
+    return legacyLocaleRedirects;
   },
 };
 

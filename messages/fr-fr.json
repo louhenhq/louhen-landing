@@ -483,61 +483,49 @@
     "a11y": {
       "skipToCta": "Skip to Join Waitlist"
     },
-    "seo": {
+    "meta": {
       "title": "Louhen Method — Fit intelligence for growing feet",
       "description": "Discover how Louhen blends kid-safe scanning, fit science, and privacy-first data to recommend shoes families trust."
     },
     "hero": {
       "eyebrow": "The Louhen Method",
       "title": "Fit intelligence that keeps up with growing feet.",
-      "subtitle_generic": "We pair quick scans with podiatrist-reviewed data so every recommendation feels personal, safe, and ready for play.",
-      "subtitle_personalized": "We pair quick scans with podiatrist-reviewed data so every recommendation feels personal to {name}.",
+      "sub": "We pair quick scans with podiatrist-reviewed data so every recommendation feels personal, safe, and ready for play for {name}.",
+      "defaultName": "your child",
       "cta": "Join the waitlist",
       "trustLine": "Trusted by podiatrists and loved by families.",
       "imageAlt": "Illustration of a parent guiding a child through a Louhen foot scan"
     },
     "pillars": {
       "title": "What powers every Louhen recommendation",
-      "items": [
-        {
-          "title": "Kid-safe scanning",
-          "body": "Capture a 3D foot profile with any phone in under a minute. No raw images ever leave your device."
-        },
-        {
-          "title": "LouhenFit engine",
-          "body": "Measurements translate into the inside of real shoes so length, width, and wiggle room align before you order."
-        },
-        {
-          "title": "Adaptive personalization",
-          "body": "Profiles learn from wear feedback, surfacing styles that match growth patterns and preferences."
-        },
-        {
-          "title": "LouhenFit guarantee",
-          "body": "If the first pair doesn’t feel right, LouhenFit covers the return and tunes the next recommendation with you.",
-          "badgeLabel": "Covered by LouhenFit",
-          "badgeTooltip": "Free returns and a guided re-check whenever the fit feels off."
-        }
-      ],
-      "engine": {
-        "scienceDisclosure": {
-          "title": "See the science",
-          "body": "Every scan becomes a map of interior shoe space, matching length, width, and instep room before the box ships. Wear check-ins from families feed the engine, so each suggestion gets smarter.",
-          "privacyNote": "We only sync scans after you say so. <privacyLink>Read how we protect families in our privacy policy</privacyLink>."
-        }
+      "data": {
+        "title": "Kid-safe scanning",
+        "body": "Capture a 3D foot profile with any phone in under a minute. No raw images ever leave your device."
+      },
+      "trust": {
+        "title": "LouhenFit engine",
+        "body": "Measurements translate into the inside of real shoes so length, width, and wiggle room align before you order."
+      },
+      "discovery": {
+        "title": "Adaptive personalization",
+        "body": "Profiles learn from wear feedback, surfacing styles that match growth patterns and preferences."
+      },
+      "scienceDisclosure": {
+        "title": "See the science",
+        "body": "Every scan becomes a map of interior shoe space, matching length, width, and instep room before the box ships. Wear check-ins from families feed the engine, so each suggestion gets smarter.",
+        "privacyNote": "We only sync scans after you say so. <privacyLink>Read how we protect families in our privacy policy</privacyLink>.",
+        "cta": "See the science"
       }
     },
-    "scienceDisclosure": {
-      "cta": "See the science"
-    },
-    "how": {
+    "steps": {
       "title": "How it works",
       "defaultChildName": "your child",
       "xpTeaser": "Earn XP for your first scan and unlock fit tips sooner.",
-      "steps": [
-    {
-      "title": "Start with a scan or size",
-      "body": "Create a child profile with measurements or customise it for {name}."
-    },
+      "items": [
+        {
+          "title": "Start with a scan or size",
+          "body": "Create a child profile with measurements or customise it for {name}."
+        },
         {
           "title": "Louhen builds the fit profile",
           "body": "We analyze growth history, support needs, and activity goals."
@@ -583,8 +571,8 @@
     },
     "cta": {
       "title": "Be first to try Louhen for your family.",
-      "button": "Join the waitlist",
-      "final": "Join the Waitlist"
+      "primary": "Join the waitlist",
+      "waitlistHref": "/waitlist"
     }
   }
 }

@@ -3,10 +3,11 @@ import { getTranslations } from 'next-intl/server';
 import type { SupportedLocale } from '@/next-intl.locales';
 import {
   buildAlternateLanguageMap,
-  buildCanonicalPath,
   buildCanonicalUrl,
   resolveSiteBaseUrl,
 } from '@/lib/i18n/metadata';
+import { SITE_NAME } from '@/constants/site';
+import { buildMethodOgImageUrl } from './ogImage';
 
 type MethodPageProps = {
   params: Promise<{ locale: SupportedLocale }>;
@@ -16,12 +17,13 @@ export async function generateMetadata({ params }: MethodPageProps): Promise<Met
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'method' });
 
-  const title = t('seo.title');
-  const description = t('seo.description');
+  const title = t('meta.title');
+  const description = t('meta.description');
   const baseUrl = resolveSiteBaseUrl();
-  const canonicalUrl = buildCanonicalUrl(locale, '/method');
-  const imageUrl = `${baseUrl}/opengraph-image.png`;
-  const languages = buildAlternateLanguageMap('/method');
+  const canonicalUrl = buildCanonicalUrl(locale, '/method/');
+  const imageUrl = buildMethodOgImageUrl(baseUrl, locale, title, description);
+  const languages = buildAlternateLanguageMap('/method/');
+  const imageAlt = t('hero.imageAlt') ?? title;
 
   return {
     title,
@@ -35,13 +37,14 @@ export async function generateMetadata({ params }: MethodPageProps): Promise<Met
       description,
       url: canonicalUrl,
       locale,
+      siteName: SITE_NAME,
       type: 'article',
       images: [
         {
           url: imageUrl,
           width: 1200,
           height: 630,
-          alt: t('hero.imageAlt') ?? title,
+          alt: imageAlt,
         },
       ],
     },

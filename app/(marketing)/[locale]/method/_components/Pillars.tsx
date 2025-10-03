@@ -16,7 +16,6 @@ type Pillar = {
 export default function Pillars() {
   const locale = useLocale();
   const t = useTranslations('method.pillars');
-  const disclosureT = useTranslations('method.scienceDisclosure');
   const badgeIdPrefix = useId();
   const disclosureId = useId();
   const [isDisclosureOpen, setIsDisclosureOpen] = useState(false);
@@ -48,38 +47,40 @@ export default function Pillars() {
   }, [isDisclosureOpen]);
 
   const pillars = useMemo(() => {
-    const raw = t.raw('items');
-    if (!Array.isArray(raw)) return [] as Pillar[];
-
-    const mapped: Pillar[] = [];
-
-    raw.forEach((item) => {
-      if (!item || typeof item !== 'object') return;
-      const value = item as Partial<Pillar>;
-      if (typeof value.title !== 'string' || typeof value.body !== 'string') return;
-
-      const badgeLabel = typeof (value as { badgeLabel?: unknown }).badgeLabel === 'string' ? (value as { badgeLabel?: string }).badgeLabel : null;
-      const badgeTooltip = typeof (value as { badgeTooltip?: unknown }).badgeTooltip === 'string' ? (value as { badgeTooltip?: string }).badgeTooltip : null;
-
-      const next: Pillar = { title: value.title, body: value.body };
-      if (badgeLabel !== null) {
-        next.badgeLabel = badgeLabel;
-      }
-      if (badgeTooltip !== null) {
-        next.badgeTooltip = badgeTooltip;
-      }
-      mapped.push(next);
-    });
-
-    return mapped;
+    const keys = ['data', 'trust', 'discovery'] as const;
+    return keys
+      .map((key) => {
+        const raw = t.raw(key);
+        if (!raw || typeof raw !== 'object') return null;
+        const value = raw as Partial<Pillar> & {
+          title?: unknown;
+          body?: unknown;
+          badgeLabel?: unknown;
+          badgeTooltip?: unknown;
+        };
+        if (typeof value.title !== 'string' || typeof value.body !== 'string') {
+          return null;
+        }
+        const badgeLabel = typeof value.badgeLabel === 'string' ? value.badgeLabel : null;
+        const badgeTooltip = typeof value.badgeTooltip === 'string' ? value.badgeTooltip : null;
+        const pillar: Pillar = { title: value.title, body: value.body };
+        if (badgeLabel) {
+          pillar.badgeLabel = badgeLabel;
+        }
+        if (badgeTooltip) {
+          pillar.badgeTooltip = badgeTooltip;
+        }
+        return pillar;
+      })
+      .filter((pillar): pillar is Pillar => pillar !== null);
   }, [t]);
 
   const disclosureHeadingId = `${disclosureId}-heading`;
   const disclosureContentId = `${disclosureId}-content`;
   const disclosure = {
-    title: t('engine.scienceDisclosure.title'),
-    body: t('engine.scienceDisclosure.body'),
-    privacyNote: t.rich('engine.scienceDisclosure.privacyNote', {
+    title: t('scienceDisclosure.title'),
+    body: t('scienceDisclosure.body'),
+    privacyNote: t.rich('scienceDisclosure.privacyNote', {
       privacyLink: (chunks) => (
         <Link
           href={`/${locale}/privacy`}
@@ -89,7 +90,7 @@ export default function Pillars() {
         </Link>
       ),
     }),
-    cta: disclosureT('cta'),
+    cta: t('scienceDisclosure.cta'),
   };
 
   const handleDisclosureKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -100,7 +101,11 @@ export default function Pillars() {
   };
 
   return (
-    <section className={cn(layout.section, 'bg-bg')} aria-labelledby="method-pillars-title">
+    <section
+      className={cn(layout.section, 'bg-bg')}
+      aria-labelledby="method-pillars-title"
+      data-testid="method-pillars"
+    >
       <div className={cn(layout.container, 'flex flex-col gap-xl')}>
         <div className="max-w-3xl">
           <h2 id="method-pillars-title" className={cn(text.heading, 'text-balance')}>
@@ -118,19 +123,19 @@ export default function Pillars() {
                     <h3 className="text-h3 text-text">{pillar.title}</h3>
                     {pillar.badgeLabel ? (
                       <>
-                      <span
-                        className="inline-flex w-fit items-center gap-1 rounded-full border border-brand-primary/30 bg-brand-primary/10 px-3 py-1 text-meta uppercase tracking-[0.32em] text-brand-primary"
-                        role="note"
-                        aria-describedby={badgeDescriptionId}
-                      >
-                        {pillar.badgeLabel}
-                      </span>
-                      {badgeDescriptionId ? (
-                        <span id={badgeDescriptionId} className="sr-only">
-                          {pillar.badgeTooltip}
+                        <span
+                          className="inline-flex w-fit items-center gap-1 rounded-full border border-brand-primary/30 bg-brand-primary/10 px-3 py-1 text-meta uppercase tracking-[0.32em] text-brand-primary"
+                          role="note"
+                          aria-describedby={badgeDescriptionId}
+                        >
+                          {pillar.badgeLabel}
                         </span>
-                      ) : null}
-                    </>
+                        {badgeDescriptionId ? (
+                          <span id={badgeDescriptionId} className="sr-only">
+                            {pillar.badgeTooltip}
+                          </span>
+                        ) : null}
+                      </>
                     ) : null}
                   </header>
                   <p className="text-body text-text-muted">{pillar.body}</p>

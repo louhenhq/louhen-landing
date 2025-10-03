@@ -15,13 +15,13 @@ type HowItWorksProps = {
 };
 
 export default function HowItWorks({ childName }: HowItWorksProps) {
-  const t = useTranslations('method.how');
+  const t = useTranslations('method.steps');
   const xpTeaserRaw = t('xpTeaser', { defaultValue: '' });
   const xpTeaser = xpTeaserRaw.trim();
   const hasXpTeaser = xpTeaser.length > 0;
 
   const steps = useMemo<Step[]>(() => {
-    const raw = t.raw('steps');
+    const raw = t.raw('items');
     if (!Array.isArray(raw)) return [];
     return raw
       .map((item) => {

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui';
 import type { SupportedLocale } from '@/next-intl.locales';
 import { track } from '@/lib/clientAnalytics';
 import { useMethodExperience } from './MethodExperienceProvider';
+import { getHelpSizingPath } from '../getHelpSizingPath';
 
 type MethodHeroProps = {
   locale: SupportedLocale;
@@ -15,13 +16,27 @@ type MethodHeroProps = {
 
 export default function MethodHero({ locale, childName }: MethodHeroProps) {
   const t = useTranslations('method.hero');
+  const ctaTranslations = useTranslations('method.cta');
   const { registerCtaInteraction, route } = useMethodExperience();
 
   useEffect(() => {
     void track('page_view', { page: route, path: route });
   }, [locale, route]);
 
-  const subtitle = childName ? t('subtitle_personalized', { name: childName }) : t('subtitle_generic');
+  const defaultName = t('defaultName');
+  const subtitle = t('sub', { name: childName ?? defaultName });
+  const toLocalizedHref = (href: string) => {
+    if (!href) return href;
+    if (/^https?:\/\//.test(href)) return href;
+    if (href.startsWith(`/${locale}`)) return href;
+    const normalized = href.startsWith('/') ? href : `/${href}`;
+    return `/${locale}${normalized}`;
+  };
+  const localizedHref = toLocalizedHref(ctaTranslations('waitlistHref'));
+  const secondaryHref = toLocalizedHref(t('cta.secondaryHref'));
+  const helpSizingPath = getHelpSizingPath(locale);
+  const hasSecondary = Boolean(t('cta.secondary', { defaultValue: '' }).trim());
+  const shouldRenderSecondary = Boolean(hasSecondary && secondaryHref && helpSizingPath && secondaryHref === helpSizingPath);
 
   return (
     <section
@@ -44,12 +59,17 @@ export default function MethodHero({ locale, childName }: MethodHeroProps) {
         <div className="flex flex-col items-center gap-md">
           <Button
             as="a"
-            href={`/${locale}/waitlist`}
+            href={localizedHref}
             prefetch={false}
             onClick={() => registerCtaInteraction('hero')}
           >
             {t('cta')}
           </Button>
+          {shouldRenderSecondary ? (
+            <Button as="a" href={secondaryHref} variant="secondary" prefetch={false}>
+              {t('cta.secondary')}
+            </Button>
+          ) : null}
           <p className="max-w-2xl text-body-sm text-text-muted">{t('trustLine')}</p>
         </div>
         <div
