@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const LOCALE = 'en';
+const LOCALE = 'en-de';
 const SHORT_CIRCUIT_ENABLED = process.env.TEST_E2E_SHORTCIRCUIT === 'true';
 const BYPASS_TOKEN = process.env.TEST_E2E_BYPASS_TOKEN || 'dev-bypass';
 

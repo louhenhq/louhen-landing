@@ -12,7 +12,7 @@ export default function FounderStory() {
   const preview = fullBody.split(' ').slice(0, 35).join(' ');
 
   return (
-    <section id="story" className={cn(layout.section, 'bg-bg')}>
+    <section id="founder-story" className={cn(layout.section, 'bg-bg')}>
       <Card className={cn(layout.narrow, 'px-gutter py-2xl')}>
         <div className={layout.stackMd}>
           <h2 className={text.heading}>{t('title')}</h2>

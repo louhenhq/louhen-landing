@@ -58,7 +58,7 @@ export default function Header({ onCta }: HeaderProps) {
           <a className="text-label text-text-muted transition-colors hover:text-text" href="#how">
             {t('nav.how')}
           </a>
-          <a className="text-label text-text-muted transition-colors hover:text-text" href="#story">
+          <a className="text-label text-text-muted transition-colors hover:text-text" href="#founder-story">
             {t('nav.story')}
           </a>
           <a className="text-label text-text-muted transition-colors hover:text-text" href="#faq">

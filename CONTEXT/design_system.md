@@ -57,7 +57,7 @@ This document is the single source of truth for Louhen Landing design decisions.
 - **Section rhythm**: `layout.section` applies `padding-block: clamp(80px, 6vw + 32px, 120px)` via tokens to keep vertical cadence consistent across hero, feature blocks, and footer.
 - **Sticky header**: Header sits on `top: 0`, uses translucent `bg-bg/80` with backdrop blur, and promotes to `shadow.elevated` once scrollY > 8px. Locale switcher, navigation, and waitlist CTA follow the focus order `skip → logo → nav → CTA → locale`.
 - **Footer**: Reuses shell helpers, surfaces, and typography tokens. Includes GDPR reassurance copy, legal links, locale switcher, and cookie preferences entry point. Must hit AA contrast in light/dark and expose focus-visible rings.
-- **Accessible anchor targets**: All shell regions expose IDs (`#how`, `#story`, `#waitlist`, `#faq`) with `scroll-margin-top` tied to the header height so skipping or jumping never hides content behind the sticky nav.
+- **Accessible anchor targets**: All shell regions expose IDs (`#how`, `#founder-story`, `#waitlist`, `#faq`) with `scroll-margin-top` tied to the header height so skipping or jumping never hides content behind the sticky nav.
 
 ## 5. Components
 

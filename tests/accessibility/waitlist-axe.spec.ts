@@ -1,16 +1,19 @@
 import { createRequire } from 'node:module';
 import { test, expect } from '@playwright/test';
 import axe from 'axe-core';
+import { DEFAULT_LOCALE } from '@/lib/i18n/locales';
 
 const require = createRequire(import.meta.url);
 
+const localePrefix = `/${DEFAULT_LOCALE.value}`;
+
 const routes = [
-  '/waitlist',
-  '/waitlist/confirm?token=sample-token',
-  '/waitlist/success',
-  '/waitlist/expired',
-  '/waitlist/already-confirmed',
-  '/waitlist/pre-onboarding',
+  `${localePrefix}/waitlist`,
+  `${localePrefix}/waitlist/confirm?token=sample-token`,
+  `${localePrefix}/waitlist/success`,
+  `${localePrefix}/waitlist/expired`,
+  `${localePrefix}/waitlist/already-confirmed`,
+  `${localePrefix}/waitlist/pre-onboarding`,
 ];
 
 test.describe('Waitlist accessibility', () => {

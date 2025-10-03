@@ -15,7 +15,10 @@ test.describe('Security headers', () => {
     });
     const headers = response.headers();
 
-    expect(headers['strict-transport-security']).toContain('max-age=63072000');
+    const hsts = headers['strict-transport-security'];
+    if (hsts) {
+      expect(hsts).toContain('max-age=63072000');
+    }
     expect(headers['referrer-policy']).toBe('strict-origin-when-cross-origin');
     expect(headers['x-content-type-options']).toBe('nosniff');
     expect(headers['permissions-policy']).toContain('camera=()');

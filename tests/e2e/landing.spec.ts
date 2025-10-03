@@ -242,8 +242,8 @@ test.describe('Trust & Social Proof', () => {
     const testimonialEvents = events.filter((event) => event.name === 'testimonial_view').map((event) => event.ix);
     expect(new Set(testimonialEvents)).toEqual(new Set([0, 1, 2]));
 
-    const podiatristLink = page.getByRole('link', { name: /learn how we fit/i });
-    await podiatristLink.click();
+    const podiatristButton = page.getByRole('button', { name: /podiatrist reviewed/i });
+    await podiatristButton.click();
     await waitForEvent(events, 'trust_podiatrist_learn_more');
 
     const logoLink = page.getByTestId('trust-logo-link').first();

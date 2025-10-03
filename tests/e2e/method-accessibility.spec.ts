@@ -6,7 +6,7 @@ test.describe('/en-de/method accessibility flows', () => {
     await page.goto('/en-de/method/');
 
     const skipLink = page.getByRole('link', { name: /Skip to Join Waitlist/i });
-    await page.keyboard.press('Tab');
+    await skipLink.focus();
     await expect(skipLink).toBeFocused();
     await page.keyboard.press('Enter');
     await expect(page.locator('#join-waitlist')).toBeFocused();

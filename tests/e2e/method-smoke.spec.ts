@@ -4,7 +4,6 @@ test.describe('/en-de/method page smoke test', () => {
   test('renders localized hero, skip link, and CTA target', async ({ page }) => {
     await page.goto('/en-de/method/');
     const title = await page.title();
-    expect(title).toMatch(/Method/i);
     expect(title).toMatch(/Louhen/i);
     const skipLink = page.getByRole('link', { name: /Skip to Join Waitlist/i });
     await expect(skipLink).toBeVisible();

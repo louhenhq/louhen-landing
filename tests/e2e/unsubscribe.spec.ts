@@ -4,6 +4,8 @@ import { expect, test } from '@playwright/test';
 
 import { buildUnsubUrl } from '@/lib/email/tokens';
 
+process.env.TEST_MODE = '1';
+
 const TEST_SCOPE = 'transactional' as const;
 
 function uniqueEmail() {
@@ -31,7 +33,7 @@ test.describe('Unsubscribe flow', () => {
     const url = buildUnsubUrl(email, 'all');
 
     await page.goto(url);
-    await expect(page.getByText(/stop emailing/i)).toBeVisible();
+    await expect(page.getByRole('status')).toContainText(/stop emailing/i);
 
     await expectSuppressed(request, email);
   });

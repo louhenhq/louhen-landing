@@ -1,4 +1,5 @@
 import { type APIRequestContext } from '@playwright/test';
+import { DEFAULT_LOCALE } from '@/lib/i18n/locales';
 
 export type SeedWaitlistResult = {
   email: string;
@@ -13,7 +14,7 @@ export async function seedWaitlistUser(request: APIRequestContext, email: string
       email,
       consent: true,
       hcaptchaToken: 'e2e-mocked-token',
-      locale: 'en',
+      locale: DEFAULT_LOCALE.value,
     },
     headers: { 'content-type': 'application/json' },
   });

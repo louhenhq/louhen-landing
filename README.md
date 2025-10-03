@@ -73,7 +73,7 @@ Louhen Landing is the official marketing site for Louhen, designed to provide a 
 - Containers come from `layout.container`/`layout.grid`; never hand-roll `max-w` or gutter spacing. Section padding comes from `layout.section` (80–120px clamp).
 - Keep hero, story, trust, and waitlist blocks on the 12-column grid—use column spans like `md:col-span-7` instead of bespoke margins.
 - Header stays translucent with shadow on scroll; footer uses the trust copy + legal links in the README/CONTEXT spec. Adjustments must preserve AA contrast and focus-visible rings.
-- Anchor targets (`#how`, `#story`, `#waitlist`, `#faq`) should land on elements with our shell helpers so the sticky nav never obscures content.
+- Anchor targets (`#how`, `#founder-story`, `#waitlist`, `#faq`) should land on elements with our shell helpers so the sticky nav never obscures content.
 
 ### Hero usage
 - `Hero.tsx` locks the text/media split, CTA stack, and LouhenFit micro-trust line—follow [`CONTEXT/design_system.md#hero`](CONTEXT/design_system.md#hero) before adjusting layout or copy.
