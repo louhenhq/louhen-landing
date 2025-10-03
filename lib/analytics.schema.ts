@@ -3,6 +3,22 @@ export type TestimonialIndex = 0 | 1 | 2;
 
 type NoProps = Record<never, never>;
 
+export type MethodEventName =
+  | 'method_hero_waitlist_click'
+  | 'method_faq_teaser_waitlist_click'
+  | 'method_sticky_waitlist_click'
+  | 'method_exit_nudge_shown';
+
+export type MethodEventPosition = 'hero' | 'faq_teaser' | 'sticky' | 'nudge';
+
+export type MethodAnalyticsPayload<P extends MethodEventPosition = MethodEventPosition> = {
+  locale: string;
+  route: string;
+  position: P;
+  variant_personalized: boolean;
+  timestamp: string;
+};
+
 export type AnalyticsEventName =
   | 'page_view'
   | 'cta_click'
@@ -20,10 +36,13 @@ export type AnalyticsEventName =
   | 'wl_referral_applied'
   | 'waitlist_signup_submitted'
   | 'waitlist_signup_result'
+  | 'waitlist_signup_confirmed'
+  | 'waitlist_signup_expired'
   | 'waitlist_landing_success_view'
   | 'waitlist_landing_expired_view'
   | 'waitlist_resend_requested'
   | 'waitlist_confirm_toast_view'
+  | 'preonboarding_completed'
   | 'hero_twin_badge_click'
   | 'voucher_share_native_success'
   | 'voucher_share_whatsapp_click'
@@ -32,7 +51,8 @@ export type AnalyticsEventName =
   | 'trust_logo_click'
   | 'trust_podiatrist_learn_more'
   | 'testimonial_view'
-  | 'privacy_ribbon_click';
+  | 'privacy_ribbon_click'
+  | MethodEventName;
 
 export interface AnalyticsEventPropsMap {
   page_view: { path?: string; page?: string; variant?: string; ref?: string | null };
@@ -49,12 +69,15 @@ export interface AnalyticsEventPropsMap {
   wl_share_copy_code: { method: string };
   wl_share_native: { supported: boolean };
   wl_referral_applied: { ref: string };
-  waitlist_signup_submitted: { source?: string | null; locale: string; hasConsent: boolean; email?: string };
+  waitlist_signup_submitted: { locale: string; hasUtm: boolean; hasRef: boolean };
   waitlist_signup_result: { ok: boolean; code?: string | null; source?: string | null; locale?: string | null; status?: number | null };
+  waitlist_signup_confirmed: { locale: string; timeToConfirmMs?: number | null };
+  waitlist_signup_expired: { locale: string; ttlDays?: number | null };
   waitlist_landing_success_view: NoProps;
   waitlist_landing_expired_view: NoProps;
-  waitlist_resend_requested: NoProps;
+  waitlist_resend_requested: { locale: string; outcome?: 'ok' | 'rate_limited' | 'error' };
   waitlist_confirm_toast_view: NoProps;
+  preonboarding_completed: { hadChildData: boolean; locale: string };
   hero_twin_badge_click: NoProps;
   voucher_share_native_success: NoProps;
   voucher_share_whatsapp_click: NoProps;
@@ -64,6 +87,10 @@ export interface AnalyticsEventPropsMap {
   trust_podiatrist_learn_more: NoProps;
   testimonial_view: { ix: TestimonialIndex };
   privacy_ribbon_click: NoProps;
+  method_hero_waitlist_click: MethodAnalyticsPayload<'hero'>;
+  method_faq_teaser_waitlist_click: MethodAnalyticsPayload<'faq_teaser'>;
+  method_sticky_waitlist_click: MethodAnalyticsPayload<'sticky'>;
+  method_exit_nudge_shown: MethodAnalyticsPayload<'nudge'>;
 }
 
 export type AnalyticsEventPayload<E extends AnalyticsEventName = AnalyticsEventName> = {

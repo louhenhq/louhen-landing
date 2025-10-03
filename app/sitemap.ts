@@ -1,14 +1,27 @@
 import type { MetadataRoute } from 'next';
+import { locales } from '@/next-intl.locales';
+import {
+  buildAlternateLanguageUrlMap,
+  buildCanonicalUrl,
+} from '@/lib/i18n/metadata';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://louhen-landing.vercel.app';
-  const pages = ['', '/method', '/privacy', '/terms', '/imprint'];
   const now = new Date().toISOString();
+  const localizedPaths = ['/', '/method/', '/privacy/', '/terms/', '/imprint/'];
 
-  return pages.map((p) => ({
-    url: `${base}${p}`,
-    lastModified: now,
-    changeFrequency: 'weekly',
-    priority: p === '' ? 1 : 0.6,
-  }));
+  return localizedPaths.flatMap((path) => {
+    const languages = buildAlternateLanguageUrlMap(path);
+
+    return locales.map((locale) => {
+      return {
+        url: buildCanonicalUrl(locale, path),
+        lastModified: now,
+        changeFrequency: path.includes('method') ? 'monthly' : 'weekly',
+        priority: path === '/' ? 0.8 : path.includes('method') ? 0.6 : 0.5,
+        alternates: {
+          languages,
+        },
+      } satisfies MetadataRoute.Sitemap[number];
+    });
+  });
 }

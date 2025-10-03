@@ -13,3 +13,10 @@
 ## Redirects
 
 - Enforce a permanent `301` redirect from `louhen.app` (apex) to `https://www.louhen.app` to keep a single canonical host and avoid duplicate indexing.
+
+---
+
+### Method Page SEO
+- URL policy: /[locale]/method/ with trailing slash; set `Metadata.alternates.canonical` accordingly.
+- Hreflang: use central generator; include all locales + `x-default` to root as per site policy.
+- JSON-LD: Use `TechArticle` with localized headline/description; author Organization "Louhen"; `inLanguage` = current locale; inject via CSP-nonce helper.

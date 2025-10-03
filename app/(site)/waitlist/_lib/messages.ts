@@ -4,14 +4,15 @@ import { extractLocaleFromCookies, resolveLocale as resolveLocaleValue } from '@
 import { loadMessages } from '@/lib/intl/loadMessages';
 import deepMerge from '@/lib/utils/deepMerge';
 import type { SupportedLocale } from '@/next-intl.locales';
+import { LOCALE_COOKIE } from '@/lib/theme/constants';
 import waitlistEn from '@/i18n/en/waitlist.json';
 import waitlistDe from '@/i18n/de/waitlist.json';
 
-const FALLBACK_LOCALE: SupportedLocale = 'en';
+const FALLBACK_LOCALE: SupportedLocale = 'en-de';
 
 const WAITLIST_NAMESPACE: Record<SupportedLocale, AbstractIntlMessages> = {
-  en: waitlistEn as AbstractIntlMessages,
-  de: waitlistDe as AbstractIntlMessages,
+  'en-de': waitlistEn as AbstractIntlMessages,
+  'de-de': waitlistDe as AbstractIntlMessages,
 };
 
 function selectWaitlistMessages(locale: SupportedLocale): AbstractIntlMessages {
@@ -20,7 +21,9 @@ function selectWaitlistMessages(locale: SupportedLocale): AbstractIntlMessages {
 
 export async function resolveWaitlistLocale(): Promise<SupportedLocale> {
   const cookieStore = await cookies();
-  const cookieLocale = resolveLocaleValue(cookieStore.get('NEXT_LOCALE')?.value ?? null);
+  const cookieLocale =
+    resolveLocaleValue(cookieStore.get(LOCALE_COOKIE)?.value ?? null) ??
+    resolveLocaleValue(cookieStore.get('NEXT_LOCALE')?.value ?? null);
   const headerStore = await headers();
   const headerLocale = extractLocaleFromCookies(headerStore.get('cookie'));
   return cookieLocale ?? headerLocale ?? FALLBACK_LOCALE;

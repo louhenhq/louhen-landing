@@ -7,11 +7,17 @@ on:
   pull_request:
   workflow_dispatch:
 
+env:
+  SKIP_E2E: ${{ vars.SKIP_E2E }}
+  SKIP_AXE: ${{ vars.SKIP_AXE }}
+  SKIP_LHCI: ${{ vars.SKIP_LHCI }}
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
     env:
       CI: true
+      SKIP_LHCI: ${{ vars.SKIP_LHCI }}
       NEXT_PUBLIC_ANALYTICS_DISABLED: '1'
       NEXT_PUBLIC_ANALYTICS_DEBUG: '0'
       NEXT_PUBLIC_ENV: 'ci'
@@ -19,8 +25,8 @@ jobs:
       NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
       NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
       NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
-      NEXT_PUBLIC_LOCALES: 'en,de'
-      NEXT_PUBLIC_DEFAULT_LOCALE: 'en'
+      NEXT_PUBLIC_LOCALES: 'en-de,de-de'
+      NEXT_PUBLIC_DEFAULT_LOCALE: 'en-de'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,7 +40,9 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        env:
+          NODE_ENV: development
+        run: npm ci --include=dev
 
       - name: Build design tokens
         run: npm run -w @louhen/design-tokens build
@@ -69,6 +77,63 @@ jobs:
         run: npm run build
         continue-on-error: false
 
+
+  e2e-tests:
+    name: Playwright E2E
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: ${{ vars.SKIP_E2E != '1' }}
+    env:
+      CI: true
+      NODE_ENV: production
+      TEST_MODE: '1'
+      APP_BASE_URL: http://localhost:4311
+      NEXT_PUBLIC_SITE_URL: http://localhost:4311
+      NEXT_PUBLIC_ENV: 'ci'
+      NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
+      NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
+      NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
+      NEXT_PUBLIC_LOCALES: 'en-de,de-de'
+      NEXT_PUBLIC_DEFAULT_LOCALE: 'en-de'
+      NEXT_PUBLIC_ANALYTICS_DISABLED: '1'
+      NEXT_PUBLIC_ANALYTICS_DEBUG: '0'
+      NEXT_PUBLIC_METHOD_STICKY_CTA: 'true'
+      NEXT_PUBLIC_METHOD_EXIT_NUDGE: 'true'
+      NEXT_TELEMETRY_DISABLED: '1'
+      DEFAULT_LOCALE: 'en-de'
+      BASE_URL: http://localhost:4311
+      HCAPTCHA_SECRET: ci-hcaptcha-secret
+      WAITLIST_CONFIRM_TTL_DAYS: '7'
+      FIREBASE_PROJECT_ID: ci-firebase
+      FIREBASE_DB_REGION: eur3
+      FIREBASE_ADMIN_SA_B64: eyJwcm9qZWN0X2lkIjoiY2ktZmlyZWJhc2UifQ==
+      RESEND_API_KEY: ci-resend-key
+      RESEND_FROM: no-reply@ci.louhen.app
+      RESEND_REPLY_TO: hello@ci.louhen.app
+      STATUS_USER: ci-status
+      STATUS_PASS: ci-secret
+      SUPPRESSION_SALT: ci-suppression-salt
+      EMAIL_TRANSPORT: noop
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        env:
+          NODE_ENV: development
+        run: npm ci --include=dev
+
+      - name: Build
+        run: npm run build:test
+
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:
@@ -80,109 +145,203 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: Check Playwright env wiring
-        env:
-          APP_BASE_URL: http://localhost:4311
-          NEXT_PUBLIC_ENV: 'ci'
-          NEXT_PUBLIC_SITE_URL: 'https://ci.louhen.app'
-          NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
-          NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
-          NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
-          NEXT_PUBLIC_LOCALES: 'en,de'
-          NEXT_PUBLIC_DEFAULT_LOCALE: 'en'
-          NEXT_PUBLIC_ANALYTICS_DISABLED: '0'
-          NEXT_PUBLIC_ANALYTICS_DEBUG: '1'
-          HCAPTCHA_SECRET: ci-hcaptcha-secret
-          WAITLIST_CONFIRM_TTL_DAYS: '7'
-          FIREBASE_PROJECT_ID: ci-firebase
-          FIREBASE_DB_REGION: eur3
-          FIREBASE_ADMIN_SA_B64: eyJwcm9qZWN0X2lkIjoiY2ktZmlyZWJhc2UifQ==
-          RESEND_API_KEY: ci-resend-key
-          RESEND_FROM: no-reply@ci.louhen.app
-          RESEND_REPLY_TO: hello@ci.louhen.app
-          STATUS_USER: ci-status
-          STATUS_PASS: ci-secret
-          SUPPRESSION_SALT: ci-suppression-salt
-        run: |
-          required_envs=(
-            NEXT_PUBLIC_ANALYTICS_DISABLED
-            NEXT_PUBLIC_ANALYTICS_DEBUG
-            NEXT_PUBLIC_ENV
-            NEXT_PUBLIC_SITE_URL
-            NEXT_PUBLIC_HCAPTCHA_SITE_KEY
-            NEXT_PUBLIC_WAITLIST_URGENCY
-            NEXT_PUBLIC_COMMIT_SHA
-            NEXT_PUBLIC_LOCALES
-            NEXT_PUBLIC_DEFAULT_LOCALE
-            APP_BASE_URL
-            FIREBASE_PROJECT_ID
-            FIREBASE_DB_REGION
-            FIREBASE_ADMIN_SA_B64
-            RESEND_API_KEY
-            RESEND_FROM
-            RESEND_REPLY_TO
-            HCAPTCHA_SECRET
-            WAITLIST_CONFIRM_TTL_DAYS
-            STATUS_USER
-            STATUS_PASS
-            SUPPRESSION_SALT
-          )
-          for key in "${required_envs[@]}"; do
-            if [ -z "${!key+x}" ]; then
-              echo "::error::missing $key"
-              exit 1
-            else
-              echo "✅ $key present"
-            fi
-          done
-
-      - name: E2E tests (Playwright)
-        env:
-          APP_BASE_URL: http://localhost:4311
-          TEST_E2E_SHORTCIRCUIT: 'true'
-          TEST_E2E_BYPASS_TOKEN: e2e-mocked-token
-          CI_SKIP_LANDING: '1'
-          NEXT_PUBLIC_ENV: 'ci'
-          NEXT_PUBLIC_SITE_URL: 'https://ci.louhen.app'
-          NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
-          NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
-          NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
-          NEXT_PUBLIC_LOCALES: 'en,de'
-          NEXT_PUBLIC_DEFAULT_LOCALE: 'en'
-          NEXT_PUBLIC_ANALYTICS_DISABLED: '0'
-          NEXT_PUBLIC_ANALYTICS_DEBUG: '1'
-          HCAPTCHA_SECRET: ci-hcaptcha-secret
-          WAITLIST_CONFIRM_TTL_DAYS: '7'
-          FIREBASE_PROJECT_ID: ci-firebase
-          FIREBASE_DB_REGION: eur3
-          FIREBASE_ADMIN_SA_B64: eyJwcm9qZWN0X2lkIjoiY2ktZmlyZWJhc2UifQ==
-          RESEND_API_KEY: ci-resend-key
-          RESEND_FROM: no-reply@ci.louhen.app
-          RESEND_REPLY_TO: hello@ci.louhen.app
-          STATUS_USER: ci-status
-          STATUS_PASS: ci-secret
-          SUPPRESSION_SALT: ci-suppression-salt
-          NODE_ENV: test
+      # For runners that cannot bind localhost:4311, deploy the app first and replace this step with:
+      #   BASE_URL=${{ env.APP_BASE_URL }}/en-de/ npm run test:e2e:external
+      - name: Run Playwright E2E suite
         run: |
           mkdir -p playwright-report
-          set -o pipefail
-          npx playwright test --reporter=html,json --workers=2 | tee playwright-report/report.json
-        continue-on-error: false
-
-      - name: Lighthouse (LHCI)
-        timeout-minutes: 10
-        env:
-          BASE_URL: http://localhost:4311
-        run: npm run lighthouse
-        continue-on-error: false
+          npx playwright test --project chromium --reporter=html,json --workers=2 | tee playwright-report/report.json
 
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: playwright-e2e-report
           path: playwright-report/
           if-no-files-found: ignore
+
+      - name: Upload Playwright test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-e2e-results
+          path: test-results/
+          if-no-files-found: ignore
+
+
+
+  accessibility-tests:
+    name: Playwright Axe
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: ${{ vars.SKIP_AXE != '1' }}
+    env:
+      CI: true
+      NODE_ENV: production
+      TEST_MODE: '1'
+      APP_BASE_URL: http://localhost:4311
+      NEXT_PUBLIC_SITE_URL: http://localhost:4311
+      NEXT_PUBLIC_ENV: 'ci'
+      NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
+      NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
+      NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
+      NEXT_PUBLIC_LOCALES: 'en-de,de-de'
+      NEXT_PUBLIC_DEFAULT_LOCALE: 'en-de'
+      NEXT_PUBLIC_ANALYTICS_DISABLED: '1'
+      NEXT_PUBLIC_ANALYTICS_DEBUG: '0'
+      NEXT_PUBLIC_METHOD_STICKY_CTA: 'true'
+      NEXT_PUBLIC_METHOD_EXIT_NUDGE: 'true'
+      NEXT_TELEMETRY_DISABLED: '1'
+      DEFAULT_LOCALE: 'en-de'
+      BASE_URL: http://localhost:4311
+      HCAPTCHA_SECRET: ci-hcaptcha-secret
+      WAITLIST_CONFIRM_TTL_DAYS: '7'
+      FIREBASE_PROJECT_ID: ci-firebase
+      FIREBASE_DB_REGION: eur3
+      FIREBASE_ADMIN_SA_B64: eyJwcm9qZWN0X2lkIjoiY2ktZmlyZWJhc2UifQ==
+      RESEND_API_KEY: ci-resend-key
+      RESEND_FROM: no-reply@ci.louhen.app
+      RESEND_REPLY_TO: hello@ci.louhen.app
+      STATUS_USER: ci-status
+      STATUS_PASS: ci-secret
+      SUPPRESSION_SALT: ci-suppression-salt
+      EMAIL_TRANSPORT: noop
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        env:
+          NODE_ENV: development
+        run: npm ci --include=dev
+
+      - name: Build
+        run: npm run build:test
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run accessibility suite
+        run: |
+          mkdir -p playwright-report
+          npx playwright test --project accessibility --reporter=html,json --workers=2 | tee playwright-report/report.json
+
+      - name: Upload accessibility report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-axe-report
+          path: playwright-report/
+          if-no-files-found: ignore
+
+      - name: Upload accessibility results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-axe-results
+          path: test-results/
+          if-no-files-found: ignore
+
+
+
+  lighthouse:
+    name: Lighthouse
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: ${{ vars.SKIP_LHCI != '1' }}
+    env:
+      CI: true
+      NODE_ENV: production
+      TEST_MODE: '1'
+      APP_BASE_URL: http://127.0.0.1:4311
+      NEXT_PUBLIC_SITE_URL: http://127.0.0.1:4311
+      NEXT_PUBLIC_ENV: 'ci'
+      NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
+      NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
+      NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
+      NEXT_PUBLIC_LOCALES: 'en-de,de-de'
+      NEXT_PUBLIC_DEFAULT_LOCALE: 'en-de'
+      NEXT_PUBLIC_ANALYTICS_DISABLED: '0'
+      NEXT_PUBLIC_ANALYTICS_DEBUG: '1'
+      HCAPTCHA_SECRET: ci-hcaptcha-secret
+      WAITLIST_CONFIRM_TTL_DAYS: '7'
+      FIREBASE_PROJECT_ID: ci-firebase
+      FIREBASE_DB_REGION: eur3
+      FIREBASE_ADMIN_SA_B64: eyJwcm9qZWN0X2lkIjoiY2ktZmlyZWJhc2UifQ==
+      RESEND_API_KEY: ci-resend-key
+      RESEND_FROM: no-reply@ci.louhen.app
+      RESEND_REPLY_TO: hello@ci.louhen.app
+      STATUS_USER: ci-status
+      STATUS_PASS: ci-secret
+      SUPPRESSION_SALT: ci-suppression-salt
+      EMAIL_TRANSPORT: noop
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        env:
+          NODE_ENV: development
+        run: npm ci --include=dev
+
+      - name: Build
+        run: npm run build
+
+      - name: Start test server
+        run: |
+          npm run start:test > server.log 2>&1 &
+          echo $! > server.pid
+
+      - name: Wait for server readiness
+        run: npx --yes wait-on http://127.0.0.1:4311/waitlist --timeout 180000
+
+      - name: Run Lighthouse
+        run: npm run lighthouse
+
+      - name: Upload Lighthouse report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: lighthouse-report/**
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Stop test server
+        if: always()
+        run: |
+          if [ -f server.pid ]; then
+            kill "$(cat server.pid)" || true
+            rm server.pid
+          fi
+          if [ -f server.log ]; then
+            echo '--- server.log tail ---'
+            tail -n 200 server.log || true
+          fi
 
       - name: Upload Lighthouse results
         if: always()
@@ -192,12 +351,12 @@ jobs:
           path: .lighthouseci/
           if-no-files-found: ignore
 
-      - name: Upload Next.js traces
+      - name: Upload server log
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: next-traces
-          path: .next/trace
+          name: lighthouse-server-log
+          path: server.log
           if-no-files-found: ignore
 
 

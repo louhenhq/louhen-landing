@@ -228,6 +228,18 @@ export function ensureWaitlistServerEnv(): WaitlistServerEnvSummary {
     }
   }
 
+  if (!parsePositiveInteger(process.env.WAITLIST_RATE_SUBMITS_PER_HOUR_PER_IP)) {
+    if (!runtime.isProduction && !runtime.isTest) {
+      warnings.push('WAITLIST_RATE_SUBMITS_PER_HOUR_PER_IP invalid; defaulting to 10 submissions/hour.');
+    }
+  }
+
+  if (!parsePositiveInteger(process.env.WAITLIST_RATE_RESENDS_PER_30M_PER_EMAIL)) {
+    if (!runtime.isProduction && !runtime.isTest) {
+      warnings.push('WAITLIST_RATE_RESENDS_PER_30M_PER_EMAIL invalid; defaulting to 3 resends/30m.');
+    }
+  }
+
   assertProductionReady(WAITLIST_SERVER_ENV_PREFIX, runtime, missingInProduction);
   emitWarnings(WAITLIST_SERVER_ENV_PREFIX, runtime, warnings);
 

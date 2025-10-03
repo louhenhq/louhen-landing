@@ -4,10 +4,10 @@ import Link from 'next/link';
 import { useEffect, useRef } from 'react';
 
 const BUTTON_CLASSES =
-  'inline-flex items-center justify-center rounded-lg border px-4 py-2 text-sm font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border focus-visible:ring-0';
+  'inline-flex items-center justify-center rounded-pill border border-border min-h-[44px] min-w-[44px] px-lg py-sm text-label transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-60';
 
-const PRIMARY_BUTTON_CLASSES = `${BUTTON_CLASSES} bg-brand-primary text-white border-brand-primary hover:opacity-90`;
-const SECONDARY_BUTTON_CLASSES = `${BUTTON_CLASSES} bg-white text-text border-border hover:bg-slate-100`;
+const PRIMARY_BUTTON_CLASSES = `${BUTTON_CLASSES} bg-brand-primary text-brand-onPrimary border-brand-primary hover:opacity-90`;
+const SECONDARY_BUTTON_CLASSES = `${BUTTON_CLASSES} bg-bg-card text-text border-border hover:bg-bg`;
 
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
@@ -19,7 +19,7 @@ type ConsentBannerProps = {
   onLearnMoreHref?: string;
 };
 
-export default function ConsentBanner({ open, onAccept, onReject, onLearnMoreHref = '/method' }: ConsentBannerProps) {
+export default function ConsentBanner({ open, onAccept, onReject, onLearnMoreHref = '/en-de/method' }: ConsentBannerProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const firstButtonRef = useRef<HTMLButtonElement | null>(null);
   const lastActiveElement = useRef<Element | null>(null);
@@ -80,19 +80,19 @@ export default function ConsentBanner({ open, onAccept, onReject, onLearnMoreHre
       aria-modal="true"
       aria-labelledby="consent-banner-title"
       aria-describedby="consent-banner-description"
-      className="fixed inset-x-0 bottom-0 z-[999] bg-white/95 backdrop-blur shadow-2xl"
+      className="fixed inset-x-0 bottom-0 z-[999] bg-bg-card/95 backdrop-blur shadow-elevated"
     >
-      <div className="mx-auto flex max-w-4xl flex-col gap-4 px-4 py-6 sm:flex-row sm:items-center sm:gap-6">
-        <div className="flex-1 text-sm text-slate-700">
-          <p id="consent-banner-title" className="text-base font-semibold text-slate-900">
+      <div className="mx-auto flex max-w-4xl flex-col gap-md px-sm py-lg sm:flex-row sm:items-center sm:gap-lg">
+        <div className="flex-1 text-body text-text-muted">
+          <p id="consent-banner-title" className="text-label text-text">
             We use cookies to improve your experience
           </p>
-          <p id="consent-banner-description" className="mt-1 text-sm">
+          <p id="consent-banner-description" className="mt-xs text-body-sm text-text-muted">
             Louhen uses essential cookies to run the site and optional analytics to learn what helps families most.
             You can change your choice any time.
           </p>
         </div>
-        <div className="flex flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+        <div className="flex flex-col gap-sm sm:w-auto sm:flex-row sm:items-center">
           <button
             ref={firstButtonRef}
             type="button"
@@ -105,7 +105,7 @@ export default function ConsentBanner({ open, onAccept, onReject, onLearnMoreHre
           <button type="button" className={SECONDARY_BUTTON_CLASSES} onClick={onReject}>
             Reject non-essential
           </button>
-          <Link className="text-sm font-medium text-brand-primary underline" href={onLearnMoreHref}>
+          <Link className="touch-target touch-padding text-label text-brand-primary underline" href={onLearnMoreHref}>
             Learn about our Method
           </Link>
         </div>

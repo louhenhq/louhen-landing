@@ -26,7 +26,8 @@
       "title": "You're in!",
       "subtitle": "We saved your spot. Watch your inbox for early access and fit guidance.",
       "preOnboarding": {
-        "cta": "Continue to pre-onboarding"
+        "cta": "Continue to pre-onboarding",
+        "completed": "Thanks! Your family's details are already saved."
       },
       "privacy": "We respect your inbox and only email with consent.",
       "share": {
@@ -34,13 +35,16 @@
         "copy": "Copy link",
         "whatsapp": "Share on WhatsApp",
         "email": "Invite via email"
-      }
+      },
+      "return": "Back to success overview"
     },
     "expired": {
       "title": "Confirmation link expired",
       "subtitle": "Request a fresh link to finish your signup.",
       "resend": {
-        "cta": "Send a new confirmation email"
+        "cta": "Send a new confirmation email",
+        "success": "Check your inbox for a fresh confirmation link.",
+        "rateLimited": "Too many requests right now. Please try again soon."
       }
     },
     "already": {
@@ -56,15 +60,19 @@
     }
   },
   "preonboarding": {
+    "badge": "Founding Parent preview",
     "title": "Tell us more (optional)",
     "subtitle": "Share a few details so we can tailor early access drops to your family.",
     "parent": {
       "firstName": {
-        "label": "Parent first name"
+        "label": "Parent first name",
+        "placeholder": "e.g. Alex"
       }
     },
     "child": {
       "section": "Children",
+      "add": "Add another child",
+      "legend": "Child {index}",
       "name": {
         "label": "Child name"
       },
@@ -72,22 +80,52 @@
         "label": "Birthday"
       },
       "weight": {
-        "label": "Weight"
+        "label": "Weight (kg)",
+        "placeholder": "kg"
       },
       "shoeSize": {
-        "label": "Shoe size"
-      }
+        "label": "Shoe size",
+        "placeholder": "EU"
+      },
+      "remove": "Remove child {index}"
     },
     "save": {
-      "cta": "Save and continue"
+      "cta": "Save family profile"
     },
-    "comingSoon": "Coming next — we’ll unlock this step soon."
+    "success": {
+      "saved": "Saved — we’ll use this profile to tailor early drops."
+    },
+    "status": {
+      "completed": "Thanks! Your family profile is already saved.",
+      "editHint": "Update the form below if anything changes."
+    },
+    "errors": {
+      "date": "Enter a valid date (YYYY-MM-DD).",
+      "weight": "Enter a weight between 0.1 and 100 kg.",
+      "childRequired": "Add at least one child to continue.",
+      "invalidChildren": "Please double-check the child details and try again.",
+      "session": "We couldn’t verify your waitlist session. Please confirm your email again."
+    },
+    "actions": {
+      "returnToWaitlist": "Back to waitlist"
+    },
+    "incentive": {
+      "title": "Why share more?",
+      "body": "Completing this step reserves the Founding Parent badge and helps us send the right looks first."
+    },
+    "privacy": {
+      "label": "Privacy note",
+      "body": "These details stay private and only shape Louhen recommendations. You can update or delete them anytime."
+    }
   },
   "errors": {
     "required": "This field is required.",
     "email": {
       "invalid": "Enter a valid email address."
     },
-    "generic": "Something went wrong. Please try again."
+    "generic": "Something went wrong. Please try again.",
+    "rateLimited": "Too many requests right now. Please try again soon.",
+    "invalid": "Please check the form and try again.",
+    "network": "Network error. Please try again."
   }
 }

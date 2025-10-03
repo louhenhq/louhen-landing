@@ -7,7 +7,48 @@
 /* Base (light) first, then higher-specificity variants */
 /* Token CSS is now loaded via <link> tags in app/layout.tsx. */
 
+:root {
+  --typography-font-family-sans: var(
+    --font-sans,
+    'Inter',
+    'Segoe UI',
+    'Helvetica Neue',
+    'Arial',
+    'system-ui',
+    'sans-serif'
+  );
+  --typography-font-family-display: var(
+    --font-display,
+    'Fraunces',
+    'Iowan Old Style',
+    'Palatino Linotype',
+    'Palatino',
+    'Times New Roman',
+    'serif'
+  );
+}
+
 /* Keep any plain CSS tweaks; avoid @apply here. */
 html, body { height: 100%; }
 /* Optional defaults driven by semantic tokens */
-html, body { background-color: var(--semantic-color-bg-page); color: var(--semantic-color-text-body); }
+html, body {
+  background-color: var(--semantic-color-bg-page);
+  color: var(--semantic-color-text-body);
+}
+
+body {
+  font-family: var(--typography-font-family-sans);
+  font-optical-sizing: auto;
+}
+
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.touch-padding {
+  padding: 0.5rem 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}

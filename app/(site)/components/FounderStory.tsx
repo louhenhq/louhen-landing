@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { buttons, cn, layout, text } from '@/app/(site)/_lib/ui';
+import { cn, layout, text } from '@/app/(site)/_lib/ui';
+import { Button, Card } from '@/components/ui';
 
 export default function FounderStory() {
   const t = useTranslations('founder');
@@ -12,20 +13,22 @@ export default function FounderStory() {
 
   return (
     <section id="story" className={cn(layout.section, 'bg-bg')}>
-      <div className={cn(layout.narrow, layout.card, 'px-gutter py-2xl')}> 
+      <Card className={cn(layout.narrow, 'px-gutter py-2xl')}>
         <div className={layout.stackMd}>
           <h2 className={text.heading}>{t('title')}</h2>
           <p className={text.body}>{expanded ? fullBody : `${preview}…`}</p>
-          <button
+          <Button
             type="button"
-            className={cn(buttons.secondary, 'w-fit')}
+            variant="secondary"
+            size="sm"
             onClick={() => setExpanded((prev) => !prev)}
             aria-expanded={expanded}
+            className="w-fit"
           >
             {expanded ? t('less') : t('more')}
-          </button>
+          </Button>
         </div>
-      </div>
+      </Card>
     </section>
   );
 }

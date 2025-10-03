@@ -36,7 +36,7 @@ export default function ReferralAttribution({ searchParams, message }: Props) {
 
   return (
     <div className="w-full px-gutter py-md" aria-live="polite">
-      <div className={cn('mx-auto max-w-3xl rounded-2xl border border-status-success/40 bg-status-success/10 px-md py-sm text-sm text-status-success')}>
+      <div className={cn('mx-auto max-w-3xl rounded-2xl border border-status-success/40 bg-status-success/10 px-md py-sm text-body-sm text-status-success')}>
         {message}
       </div>
     </div>

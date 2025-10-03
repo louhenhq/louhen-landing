@@ -4,6 +4,8 @@ import { NextResponse } from 'next/server';
 import { BadRequestError, HttpError, InternalServerError } from '@/lib/http/errors';
 import { findByEmail, upsertPending } from '@/lib/firestore/waitlist';
 import { sendWaitlistConfirmEmail } from '@/lib/email/sendWaitlistConfirm';
+import { enforceRateLimit } from '@/lib/rate/limiter';
+import { getWaitlistResendRule } from '@/lib/rate/rules';
 import { verifyToken as verifyCaptchaToken } from '@/lib/security/hcaptcha';
 import { generateToken, hashToken } from '@/lib/security/tokens';
 import { getExpiryDate } from '@/lib/waitlistConfirmTtl';
@@ -44,6 +46,52 @@ function errorResponse(error: HttpError) {
 export async function POST(request: Request) {
   try {
     const payload = parseResendDTO(await readJson(request));
+
+    const rateDecision = await enforceRateLimit(getWaitlistResendRule(), payload.email);
+    if (!rateDecision.allowed) {
+      return NextResponse.json(
+        { ok: false, code: 'rate_limited' },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': rateDecision.retryAfterSeconds.toString(),
+          },
+        }
+      );
+    }
+
+    if (process.env.TEST_E2E_SHORTCIRCUIT === 'true') {
+      const record = await findByEmail(payload.email);
+      if (!record || record.status === 'confirmed') {
+        return NextResponse.json({ ok: true, status: record?.status ?? null }, { status: 200 });
+      }
+
+      const confirmToken = generateToken();
+      const { hash, salt, lookupHash } = hashToken(confirmToken);
+      const expiresAt = getExpiryDate();
+
+      await upsertPending(payload.email, {
+        locale: record.locale ?? null,
+        utm: record.utm ?? undefined,
+        ref: record.ref ?? null,
+        consent: true,
+        confirmExpiresAt: expiresAt,
+        confirmTokenHash: hash,
+        confirmTokenLookupHash: lookupHash,
+        confirmSalt: salt,
+      });
+
+      return NextResponse.json(
+        {
+          ok: true,
+          shortCircuit: true,
+          token: confirmToken,
+          lookupHash,
+          docId: record.id,
+        },
+        { status: 200 }
+      );
+    }
 
     const { captcha } = ensureWaitlistServerEnv();
     const secret = process.env.HCAPTCHA_SECRET?.trim();

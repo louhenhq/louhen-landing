@@ -2,7 +2,7 @@
 
 import { useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { buttons } from '@/app/(site)/_lib/ui';
+import { Button } from '@/components/ui';
 import { track } from '@/lib/clientAnalytics';
 
 const SHARE_URL = 'https://louhen-app.com?code=TWINS5&utm_source=share&utm_medium=native&utm_campaign=twins5';
@@ -45,13 +45,15 @@ export default function ShareTwinVoucherButton({ className }: ShareTwinVoucherBu
   }, [handleFallbackShare, message, shareTitle]);
 
   return (
-    <button
+    <Button
       type="button"
+      variant="secondary"
+      size="sm"
       onClick={handleShare}
-      className={`${buttons.secondary} ${className ?? ''}`.trim()}
+      className={className}
       aria-label={t('aria')}
     >
       {t('cta')}
-    </button>
+    </Button>
   );
 }

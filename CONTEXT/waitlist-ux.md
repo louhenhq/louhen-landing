@@ -15,9 +15,15 @@ Reference for the locked waitlist experience. Align copy, analytics, and enginee
 
 ## Acceptance Criteria Snapshot
 - **Accessibility:** AA colour contrast, focus management, semantic labels, and keyboard-only completion.
-- **Reliability:** Duplicate submissions safe (idempotent); hashed tokens single-use; TTL observed in confirm + resend flows; rate limiting on form + resend endpoints.
+- **Reliability:** Duplicate submissions safe (idempotent); hashed tokens single-use; TTL observed in confirm + resend flows; rate limiting on form + resend endpoints; pre-onboarding drafts persist against a session cookie rather than raw email.
 - **Privacy:** No PII beyond scoped fields; analytics events gated by consent; logs redact emails and IPs; maintain consent ledger for audits.
 - **Email:** Confirmation templates include compliance headers and unsubscribe metadata.
+
+## Pre-onboarding implementation notes
+- `/waitlist/pre-onboarding` is unlocked after confirmation. The confirm handler sets a short-lived `waitlist_session` cookie (doc UUID, HttpOnly) that the API route uses to locate the Firestore document.
+- Draft saves land in `profileDraft` on the waitlist document and toggle `preOnboarded=true`. Re-saves overwrite the draft; Firestore timestamps `updatedAt` + `profileDraftUpdatedAt`.
+- Client form supports up to five children (name, ISO birthday, optional weight + shoe size), inline validation, and idempotent messaging when a draft already exists.
+- Analytics: the client emits `preonboarding_completed { hadChildData, locale }` after a successful save, gated by consent.
 
 ## Related Backlog Slices
 - Slice 1 — UI scaffold + hCaptcha wiring

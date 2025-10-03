@@ -1,24 +1,31 @@
 import { getRequestConfig } from 'next-intl/server';
 
-const envLocales = (process.env.NEXT_PUBLIC_LOCALES ?? 'en,de')
-  .split(',')
-  .map((value) => value.trim())
-  .filter(Boolean);
+const locales = ['en-de', 'de-de'];
+const defaultLocale = 'en-de';
 
-const locales = envLocales.length ? envLocales : ['en', 'de'];
-const envDefaultLocale = (process.env.NEXT_PUBLIC_DEFAULT_LOCALE ?? 'en').trim();
-const defaultLocale = locales.includes(envDefaultLocale) ? envDefaultLocale : locales[0];
+const messageKeyByLocale = new Map([
+  ['en-de', 'en'],
+  ['de-de', 'de'],
+]);
 
 function resolveLocale(locale) {
-  if (typeof locale === 'string' && locales.includes(locale)) {
-    return locale;
+  if (typeof locale === 'string') {
+    const normalized = locale.toLowerCase();
+    if (locales.includes(normalized)) {
+      return normalized;
+    }
   }
   return defaultLocale;
 }
 
+function resolveMessageKey(locale) {
+  return messageKeyByLocale.get(locale) ?? messageKeyByLocale.get(defaultLocale) ?? 'en';
+}
+
 export default getRequestConfig(async ({ locale }) => {
   const activeLocale = resolveLocale(locale);
-  const messages = (await import(`./messages/${activeLocale}.json`)).default;
+  const messageKey = resolveMessageKey(activeLocale);
+  const messages = (await import(`./messages/${messageKey}.json`)).default;
   return {
     locale: activeLocale,
     messages,
@@ -28,4 +35,5 @@ export default getRequestConfig(async ({ locale }) => {
 export const config = {
   locales,
   defaultLocale,
+  localePrefix: 'always',
 };

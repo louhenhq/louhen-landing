@@ -49,6 +49,43 @@ describe('waitlist validation DTOs', () => {
       ],
     });
     expect(dto.parentFirstName).toBe('Alex');
-    expect(dto.children?.[0]?.name).toBe('Sam');
+    expect(dto.children[0]?.name).toBe('Sam');
+    expect(dto.children[0]?.weight).toBe(18);
+  });
+
+  it('rejects pre-onboarding payload without children', () => {
+    expect(() =>
+      parsePreOnboardingDTO({
+        parentFirstName: 'Alex',
+        children: [],
+      })
+    ).toThrow(BadRequestError);
+  });
+
+  it('rejects pre-onboarding payload with invalid birthday', () => {
+    expect(() =>
+      parsePreOnboardingDTO({
+        children: [
+          {
+            name: 'Sam',
+            birthday: '01-01-2020',
+          },
+        ],
+      })
+    ).toThrow(BadRequestError);
+  });
+
+  it('rejects pre-onboarding payload with invalid weight', () => {
+    expect(() =>
+      parsePreOnboardingDTO({
+        children: [
+          {
+            name: 'Sam',
+            birthday: '2020-01-01',
+            weight: 150,
+          },
+        ],
+      })
+    ).toThrow(BadRequestError);
   });
 });

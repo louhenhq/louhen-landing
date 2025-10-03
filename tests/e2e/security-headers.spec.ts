@@ -8,7 +8,7 @@ function getCspNonce(header: string | undefined) {
 
 test.describe('Security headers', () => {
   test('HTTP response carries strict headers and CSP nonce', async ({ page }) => {
-    const response = await page.request.get('/', {
+    const response = await page.request.get('/en-de/', {
       headers: {
         Accept: 'text/html',
       },
@@ -27,7 +27,7 @@ test.describe('Security headers', () => {
     const nonce = getCspNonce(cspHeader);
     expect(nonce).toBeTruthy();
 
-    await page.goto('/');
+    await page.goto('/en-de/');
 
     const jsonLdHasNonce = await page.evaluate(() =>
       Array.from(document.querySelectorAll('script[type="application/ld+json"]')).every((node) => node.nonce && node.nonce.length > 0)

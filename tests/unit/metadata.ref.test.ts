@@ -3,13 +3,13 @@ import { generateMetadata } from '@/app/(site)/[locale]/page';
 
 describe('landing metadata', () => {
   it('returns invite metadata when ref present', async () => {
-    const metadata = await generateMetadata({ params: { locale: 'en' }, searchParams: { ref: 'CODE123' } });
-    expect(metadata.title).toContain('invited');
+    const metadata = await generateMetadata({ params: { locale: 'en-de' }, searchParams: { ref: 'CODE123' } });
+    expect(typeof metadata.title === 'string' ? metadata.title : metadata.title?.default ?? '').toMatch(/invited/i);
     expect(metadata.openGraph?.url).toContain('ref=CODE123');
   });
 
   it('returns default metadata when ref missing', async () => {
-    const metadata = await generateMetadata({ params: { locale: 'en' }, searchParams: {} });
+    const metadata = await generateMetadata({ params: { locale: 'en-de' }, searchParams: {} });
     if (typeof metadata.title === 'string') {
       expect(metadata.title).toMatch(/Louhen/i);
     } else if (metadata.title !== undefined && metadata.title !== null) {

@@ -1,7 +1,13 @@
 'use client';
+
 import { useEffect } from 'react';
 import tokens from '@/packages/design-tokens/build/web/tokens.json';
-import { applyThemeFromMedia, getSavedTheme, getSavedContrast, setTheme, setContrast } from '@/app/theme-client';
+import {
+  applyThemeFromMedia,
+  getSavedContrast,
+  getSavedTheme,
+  subscribeToSystemPreferences,
+} from '@/app/theme-client';
 
 const bgToken = tokens['--semantic-color-bg-page'];
 
@@ -22,50 +28,28 @@ function setMetaThemeFromTokens() {
 
 export default function ThemeInit() {
   useEffect(() => {
-    const t = getSavedTheme();
-    const c = getSavedContrast();
-    if (t === 'system' || c === 'system') applyThemeFromMedia();
-    else {
-      setTheme(t);
-      setContrast(c);
-    }
+    applyThemeFromMedia();
     setMetaThemeFromTokens();
 
-    const mqlDark = window.matchMedia('(prefers-color-scheme: dark)');
-    const mqlContrast = window.matchMedia('(prefers-contrast: more)');
-    const mqlForced = window.matchMedia('(forced-colors: active)');
-
-    const updateMeta = () => {
-      const meta =
-        (document.querySelector('meta[name="theme-color"]') as HTMLMetaElement | null) ||
-        (() => {
-          const m = document.createElement('meta');
-          m.setAttribute('name', 'theme-color');
-          document.head.appendChild(m);
-          return m;
-        })();
-      const bg = getComputedStyle(document.documentElement)
-        .getPropertyValue('--semantic-color-bg-page')
-        .trim() || FALLBACK_BG;
-      meta.setAttribute('content', bg);
-    };
-
-    updateMeta();
-
-    const handle = () => {
+    const unsubscribe = subscribeToSystemPreferences(() => {
       if (getSavedTheme() === 'system' || getSavedContrast() === 'system') {
         applyThemeFromMedia();
       }
       setMetaThemeFromTokens();
-    };
-    mqlDark.addEventListener('change', handle);
-    mqlContrast.addEventListener('change', handle);
-    mqlForced.addEventListener('change', handle);
+    });
+
+    const observer = new MutationObserver((mutations) => {
+      if (mutations.some((mutation) => mutation.attributeName === 'data-theme')) {
+        setMetaThemeFromTokens();
+      }
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
     return () => {
-      mqlDark.removeEventListener('change', handle);
-      mqlContrast.removeEventListener('change', handle);
-      mqlForced.removeEventListener('change', handle);
+      unsubscribe();
+      observer.disconnect();
     };
   }, []);
+
   return null;
 }

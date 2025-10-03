@@ -3,14 +3,22 @@
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { cn, layout, text } from '@/app/(site)/_lib/ui';
+import { Card } from '@/components/ui';
 
 type Step = {
   title: string;
   body: string;
 };
 
-export default function HowItWorks() {
+type HowItWorksProps = {
+  childName: string | null;
+};
+
+export default function HowItWorks({ childName }: HowItWorksProps) {
   const t = useTranslations('method.how');
+  const xpTeaserRaw = t('xpTeaser', { defaultValue: '' });
+  const xpTeaser = xpTeaserRaw.trim();
+  const hasXpTeaser = xpTeaser.length > 0;
 
   const steps = useMemo<Step[]>(() => {
     const raw = t.raw('steps');
@@ -20,10 +28,12 @@ export default function HowItWorks() {
         if (!item || typeof item !== 'object') return null;
         const value = item as Partial<Step>;
         if (typeof value.title !== 'string' || typeof value.body !== 'string') return null;
-        return { title: value.title, body: value.body };
+        const fallbackName = t('defaultChildName', { defaultValue: 'your child' });
+        const normalizedBody = value.body.replace(/\{\s*name\s*\}/g, childName ?? fallbackName);
+        return { title: value.title, body: normalizedBody };
       })
       .filter((step): step is Step => Boolean(step));
-  }, [t]);
+  }, [childName, t]);
 
   return (
     <section id="how" className={cn(layout.section, 'bg-bg')} aria-labelledby="method-how-title">
@@ -32,18 +42,24 @@ export default function HowItWorks() {
           <h2 id="method-how-title" className={cn(text.heading, 'text-balance')}>
             {t('title')}
           </h2>
+          {hasXpTeaser ? <p className="mt-sm text-body-sm text-text-muted">{xpTeaser}</p> : null}
         </div>
-        <div className="grid gap-lg md:grid-cols-2 xl:grid-cols-4">
+        <ol className="grid gap-lg md:grid-cols-2 xl:grid-cols-5" role="list">
           {steps.map((step, index) => (
-            <article key={step.title} className={cn(layout.card, 'flex h-full flex-col gap-sm px-gutter py-xl')}>
-              <div className="text-sm font-semibold uppercase tracking-wide text-brand-primary">
-                {String(index + 1).padStart(2, '0')}
-              </div>
-              <h3 className="text-lg font-semibold text-text">{step.title}</h3>
-              <p className="text-base leading-relaxed text-text-muted">{step.body}</p>
-            </article>
+            <li key={step.title}>
+              <Card
+                className="flex h-full flex-col gap-sm px-gutter py-xl"
+                aria-label={`Step ${index + 1} of ${steps.length}: ${step.title}`}
+              >
+                <div className="text-label uppercase tracking-[0.24em] text-brand-primary" aria-hidden="true">
+                  {String(index + 1).padStart(2, '0')}
+                </div>
+                <h3 className="text-h3 text-text">{step.title}</h3>
+                <p className="text-body text-text-muted">{step.body}</p>
+              </Card>
+            </li>
           ))}
-        </div>
+        </ol>
       </div>
     </section>
   );

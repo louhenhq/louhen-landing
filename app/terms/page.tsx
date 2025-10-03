@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 export default function TermsPage() {
   return (
     <main className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">
-      <h1 className="text-3xl font-bold tracking-tight">Terms</h1>
-      <p className="mt-4 text-slate-700">
+      <h1 className="text-display-lg text-text">Terms</h1>
+      <p className="mt-4 text-body text-text">
         These placeholder terms cover the waitlist period while we finalize the full agreement for {SITE_NAME}. Official
         subscription terms will be shared when early access opens.
       </p>

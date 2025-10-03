@@ -16,7 +16,9 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        env:
+          NODE_ENV: development
+        run: npm ci --include=dev
 
       - name: Build design tokens
         run: npm run -w @louhen/design-tokens build

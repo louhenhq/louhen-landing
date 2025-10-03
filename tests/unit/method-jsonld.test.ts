@@ -3,10 +3,10 @@ import { describe, expect, it } from 'vitest';
 import { buildMethodTechArticleSchema } from '@/app/(marketing)/[locale]/method/articleSchema';
 
 const baseInput = {
-  url: 'https://example.com/en/method',
+  url: 'https://example.com/en-de/method',
   headline: 'Fit intelligence that keeps up with growing feet.',
   description: 'Discover how Louhen blends kid-safe scanning with verified fit science.',
-  locale: 'en',
+  locale: 'en-de',
   sections: ['Kid-safe scanning', 'Verified fit science', 'Adaptive personalization'],
   baseUrl: 'https://example.com',
   brandName: 'Louhen',
@@ -24,6 +24,7 @@ describe('buildMethodTechArticleSchema', () => {
     expect(schema.description).toBe(baseInput.description);
     expect(schema.url).toBe(baseInput.url);
     expect(schema.mainEntityOfPage).toBe(baseInput.url);
+    expect(new URL(schema.url).pathname).toBe('/en-de/method');
     expect(schema.articleSection).toContain('Kid-safe scanning');
     expect(schema.keywords).toContain('Adaptive personalization');
     expect(schema.publisher).toMatchObject({

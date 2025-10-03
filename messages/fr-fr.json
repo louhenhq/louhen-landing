@@ -1,0 +1,590 @@
+{
+  "header": {
+    "logo": "Louhen",
+    "nav": {
+      "aria": "Primary",
+      "how": "How it works",
+      "story": "Founder story",
+      "faq": "FAQ",
+      "legal": {
+        "privacy": "Privacy",
+        "terms": "Terms",
+        "imprint": "Imprint"
+      }
+    },
+    "cta": "Join waitlist",
+    "locale": {
+      "label": "Langue",
+      "announce": "Langue changée en {locale}."
+    }
+  },
+  "localeSuggestion": {
+    "title": "[FR] Prefer browsing in {locale}?",
+    "body": {
+      "cookie": "[FR] You usually browse Louhen in {locale}.",
+      "acceptLanguage": "[FR] Your browser language is set to {locale}."
+    },
+    "action": "[FR] Switch to {locale}",
+    "dismiss": "[FR] Stay here"
+  },
+  "theme": {
+    "label": "Thème",
+    "system": "Système",
+    "light": "Clair",
+    "dark": "Sombre",
+    "announce": {
+      "system": "Le thème suit les réglages de votre appareil.",
+      "light": "Thème clair activé.",
+      "dark": "Thème sombre activé."
+    }
+  },
+  "trustCopy": {
+    "fitTitle": "[FR] LouhenFit",
+    "fitGuarantee": "[FR] Covered by LouhenFit — free returns, guaranteed.",
+    "fitDetail": "[FR] LouhenFit protects every order — free returns until it fits.",
+    "fitCard": "[FR] LouhenFit covers free returns on your first pair so we can dial in the fit together.",
+    "gdprTitle": "[FR] GDPR & privacy",
+    "gdpr": "[FR] Your data is safe — GDPR compliant. We never sell personal data.",
+    "gdprDetail": "[FR] We store every profile in the EU and you stay in control at all times.",
+    "payment": "[FR] Your payment is secure. Processed by Adyen with bank-grade protection.",
+    "coverage": {
+      "coveredNamed": "[FR] {name} is covered by LouhenFit — free returns on the first pair to get the fit just right.",
+      "covered": "[FR] This profile is covered by LouhenFit — free returns on the first pair to get the fit just right.",
+      "notCoveredNamed": "[FR] {name} isn’t covered by LouhenFit yet. We’ll guide you with gentle fit tips until coverage expands.",
+      "notCovered": "[FR] LouhenFit isn’t available for this profile yet. We’ll guide you with gentle fit tips until coverage expands."
+    }
+  },
+  "hero": {
+    "h1": "Personal style. Effortless fit.",
+    "sub": "Louhen pairs smart sizing with curated pieces so every outfit just works.",
+    "cta": "Join the waitlist",
+    "secondary": "See how it works",
+    "microTrust": "Covered by LouhenFit — free returns, guaranteed.",
+    "trust": "LouhenFit protects every order — free returns until it fits.",
+    "badge": {
+      "label": "Special gift for twin parents — scroll down",
+      "aria": "Scroll to twin parent voucher"
+    },
+    "media": {
+      "placeholderLabel": "LouhenFit in motion",
+      "placeholderBody": "Smart sizing and curated looks come together to keep every step comfortable."
+    }
+  },
+  "trust": {
+    "badges": {
+      "gdpr": "EU GDPR compliant",
+      "louhenfit": "Powered by LouhenFit",
+      "parentsFirst": "Parents-first sizing"
+    },
+    "podiatrist": {
+      "badge": "Podiatrist reviewed",
+      "title": "Approved by European podiatrists",
+      "body": "Our sizing guidance is checked with practising podiatrists to support healthy foot development for growing kids."
+    },
+    "louhenfit": {
+      "badge": "LouhenFit guarantee",
+      "title": "Fit guaranteed with LouhenFit",
+      "body": "If the first pair misses, returns are free and we fast-track a better fit using detailed fit feedback."
+    },
+    "bar": {
+      "heading": "Why parents trust Louhen",
+      "items": {
+        "podiatrist": {
+          "label": "Podiatrist approved",
+          "description": "Expert-reviewed fit guidance",
+          "aria": "Podiatrist approved — our sizing guidance is reviewed by practising podiatrists."
+        },
+        "privacy": {
+          "label": "GDPR data safety",
+          "description": "EU-only storage and control",
+          "aria": "GDPR data safety — we store your family's data in the EU and you stay in control.",
+          "modalTitle": "GDPR-first data stewardship",
+          "modalBody": "Louhen stores profiles and fit insights on EU servers only. Families can export or delete data at any time, and we never sell or share profiles with advertisers."
+        },
+        "returns": {
+          "label": "Free returns with LouhenFit",
+          "description": "Covered until the fit is right",
+          "aria": "Free returns with LouhenFit — every first pair is covered until the fit feels right."
+        },
+        "adyen": {
+          "label": "Payments by Adyen",
+          "description": "Bank-grade payment security",
+          "aria": "Payments by Adyen — checkout is processed through Adyen's PCI Level 1 platform.",
+          "modalTitle": "Secured by Adyen",
+          "modalBody": "All payments run through Adyen’s PCI Level 1 platform, the same infrastructure trusted by leading retailers. Strong Customer Authentication and fraud monitoring protect every Louhen order."
+        }
+      }
+    },
+    "podiatristCard": {
+      "title": "Backed by podiatrists",
+      "body": "Our fit logic is developed with podiatrist insights so healthy feet come first.",
+      "cta": "Learn how we fit"
+    },
+    "testimonials": {
+      "title": "Parents who tried Louhen",
+      "items": [
+        {
+          "name": "Sophie",
+          "meta": "Emma, 3",
+          "quote": "Sizing was spot-on and the styles hit the mark. No more returns."
+        },
+        {
+          "name": "Jonas",
+          "meta": "Mila, 5",
+          "quote": "Scan took a minute and the recommendations actually fit. Stress-free."
+        },
+        {
+          "name": "Lea",
+          "meta": "Noah, 2",
+          "quote": "We finally stopped guessing. He wore them all day without complaints."
+        }
+      ]
+    },
+    "privacy": {
+      "body": "We never sell your data. You control your child’s profile.",
+      "cta": "Read our privacy policy"
+    }
+  },
+  "founder": {
+    "title": "Why we started Louhen",
+    "body": "Our twins needed their first shoes, but the store had long queues, rushed fittings, and only length and width to go by. We wanted parents to know how a shoe will feel before checkout, to compare styles side-by-side, and to shop when it fits their schedule. Louhen brings precise measurements, LouhenFit coverage, and curated looks so every pair feels like it was made for your child.",
+    "more": "Read more",
+    "less": "Show less",
+    "headline": "Our story began with twins",
+    "p1": "When our twin boys, Louis and Henry, took their first steps, we wanted to find them the perfect shoes. A physiotherapist recommended a small local store, and while the owners were kind, the experience was stressful: long waits with impatient kids, just two shoe options, and only basic measurements of length and width.",
+    "p2": "That day we realized how much guesswork parents face when shopping for children’s shoes. We thought: there must be a better way — one that makes fit effortless and choice inspiring.",
+    "p3": "That’s why we built Louhen: an app designed by parents, for parents — where every recommendation feels thoughtfully tailored, healthy feet are always the priority, and shopping is calm instead of chaotic. To honor our beginnings, we created the Twins Welcome Voucher: 5% off every order for twin parents.",
+    "voucher": {
+      "badge": "Twins Welcome Voucher",
+      "headline": "A little extra help for twin parents",
+      "body": "Every twin family gets 5% off in the Louhen app — every time. Because every little help matters when the journey is double.",
+      "hint": "Redeem in-app at checkout",
+      "cta": "Join the waitlist",
+      "tc": "Always available for twin parents. 5% off per order. Non-stackable. Terms may apply.",
+      "copyAria": "Copy voucher code TWINS5",
+      "copied": "Copied"
+    }
+  },
+  "how": {
+    "title": "How Louhen works",
+    "subtitle": "Three calm steps from scan to happy feet.",
+    "steps": [
+      {
+        "id": "scan",
+        "title": "Scan in minutes",
+        "body": "Capture a precise fit with a guided scan or quick measurements.",
+        "illustrationLabel": "Illustration of a parent scanning a child's feet",
+        "link": {
+          "label": "How sizing works",
+          "href": "method#scan"
+        }
+      },
+      {
+        "id": "match",
+        "title": "Smart matching",
+        "body": "LouhenFit maps their profile to real shoe interiors for confident picks.",
+        "illustrationLabel": "Illustration of curated shoe recommendations on a phone",
+        "link": {
+          "label": "See the fit engine",
+          "href": "method#engine"
+        }
+      },
+      {
+        "id": "happy",
+        "title": "Happy feet",
+        "body": "Unbox comfy styles and use quick feedback to keep every pair dialed in.",
+        "illustrationLabel": "Illustration of a child enjoying comfortable shoes",
+        "link": {
+          "label": "LouhenFit guarantee",
+          "href": "method#louhenfit"
+        }
+      }
+    ]
+  },
+  "layout": {
+    "skipToMain": "Skip to main content"
+  },
+  "faq": {
+    "title": "Frequently asked questions",
+    "items": {
+      "who": {
+        "q": "Who is Louhen for?",
+        "a": "Families who want shoes that support growing feet without the guesswork."
+      },
+      "what": {
+        "q": "What is LouhenFit?",
+        "a": "A promise that the first pair fits. If not, we cover returns and send the next best match."
+      },
+      "referrals": {
+        "q": "How do referrals work?",
+        "a": "Join the waitlist to receive a personal link — you and a friend earn credit when they confirm."
+      },
+      "brands": {
+        "q": "Do you support multiple brands?",
+        "a": "Yes. We partner with leading kids’ brands and map each shoe down to internal dimensions."
+      },
+      "data": {
+        "q": "How do you handle data?",
+        "a": "We only collect what we need, store IPs hashed unless you consent, and never sell your data."
+      },
+      "launch": {
+        "q": "When will Louhen launch?",
+        "a": "We’re onboarding families in waves. Join the waitlist to be notified first."
+      }
+    }
+  },
+  "waitlist": {
+    "form": {
+      "title": "Join the waitlist",
+      "lead": "Add your email and we’ll send a confirmation within seconds.",
+      "labels": {
+        "email": "Email",
+        "consent": "I agree to receive Louhen waitlist updates and accept the",
+        "captcha": "Security check"
+      },
+      "placeholders": {
+        "email": "you@example.com"
+      },
+      "submit": "Join waitlist",
+      "inflight": "Joining…",
+      "privacyLinkLabel": "Privacy Policy",
+      "success": {
+        "title": "Check your inbox",
+        "body": "We just sent a confirmation email to finish your signup.",
+        "followUp": "Didn’t get it? Look for “Louhen” in your spam or Promotions tab, then add us to your contacts.",
+        "resend": {
+          "cta": "Request another confirmation",
+          "hint": "Need a fresh link? Solve the captcha again and resubmit when you’re ready."
+        }
+      },
+      "warnings": {
+        "captchaMissing": "hCaptcha is not configured. Set NEXT_PUBLIC_HCAPTCHA_SITE_KEY to enable confirmations."
+      },
+      "errors": {
+        "summaryTitle": "Please fix the highlighted details",
+        "emailRequired": "Enter your email address.",
+        "emailInvalid": "That email doesn’t look quite right.",
+        "consent": "Please accept waitlist updates to continue.",
+        "captchaRequired": "Complete the captcha to confirm you’re human.",
+        "captchaFailed": "Captcha verification failed. Please try again.",
+        "default": "Something went wrong. Please try again.",
+        "rateLimited": "You’ve tried a few times. Please wait a minute and retry.",
+        "expired": "This confirmation link has expired. Please sign up again.",
+        "invalid": "We couldn’t process that email. Check the spelling and try again.",
+        "network": "We couldn’t reach the server. Check your connection and retry."
+      },
+      "reassurance": {
+        "title": "Why families join",
+        "items": [
+          "LouhenFit covers free returns on your first pair.",
+          "GDPR-first data: everything stays on EU servers.",
+          "Podiatrists review our sizing guidance so growing feet stay healthy."
+        ],
+        "podiatrist": {
+          "title": "Podiatrist approved",
+          "body": "Tap to see how our advisors keep each recommendation healthy.",
+          "aria": "Open podiatrist approval details"
+        }
+      }
+    },
+    "toast": {
+      "confirmed": {
+        "title": "You’re confirmed!",
+        "body": "Thanks for joining Louhen. We’ll drop early updates straight to your inbox.",
+        "dismiss": "Dismiss"
+      }
+    },
+    "index": {
+      "title": "Get early access with Louhen",
+      "body": "Join the waitlist to receive curated drops, styling guidance, and the LouhenFit guarantee before anyone else.",
+      "steps": [
+        "Share the email you check most.",
+        "Confirm the link we send right away.",
+        "Enjoy early product releases and tailored updates."
+      ],
+      "cta": {
+        "join": "Join the waitlist",
+        "privacy": "Privacy policy",
+        "faq": "Read the FAQ"
+      },
+      "meta": {
+        "title": "Louhen waitlist",
+        "description": "Discover how to join the Louhen waitlist and secure early access in minutes."
+      }
+    },
+    "success": {
+      "title": {
+        "pending": "Check your inbox ✉️",
+        "confirmed": "You’re in! 🎉"
+      },
+      "body": {
+        "pending": "Open the confirmation email we just sent to finish joining the waitlist.",
+        "confirmed": "Thanks for confirming. Your Louhen waitlist spot is saved—watch your inbox for invites and styling updates."
+      },
+      "cta": {
+        "home": "Return home",
+        "preferences": "Manage email preferences"
+      },
+      "meta": {
+        "title": "Louhen waitlist – confirmation",
+        "description": "Your Louhen waitlist place is confirmed. Expect curated updates and early access soon."
+      }
+    },
+    "expired": {
+      "title": "Link expired",
+      "body": "The confirmation link you opened has expired. Request a new email below to finish signing up.",
+      "cta": {
+        "resend": "Back to waitlist"
+      },
+      "meta": {
+        "title": "Louhen waitlist – link expired",
+        "description": "Your Louhen waitlist link has expired. Request a new confirmation email in seconds."
+      }
+    },
+    "resend": {
+      "title": "Need another email?",
+      "description": "Enter your waitlist email and we’ll send a fresh confirmation link right away.",
+      "email": {
+        "label": "Email address",
+        "placeholder": "you@example.com"
+      },
+      "submit": "Resend confirmation",
+      "success": "If that address is on the waitlist, a new confirmation email is already on its way.",
+      "error": "We couldn’t resend the email just now. Please try again shortly.",
+      "rateLimited": "Too many requests. Please wait a moment before trying again.",
+      "invalid": "Please enter a valid email address."
+    }
+  },
+  "confirm": {
+    "success": {
+      "title": "You’re confirmed!",
+      "body": "Your spot is secured. We’ll be in touch with next steps soon."
+    },
+    "expired": {
+      "title": "Confirmation link expired",
+      "body": "Request a new email below and finish joining the waitlist."
+    },
+    "already": {
+      "title": "Already confirmed",
+      "body": "This email is already part of the waitlist. See you soon!"
+    },
+    "invalid": {
+      "title": "We couldn’t validate that link",
+      "body": "Check that you copied the full URL or request another confirmation email below."
+    },
+    "resend": {
+      "cta": "Resend confirmation",
+      "sent": "If that email exists, a new link is on its way.",
+      "error": "We couldn’t send the email. Please try again later."
+    }
+  },
+  "confirmPending": {
+    "title": "Check your inbox",
+    "help": "Open the confirmation email to secure your place. Didn’t get it?"
+  },
+  "consent": {
+    "banner": {
+      "title": "We use cookies for analytics",
+      "body": "We’d like to measure how visitors use Louhen so we can improve the experience.",
+      "accept": "Accept analytics",
+      "decline": "Decline",
+      "manage": "Manage later"
+    },
+    "manage": {
+      "title": "Cookie preferences",
+      "description": "Enable analytics cookies to help us understand what’s working.",
+      "analytics": "Allow anonymous analytics",
+      "cancel": "Cancel",
+      "save": "Save",
+      "close": "Close"
+    }
+  },
+  "share": {
+    "title": "Share & earn",
+    "subtitle": "Invite friends with your link and you’ll both receive rewards when they place their first order.",
+    "linkLabel": "Referral link",
+    "codeLabel": "Referral code",
+    "copyLink": "Copy link",
+    "copyCode": "Copy code",
+    "copied": "Copied!",
+    "nativeShare": "Share",
+    "codePending": "Your referral code will appear here soon.",
+    "qr": "Show QR code",
+    "verificationPending": "Referral will be verified shortly.",
+    "assurance": "LouhenFit protects every invitee with free returns on their first pair."
+  },
+  "referral": {
+    "appliedToast": "Referral applied — thanks for supporting your friend!"
+  },
+  "og": {
+    "default": {
+      "title": "Personal style. Effortless fit.",
+      "description": "Louhen pairs podiatrist-backed comfort with adaptive sizing to keep you moving."
+    },
+    "invited": {
+      "title": "A friend invited you to Louhen",
+      "description": "Join through their link to unlock early rewards and smarter sizing for every outfit."
+    }
+  },
+  "admin": {
+    "metrics": {
+      "title": "Metrics dashboard",
+      "intro": "Key waitlist metrics updated every 60 seconds.",
+      "totals": {
+        "signups": "Signups",
+        "confirmed": "Confirmed",
+        "conversion": "Conversion"
+      },
+      "topReferrers": "Top referrers",
+      "blocks": "Referral blocks",
+      "trend": "14-day trend",
+      "noReferrers": "No referral data yet.",
+      "noBlocks": "No blocked referrals recorded.",
+      "noTrend": "No events recorded in this window.",
+      "reason": "Reason",
+      "count": "Count",
+      "date": "Date",
+      "codeLabel": "Code",
+      "signupsLabel": "Signups",
+      "confirmedLabel": "Confirmed",
+      "sparkline": {
+        "signups": "14-day Signups",
+        "confirms": "14-day Confirmations"
+      }
+    }
+  },
+  "footer": {
+    "trustEyebrow": "Why parents trust Louhen",
+    "trustHeadline": "Podiatrist-led sizing with privacy built in",
+    "trustBody": "LouhenFit keeps family data in the EU and follows GDPR so every profile stays protected.",
+    "legalNavLabel": "Legal links",
+    "legal": {
+      "heading": "Legal",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "imprint": "Imprint",
+      "preferences": "Cookie preferences"
+    },
+    "localeLabel": "Choisir la langue",
+    "dataResidency": "GDPR-compliant • EU data residency",
+    "rights": "All rights reserved"
+  },
+  "common": {
+    "learnMore": "Learn more"
+  },
+  "voucher": {
+    "share": {
+      "cta": "Share with a twin parent",
+      "aria": "Share the twin voucher",
+      "message": "Hey 👋 I found Louhen — an app that nails kids’ shoe fit.\nTwin parents get 5% off every order with code TWINS5. 🎉\nCheck it out → {url}"
+    }
+  },
+  "method": {
+    "a11y": {
+      "skipToCta": "Skip to Join Waitlist"
+    },
+    "seo": {
+      "title": "Louhen Method — Fit intelligence for growing feet",
+      "description": "Discover how Louhen blends kid-safe scanning, fit science, and privacy-first data to recommend shoes families trust."
+    },
+    "hero": {
+      "eyebrow": "The Louhen Method",
+      "title": "Fit intelligence that keeps up with growing feet.",
+      "subtitle_generic": "We pair quick scans with podiatrist-reviewed data so every recommendation feels personal, safe, and ready for play.",
+      "subtitle_personalized": "We pair quick scans with podiatrist-reviewed data so every recommendation feels personal to {name}.",
+      "cta": "Join the waitlist",
+      "trustLine": "Trusted by podiatrists and loved by families.",
+      "imageAlt": "Illustration of a parent guiding a child through a Louhen foot scan"
+    },
+    "pillars": {
+      "title": "What powers every Louhen recommendation",
+      "items": [
+        {
+          "title": "Kid-safe scanning",
+          "body": "Capture a 3D foot profile with any phone in under a minute. No raw images ever leave your device."
+        },
+        {
+          "title": "LouhenFit engine",
+          "body": "Measurements translate into the inside of real shoes so length, width, and wiggle room align before you order."
+        },
+        {
+          "title": "Adaptive personalization",
+          "body": "Profiles learn from wear feedback, surfacing styles that match growth patterns and preferences."
+        },
+        {
+          "title": "LouhenFit guarantee",
+          "body": "If the first pair doesn’t feel right, LouhenFit covers the return and tunes the next recommendation with you.",
+          "badgeLabel": "Covered by LouhenFit",
+          "badgeTooltip": "Free returns and a guided re-check whenever the fit feels off."
+        }
+      ],
+      "engine": {
+        "scienceDisclosure": {
+          "title": "See the science",
+          "body": "Every scan becomes a map of interior shoe space, matching length, width, and instep room before the box ships. Wear check-ins from families feed the engine, so each suggestion gets smarter.",
+          "privacyNote": "We only sync scans after you say so. <privacyLink>Read how we protect families in our privacy policy</privacyLink>."
+        }
+      }
+    },
+    "scienceDisclosure": {
+      "cta": "See the science"
+    },
+    "how": {
+      "title": "How it works",
+      "defaultChildName": "your child",
+      "xpTeaser": "Earn XP for your first scan and unlock fit tips sooner.",
+      "steps": [
+    {
+      "title": "Start with a scan or size",
+      "body": "Create a child profile with measurements or customise it for {name}."
+    },
+        {
+          "title": "Louhen builds the fit profile",
+          "body": "We analyze growth history, support needs, and activity goals."
+        },
+        {
+          "title": "Recommendations stay relevant",
+          "body": "Only shoes that match their fit confidence, style, and season appear."
+        },
+        {
+          "title": "You review, they explore",
+          "body": "Order with clarity and simple wear checks to confirm comfort at home."
+        },
+        {
+          "title": "Keep the journey going",
+          "body": "Join the waitlist to unlock invites, tips, and surprise drops."
+        }
+      ]
+    },
+    "trust": {
+      "badge": "Clinically guided",
+      "headline": "Podiatry advisors keep LouhenFit aligned with healthy development for every stage.",
+      "body": "Each recommendation includes fit confidence, break-in guidance, and when to re-check their size.",
+      "quote": "“We never guess sizes anymore. Louhen explains why a shoe fits so I can say yes with confidence.”",
+      "attribution": "Maya, mom of two explorers"
+    },
+    "testimonial": {
+      "quote": "“Louhen shows the data so I don’t second-guess the size anymore.”",
+      "attribution": "Jon, dad of a fearless runner"
+    },
+    "founder": {
+      "title": "From our family to yours",
+      "body": "Louhen began when our twins needed their first shoes. We wanted every parent to feel confident before hitting checkout."
+    },
+    "faqTeaser": {
+      "title": "Have questions?",
+      "subtitle": "We collected the most common topics from families like yours.",
+      "linkOnboarding": "How does onboarding work?",
+      "linkGuarantee": "What is the LouhenFit guarantee?",
+      "linkPrivacy": "How do you protect data?",
+      "cta": "Explore the FAQ",
+      "dismiss": "Dismiss",
+      "dismissAria": "Dismiss exit reminder"
+    },
+    "cta": {
+      "title": "Be first to try Louhen for your family.",
+      "button": "Join the waitlist",
+      "final": "Join the Waitlist"
+    }
+  }
+}

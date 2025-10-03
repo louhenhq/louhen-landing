@@ -3,53 +3,61 @@ import { constantTimeEquals, createTokenLookupHash, hashToken } from '@/lib/secu
 
 export type ConfirmResult = 'confirmed' | 'already' | 'expired' | 'not_found' | 'invalid';
 
-export async function processConfirmationToken(rawToken: string | null | undefined): Promise<ConfirmResult> {
+export type ConfirmOutcome = {
+  status: ConfirmResult;
+  docId?: string;
+  locale?: string | null;
+};
+
+export async function processConfirmationToken(rawToken: string | null | undefined): Promise<ConfirmOutcome> {
   const token = typeof rawToken === 'string' ? rawToken.trim() : '';
   if (!token || token.length < 20) {
-    return 'invalid';
+    return { status: 'invalid' };
   }
 
   const lookupHash = createTokenLookupHash(token);
   const record = await findByTokenHash(lookupHash);
   if (!record) {
-    return 'not_found';
+    return { status: 'not_found' };
   }
 
+  const context = { docId: record.id, locale: record.locale ?? null };
+
   if (record.status === 'confirmed') {
-    return 'already';
+    return { status: 'already', ...context };
   }
 
   if (record.status === 'expired') {
-    return 'expired';
+    return { status: 'expired', ...context };
   }
 
   const expiresAt = record.confirmExpiresAt;
   if (!expiresAt || Date.now() > expiresAt.getTime()) {
     await markExpiredByTokenHash(lookupHash);
-    return 'expired';
+    return { status: 'expired', ...context };
   }
 
   if (!record.confirmSalt || !record.confirmTokenHash) {
     await markExpiredByTokenHash(lookupHash);
-    return 'expired';
+    return { status: 'expired', ...context };
   }
 
   const hashed = hashToken(token, record.confirmSalt).hash;
   const matches = constantTimeEquals(hashed, record.confirmTokenHash);
   if (!matches) {
     await markExpiredByTokenHash(lookupHash);
-    return 'expired';
+    return { status: 'expired', ...context };
   }
 
   const confirmationResult = await markConfirmedByTokenHash(lookupHash);
   if (confirmationResult === 'confirmed') {
-    return 'confirmed';
+    return { status: 'confirmed', ...context };
   }
   if (confirmationResult === 'already') {
-    return 'already';
+    return { status: 'already', ...context };
   }
   if (confirmationResult === 'expired') {
-    return 'expired';
+    return { status: 'expired', ...context };
   }
-  return 'not_found';
+  return { status: 'not_found' };
 }

@@ -21,6 +21,11 @@ High-level map of routes, data flow, environment setup, security, observability,
 - (Optional) `app/api/resend-confirm/route.ts`  
   POST endpoint to re-send confirmation email if token expired or lost (guarded by rate limit).
 
+### Method Page — Personalisation & Flags
+- Personalised copy derives from session user context; prefer SSR-safe read of child profiles (id, firstName) from the existing auth/session provider. Do not block render; if missing, fall back to generic strings.
+- Feature flags: `method.stickyCta`, `method.exitNudge`. Default: enabled on staging, disabled on production until QA sign-off.
+- Performance budget: do not add new client libraries beyond the already-approved Framer Motion; gate animations behind the reduced-motion media query.
+
 ---
 
 ## 2) Data Flow — Waitlist
@@ -113,6 +118,14 @@ Required env vars (all set in Vercel):
 - WAITLIST_CONFIRM_TTL_DAYS (e.g., `7`)
 
 Fail fast on missing envs with clear server-side error logs (no secrets echoed).
+
+---
+
+## 6) CSP & Inline Scripts
+
+- Middleware issues a strict CSP with per-request nonces. All inline scripts **must** set `nonce={nonce}` from the request headers and render via helpers like `SeoJsonLd`.
+- Do not add raw `<script>` tags or inline event handlers; encapsulate logic in React components or external modules so the nonce is applied automatically.
+- JSON-LD helpers (`OrganizationJsonLd`, `BreadcrumbJsonLd`, `TechArticleJsonLd`, etc.) already inject the correct nonce — reuse them instead of hand-writing `<script>` blocks.
 
 ### DNS / Environment Addendum
 
