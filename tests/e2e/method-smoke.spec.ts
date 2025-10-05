@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { defaultLocale, type SupportedLocale } from '@/next-intl.locales';
-import enMessages from '@/messages/en.json';
+import enMessages from '@/messages/en.json' assert { type: 'json' };
 
 function methodPath(locale: SupportedLocale): string {
   return locale === defaultLocale ? '/method' : `/${locale}/method`;
