@@ -2,6 +2,8 @@
 
 import * as React from 'react';
 import Link from 'next/link';
+import { useLocale, useTranslations } from 'next-intl';
+import { legalPath } from '@/lib/routing/legalPath';
 import ThemeToggle from '@/components/ThemeToggle';
 import { SITE_NAME } from '@/constants/site';
 
@@ -11,6 +13,8 @@ type Props = {
 };
 
 export default function SiteHeader({ onboardingEnabled = false }: Props) {
+  const locale = useLocale();
+  const legalT = useTranslations('footer.legal');
   return (
     <header className="w-full border-b border-slate-200">
       <div className="mx-auto max-w-6xl px-4 py-3 flex items-center gap-4">
@@ -21,8 +25,8 @@ export default function SiteHeader({ onboardingEnabled = false }: Props) {
 
         {/* Desktop nav */}
         <nav className="ml-auto hidden md:flex items-center gap-4">
-          <Link href="/privacy" prefetch={false} className="text-sm hover:underline">Privacy</Link>
-          <Link href="/terms" prefetch={false} className="text-sm hover:underline">Terms</Link>
+          <Link href={legalPath(locale, 'privacy')} prefetch={false} className="text-sm hover:underline">{legalT('privacy')}</Link>
+          <Link href={legalPath(locale, 'terms')} prefetch={false} className="text-sm hover:underline">{legalT('terms')}</Link>
           <Link href="/method" prefetch={false} className="text-sm hover:underline">Method</Link>
           <Link href="/imprint" prefetch={false} className="text-sm hover:underline">Imprint</Link>
           {onboardingEnabled && (
@@ -48,8 +52,8 @@ export default function SiteHeader({ onboardingEnabled = false }: Props) {
       {/* Ensure your existing mobile panel renders nav links here */}
       <div className="md:hidden border-t border-slate-200">
         <nav className="px-4 py-3 flex flex-col gap-2">
-          <Link href="/privacy" prefetch={false} className="text-sm underline">Privacy</Link>
-          <Link href="/terms" prefetch={false} className="text-sm underline">Terms</Link>
+          <Link href={legalPath(locale, 'privacy')} prefetch={false} className="text-sm underline">{legalT('privacy')}</Link>
+          <Link href={legalPath(locale, 'terms')} prefetch={false} className="text-sm underline">{legalT('terms')}</Link>
           <Link href="/method" prefetch={false} className="text-sm underline">Method</Link>
           <Link href="/imprint" prefetch={false} className="text-sm underline">Imprint</Link>
           {onboardingEnabled && (

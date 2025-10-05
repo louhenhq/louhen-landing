@@ -44,6 +44,7 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.10.2",
     "@eslint/eslintrc": "^3",
     "@hcaptcha/react-hcaptcha": "^1.12.1",
     "@lhci/cli": "^0.15.1",

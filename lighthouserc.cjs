@@ -1,8 +1,21 @@
-const BASE = process.env.BASE_URL || 'http://localhost:4311';
+require('ts-node/register');
+const { locales, defaultLocale } = require('./next-intl.locales');
+
+const RAW_BASE = process.env.BASE_URL || 'http://localhost:4311';
+const BASE = RAW_BASE.replace(/\/$/, '');
+
+const baseRoutes = [
+  `${BASE}/`,
+  `${BASE}/method`,
+];
+
+const legalPrivacyRoutes = locales.map((locale) => `${BASE}/${locale}/legal/privacy`);
+const legalTermsRoute = `${BASE}/${defaultLocale}/legal/terms`;
+
 module.exports = {
   ci: {
     collect: {
-      url: [`${BASE}/`, `${BASE}/method`],
+      url: [...baseRoutes, ...legalPrivacyRoutes, legalTermsRoute],
       numberOfRuns: 1,
       settings: {
         formFactor: 'mobile',

@@ -1,0 +1,176 @@
+import type { Metadata } from 'next';
+import type { ReactNode } from 'react';
+import { getTranslations, unstable_setRequestLocale } from 'next-intl/server';
+import { isPrelaunch } from '@/lib/env/prelaunch';
+import type { SupportedLocale } from '@/next-intl.locales';
+
+export const runtime = 'nodejs';
+
+const FALLBACK_SITE_URL = 'https://louhen-landing.vercel.app';
+const REVISION_DATE_ISO = '2025-02-14';
+
+const SECTION_KEYS = [
+  'controller',
+  'purpose',
+  'legalBases',
+  'processors',
+  'retention',
+  'rights',
+  'children',
+  'changes',
+  'contact',
+] as const;
+
+const SECTION_IDS: Record<(typeof SECTION_KEYS)[number], string> = {
+  controller: 'controller',
+  purpose: 'purpose',
+  legalBases: 'legal-bases',
+  processors: 'processors',
+  retention: 'retention',
+  rights: 'rights',
+  children: 'children',
+  changes: 'changes',
+  contact: 'contact',
+};
+
+type PrivacyPageProps = {
+  params: { locale: SupportedLocale };
+};
+
+export async function generateMetadata({ params }: PrivacyPageProps): Promise<Metadata> {
+  const { locale } = params;
+  const t = await getTranslations({ locale, namespace: 'legal' });
+
+  const title = t('privacy.title');
+  const description = t('privacy.purpose.items.0');
+  const rawBaseUrl = process.env.APP_BASE_URL?.trim() || process.env.NEXT_PUBLIC_SITE_URL?.trim() || FALLBACK_SITE_URL;
+  const baseUrl = rawBaseUrl.replace(/\/$/, '');
+  const canonicalPath = `/${locale}/legal/privacy`;
+  const fullUrl = `${baseUrl}${canonicalPath}`;
+
+  const robots = isPrelaunch()
+    ? { index: false, follow: false }
+    : undefined;
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: canonicalPath,
+    },
+    openGraph: {
+      title,
+      description,
+      url: fullUrl,
+    },
+    twitter: {
+      title,
+      description,
+    },
+    robots,
+  } satisfies Metadata;
+}
+
+export default async function PrivacyPage({ params }: PrivacyPageProps) {
+  const { locale } = params;
+  unstable_setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: 'legal' });
+
+  const revisionDate = new Date(REVISION_DATE_ISO);
+  const formattedDate = new Intl.DateTimeFormat(locale, { dateStyle: 'long' }).format(revisionDate);
+  const lastUpdatedLabel = t('common.lastUpdatedTemplate', { date: formattedDate });
+  const privacyEmail = t('common.privacyEmail');
+  const purposeItemsRaw = t.raw('privacy.purpose.items');
+  const introParagraph = Array.isArray(purposeItemsRaw) && typeof purposeItemsRaw[0] === 'string'
+    ? purposeItemsRaw[0]
+    : t('privacy.purpose.heading');
+
+  type SectionContent = {
+    key: (typeof SECTION_KEYS)[number];
+    heading: string;
+    body: ReactNode;
+  };
+
+  const sections: SectionContent[] = SECTION_KEYS.map((key) => {
+    const heading = t(`privacy.${key}.heading`);
+
+    if (key === 'purpose' || key === 'legalBases' || key === 'rights') {
+      const items = t.raw(`privacy.${key}.items`);
+      const listItems = Array.isArray(items)
+        ? items.filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+        : [];
+
+      const listBody = (
+        <ul className="list-disc space-y-2 pl-6 text-base leading-relaxed text-text-muted">
+          {listItems.map((item, index) => (
+            <li key={`${key}-${index}`}>{item}</li>
+          ))}
+        </ul>
+      );
+
+      return {
+        key,
+        heading,
+        body: listBody,
+      };
+    }
+
+    if (key === 'contact') {
+      const richBody = t.rich('privacy.contact.body', {
+        email: (chunks) => (
+          <a
+            href={`mailto:${privacyEmail}`}
+            className="text-brand-primary underline underline-offset-4 transition-colors hover:text-brand-primary/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
+          >
+            {chunks}
+          </a>
+        ),
+        emailAddress: privacyEmail,
+      });
+      return {
+        key,
+        heading,
+        body: richBody,
+      };
+    }
+
+    const body = t(`privacy.${key}.body`);
+    return {
+      key,
+      heading,
+      body,
+    };
+  });
+
+  const controllerSection = sections.find((section) => section.key === 'controller');
+  const remainingSections = sections.filter((section) => section.key !== 'controller');
+
+  return (
+    <main id="main" className="mx-auto max-w-3xl px-gutter py-3xl text-text">
+      <article className="space-y-8">
+        <header className="space-y-3">
+          <h1 className="text-3xl font-semibold tracking-tight text-text">{t('privacy.title')}</h1>
+          <p data-testid="last-updated" className="text-sm text-text-muted">{lastUpdatedLabel}</p>
+          <p className="text-base leading-relaxed text-text-muted">{introParagraph}</p>
+        </header>
+
+        {controllerSection ? (
+          <section id={SECTION_IDS.controller} className="space-y-3">
+            <h2 className="text-2xl font-semibold text-text">{controllerSection.heading}</h2>
+            <div className="text-base leading-relaxed text-text-muted">{controllerSection.body}</div>
+          </section>
+        ) : null}
+
+        <div className="space-y-8">
+          {remainingSections.map(({ key, heading, body }) => (
+            <section key={key} id={SECTION_IDS[key]} className="space-y-3">
+              <h2 className="text-2xl font-semibold text-text">{heading}</h2>
+              <div className="text-base leading-relaxed text-text-muted">{body}</div>
+            </section>
+          ))}
+        </div>
+      </article>
+    </main>
+  );
+}
+

@@ -7,15 +7,22 @@ import type { SupportedLocale } from '@/next-intl.locales';
 import waitlistEn from '@/i18n/en/waitlist.json';
 import waitlistDe from '@/i18n/de/waitlist.json';
 
-const FALLBACK_LOCALE: SupportedLocale = 'en';
+const WAITLIST_LOCALES = ['en', 'de'] as const;
+type WaitlistLocale = (typeof WAITLIST_LOCALES)[number];
+const FALLBACK_LOCALE: WaitlistLocale = 'en';
 
-const WAITLIST_NAMESPACE: Record<SupportedLocale, AbstractIntlMessages> = {
+const WAITLIST_NAMESPACE: Record<WaitlistLocale, AbstractIntlMessages> = {
   en: waitlistEn as AbstractIntlMessages,
   de: waitlistDe as AbstractIntlMessages,
 };
 
+function isWaitlistLocale(locale: SupportedLocale): locale is WaitlistLocale {
+  return (WAITLIST_LOCALES as readonly string[]).includes(locale);
+}
+
 function selectWaitlistMessages(locale: SupportedLocale): AbstractIntlMessages {
-  return WAITLIST_NAMESPACE[locale] ?? WAITLIST_NAMESPACE[FALLBACK_LOCALE];
+  const resolved = isWaitlistLocale(locale) ? locale : FALLBACK_LOCALE;
+  return WAITLIST_NAMESPACE[resolved];
 }
 
 export async function resolveWaitlistLocale(): Promise<SupportedLocale> {

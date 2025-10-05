@@ -350,7 +350,8 @@
       "privacy": "[DE] Privacy",
       "terms": "[DE] Terms",
       "imprint": "[DE] Imprint",
-      "preferences": "[DE] Cookie preferences"
+      "preferences": "[DE] Cookie preferences",
+      "heading": "Rechtliches"
     },
     "rights": "[DE] All rights reserved"
   },
@@ -426,6 +427,119 @@
     "cta": {
       "title": "[DE] Be first to try Louhen for your family.",
       "button": "[DE] Join the waitlist"
+    }
+  },
+  "legal": {
+    "common": {
+      "companyName": "[[PENDING GmbH NAME]]",
+      "companyAddress": "[[PENDING ADDRESS]]",
+      "legalEmail": "legal@louhen.eu",
+      "privacyEmail": "privacy@louhen.eu",
+      "lastUpdatedTemplate": "Zuletzt aktualisiert: {date}"
+    },
+    "terms": {
+      "title": "Allgemeine Geschäftsbedingungen",
+      "intro": "Diese Vorab-AGB regeln Ihre Nutzung der Louhen-Marketingseite und der Warteliste. Mit dem Besuch der Seite oder der Angabe Ihrer E-Mail stimmen Sie den folgenden Bedingungen zu.",
+      "sections": {
+        "eligibility": {
+          "heading": "Teilnahmevoraussetzungen",
+          "body": "Sie müssen mindestens 18 Jahre alt sein und im eigenen Namen oder für Ihren Haushalt handeln, um die Seite zu nutzen und sich für die Warteliste anzumelden. Sie sind dafür verantwortlich, dass alle bereitgestellten Angaben korrekt sind."
+        },
+        "waitlist": {
+          "heading": "Warteliste",
+          "body": "Die Warteliste erfordert eine gültige E-Mail-Adresse. Wir können vor der Reservierung Ihres Platzes eine Bestätigung verlangen und behalten uns vor, Einträge zu entfernen, die betrügerisch oder unvollständig wirken. Ein Wartelistenplatz garantiert keinen künftigen Zugang, keine Preise und keine Produktverfügbarkeit."
+        },
+        "acceptableUse": {
+          "heading": "Zulässige Nutzung",
+          "body": "Unterlassen Sie jeglichen Missbrauch der Seite, Sicherheitsangriffe oder das Sammeln von Daten anderer Besucher. Automatisierte Skripte, Scraping oder Masseneinreichungen sind untersagt."
+        },
+        "intellectualProperty": {
+          "heading": "Geistiges Eigentum",
+          "body": "Sämtliche Inhalte, Marken, Texte und Layouts auf der Seite gehören Louhen oder Partnern. Eine Vervielfältigung, Weitergabe oder Anpassung ist nur mit schriftlicher Zustimmung erlaubt."
+        },
+        "availability": {
+          "heading": "Verfügbarkeit & Änderungen",
+          "body": "Die Seite und die Warteliste werden im Preview-Modus bereitgestellt. Wir können Funktionen jederzeit aktualisieren, aussetzen oder einstellen und übernehmen keine Garantie für durchgehende Verfügbarkeit oder einen bestimmten Launch-Zeitpunkt."
+        },
+        "disclaimer": {
+          "heading": "Haftungsausschluss",
+          "body": "Die Informationen auf dieser Seite dienen allgemeinen Planungszwecken und stellen kein verbindliches Angebot für Waren oder Dienstleistungen dar."
+        },
+        "liability": {
+          "heading": "Haftungsbeschränkung",
+          "body": "Soweit gesetzlich zulässig haftet Louhen nicht für indirekte, zufällige oder Folgeschäden, die aus der Nutzung der Seite oder der Warteliste entstehen. Unverzichtbare Verbraucherrechte bleiben davon unberührt."
+        },
+        "governingLaw": {
+          "heading": "Anwendbares Recht",
+          "body": "Diese Bedingungen unterliegen deutschem Recht, unbeschadet zwingender Verbraucherschutzvorschriften an Ihrem Wohnsitz."
+        },
+        "changes": {
+          "heading": "Änderungen dieser Bedingungen",
+          "body": "Wir können diese Bedingungen an Produkt- oder Rechtsentwicklungen anpassen. Das Änderungsdatum wird über den Hinweis \"Zuletzt aktualisiert\" auf der Rechtsseite angezeigt."
+        },
+        "contact": {
+          "heading": "Kontakt",
+          "body": "Fragen zu diesen Bedingungen richten Sie an <email>{emailAddress}</email>."
+        }
+      }
+    },
+    "privacy": {
+      "title": "Datenschutzerklärung",
+      "controller": {
+        "heading": "Verantwortlicher",
+        "body": "Für diese Landing-Experience und die Warteliste ist [[PENDING GmbH NAME]] mit Sitz in [[PENDING ADDRESS]] verantwortlich."
+      },
+      "purpose": {
+        "heading": "Verarbeitungszwecke",
+        "items": [
+          "Bearbeitung von Wartelisten-Anmeldungen inklusive E-Mail, Sprache und optionalen Referral-Daten.",
+          "Versand von Bestätigungs- und Service-E-Mails über Resend, damit Sie Ihre Anmeldung verifizieren und Updates erhalten können.",
+          "Schutz der Formulare vor Missbrauch durch hCaptcha-Prüfungen und zugehörige Token.",
+          "Betrieb von Server-Infrastruktur und Sicherheitsprotokollen über Firebase Admin auf geschützten API-Routen.",
+          "Durchführung optionaler Analysen nur nach Ihrer ausdrücklichen Einwilligung, um die Performance der Seite zu verstehen."
+        ]
+      },
+      "legalBases": {
+        "heading": "Rechtsgrundlagen",
+        "items": [
+          "Art. 6 Abs. 1 lit. b DSGVO – Verarbeitung zur Bereitstellung der Warteliste und zugehöriger Kommunikation.",
+          "Art. 6 Abs. 1 lit. a DSGVO – Verarbeitung auf Basis Ihrer Einwilligung für Analysen und spätere Marketing-Maßnahmen.",
+          "Art. 6 Abs. 1 lit. f DSGVO – Wahrung berechtigter Interessen an Sicherheit und Missbrauchsprävention, z. B. über Monitoring und hCaptcha."
+        ]
+      },
+      "processors": {
+        "heading": "Auftragsverarbeiter & Übermittlungen",
+        "body": "Wir nutzen geprüfte Dienstleister für Hosting/CDN, Resend (E-Mail-Versand), hCaptcha (Bot-Schutz) und Firebase (Infrastruktur). Arbeiten Anbieter außerhalb des EWR, greifen Standardvertragsklauseln oder Angemessenheitsbeschlüsse."
+      },
+      "retention": {
+        "heading": "Speicherdauer",
+        "body": "Wir bewahren Wartelisten- und Einwilligungsdaten nur so lange auf, wie es für Early-Access-Programme, gesetzliche Pflichten oder auf Ihren Löschwunsch hin erforderlich ist."
+      },
+      "rights": {
+        "heading": "Ihre Rechte",
+        "items": [
+          "Auskunft über Ihre personenbezogenen Daten verlangen.",
+          "Unrichtige Daten berichtigen lassen.",
+          "Löschung von Daten verlangen, wenn sie nicht mehr benötigt werden.",
+          "Die Verarbeitung unter bestimmten Voraussetzungen einschränken.",
+          "Daten in einem übertragbaren Format erhalten.",
+          "Der Verarbeitung aus berechtigtem Interesse widersprechen.",
+          "Eine erteilte Einwilligung jederzeit mit Wirkung für die Zukunft widerrufen.",
+          "Beschwerde bei einer Aufsichtsbehörde einreichen."
+        ]
+      },
+      "children": {
+        "heading": "Kinder",
+        "body": "Die Landing-Seite richtet sich an Erwachsene bzw. Erziehungsberechtigte. Wir erheben wissentlich keine personenbezogenen Daten direkt von Kindern."
+      },
+      "changes": {
+        "heading": "Änderungen dieser Datenschutzerklärung",
+        "body": "Wir aktualisieren diese Datenschutzerklärung, wenn sich unsere Verarbeitungstätigkeiten ändern. Bitte beachten Sie den Hinweis \"Zuletzt aktualisiert\" für die aktuelle Version."
+      },
+      "contact": {
+        "heading": "Datenschutzkontakt",
+        "body": "Für Datenschutzanfragen schreiben Sie an <email>{emailAddress}</email>."
+      }
     }
   }
 }

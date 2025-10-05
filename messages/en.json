@@ -350,7 +350,8 @@
       "privacy": "Privacy",
       "terms": "Terms",
       "imprint": "Imprint",
-      "preferences": "Cookie preferences"
+      "preferences": "Cookie preferences",
+      "heading": "Legal"
     },
     "rights": "All rights reserved"
   },
@@ -426,6 +427,119 @@
     "cta": {
       "title": "Be first to try Louhen for your family.",
       "button": "Join the waitlist"
+    }
+  },
+  "legal": {
+    "common": {
+      "companyName": "[[PENDING GmbH NAME]]",
+      "companyAddress": "[[PENDING ADDRESS]]",
+      "legalEmail": "legal@louhen.eu",
+      "privacyEmail": "privacy@louhen.eu",
+      "lastUpdatedTemplate": "Last updated: {date}"
+    },
+    "terms": {
+      "title": "Terms & Conditions",
+      "intro": "These pre-launch terms govern your use of the Louhen marketing site and waitlist. By visiting the site or submitting your email, you agree to the conditions below.",
+      "sections": {
+        "eligibility": {
+          "heading": "Eligibility",
+          "body": "You must be at least 18 years old and acting on behalf of yourself or your household to use the site and join the waitlist. You are responsible for ensuring any information you provide is accurate."
+        },
+        "waitlist": {
+          "heading": "Waitlist Participation",
+          "body": "Joining the waitlist requires a valid email address. We may request confirmation before reserving your place and reserve the right to decline or remove entries that appear fraudulent or incomplete. A waitlist spot does not guarantee future access, pricing, or product availability."
+        },
+        "acceptableUse": {
+          "heading": "Acceptable Use",
+          "body": "Do not misuse the site, attempt to interfere with its security, or harvest data about other visitors. Automated scripts, scraping, or bulk submissions are prohibited."
+        },
+        "intellectualProperty": {
+          "heading": "Intellectual Property",
+          "body": "All content, branding, copy, and layouts on the site are owned by Louhen or its partners. You may not copy, distribute, or adapt materials without written permission."
+        },
+        "availability": {
+          "heading": "Availability & Changes",
+          "body": "The site and waitlist are offered on a preview basis. We may update, suspend, or withdraw features at any time. We do not promise uninterrupted access or a specific launch timeline."
+        },
+        "disclaimer": {
+          "heading": "Disclaimers",
+          "body": "Information on this site is provided for general planning purposes and does not constitute a binding offer for goods or services."
+        },
+        "liability": {
+          "heading": "Limitation of Liability",
+          "body": "To the extent permitted by law, Louhen is not liable for indirect, incidental, or consequential damages arising from use of the site or waitlist. This does not limit rights that cannot be excluded under applicable law."
+        },
+        "governingLaw": {
+          "heading": "Governing Law",
+          "body": "These terms are governed by German law, without prejudice to any mandatory consumer protections in your place of residence."
+        },
+        "changes": {
+          "heading": "Updates to These Terms",
+          "body": "We may revise these terms to reflect product or regulatory changes. The revision date will be shown using the Last updated notice in the legal page."
+        },
+        "contact": {
+          "heading": "Contact",
+          "body": "Questions about these terms can be sent to <email>{emailAddress}</email>."
+        }
+      }
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "controller": {
+        "heading": "Controller",
+        "body": "[[PENDING GmbH NAME]] at [[PENDING ADDRESS]] is responsible for this landing experience and the waitlist program."
+      },
+      "purpose": {
+        "heading": "Purpose of Processing",
+        "items": [
+          "Process waitlist registrations, including email, locale, and optional referral data.",
+          "Send confirmation and operational emails via Resend so you can verify your signup and receive key updates.",
+          "Protect forms and prevent abuse through hCaptcha challenges and associated tokens.",
+          "Operate server-side infrastructure and security logs through Firebase Admin on restricted API routes.",
+          "Run optional analytics only after you provide explicit consent to help us understand site performance."
+        ]
+      },
+      "legalBases": {
+        "heading": "Legal Bases",
+        "items": [
+          "Art. 6(1)(b) GDPR – we process your data to provide the waitlist and related communications.",
+          "Art. 6(1)(a) GDPR – we rely on your consent for analytics and future marketing messages.",
+          "Art. 6(1)(f) GDPR – we safeguard the service against fraud and misuse, including security monitoring and abuse prevention."
+        ]
+      },
+      "processors": {
+        "heading": "Processors & Transfers",
+        "body": "We use vetted service providers for hosting/CDN, Resend (email delivery), hCaptcha (bot protection), and Firebase (infrastructure). When providers operate outside the EEA, standard contractual clauses or adequacy decisions apply."
+      },
+      "retention": {
+        "heading": "Data Retention",
+        "body": "We retain waitlist and consent records only as long as needed to manage early access programs, comply with legal obligations, or until you request deletion."
+      },
+      "rights": {
+        "heading": "Your Rights",
+        "items": [
+          "Access your personal data.",
+          "Rectify inaccurate data.",
+          "Request erasure of data when no longer needed.",
+          "Restrict processing under qualifying conditions.",
+          "Receive a copy of data in a portable format.",
+          "Object to processing based on legitimate interest.",
+          "Withdraw consent at any time for future processing.",
+          "Lodge a complaint with a supervisory authority."
+        ]
+      },
+      "children": {
+        "heading": "Children",
+        "body": "The landing site is designed for adults or guardians exploring Louhen. We do not knowingly collect personal data directly from children."
+      },
+      "changes": {
+        "heading": "Changes to This Policy",
+        "body": "We will update this policy when our processing activities evolve. Please review the Last updated notice to understand the latest version."
+      },
+      "contact": {
+        "heading": "Privacy Contact",
+        "body": "For privacy requests email <email>{emailAddress}</email>."
+      }
     }
   }
 }

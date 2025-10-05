@@ -47,4 +47,4 @@ export function buildEmailTheme(palette: EmailColorPalette): EmailTheme {
 
 export const emailTheme = buildEmailTheme(emailColors);
 
-export const emailThemeDark = buildEmailTheme(emailColorsDark);
+export const emailThemeDark = buildEmailTheme(emailColorsDark as unknown as EmailColorPalette);
