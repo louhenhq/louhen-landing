@@ -42,7 +42,7 @@ test.describe('SEO metadata', () => {
     const canonical = page.locator('link[rel="canonical"]');
     const canonicalHref = await canonical.getAttribute('href');
     const canonicalParts = getCanonicalParts(canonicalHref);
-    expect(['/','/en','/de']).toContain(canonicalParts.path);
+    expect(['/', '/en', '/de', '/en-de', '/de-de']).toContain(canonicalParts.path);
     expect(allowedHosts).toContain(canonicalParts.host);
 
     const altTexts = await page

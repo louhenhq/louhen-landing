@@ -61,7 +61,7 @@ test.describe('Localized legal pages', () => {
 
       await expect(termsLink).toBeVisible();
       await Promise.all([
-        page.waitForURL((url) => url.pathname === legalPath(locale, 'terms')),
+        page.waitForURL((url) => url.pathname === legalPath(locale, 'terms'), { waitUntil: 'commit' }),
         termsLink.click(),
       ]);
       await expect(page.locator('h1')).toHaveCount(1);
@@ -70,7 +70,7 @@ test.describe('Localized legal pages', () => {
 
       await expect(privacyLink).toBeVisible();
       await Promise.all([
-        page.waitForURL((url) => url.pathname === legalPath(locale, 'privacy')),
+        page.waitForURL((url) => url.pathname === legalPath(locale, 'privacy'), { waitUntil: 'commit' }),
         privacyLink.click(),
       ]);
       await expect(page.locator('h1')).toHaveCount(1);

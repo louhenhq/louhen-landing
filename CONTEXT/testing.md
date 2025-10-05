@@ -21,3 +21,8 @@
 - `tests/e2e/legal.a11y.spec.ts` runs axe-core against every localized Terms and Privacy route.
 - Tests fail on any serious or critical violations; review CI logs for details and remediate before merge.
 - Axe coverage includes color contrast, document landmarks, ARIA usage, and common structural issues.
+
+## Debugging & Reports
+- Set `PWTEST_EDITOR` to enable "Open in Editor" links in Playwright HTML reports (e.g., `export PWTEST_EDITOR="code -g"` for VS Code).
+- After exporting, clicking a file/line inside the HTML report opens the file directly in your editor.
+- For terminal-only output (easy copy/paste), rerun the failing spec with `npx playwright test <spec> --reporter=line --workers=1`.
