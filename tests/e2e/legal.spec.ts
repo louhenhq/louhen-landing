@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { locales } from '@/next-intl.locales';
-import { legalPath, localeHomePath } from '@/lib/routing/legalPath';
+import { legalPath, localeHomePath, type LegalSlug } from '@/lib/routing/legalPath';
 
 const TERMS_PATTERNS = [/terms/i, /allgemeine\s+geschäftsbedingungen/iu];
 const PRIVACY_PATTERNS = [/privacy/i, /datenschutz/i];
@@ -8,6 +8,20 @@ const PRIVACY_PATTERNS = [/privacy/i, /datenschutz/i];
 const PRELAUNCH_FLAG =
   (process.env.IS_PRELAUNCH?.trim() === 'true' || process.env.IS_PRELAUNCH?.trim() === '1') ||
   (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'production');
+
+const SPECIAL_REGEX_CHARS = new Set(['\\', '^', '$', '.', '|', '?', '*', '+', '(', ')', '[', ']', '{', '}']);
+
+function escapeForRegex(value: string): string {
+  return value
+    .split('')
+    .map((char) => (SPECIAL_REGEX_CHARS.has(char) ? `\\${char}` : char))
+    .join('');
+}
+
+function legalUrlMatcher(locale: string, slug: LegalSlug): RegExp {
+  const expectedPath = legalPath(locale, slug);
+  return new RegExp(`${escapeForRegex(expectedPath)}(?:/)?(?:[?#].*)?$`);
+}
 
 function matchesAny(text: string | null, patterns: RegExp[]): boolean {
   if (!text) return false;
@@ -60,19 +74,15 @@ test.describe('Localized legal pages', () => {
       const privacyLink = footer.getByRole('link', { name: /privacy|datenschutz/i });
 
       await expect(termsLink).toBeVisible();
-      await Promise.all([
-        page.waitForURL((url) => url.pathname === legalPath(locale, 'terms'), { waitUntil: 'commit' }),
-        termsLink.click(),
-      ]);
+      await termsLink.click();
+      await expect(page).toHaveURL(legalUrlMatcher(locale, 'terms'));
       await expect(page.locator('h1')).toHaveCount(1);
 
       await page.goBack();
 
       await expect(privacyLink).toBeVisible();
-      await Promise.all([
-        page.waitForURL((url) => url.pathname === legalPath(locale, 'privacy'), { waitUntil: 'commit' }),
-        privacyLink.click(),
-      ]);
+      await privacyLink.click();
+      await expect(page).toHaveURL(legalUrlMatcher(locale, 'privacy'));
       await expect(page.locator('h1')).toHaveCount(1);
 
       await context.close();

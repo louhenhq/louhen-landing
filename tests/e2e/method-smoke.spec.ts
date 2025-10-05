@@ -1,17 +1,28 @@
 import { expect, test } from '@playwright/test';
+import { defaultLocale, type SupportedLocale } from '@/next-intl.locales';
+import enMessages from '@/messages/en.json';
 
-test.describe('/en/method page smoke test', () => {
+function methodPath(locale: SupportedLocale): string {
+  return locale === defaultLocale ? '/method' : `/${locale}/method`;
+}
+
+test.describe('Method page smoke test', () => {
+  const locale: SupportedLocale = 'en';
+  const messages = enMessages.method;
+
   test('renders localized hero and key content', async ({ page }) => {
-    await page.goto('/en/method');
-    const title = await page.title();
-    expect(title).toMatch(/Method/i);
-    expect(title).toMatch(/Louhen/i);
+    const response = await page.goto(methodPath(locale), { waitUntil: 'networkidle' });
+    expect(response?.status()).toBe(200);
+
+    await expect(page).toHaveTitle(messages.seo.title);
+
     const heroHeading = page.getByRole('heading', { level: 1 }).first();
     await expect(heroHeading).toBeVisible();
-    await expect(heroHeading).toContainText(/Our Method/i);
+    await expect(heroHeading).toHaveText(messages.hero.title);
 
-    await expect(page.getByRole('heading', { level: 2, name: /Capturing precise shoe dimensions/i })).toBeVisible();
-    await expect(page.getByRole('heading', { level: 2, name: /Trust pillars/i })).toBeVisible();
-    await expect(page.getByText(/computer vision with human insight/i)).toBeVisible();
+    await expect(page.getByRole('heading', { level: 2, name: messages.pillars.title })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 2, name: messages.how.title })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 2, name: messages.trust.headline })).toBeVisible();
+    await expect(page.getByRole('link', { name: messages.cta.button })).toBeVisible();
   });
 });
