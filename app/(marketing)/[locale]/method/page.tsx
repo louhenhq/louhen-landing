@@ -2,9 +2,11 @@ import Header from '@/app/(site)/components/Header';
 import Footer from '@/app/(site)/components/Footer';
 import { layout } from '@/app/(site)/_lib/ui';
 import { TechArticleJsonLd } from '@/components/SeoJsonLd';
+import { resolveBaseUrl } from '@/lib/seo/shared';
+import { methodPath } from '@/lib/routing/methodPath';
 import type { SupportedLocale } from '@/next-intl.locales';
 import { headers } from 'next/headers';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, unstable_setRequestLocale } from 'next-intl/server';
 import MethodHero from './_components/MethodHero';
 import Pillars from './_components/Pillars';
 import HowItWorks from './_components/HowItWorks';
@@ -20,15 +22,14 @@ type MethodPageProps = {
 
 export default async function MethodPage({ params }: MethodPageProps) {
   const { locale } = await params;
+  unstable_setRequestLocale(locale);
   const headerStore = await headers();
   const nonce = headerStore.get('x-csp-nonce') ?? undefined;
 
   const t = await getTranslations({ locale, namespace: 'method' });
 
-  const FALLBACK_SITE_URL = 'https://louhen-landing.vercel.app';
-  const rawBaseUrl = process.env.APP_BASE_URL?.trim() || process.env.NEXT_PUBLIC_SITE_URL?.trim() || FALLBACK_SITE_URL;
-  const baseUrl = rawBaseUrl.replace(/\/$/, '');
-  const localizedPath = `/${locale}/method`;
+  const baseUrl = resolveBaseUrl();
+  const localizedPath = methodPath(locale);
   const articleUrl = `${baseUrl}${localizedPath}`;
 
   const pillarTitles = (() => {

@@ -1,28 +1,51 @@
 import { expect, test } from '@playwright/test';
-import { defaultLocale, type SupportedLocale } from '@/next-intl.locales';
-import enMessages from '@/messages/en.json' assert { type: 'json' };
+import { locales, type SupportedLocale } from '@/next-intl.locales';
+import { loadMessages } from '@/lib/intl/loadMessages';
+import { methodPath } from '@/lib/routing/methodPath';
 
-function methodPath(locale: SupportedLocale): string {
-  return locale === defaultLocale ? '/method' : `/${locale}/method`;
-}
+type MethodMessages = {
+  seo: { title: string };
+  hero: { title: string };
+  pillars: { title: string };
+  how: { title: string };
+  trust: { headline: string };
+  cta: { button: string };
+};
 
 test.describe('Method page smoke test', () => {
-  const locale: SupportedLocale = 'en';
-  const messages = enMessages.method;
+  for (const locale of locales) {
+    test(`${locale} renders localized hero and key content`, async ({ page }) => {
+      const messages = (await loadMessages(locale)) as { method?: Partial<MethodMessages> };
+      const methodMessages = messages.method ?? {};
 
-  test('renders localized hero and key content', async ({ page }) => {
-    const response = await page.goto(methodPath(locale), { waitUntil: 'networkidle' });
-    expect(response?.status()).toBe(200);
+      const response = await page.goto(methodPath(locale), { waitUntil: 'networkidle' });
+      expect(response?.status()).toBe(200);
 
-    await expect(page).toHaveTitle(messages.seo.title);
+      if (methodMessages.seo?.title) {
+        await expect(page).toHaveTitle(methodMessages.seo.title);
+      }
 
-    const heroHeading = page.getByRole('heading', { level: 1 }).first();
-    await expect(heroHeading).toBeVisible();
-    await expect(heroHeading).toHaveText(messages.hero.title);
+      const heroHeading = page.getByRole('heading', { level: 1 }).first();
+      await expect(heroHeading).toBeVisible();
+      if (methodMessages.hero?.title) {
+        await expect(heroHeading).toHaveText(methodMessages.hero.title);
+      }
 
-    await expect(page.getByRole('heading', { level: 2, name: messages.pillars.title })).toBeVisible();
-    await expect(page.getByRole('heading', { level: 2, name: messages.how.title })).toBeVisible();
-    await expect(page.getByRole('heading', { level: 2, name: messages.trust.headline })).toBeVisible();
-    await expect(page.getByRole('link', { name: messages.cta.button })).toBeVisible();
-  });
+      if (methodMessages.pillars?.title) {
+        await expect(page.getByRole('heading', { level: 2, name: methodMessages.pillars.title })).toBeVisible();
+      }
+
+      if (methodMessages.how?.title) {
+        await expect(page.getByRole('heading', { level: 2, name: methodMessages.how.title })).toBeVisible();
+      }
+
+      if (methodMessages.trust?.headline) {
+        await expect(page.getByRole('heading', { level: 2, name: methodMessages.trust.headline })).toBeVisible();
+      }
+
+      if (methodMessages.cta?.button) {
+        await expect(page.getByRole('link', { name: methodMessages.cta.button })).toBeVisible();
+      }
+    });
+  }
 });

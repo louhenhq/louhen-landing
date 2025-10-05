@@ -15,7 +15,10 @@
     "locale": {
       "label": "Language",
       "en": "English",
-      "de": "Deutsch"
+      "de": "Deutsch",
+      "en-de": "English (Germany)",
+      "de-de": "German (Germany)",
+      "de-at": "German (Austria)"
     }
   },
   "hero": {
@@ -367,8 +370,8 @@
   },
   "method": {
     "seo": {
-      "title": "Louhen Method — Fit intelligence for growing feet",
-      "description": "Discover how Louhen blends kid-safe scanning, fit science, and privacy-first data to recommend shoes families trust."
+      "title": "Method – Louhen",
+      "description": "How Louhen works: fit-first guidance, trusted sizing, and effortless discovery."
     },
     "hero": {
       "eyebrow": "The Louhen Method",

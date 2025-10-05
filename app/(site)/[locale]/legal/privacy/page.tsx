@@ -1,12 +1,11 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { getTranslations, unstable_setRequestLocale } from 'next-intl/server';
-import { isPrelaunch } from '@/lib/env/prelaunch';
+import { buildLegalMetadata } from '@/lib/seo/legalMetadata';
 import type { SupportedLocale } from '@/next-intl.locales';
 
 export const runtime = 'nodejs';
 
-const FALLBACK_SITE_URL = 'https://louhen-landing.vercel.app';
 const REVISION_DATE_ISO = '2025-02-14';
 
 const SECTION_KEYS = [
@@ -39,36 +38,7 @@ type PrivacyPageProps = {
 
 export async function generateMetadata({ params }: PrivacyPageProps): Promise<Metadata> {
   const { locale } = params;
-  const t = await getTranslations({ locale, namespace: 'legal' });
-
-  const title = t('privacy.title');
-  const description = t('privacy.purpose.items.0');
-  const rawBaseUrl = process.env.APP_BASE_URL?.trim() || process.env.NEXT_PUBLIC_SITE_URL?.trim() || FALLBACK_SITE_URL;
-  const baseUrl = rawBaseUrl.replace(/\/$/, '');
-  const canonicalPath = `/${locale}/legal/privacy`;
-  const fullUrl = `${baseUrl}${canonicalPath}`;
-
-  const robots = isPrelaunch()
-    ? { index: false, follow: false }
-    : undefined;
-
-  return {
-    title,
-    description,
-    alternates: {
-      canonical: canonicalPath,
-    },
-    openGraph: {
-      title,
-      description,
-      url: fullUrl,
-    },
-    twitter: {
-      title,
-      description,
-    },
-    robots,
-  } satisfies Metadata;
+  return buildLegalMetadata({ locale, kind: 'privacy' });
 }
 
 export default async function PrivacyPage({ params }: PrivacyPageProps) {
@@ -173,4 +143,3 @@ export default async function PrivacyPage({ params }: PrivacyPageProps) {
     </main>
   );
 }
-

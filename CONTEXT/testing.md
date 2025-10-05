@@ -5,6 +5,8 @@
 - **Localized `<h1>`**: Tests confirm the heading text comes from the `legal.*` message namespaces and matches locale snapshots.
 - **Robots Directives**: While pre-launch, verify `<meta name="robots" content="noindex, nofollow">` (or equivalent HTTP header) is present on every legal page.
 - **Sitemap Entries**: Once sitemap generation is active, assert monthly frequency and `priority: 0.2` for legal URLs.
+- **Shared metadata builders**: `tests/e2e/legal.spec.ts` and `tests/e2e/method.meta.spec.ts` assert canonical URLs, `hreflang` alternates, and pre-launch robots directives across Legal and Method routes using the shared helpers (`makeCanonical`, `hreflangMapFor`).
+- **Playwright server ownership**: The Playwright `webServer` config starts/stops Next.js on port 4311. Do not run `next start` manually before tests to avoid `EADDRINUSE` failures.
 
 ## Manual QA
 - Validate footer links navigate to the localized legal pages without full reload issues.

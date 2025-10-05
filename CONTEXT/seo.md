@@ -17,6 +17,13 @@
 - Confirm localized metadata (title + description) lives in the `legal.*` translation namespaces so updates stay in sync across locales.
 - When adding new jurisdictions (e.g., Impressum), inherit the same sitemap cadence and canonical rules.
 
+## Shared metadata builders
+- `lib/seo/methodMetadata.ts#buildMethodMetadata` and `lib/seo/legalMetadata.ts#buildLegalMetadata` generate the complete `Metadata` object for Method and Legal pages respectively.
+- Both helpers resolve titles/descriptions from the relevant translation namespace, produce absolute canonical URLs, and emit a full `hreflang` map (including `x-default`) for every locale listed in `next-intl.locales.ts`.
+- `isPrelaunch()` drives the robots policy inside each builder, keeping the pre-launch `noindex,nofollow` directive in sync with the global flag.
+- Consumers must pass the active locale and (for legal pages) the `terms`/`privacy` slug; page-level `generateMetadata()` implementations should delegate directly to these builders.
+- Default-locale routes (e.g., `/method`) must call `unstable_setRequestLocale(defaultLocale)` before rendering so next-intl receives locale context identical to `/${defaultLocale}/…` routes and does not emit `MISSING_MESSAGE` errors.
+
 
 ## Pre-launch Robots Policy
 - Server pages call `isPrelaunch()` (see `lib/env/prelaunch.ts`) which prioritises `IS_PRELAUNCH=true`/`1`, otherwise treats any `VERCEL_ENV` other than `production` as pre-launch.

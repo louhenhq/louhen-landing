@@ -1,12 +1,11 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { getTranslations, unstable_setRequestLocale } from 'next-intl/server';
-import { isPrelaunch } from '@/lib/env/prelaunch';
+import { buildLegalMetadata } from '@/lib/seo/legalMetadata';
 import type { SupportedLocale } from '@/next-intl.locales';
 
 export const runtime = 'nodejs';
 
-const FALLBACK_SITE_URL = 'https://louhen-landing.vercel.app';
 const REVISION_DATE_ISO = '2025-02-14';
 const SECTION_ORDER = [
   'eligibility',
@@ -35,36 +34,7 @@ type SectionContent = {
 
 export async function generateMetadata({ params }: TermsPageProps): Promise<Metadata> {
   const { locale } = params;
-  const t = await getTranslations({ locale, namespace: 'legal' });
-
-  const title = t('terms.title');
-  const description = t('terms.intro');
-  const rawBaseUrl = process.env.APP_BASE_URL?.trim() || process.env.NEXT_PUBLIC_SITE_URL?.trim() || FALLBACK_SITE_URL;
-  const baseUrl = rawBaseUrl.replace(/\/$/, '');
-  const canonicalPath = `/${locale}/legal/terms`;
-  const fullUrl = `${baseUrl}${canonicalPath}`;
-
-  const robots = isPrelaunch()
-    ? { index: false, follow: false }
-    : undefined;
-
-  return {
-    title,
-    description,
-    alternates: {
-      canonical: canonicalPath,
-    },
-    openGraph: {
-      title,
-      description,
-      url: fullUrl,
-    },
-    twitter: {
-      title,
-      description,
-    },
-    robots,
-  } satisfies Metadata;
+  return buildLegalMetadata({ locale, kind: 'terms' });
 }
 
 export default async function TermsPage({ params }: TermsPageProps) {
