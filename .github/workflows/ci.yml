@@ -19,6 +19,7 @@ jobs:
       NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
       NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
       NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
+      PW_HEALTH_PATH: /status
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -164,9 +165,9 @@ jobs:
           STATUS_PASS: ci-secret
           SUPPRESSION_SALT: ci-suppression-salt
           NODE_ENV: production
+          PW_HEALTH_PATH: /status
         run: |
           mkdir -p playwright-report test-results
-          npx playwright show-config | sed -n '1,160p'
           DEBUG=pw:webserver,pw:api npx playwright test --project=chromium --workers=1
         continue-on-error: false
 
@@ -207,6 +208,7 @@ jobs:
           STATUS_PASS: ci-secret
           SUPPRESSION_SALT: ci-suppression-salt
           NODE_ENV: production
+          PW_HEALTH_PATH: /status
         run: |
           mkdir -p playwright-a11y-report
           IS_PRELAUNCH=true PLAYWRIGHT_HTML_REPORT=playwright-a11y-report npx playwright test tests/e2e/legal.a11y.spec.ts --reporter=html --reporter=json=playwright-a11y-report/report.json --workers=1
@@ -270,6 +272,7 @@ jobs:
       NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
       HOST: 127.0.0.1
       PORT: '4311'
+      PW_HEALTH_PATH: /status
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -303,21 +306,24 @@ jobs:
         env:
           PORT: '4311'
           HOST: 127.0.0.1
+          PW_HEALTH_PATH: /status
         run: |
           mkdir -p .next
           PORT=${PORT:-4311}
           HOST=${HOST:-127.0.0.1}
+          HEALTH_PATH=${PW_HEALTH_PATH:-/}
           echo "Using host $HOST and port $PORT"
           npm run start:test &
           SERVER_PID=$!
           echo "SERVER_PID=$SERVER_PID" >> "$GITHUB_ENV"
           echo "HOST=$HOST" >> "$GITHUB_ENV"
           echo "PORT=$PORT" >> "$GITHUB_ENV"
+          echo "PW_HEALTH_PATH=$HEALTH_PATH" >> "$GITHUB_ENV"
           started=0
           for i in {1..120}; do
-            if curl -fsS "http://$HOST:$PORT/" >/dev/null 2>&1; then
+            if curl -fsS "http://$HOST:$PORT${HEALTH_PATH}" >/dev/null 2>&1; then
               started=1
-              echo "Server is responding on http://$HOST:$PORT"
+              echo "Server is responding on http://$HOST:$PORT${HEALTH_PATH}"
               break
             fi
             if ! kill -0 "$SERVER_PID" >/dev/null 2>&1; then
@@ -365,9 +371,9 @@ jobs:
           NODE_ENV: production
           PW_REUSE: '1'
           DEBUG: pw:api
+          PW_HEALTH_PATH: /status
         run: |
           mkdir -p playwright-report test-results
-          npx playwright show-config | sed -n '1,160p'
           npx playwright test --project=chromium --workers=1
 
       - name: Tail Next.js test server log (fallback)
