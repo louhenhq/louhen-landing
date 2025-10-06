@@ -2,24 +2,82 @@
   "header": {
     "logo": "Louhen",
     "nav": {
-      "how": "[DE] How it works",
-      "story": "[DE] Founder story",
-      "faq": "[DE] FAQ",
-      "legal": {
+      "primary": {
+        "how": "[DE] How it works",
+        "story": "[DE] Founder story",
+        "faq": "[DE] FAQ",
+        "method": "[DE] Method"
+      },
+      "secondary": {
         "privacy": "[DE] Privacy",
-        "terms": "[DE] Terms",
-        "imprint": "[DE] Imprint"
-      }
+        "terms": "[DE] Terms"
+      },
+      "primaryLabel": "[DE] Primary navigation",
+      "secondaryLabel": "[DE] Secondary navigation"
     },
     "cta": "[DE] Join waitlist",
+    "ctaPostlaunch": "[DE] Request access",
+    "system": {
+      "theme": "Erscheinungsbild",
+      "consent": "Privatsphäre"
+    },
+    "cta": {
+      "waitlist": "Zur Warteliste",
+      "access": "Zugang anfragen",
+      "download": "App herunterladen",
+      "dashboard": "Dashboard"
+    },
+    "auth": {
+      "logout": "Abmelden"
+    },
+    "ribbon": {
+      "default": {
+        "title": "Limitierter Start",
+        "body": "Sichere dir jetzt einen Platz, bevor wir weiter öffnen.",
+        "cta": "Mehr erfahren",
+        "dismiss": "Ausblenden"
+      }
+    },
+    "drawer": {
+      "title": "[DE] Menu",
+      "open": "[DE] Menu",
+      "close": "[DE] Close menu",
+      "navLabel": "[DE] Mobile navigation"
+    },
     "locale": {
       "label": "Sprache",
       "en": "English",
       "de": "Deutsch",
       "en-de": "Englisch (Deutschland)",
       "de-de": "Deutsch (Deutschland)",
-      "de-at": "Deutsch (Österreich)"
-    }
+      "de-at": "Deutsch (Österreich)",
+      "submit": "Sprache wechseln"
+    },
+    "theme": {
+      "label": "Erscheinungsbild",
+      "modes": {
+        "system": "System",
+        "light": "Hell",
+        "dark": "Dunkel"
+      }
+    },
+    "consent": {
+      "label": "Privatsphäre",
+      "state": {
+        "granted": "Aktiv",
+        "denied": "Aus",
+        "unset": "Prüfen"
+      },
+      "manager": {
+        "title": "Privatsphäre",
+        "description": "Wir verwenden notwendige Cookies für den Betrieb von Louhen. Aktiviere Analyse, wenn du uns bei der Verbesserung helfen möchtest.",
+        "accept": "Alle akzeptieren",
+        "reject": "Nur notwendige",
+        "settings": "Datenschutzhinweise",
+        "close": "Schließen"
+      }
+    },
+    "skipLink": "Zum Hauptinhalt springen"
   },
   "hero": {
     "h1": "[DE] Personal style. Effortless fit.",
@@ -359,7 +417,10 @@
     "rights": "[DE] All rights reserved"
   },
   "common": {
-    "learnMore": "[DE] Learn more"
+    "learnMore": "[DE] Learn more",
+    "breadcrumb": {
+      "home": "Startseite"
+    }
   },
   "voucher": {
     "share": {

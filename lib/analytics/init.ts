@@ -10,6 +10,7 @@ export function initAnalytics(consent: ConsentValue | null) {
   const resolved = consent ?? getConsentValue();
   if (!resolved.analytics) {
     window.__LOUHEN_ANALYTICS_READY = false;
+    initialised = false;
     return;
   }
 

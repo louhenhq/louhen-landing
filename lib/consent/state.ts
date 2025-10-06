@@ -63,7 +63,9 @@ export function setClientConsent(value: ConsentValue) {
 
 export function clearClientConsent() {
   if (typeof document === 'undefined') return;
-  document.cookie = `${COOKIE_NAME}=; Path=/; Max-Age=0; SameSite=Lax`;
+  const directives = ['Path=/', 'Max-Age=0', 'SameSite=Lax'];
+  if (process.env.NODE_ENV === 'production') directives.push('Secure');
+  document.cookie = `${COOKIE_NAME}=; ${directives.join('; ')}`;
   if (typeof window !== 'undefined') {
     window.__LOUHEN_CONSENT__ = undefined;
     window.dispatchEvent(new CustomEvent('louhen:consent', { detail: { analytics: false } }));

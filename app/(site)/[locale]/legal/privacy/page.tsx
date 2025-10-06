@@ -1,7 +1,11 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import { headers } from 'next/headers';
 import { getTranslations, unstable_setRequestLocale } from 'next-intl/server';
+import { BreadcrumbJsonLd } from '@/components/SeoJsonLd';
+import { legalPath, localeHomePath } from '@/lib/routing/legalPath';
 import { buildLegalMetadata } from '@/lib/seo/legalMetadata';
+import { makeCanonical, resolveBaseUrl } from '@/lib/seo/shared';
 import type { SupportedLocale } from '@/next-intl.locales';
 
 export const runtime = 'nodejs';
@@ -44,7 +48,23 @@ export async function generateMetadata({ params }: PrivacyPageProps): Promise<Me
 export default async function PrivacyPage({ params }: PrivacyPageProps) {
   const { locale } = params;
   unstable_setRequestLocale(locale);
-  const t = await getTranslations({ locale, namespace: 'legal' });
+  const [t, common] = await Promise.all([
+    getTranslations({ locale, namespace: 'legal' }),
+    getTranslations({ locale, namespace: 'common' }).catch(() => null),
+  ]);
+  const headerStore = await headers();
+  const nonce = headerStore.get('x-csp-nonce') ?? undefined;
+  const baseUrl = resolveBaseUrl();
+  let homeLabel = locale.startsWith('de') ? 'Startseite' : 'Home';
+  if (common) {
+    try {
+      homeLabel = common('breadcrumb.home');
+    } catch {
+      // fall back to heuristic
+    }
+  }
+  const homeUrl = makeCanonical(localeHomePath(locale), baseUrl);
+  const pageUrl = makeCanonical(legalPath(locale, 'privacy'), baseUrl);
 
   const revisionDate = new Date(REVISION_DATE_ISO);
   const formattedDate = new Intl.DateTimeFormat(locale, { dateStyle: 'long' }).format(revisionDate);
@@ -116,7 +136,15 @@ export default async function PrivacyPage({ params }: PrivacyPageProps) {
   const remainingSections = sections.filter((section) => section.key !== 'controller');
 
   return (
-    <main id="main" className="mx-auto max-w-3xl px-gutter py-3xl text-text">
+    <>
+      <BreadcrumbJsonLd
+        nonce={nonce}
+        items={[
+          { name: homeLabel, item: homeUrl },
+          { name: t('privacy.title'), item: pageUrl },
+        ]}
+      />
+      <main id="main-content" className="mx-auto max-w-3xl px-gutter py-3xl text-text">
       <article className="space-y-8">
         <header className="space-y-3">
           <h1 className="text-3xl font-semibold tracking-tight text-text">{t('privacy.title')}</h1>
@@ -140,6 +168,7 @@ export default async function PrivacyPage({ params }: PrivacyPageProps) {
           ))}
         </div>
       </article>
-    </main>
+      </main>
+    </>
   );
 }

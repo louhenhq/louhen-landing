@@ -30,14 +30,14 @@ type ConsentProviderProps = {
 
 export function ConsentProvider({ children, initialConsent }: ConsentProviderProps) {
   const [consent, setConsentState] = useState<ConsentValue | null>(initialConsent ?? DEFAULT_CONSENT);
-  const [bannerOpen, setBannerOpen] = useState(() => !initialConsent.analytics && !initialConsent.marketing);
+  const [managerOpen, setManagerOpen] = useState(() => !initialConsent.analytics && !initialConsent.marketing);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const clientConsent = getClientConsent();
     if (clientConsent) {
       setConsentState(clientConsent);
-      setBannerOpen(false);
+      setManagerOpen(false);
       initAnalytics(clientConsent);
       return;
     }
@@ -46,19 +46,19 @@ export function ConsentProvider({ children, initialConsent }: ConsentProviderPro
     initAnalytics(initialConsent);
     if (initialConsent.analytics || initialConsent.marketing) {
       setConsentState(initialConsent);
-      setBannerOpen(false);
+      setManagerOpen(false);
     }
   }, [initialConsent]);
 
   const persistConsent = useCallback((value: ConsentValue) => {
     setClientConsent(value);
     setConsentState(value);
-    setBannerOpen(false);
+    setManagerOpen(false);
     initAnalytics(value);
   }, []);
 
   const openManager = useCallback(() => {
-    setBannerOpen(true);
+    setManagerOpen(true);
   }, []);
 
   const contextValue = useMemo<ConsentContextValue>(
@@ -70,9 +70,10 @@ export function ConsentProvider({ children, initialConsent }: ConsentProviderPro
     <ConsentContext.Provider value={contextValue}>
       {children}
       <ConsentBanner
-        open={bannerOpen}
+        open={managerOpen}
         onAccept={() => persistConsent({ analytics: true, marketing: false })}
         onReject={() => persistConsent({ analytics: false, marketing: false })}
+        onClose={() => setManagerOpen(false)}
       />
     </ConsentContext.Provider>
   );

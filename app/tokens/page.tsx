@@ -1,12 +1,23 @@
 import React from 'react'
+import type { Metadata } from 'next'
 
-export const dynamic = 'force-static'
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
+export const metadata: Metadata = {
+  title: 'Design Tokens Playground',
+  description: 'Internal palette viewer for the Louhen design token system.',
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 type TileProps = { name: string; className?: string; children?: React.ReactNode }
 function Tile({ name, className = '', children }: TileProps) {
   return (
     <div className={`rounded-md border border-border bg-bg p-md ${className}`}>
-      <div className="text-xs text-text-muted mb-xs">{name}</div>
+      <div className="mb-xs text-xs text-text-muted">{name}</div>
       {children}
     </div>
   )
@@ -31,12 +42,12 @@ export default function TokensPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-md py-lg">
-      <h1 className="text-2xl font-semibold text-text mb-lg">Design Tokens Playground</h1>
+      <h1 className="mb-lg text-2xl font-semibold text-text">Design Tokens Playground</h1>
 
       {/* Backgrounds */}
       <section className="mt-lg">
         <h2 className="mb-sm text-lg font-medium">Background</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-md">
+        <div className="grid grid-cols-2 gap-md md:grid-cols-4">
           {bg.map((c) => (
             <Swatch key={c} name={c} cls={c} />
           ))}
@@ -46,11 +57,11 @@ export default function TokensPage() {
       {/* Text */}
       <section className="mt-lg">
         <h2 className="mb-sm text-lg font-medium">Text</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
+        <div className="grid grid-cols-1 gap-md md:grid-cols-2">
           {text.map((c) => (
             <Tile key={c} name={c}>
               <p className={`font-medium ${c}`}>The quick brown fox jumps over the lazy dog.</p>
-              <p className="text-sm text-text-muted mt-xs">0123456789 • A/a • ÄÖÜ äöü</p>
+              <p className="mt-xs text-sm text-text-muted">0123456789 • A/a • ÄÖÜ äöü</p>
             </Tile>
           ))}
         </div>
@@ -59,9 +70,9 @@ export default function TokensPage() {
       {/* Borders */}
       <section className="mt-lg">
         <h2 className="mb-sm text-lg font-medium">Borders</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-md">
+        <div className="grid grid-cols-2 gap-md md:grid-cols-4">
           {border.map((b) => (
-            <div key={b} className={`rounded-md p-md bg-bg border ${b}`}>
+            <div key={b} className={`rounded-md border bg-bg p-md ${b}`}>
               <code className="text-sm text-text">{b}</code>
               <div className="mt-sm h-10 rounded-md bg-bg-card" />
             </div>
@@ -72,7 +83,7 @@ export default function TokensPage() {
       {/* Status */}
       <section className="mt-lg">
         <h2 className="mb-sm text-lg font-medium">Status</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-md">
+        <div className="grid grid-cols-2 gap-md md:grid-cols-4">
           {status.map((s) => (
             <Swatch key={s} name={s} cls={s} />
           ))}
@@ -82,7 +93,7 @@ export default function TokensPage() {
       {/* Brand */}
       <section className="mt-lg">
         <h2 className="mb-sm text-lg font-medium">Brand</h2>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-md">
+        <div className="grid grid-cols-2 gap-md md:grid-cols-5">
           {brand.map((s) => (
             <Swatch key={s} name={s} cls={s} />
           ))}
@@ -93,7 +104,7 @@ export default function TokensPage() {
       <section className="mt-lg">
         <h2 className="mb-sm text-lg font-medium">Spacing</h2>
         <div className="space-y-sm">
-          {['xs','sm','md','lg','xl','xxl','xxxl','gutter'].map((k) => (
+          {['xs', 'sm', 'md', 'lg', 'xl', 'xxl', 'xxxl', 'gutter'].map((k) => (
             <div key={k} className="flex items-center gap-sm">
               <div className="h-2 rounded-sm bg-brand-secondary" style={{ width: `var(--spacing-${k})` }} />
               <code className="text-sm text-text">--spacing-{k}</code>
@@ -105,8 +116,8 @@ export default function TokensPage() {
       {/* Radii */}
       <section className="mt-lg">
         <h2 className="mb-sm text-lg font-medium">Radii</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-md">
-          {['sm','md','lg','pill'].map((k) => (
+        <div className="grid grid-cols-2 gap-md md:grid-cols-4">
+          {['sm', 'md', 'lg', 'pill'].map((k) => (
             <Tile key={k} name={`--radii-${k}`}>
               <div className="h-10 bg-bg-card" style={{ borderRadius: `var(--radii-${k})` }} />
             </Tile>
@@ -117,7 +128,7 @@ export default function TokensPage() {
       {/* Shadows */}
       <section className="mt-lg">
         <h2 className="mb-sm text-lg font-medium">Shadows</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-md">
+        <div className="grid grid-cols-2 gap-md md:grid-cols-4">
           <Tile name="shadow-card">
             <div className="h-12 rounded-md bg-bg-card shadow-card" />
           </Tile>

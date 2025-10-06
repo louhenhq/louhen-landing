@@ -1,9 +1,11 @@
 import Header from '@/app/(site)/components/Header';
 import Footer from '@/app/(site)/components/Footer';
 import { layout } from '@/app/(site)/_lib/ui';
-import { TechArticleJsonLd } from '@/components/SeoJsonLd';
-import { resolveBaseUrl } from '@/lib/seo/shared';
+import { BreadcrumbJsonLd, TechArticleJsonLd } from '@/components/SeoJsonLd';
+import { localeHomePath } from '@/lib/routing/legalPath';
 import { methodPath } from '@/lib/routing/methodPath';
+import { resolveBaseUrl } from '@/lib/seo/shared';
+import { getHeaderUserState } from '@/lib/auth/userState.server';
 import type { SupportedLocale } from '@/next-intl.locales';
 import { headers } from 'next/headers';
 import { getTranslations, unstable_setRequestLocale } from 'next-intl/server';
@@ -25,12 +27,22 @@ export default async function MethodPage({ params }: MethodPageProps) {
   unstable_setRequestLocale(locale);
   const headerStore = await headers();
   const nonce = headerStore.get('x-csp-nonce') ?? undefined;
+  const headerUserState = await getHeaderUserState();
 
   const t = await getTranslations({ locale, namespace: 'method' });
+
+  let homeLabel = locale.startsWith('de') ? 'Startseite' : 'Home';
+  try {
+    const common = await getTranslations({ locale, namespace: 'common' });
+    homeLabel = common('breadcrumb.home');
+  } catch {
+    // fall back to locale heuristic defined above
+  }
 
   const baseUrl = resolveBaseUrl();
   const localizedPath = methodPath(locale);
   const articleUrl = `${baseUrl}${localizedPath}`;
+  const homeUrl = `${baseUrl}${localeHomePath(locale)}`;
 
   const pillarTitles = (() => {
     const raw = t.raw('pillars.items');
@@ -63,9 +75,16 @@ export default async function MethodPage({ params }: MethodPageProps) {
 
   return (
     <div className={layout.page}>
+      <BreadcrumbJsonLd
+        nonce={nonce}
+        items={[
+          { name: homeLabel, item: homeUrl },
+          { name: t('seo.title'), item: articleUrl },
+        ]}
+      />
       <TechArticleJsonLd schema={schema} nonce={nonce} />
-      <Header />
-      <main id="main">
+      <Header userState={headerUserState} />
+      <main id="main-content">
         <MethodHero />
         <Pillars />
         <HowItWorks />

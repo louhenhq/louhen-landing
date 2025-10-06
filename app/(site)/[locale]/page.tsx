@@ -2,8 +2,12 @@ import type { Metadata } from 'next'
 import LandingExperience from '@/app/(site)/components/LandingExperience'
 import ReferralAttribution from '@/app/(site)/components/ReferralAttribution'
 import { SITE_NAME } from '@/constants/site'
+import { getHeaderUserState } from '@/lib/auth/userState.server'
 import { loadMessages } from '@/lib/intl/loadMessages'
+import { localeHomePath } from '@/lib/routing/legalPath'
+import { hreflangMapFor, makeCanonical, resolveBaseUrl } from '@/lib/seo/shared'
 import type { SupportedLocale } from '@/next-intl.locales'
+import { unstable_setRequestLocale } from 'next-intl/server'
 
 type PageProps = {
   params: Promise<{ locale: SupportedLocale }>;
@@ -16,8 +20,6 @@ function firstParam(value: string | string[] | undefined): string | null {
   return null;
 }
 
-const FALLBACK_SITE_URL = 'https://louhen-landing.vercel.app'
-
 export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const [{ locale }, resolvedSearchParams] = await Promise.all([params, searchParams])
   const messages = (await loadMessages(locale)) as Record<string, unknown>
@@ -27,26 +29,35 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
     : 'Louhen pairs podiatrist-backed comfort with adaptive sizing to keep every step confident.'
   const defaultTitle = `${SITE_NAME} — Personal style. Effortless fit.`
   const defaultDescription = heroSubtitle
-  const baseUrl = (process.env.APP_BASE_URL?.trim() || process.env.NEXT_PUBLIC_SITE_URL?.trim() || FALLBACK_SITE_URL).replace(/\/$/, '')
-  const canonicalPath = `/${locale}`
+  const baseUrl = resolveBaseUrl()
+  const canonicalPath = localeHomePath(locale)
+  const canonicalUrl = makeCanonical(canonicalPath, baseUrl)
+  const hreflang = hreflangMapFor(localeHomePath, baseUrl)
   const ref = firstParam(resolvedSearchParams.ref)
+
+  const baseMetadata = {
+    description: defaultDescription,
+    alternates: {
+      canonical: canonicalUrl,
+      languages: hreflang,
+    },
+    openGraph: {
+      title: defaultTitle,
+      description: defaultDescription,
+      url: canonicalUrl,
+      locale,
+    },
+    twitter: {
+      card: 'summary_large_image' as const,
+      title: defaultTitle,
+      description: defaultDescription,
+    },
+  }
 
   if (!ref) {
     return {
       title: defaultTitle,
-      description: defaultDescription,
-      alternates: {
-        canonical: canonicalPath,
-      },
-      openGraph: {
-        title: defaultTitle,
-        description: defaultDescription,
-        url: canonicalPath,
-      },
-      twitter: {
-        title: defaultTitle,
-        description: defaultDescription,
-      },
+      ...baseMetadata,
     }
   }
 
@@ -62,16 +73,16 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   return {
     title: invitedTitle,
     description: invitedDescription,
-    alternates: {
-      canonical: canonicalPath,
-    },
+    alternates: baseMetadata.alternates,
     openGraph: {
+      ...baseMetadata.openGraph,
       title: invitedTitle,
       description: invitedDescription,
       url: fullUrl,
       images: [imageUrl],
     },
     twitter: {
+      ...baseMetadata.twitter,
       title: invitedTitle,
       description: invitedDescription,
       images: [imageUrl],
@@ -81,14 +92,16 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
 
 export default async function LocaleLandingPage({ params, searchParams }: PageProps) {
   const [{ locale }, resolvedSearchParams] = await Promise.all([params, searchParams]);
+  unstable_setRequestLocale(locale);
   const messages = (await loadMessages(locale)) as Record<string, unknown>;
   const referralToast = ((messages.referral ?? {}) as Record<string, unknown>).appliedToast;
   const toastMessage = typeof referralToast === 'string' ? referralToast : null;
+  const headerUserState = await getHeaderUserState();
 
   return (
     <>
       <ReferralAttribution searchParams={resolvedSearchParams} message={toastMessage} />
-      <LandingExperience />
+      <LandingExperience userState={headerUserState} />
     </>
   );
 }

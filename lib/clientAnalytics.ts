@@ -53,6 +53,9 @@ if (isBrowser) {
     notifyConsentListeners(consentGranted);
     if (consentGranted) {
       void flushQueue();
+    } else {
+      pendingQueue.length = 0;
+      dedupeCache.clear();
     }
   });
 }
@@ -179,6 +182,11 @@ export function track<E extends AnalyticsEventName>(eventOrPayload: AnalyticsEve
   }
 
   return flushQueue();
+}
+
+export function canTrack(): boolean {
+  if (!isBrowser || ANALYTICS_DISABLED) return false;
+  return getConsent();
 }
 
 function normalizeArgs<E extends AnalyticsEventName>(eventOrPayload: AnalyticsEventPayload<E> | AnalyticsEventName, maybeProps?: AnalyticsEventPropsMap[E]) {

@@ -195,6 +195,7 @@ Branching:
   - CI: `npm run ci:color-policy` scans the entire repo, enforces email palette imports, and writes `ci-artifacts/color-policy-report.txt` for PR visibility.
 - Exceptions (allowlist): generated outputs only — `packages/design-tokens/**`, `public/tokens/**`, and the single `lib/email/colors.ts` module. Any new exception requires design-engineering approval and an update to the guard script.
 - Governance: new colours come via the design weekly. Designers propose token additions/changes, engineering reviews build impact, and the change ships with screenshots + changelog. Tokens are versioned by semver tags on the design-tokens package for traceability.
+- Playground route: `/tokens` renders the playground dynamically (`dynamic = 'force-dynamic'`, `runtime = 'nodejs'`) because the root layout reads request headers/cookies. The page never ships to production marketing traffic (robots noindex) and serves as an internal QA surface only.
 
 ## 12) Error Codes (canonical)
 

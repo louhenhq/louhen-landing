@@ -8,6 +8,7 @@ import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/SeoJsonLd'
 import { SITE_NAME } from '@/constants/site'
 import { getServerConsent } from '@/lib/consent/state'
 import { NonceProvider } from '@/lib/csp/nonce-context'
+import { CONTRAST_COOKIE_NAME, THEME_COOKIE_NAME } from '@/lib/theme/constants'
 import tokens from '@louhen/design-tokens/build/web/tokens.json' assert { type: 'json' }
 
 const tokenValues = tokens as Record<string, unknown> & {
@@ -41,6 +42,12 @@ const baseUrl = rawBaseUrl.replace(/\/$/, '')
 const metadataBaseUrl = `${baseUrl}/`
 const defaultDescription =
   'Join the Louhen waitlist and get smarter sizing, curated looks, and fit feedback that improves with every try.'
+
+function getCookieValue(header: string | null | undefined, name: string): string | null {
+  if (!header) return null;
+  const match = header.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
+}
 
 export const metadata: Metadata = {
   metadataBase: new URL(metadataBaseUrl),
@@ -96,6 +103,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const consentHeaders = await headers();
   const consent = getServerConsent(consentHeaders);
   const nonce = consentHeaders.get('x-csp-nonce') ?? undefined;
+  const cookieHeader = consentHeaders.get('cookie');
+  const cookieTheme = getCookieValue(cookieHeader, THEME_COOKIE_NAME);
+  const cookieContrast = getCookieValue(cookieHeader, CONTRAST_COOKIE_NAME);
+  const initialThemeAttr = cookieTheme === 'light' || cookieTheme === 'dark' ? cookieTheme : undefined;
+  const initialContrastAttr = cookieContrast === 'more' ? 'more' : undefined;
   const shouldNoIndex = typeof process.env.VERCEL_ENV === 'string' && process.env.VERCEL_ENV !== 'production'
   const sameAsProfiles = [
     'https://www.linkedin.com/company/louhen',
@@ -104,7 +116,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const searchActionUrl = `${baseUrl}/search?q={search_term_string}`
 
   return (
-    <html lang="en">
+    <html lang="en" data-theme={initialThemeAttr} data-contrast={initialContrastAttr ?? undefined}>
       <head>
         {/* iOS PWA / status bar styling */}
         <meta name="apple-mobile-web-app-capable" content="yes" />

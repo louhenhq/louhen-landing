@@ -2,24 +2,82 @@
   "header": {
     "logo": "Louhen",
     "nav": {
-      "how": "How it works",
-      "story": "Founder story",
-      "faq": "FAQ",
-      "legal": {
+      "primary": {
+        "how": "How it works",
+        "story": "Founder story",
+        "faq": "FAQ",
+        "method": "Method"
+      },
+      "secondary": {
         "privacy": "Privacy",
-        "terms": "Terms",
-        "imprint": "Imprint"
-      }
+        "terms": "Terms"
+      },
+      "primaryLabel": "Primary navigation",
+      "secondaryLabel": "Secondary navigation"
     },
     "cta": "Join waitlist",
+    "ctaPostlaunch": "Request access",
+    "system": {
+      "theme": "Appearance",
+      "consent": "Privacy choices"
+    },
+    "cta": {
+      "waitlist": "Join the waitlist",
+      "access": "Request access",
+      "download": "Download the app",
+      "dashboard": "Dashboard"
+    },
+    "auth": {
+      "logout": "Log out"
+    },
+    "ribbon": {
+      "default": {
+        "title": "Limited launch",
+        "body": "Secure your spot before we open the doors wider.",
+        "cta": "Learn more",
+        "dismiss": "Dismiss"
+      }
+    },
+    "drawer": {
+      "title": "Menu",
+      "open": "Menu",
+      "close": "Close menu",
+      "navLabel": "Mobile navigation"
+    },
     "locale": {
       "label": "Language",
       "en": "English",
       "de": "Deutsch",
       "en-de": "English (Germany)",
       "de-de": "German (Germany)",
-      "de-at": "German (Austria)"
-    }
+      "de-at": "German (Austria)",
+      "submit": "Switch locale"
+    },
+    "theme": {
+      "label": "Theme",
+      "modes": {
+        "system": "System",
+        "light": "Light",
+        "dark": "Dark"
+      }
+    },
+    "consent": {
+      "label": "Privacy choices",
+      "state": {
+        "granted": "On",
+        "denied": "Off",
+        "unset": "Review"
+      },
+      "manager": {
+        "title": "Privacy choices",
+        "description": "We use essential cookies to run Louhen. Enable analytics if you want to help us improve the experience.",
+        "accept": "Accept all",
+        "reject": "Reject non-essential",
+        "settings": "View privacy policy",
+        "close": "Close"
+      }
+    },
+    "skipLink": "Skip to main content"
   },
   "hero": {
     "h1": "Personal style. Effortless fit.",
@@ -359,7 +417,10 @@
     "rights": "All rights reserved"
   },
   "common": {
-    "learnMore": "Learn more"
+    "learnMore": "Learn more",
+    "breadcrumb": {
+      "home": "Home"
+    }
   },
   "voucher": {
     "share": {

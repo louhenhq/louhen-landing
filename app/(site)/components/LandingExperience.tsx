@@ -20,8 +20,13 @@ import TrustSchema from '@/components/TrustSchema';
 import WaitlistForm from '@/components/waitlist/WaitlistForm';
 import { layout, surfaces } from '@/app/(site)/_lib/ui';
 import { track } from '@/lib/clientAnalytics';
+import type { HeaderUserState } from '@/lib/auth/userState';
 
-export default function LandingExperience() {
+type LandingExperienceProps = {
+  userState: HeaderUserState;
+};
+
+export default function LandingExperience({ userState }: LandingExperienceProps) {
   const locale = useLocale();
   const searchParams = useSearchParams();
   const toastT = useTranslations('waitlist.toast.confirmed');
@@ -59,8 +64,8 @@ export default function LandingExperience() {
 
   return (
     <div className={layout.page}>
-      <Header onCta={scrollToForm} />
-      <main>
+      <Header onCta={scrollToForm} userState={userState} />
+      <main id="main-content">
         <SectionViewTracker />
         {showToast ? (
           <div className="mx-auto mb-lg w-full max-w-3xl px-gutter" role="status" aria-live="polite">

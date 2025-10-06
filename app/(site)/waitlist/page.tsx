@@ -3,6 +3,8 @@ import { createTranslator } from 'next-intl';
 import WaitlistForm from '@/app/(site)/components/WaitlistForm';
 import { loadWaitlistMessages } from '@/app/(site)/waitlist/_lib/messages';
 import { WAITLIST_URGENCY_COPY_ENABLED } from '@/lib/flags';
+import { hreflangMapFor, makeCanonical, resolveBaseUrl } from '@/lib/seo/shared';
+import type { SupportedLocale } from '@/next-intl.locales';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -12,14 +14,29 @@ export async function generateMetadata(): Promise<Metadata> {
   const t = createTranslator({ locale, messages, namespace: 'waitlist' });
   const title = t('title');
   const description = t('subtitle');
+  const baseUrl = resolveBaseUrl();
+  const canonicalPath = '/waitlist';
+  const canonicalUrl = makeCanonical(canonicalPath, baseUrl);
+  const waitlistPathForLocale: (locale: SupportedLocale) => string = () => canonicalPath;
+  const hreflang = hreflangMapFor(waitlistPathForLocale, baseUrl);
 
   return {
     title,
     description,
     alternates: {
-      canonical: '/waitlist',
+      canonical: canonicalUrl,
+      languages: hreflang,
     },
-    // TODO: add per-locale canonical + hreflang entries in SEO slice.
+    openGraph: {
+      title,
+      description,
+      url: canonicalUrl,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+    },
   };
 }
 

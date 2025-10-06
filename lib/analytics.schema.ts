@@ -1,7 +1,12 @@
+import type { HeaderUserState } from '@/lib/auth/userState';
+import type { SupportedLocale } from '@/next-intl.locales';
+
 export type SectionViewId = 'founder-story' | 'how';
 export type TestimonialIndex = 0 | 1 | 2;
 
 type NoProps = Record<never, never>;
+
+export type HeaderAnalyticsMode = 'prelaunch' | 'launch' | 'postlaunch' | 'authenticated';
 
 export type AnalyticsEventName =
   | 'page_view'
@@ -32,9 +37,48 @@ export type AnalyticsEventName =
   | 'trust_logo_click'
   | 'trust_podiatrist_learn_more'
   | 'testimonial_view'
-  | 'privacy_ribbon_click';
+  | 'privacy_ribbon_click'
+  | 'header_brand_click'
+  | 'header_nav_click'
+  | 'header_cta_click'
+  | 'header_locale_switch'
+  | 'header_theme_toggle'
+  | 'header_consent_open'
+  | 'header_open_drawer'
+  | 'header_close_drawer'
+  | 'header_ribbon_view'
+  | 'header_ribbon_click'
+  | 'header_ribbon_dismiss';
+
+export type HeaderSurface = 'header' | 'drawer' | 'ribbon';
+export type HeaderDrawerTrigger = 'button' | 'escape' | 'backdrop' | 'nav' | 'cta' | 'system';
+export type HeaderEventTrigger =
+  | 'click'
+  | 'keyboard'
+  | 'touch'
+  | 'pointer'
+  | 'brand'
+  | 'auto'
+  | 'change'
+  | HeaderDrawerTrigger;
+
+export type HeaderNavId = 'how-it-works' | 'founder-story' | 'faq' | 'method' | 'privacy' | 'terms';
+export type HeaderCtaId = 'waitlist' | 'access' | 'download' | 'dashboard' | 'logout';
+export type HeaderThemePreference = 'system' | 'light' | 'dark';
+export type HeaderConsentState = 'granted' | 'denied' | 'unset';
 
 export interface AnalyticsEventPropsMap {
+  header_brand_click: HeaderBrandEventProps;
+  header_nav_click: HeaderNavEventProps;
+  header_cta_click: HeaderCtaEventProps;
+  header_locale_switch: HeaderLocaleSwitchEventProps;
+  header_theme_toggle: HeaderThemeToggleEventProps;
+  header_consent_open: HeaderConsentOpenEventProps;
+  header_open_drawer: HeaderDrawerEventProps;
+  header_close_drawer: HeaderDrawerEventProps;
+  header_ribbon_view: HeaderRibbonEventProps;
+  header_ribbon_click: HeaderRibbonEventProps;
+  header_ribbon_dismiss: HeaderRibbonEventProps;
   page_view: { path?: string; page?: string; variant?: string; ref?: string | null };
   cta_click: { id: 'hero_primary' | 'hero_secondary'; variant?: string } | { page: string; cta: string };
   waitlist_submit: { ok: boolean; error?: string };
@@ -65,6 +109,58 @@ export interface AnalyticsEventPropsMap {
   testimonial_view: { ix: TestimonialIndex };
   privacy_ribbon_click: NoProps;
 }
+
+type HeaderEventBase<S extends HeaderSurface = 'header'> = {
+  locale: SupportedLocale;
+  mode: HeaderAnalyticsMode;
+  surface: S;
+  'user_state': HeaderUserState;
+};
+
+type HeaderCtaEventProps = HeaderEventBase<'header' | 'drawer'> & {
+  ctaId: HeaderCtaId;
+  target?: string;
+  trigger?: HeaderEventTrigger;
+};
+
+type HeaderNavEventProps = HeaderEventBase<'header' | 'drawer'> & {
+  navId: HeaderNavId;
+  target?: string;
+  trigger?: HeaderEventTrigger;
+};
+
+type HeaderBrandEventProps = HeaderEventBase<'header'> & {
+  target?: string;
+  trigger?: HeaderEventTrigger;
+};
+
+type HeaderLocaleSwitchEventProps = HeaderEventBase<'header' | 'drawer'> & {
+  from: SupportedLocale;
+  to: SupportedLocale;
+  target?: string;
+  trigger?: HeaderEventTrigger;
+};
+
+type HeaderThemeToggleEventProps = HeaderEventBase<'header' | 'drawer'> & {
+  from: HeaderThemePreference;
+  to: HeaderThemePreference;
+  trigger?: HeaderEventTrigger;
+};
+
+type HeaderConsentOpenEventProps = HeaderEventBase<'header' | 'drawer'> & {
+  state: HeaderConsentState;
+  trigger?: HeaderEventTrigger;
+};
+
+type HeaderRibbonEventProps = HeaderEventBase<'ribbon'> & {
+  ribbonId: string;
+  target?: string;
+  trigger?: HeaderEventTrigger;
+};
+
+type HeaderDrawerEventProps = HeaderEventBase<'drawer'> & {
+  trigger?: HeaderDrawerTrigger;
+};
 
 export type AnalyticsEventPayload<E extends AnalyticsEventName = AnalyticsEventName> = {
   name: E;
