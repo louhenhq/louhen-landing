@@ -3,7 +3,10 @@ import { mkdirSync } from 'node:fs';
 import { defineConfig, devices } from '@playwright/test';
 import type { PlaywrightTestConfig } from '@playwright/test';
 
-const baseURL = process.env.BASE_URL ?? 'http://127.0.0.1:4311';
+const HOST = process.env.HOST ?? '127.0.0.1';
+const parsedPort = Number.parseInt(process.env.PORT ?? '4311', 10);
+const PORT = Number.isFinite(parsedPort) ? parsedPort : 4311;
+const baseURL = process.env.BASE_URL ?? `http://${HOST}:${PORT}`;
 const shouldSkipWebServer = process.env.PLAYWRIGHT_SKIP === '1';
 
 mkdirSync('playwright-report', { recursive: true });
@@ -34,7 +37,8 @@ const testEnv = {
   RESEND_FROM: process.env.RESEND_FROM ?? 'no-reply@ci.louhen.app',
   RESEND_REPLY_TO: process.env.RESEND_REPLY_TO ?? 'hello@ci.louhen.app',
   NODE_ENV: 'production',
-  HOST: process.env.HOST ?? '127.0.0.1',
+  HOST,
+  PORT: String(PORT),
   SUPPRESSION_SALT: process.env.SUPPRESSION_SALT ?? 'test-salt',
   EMAIL_TRANSPORT: process.env.EMAIL_TRANSPORT ?? 'noop',
   STATUS_USER: statusUser,
@@ -86,7 +90,7 @@ if (shouldSkipWebServer) {
   config.webServer = {
     command: 'npm run start:test',
     url: baseURL,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: Boolean(process.env.PW_REUSE) || !process.env.CI,
     timeout: 180_000,
     env: {
       ...testEnv,

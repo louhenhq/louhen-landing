@@ -137,7 +137,7 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
 
 - **2025-10-08 — CI/Playwright Server Lifecycle 2025**
   - Adjust → Playwright now owns the e2e server lifecycle via `webServer.command`; CI builds once, then runs `npx playwright test` without manual `npm run start:test` calls.
-  - Add → `start:test` enforces `NODE_ENV=production`, binds to `127.0.0.1:4311`, and captures output in `.next/test-server.log`; Playwright config pre-creates `playwright-report/` + `test-results/` and publishes JSON to `playwright-report/report.json`.
+  - Add → `start:test` enforces `NODE_ENV=production`, binds to `127.0.0.1:4311`, and captures output in `.next/test-server.log`; Playwright config pre-creates `playwright-report/` + `test-results/` and publishes JSON to `playwright-report/report.json`. Conditional fallback job pre-starts the server and reuses it when the managed path fails so CI still runs coverage.
   - Notes → CI always tails `.next/test-server.log` and uploads combined artifacts (`playwright-report/`, `test-results/`, `.next/test-server.log`). Local developers run `npx playwright test --project=chromium --workers=1` post-build for equivalent coverage.
 
 ---

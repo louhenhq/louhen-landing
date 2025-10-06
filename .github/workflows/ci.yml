@@ -139,6 +139,7 @@ jobs:
           APP_BASE_URL: http://127.0.0.1:4311
           BASE_URL: http://127.0.0.1:4311
           HOST: 127.0.0.1
+          PORT: '4311'
           TEST_E2E_SHORTCIRCUIT: 'true'
           TEST_E2E_BYPASS_TOKEN: e2e-mocked-token
           CI_SKIP_LANDING: '1'
@@ -165,15 +166,16 @@ jobs:
           NODE_ENV: production
         run: |
           mkdir -p playwright-report test-results
-          npx playwright test --project=chromium --workers=1
+          npx playwright show-config | sed -n '1,160p'
+          DEBUG=pw:webserver,pw:api npx playwright test --project=chromium --workers=1
         continue-on-error: false
 
       - name: Tail Next.js test server log
         if: always()
         run: |
           if [ -f .next/test-server.log ]; then
-            echo 'Last 200 lines from .next/test-server.log'
-            tail -n 200 .next/test-server.log
+            echo 'Last 300 lines from .next/test-server.log'
+            tail -n 300 .next/test-server.log
           else
             echo 'No server log found'
           fi
@@ -251,6 +253,152 @@ jobs:
           name: next-traces
           path: .next/trace
           if-no-files-found: ignore
+
+
+  e2e-fallback:
+    needs: build-and-test
+    if: needs.build-and-test.result == 'failure'
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+      NEXT_PUBLIC_ANALYTICS_DISABLED: '1'
+      NEXT_PUBLIC_ANALYTICS_DEBUG: '0'
+      NEXT_PUBLIC_ENV: 'ci'
+      NEXT_PUBLIC_SITE_URL: 'https://ci.louhen.app'
+      NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
+      NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
+      NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
+      HOST: 127.0.0.1
+      PORT: '4311'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --include=dev
+
+      - name: Build
+        run: npm run build
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Start fallback Next.js server
+        env:
+          PORT: '4311'
+          HOST: 127.0.0.1
+        run: |
+          mkdir -p .next
+          PORT=${PORT:-4311}
+          HOST=${HOST:-127.0.0.1}
+          echo "Using host $HOST and port $PORT"
+          npm run start:test &
+          SERVER_PID=$!
+          echo "SERVER_PID=$SERVER_PID" >> "$GITHUB_ENV"
+          echo "HOST=$HOST" >> "$GITHUB_ENV"
+          echo "PORT=$PORT" >> "$GITHUB_ENV"
+          started=0
+          for i in {1..120}; do
+            if curl -fsS "http://$HOST:$PORT/" >/dev/null 2>&1; then
+              started=1
+              echo "Server is responding on http://$HOST:$PORT"
+              break
+            fi
+            if ! kill -0 "$SERVER_PID" >/dev/null 2>&1; then
+              echo "Server process exited early"
+              [[ -f .next/test-server.log ]] && cat .next/test-server.log || true
+              exit 1
+            fi
+            sleep 1
+          done
+          if [ "$started" -ne 1 ]; then
+            echo "Server failed to become healthy within 120 seconds"
+            [[ -f .next/test-server.log ]] && tail -n 200 .next/test-server.log || true
+            exit 1
+          fi
+
+      - name: Playwright tests (fallback)
+        env:
+          APP_BASE_URL: http://127.0.0.1:${{ env.PORT }}
+          BASE_URL: http://127.0.0.1:${{ env.PORT }}
+          HOST: 127.0.0.1
+          PORT: ${{ env.PORT }}
+          TEST_E2E_SHORTCIRCUIT: 'true'
+          TEST_E2E_BYPASS_TOKEN: e2e-mocked-token
+          CI_SKIP_LANDING: '1'
+          NEXT_PUBLIC_ENV: 'ci'
+          NEXT_PUBLIC_SITE_URL: 'https://ci.louhen.app'
+          NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
+          NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
+          NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
+          NEXT_PUBLIC_LOCALES: 'en-de,de-de'
+          NEXT_PUBLIC_DEFAULT_LOCALE: 'en-de'
+          NEXT_PUBLIC_ANALYTICS_DISABLED: '0'
+          NEXT_PUBLIC_ANALYTICS_DEBUG: '1'
+          HCAPTCHA_SECRET: ci-hcaptcha-secret
+          WAITLIST_CONFIRM_TTL_DAYS: '7'
+          FIREBASE_PROJECT_ID: ci-firebase
+          FIREBASE_DB_REGION: eur3
+          FIREBASE_ADMIN_SA_B64: eyJwcm9qZWN0X2lkIjoiY2ktZmlyZWJhc2UifQ==
+          RESEND_API_KEY: ci-resend-key
+          RESEND_FROM: no-reply@ci.louhen.app
+          RESEND_REPLY_TO: hello@ci.louhen.app
+          STATUS_USER: ci-status
+          STATUS_PASS: ci-secret
+          SUPPRESSION_SALT: ci-suppression-salt
+          NODE_ENV: production
+          PW_REUSE: '1'
+          DEBUG: pw:api
+        run: |
+          mkdir -p playwright-report test-results
+          npx playwright show-config | sed -n '1,160p'
+          npx playwright test --project=chromium --workers=1
+
+      - name: Tail Next.js test server log (fallback)
+        if: always()
+        run: |
+          if [ -f .next/test-server.log ]; then
+            echo 'Last 300 lines from .next/test-server.log'
+            tail -n 300 .next/test-server.log
+          else
+            echo 'No server log found'
+          fi
+
+      - name: Upload Playwright artifacts (fallback)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts-fallback
+          path: |
+            playwright-report
+            test-results
+            .next/test-server.log
+          if-no-files-found: warn
+
+      - name: Stop fallback Next.js server
+        if: always()
+        run: |
+          if [ -n "${SERVER_PID:-}" ]; then
+            echo "Stopping server PID ${SERVER_PID}"
+            kill "${SERVER_PID}" || true
+            wait "${SERVER_PID}" 2>/dev/null || true
+          fi
 
 
   enforce-release-source:
