@@ -6,7 +6,7 @@ import type { PlaywrightTestConfig } from '@playwright/test';
 const HOST = process.env.HOST ?? '127.0.0.1';
 const parsedPort = Number.parseInt(process.env.PORT ?? '4311', 10);
 const PORT = Number.isFinite(parsedPort) ? parsedPort : 4311;
-const HEALTH_PATH = process.env.PW_HEALTH_PATH ?? '/status';
+const HEALTH_PATH = process.env.PW_HEALTH_PATH ?? '/icon.svg';
 const baseURL = process.env.BASE_URL ?? `http://${HOST}:${PORT}`;
 const shouldSkipWebServer = process.env.PLAYWRIGHT_SKIP === '1';
 

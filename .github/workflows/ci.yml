@@ -19,7 +19,7 @@ jobs:
       NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
       NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
       NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
-      PW_HEALTH_PATH: /status
+      PW_HEALTH_PATH: /icon.svg
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -165,7 +165,7 @@ jobs:
           STATUS_PASS: ci-secret
           SUPPRESSION_SALT: ci-suppression-salt
           NODE_ENV: production
-          PW_HEALTH_PATH: /status
+          PW_HEALTH_PATH: /icon.svg
         run: |
           mkdir -p playwright-report test-results
           DEBUG=pw:webserver,pw:api npx playwright test --project=chromium --workers=1
@@ -208,7 +208,7 @@ jobs:
           STATUS_PASS: ci-secret
           SUPPRESSION_SALT: ci-suppression-salt
           NODE_ENV: production
-          PW_HEALTH_PATH: /status
+          PW_HEALTH_PATH: /icon.svg
         run: |
           mkdir -p playwright-a11y-report
           IS_PRELAUNCH=true PLAYWRIGHT_HTML_REPORT=playwright-a11y-report npx playwright test tests/e2e/legal.a11y.spec.ts --reporter=html --reporter=json=playwright-a11y-report/report.json --workers=1
@@ -272,7 +272,7 @@ jobs:
       NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
       HOST: 127.0.0.1
       PORT: '4311'
-      PW_HEALTH_PATH: /status
+      PW_HEALTH_PATH: /icon.svg
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -306,7 +306,7 @@ jobs:
         env:
           PORT: '4311'
           HOST: 127.0.0.1
-          PW_HEALTH_PATH: /status
+          PW_HEALTH_PATH: /icon.svg
         run: |
           mkdir -p .next
           PORT=${PORT:-4311}
@@ -371,7 +371,7 @@ jobs:
           NODE_ENV: production
           PW_REUSE: '1'
           DEBUG: pw:api
-          PW_HEALTH_PATH: /status
+          PW_HEALTH_PATH: /icon.svg
         run: |
           mkdir -p playwright-report test-results
           npx playwright test --project=chromium --workers=1
