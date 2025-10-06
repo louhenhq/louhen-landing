@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { localeUrl } from './_utils/url';
 
 test.describe('Header consent controls', () => {
   test('opens manager and gates analytics events', async ({ page }) => {
@@ -8,7 +9,7 @@ test.describe('Header consent controls', () => {
       await route.fulfill({ status: 204, body: '' });
     });
 
-    await page.goto('/en?utm_source=consent-header', { waitUntil: 'networkidle' });
+    await page.goto(localeUrl('?utm_source=consent-header'), { waitUntil: 'networkidle' });
 
     const consentButton = page.getByTestId('header-consent-button-desktop');
     await expect(consentButton).toBeVisible();

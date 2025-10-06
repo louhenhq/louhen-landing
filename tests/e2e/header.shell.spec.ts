@@ -1,9 +1,10 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { localeUrl } from './_utils/url';
 
 test.describe('Header shell structure', () => {
   test('desktop header renders primary navigation and hides drawer trigger', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto(localeUrl(), { waitUntil: 'networkidle' });
 
     const banner = page.getByRole('banner');
     await expect(banner).toBeVisible();
@@ -30,7 +31,7 @@ test.describe('Header shell structure', () => {
 
   test('mobile drawer trigger toggles menu', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto(localeUrl(), { waitUntil: 'networkidle' });
 
     const trigger = page.locator('[data-nav-drawer-trigger]');
     await expect(trigger).toBeVisible();

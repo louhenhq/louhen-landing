@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
+import { localeUrl } from './_utils/url';
 
 async function activeElementInsideDrawer(page: Page) {
   return page.evaluate(() => {
@@ -12,7 +13,7 @@ async function activeElementInsideDrawer(page: Page) {
 test.describe('Header mobile drawer', () => {
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize({ width: 414, height: 896 });
-    await page.goto('/en?utm_source=drawer-spec', { waitUntil: 'networkidle' });
+    await page.goto(localeUrl('?utm_source=drawer-spec'), { waitUntil: 'networkidle' });
   });
 
   test('opens with dialog semantics, traps focus, and closes on Escape', async ({ page }) => {

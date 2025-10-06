@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { localeUrl } from './_utils/url';
 
 function getCspNonce(header: string | undefined) {
   if (!header) return null;
@@ -8,7 +9,8 @@ function getCspNonce(header: string | undefined) {
 
 test.describe('Security headers', () => {
   test('HTTP response carries strict headers and CSP nonce', async ({ page }) => {
-    const response = await page.request.get('/', {
+    const homeUrl = localeUrl();
+    const response = await page.request.get(homeUrl, {
       headers: {
         Accept: 'text/html',
       },
@@ -27,7 +29,7 @@ test.describe('Security headers', () => {
     const nonce = getCspNonce(cspHeader);
     expect(nonce).toBeTruthy();
 
-    await page.goto('/');
+    await page.goto(homeUrl);
 
     const jsonLdHasNonce = await page.evaluate(() =>
       Array.from(document.querySelectorAll('script[type="application/ld+json"]')).every((node) => node.nonce && node.nonce.length > 0)

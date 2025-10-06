@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { localeUrl } from './_utils/url';
 
 async function seedAuthHintCookies(page: import('@playwright/test').Page) {
   const timestamp = new Date().toISOString();
@@ -14,7 +15,7 @@ async function seedAuthHintCookies(page: import('@playwright/test').Page) {
 
 test.describe('Header user state awareness', () => {
   test('guest experience keeps waitlist CTA and hides logout link', async ({ page }) => {
-    await page.goto('/en?utm_source=user-state-guest', { waitUntil: 'networkidle' });
+    await page.goto(localeUrl('?utm_source=user-state-guest'), { waitUntil: 'networkidle' });
 
     await expect(page.getByTestId('header-cta')).toHaveText('Join the waitlist');
     await expect(page.getByTestId('header-logout')).toHaveCount(0);
@@ -38,7 +39,7 @@ test.describe('Header user state awareness', () => {
       await route.fulfill({ status: 204, body: '' });
     });
 
-    await page.goto('/en?utm_source=user-state-hinted', { waitUntil: 'networkidle' });
+    await page.goto(localeUrl('?utm_source=user-state-hinted'), { waitUntil: 'networkidle' });
 
     const dashboardCta = page.getByTestId('header-cta');
     await expect(dashboardCta).toHaveText('Dashboard');

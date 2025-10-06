@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { localeUrl } from './_utils/url';
 
 const banner = () => test.info().page?.getByRole('dialog', { name: /cookies/i });
 
@@ -9,7 +10,7 @@ function getBanner(page: import('@playwright/test').Page) {
 test.describe('Consent banner', () => {
   test('accepting consent hides banner and persists choice', async ({ context, page }) => {
     await context.clearCookies();
-    await page.goto('/');
+    await page.goto(localeUrl());
 
     const dialog = getBanner(page);
     await expect(dialog).toBeVisible();

@@ -1,11 +1,12 @@
 import { expect, test } from '@playwright/test';
+import { localeUrl } from './_utils/url';
 
 type Scenario = {
   name: string;
   path: string;
   viewport: { width: number; height: number };
   theme: 'system' | 'light' | 'dark';
-  locale: 'en' | 'de';
+  locale?: string;
   hinted: boolean;
   ribbon: boolean;
 };
@@ -15,28 +16,28 @@ const shouldRunVisuals = process.env.HEADER_VISUAL === '1';
 const SCENARIOS: Scenario[] = [
   {
     name: 'desktop-light-guest',
-    path: '/en?utm_source=header-visual-desktop',
+    path: '?utm_source=header-visual-desktop',
     viewport: { width: 1280, height: 720 },
     theme: 'light',
-    locale: 'en',
+    locale: 'en-de',
     hinted: false,
     ribbon: false,
   },
   {
     name: 'desktop-dark-hinted-ribbon',
-    path: '/en?utm_source=header-visual-dark',
+    path: '?utm_source=header-visual-dark',
     viewport: { width: 1280, height: 720 },
     theme: 'dark',
-    locale: 'en',
+    locale: 'en-de',
     hinted: true,
     ribbon: true,
   },
   {
     name: 'mobile-system-guest',
-    path: '/de?utm_source=header-visual-mobile',
+    path: '?utm_source=header-visual-mobile',
     viewport: { width: 414, height: 896 },
     theme: 'system',
-    locale: 'de',
+    locale: 'de-de',
     hinted: false,
     ribbon: false,
   },
@@ -78,7 +79,7 @@ test.describe('Header visual snapshots', () => {
       }
 
       await page.setViewportSize(scenario.viewport);
-      await page.goto(scenario.path, { waitUntil: 'networkidle' });
+      await page.goto(localeUrl(scenario.path, { locale: scenario.locale }), { waitUntil: 'networkidle' });
 
       const header = page.locator('header[role="banner"]');
       await header.waitFor({ state: 'visible' });

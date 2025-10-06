@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { localeUrl } from './_utils/url';
 
 test.describe('Header promo ribbon', () => {
   test('renders, tracks dismissal, and stays hidden after reload', async ({ page }) => {
@@ -9,7 +10,7 @@ test.describe('Header promo ribbon', () => {
       };
     });
 
-    await page.goto('/en', { waitUntil: 'networkidle' });
+    await page.goto(localeUrl(), { waitUntil: 'networkidle' });
 
     const ribbon = page.locator('[data-ribbon]');
     await expect(ribbon).toBeVisible();

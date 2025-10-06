@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { getDefaultLocale, localeUrl } from './_utils/url';
 
 const rawBaseUrl = process.env.APP_BASE_URL ?? 'http://localhost:4311';
 const baseUrl = rawBaseUrl.replace(/\/$/, '');
@@ -13,6 +14,8 @@ const allowedHosts = [
   })(),
   new URL(fallbackBaseUrl).host,
 ].filter(Boolean) as string[];
+
+const defaultLocale = getDefaultLocale();
 
 function getCanonicalParts(href: string | null) {
   if (!href) {
@@ -32,7 +35,7 @@ function getCanonicalParts(href: string | null) {
 
 test.describe('SEO metadata', () => {
   test('home page metadata renders canonical tags and JSON-LD', async ({ page }) => {
-    await page.goto('/');
+    await page.goto(localeUrl());
 
     const metaDescriptions = await page
       .locator('meta[name="description"]')
@@ -42,7 +45,7 @@ test.describe('SEO metadata', () => {
     const canonical = page.locator('link[rel="canonical"]');
     const canonicalHref = await canonical.getAttribute('href');
     const canonicalParts = getCanonicalParts(canonicalHref);
-    expect(['/', '/en', '/de', '/en-de', '/de-de']).toContain(canonicalParts.path);
+    expect([`/${defaultLocale}`, '/en-de', '/de-de']).toContain(canonicalParts.path);
     expect(allowedHosts).toContain(canonicalParts.host);
 
     const altTexts = await page
@@ -66,7 +69,7 @@ test.describe('SEO metadata', () => {
   });
 
   test('method page has canonical URL and breadcrumb JSON-LD', async ({ page }) => {
-    await page.goto('/method');
+    await page.goto(localeUrl('/method'));
 
     const metaDescriptions = await page
       .locator('meta[name="description"]')
@@ -76,7 +79,7 @@ test.describe('SEO metadata', () => {
     const canonical = page.locator('link[rel="canonical"]');
     const canonicalHref = await canonical.getAttribute('href');
     const canonicalParts = getCanonicalParts(canonicalHref);
-    expect(canonicalParts.path).toBe('/method');
+    expect(canonicalParts.path).toBe(`/${defaultLocale}/method`);
     expect(allowedHosts).toContain(canonicalParts.host);
 
     const jsonLdContent = await page

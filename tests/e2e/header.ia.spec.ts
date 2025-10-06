@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { buildHeaderNavigation } from '@/lib/nav/config';
-import { locales, defaultLocale, type SupportedLocale } from '@/next-intl.locales';
-import { localeHomePath } from '@/lib/routing/legalPath';
+import { locales, type SupportedLocale } from '@/next-intl.locales';
+import { localeUrl } from './_utils/url';
 
 const SERIOUS_IMPACT = new Set(['serious', 'critical']);
 
@@ -39,8 +39,5 @@ test.describe('Header information architecture', () => {
 });
 
 function getHomePath(locale: SupportedLocale): string {
-  if (locale === defaultLocale) {
-    return '/';
-  }
-  return localeHomePath(locale);
+  return localeUrl(undefined, { locale });
 }

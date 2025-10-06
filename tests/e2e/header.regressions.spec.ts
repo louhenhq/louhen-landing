@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { localeUrl } from './_utils/url';
 
 type Page = import('@playwright/test').Page;
 type BrowserContext = import('@playwright/test').BrowserContext;
@@ -27,8 +28,8 @@ async function setThemePreference(context: BrowserContext, theme: 'light' | 'dar
   ]);
 }
 
-async function gotoReady(page: Page, url: string) {
-  await page.goto(url, { waitUntil: 'networkidle' });
+async function gotoReady(page: Page, path: string) {
+  await page.goto(localeUrl(path), { waitUntil: 'networkidle' });
 }
 
 test.describe('Header regression pack', () => {
@@ -39,7 +40,7 @@ test.describe('Header regression pack', () => {
   });
 
   test('CTA width stays stable between guest and hinted states', async ({ page, context }) => {
-    await gotoReady(page, '/en?utm_source=header-width');
+    await gotoReady(page, '?utm_source=header-width');
     const cta = page.getByTestId('header-cta');
     await expect(cta).toBeVisible();
 
@@ -61,7 +62,7 @@ test.describe('Header regression pack', () => {
   });
 
   test('Primary nav uses intent prefetch and exposes focus ring', async ({ page }) => {
-    await gotoReady(page, '/en?utm_source=header-nav');
+    await gotoReady(page, '?utm_source=header-nav');
 
     const methodLink = page.locator('[data-nav-id="method"]');
     await expect(methodLink).toHaveAttribute('data-prefetch-policy', 'intent');
@@ -82,7 +83,7 @@ test.describe('Header regression pack', () => {
       { name: 'louhen_consent', value: CONSENT_COOKIE_VALUE(), domain: 'localhost', path: '/' },
     ]);
     await page.setViewportSize({ width: 414, height: 896 });
-    await gotoReady(page, '/en?utm_source=header-drawer');
+    await gotoReady(page, '?utm_source=header-drawer');
 
     const trigger = page.locator('[data-nav-drawer-trigger]');
     await trigger.click();

@@ -1,9 +1,10 @@
 import { expect, test } from '@playwright/test';
+import { localeUrl } from './_utils/url';
 
 test.describe('Header theme toggle', () => {
   test('desktop theme selection persists across reloads', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto('/en?utm_source=theme-desktop', { waitUntil: 'networkidle' });
+    await page.goto(localeUrl('?utm_source=theme-desktop'), { waitUntil: 'networkidle' });
 
     const themeSelect = page.getByTestId('header-theme-select-desktop');
     await expect(themeSelect).toBeVisible();
@@ -31,7 +32,9 @@ test.describe('Header theme toggle', () => {
 
   test('mobile theme change closes drawer and updates attribute', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto('/de?utm_source=theme-mobile', { waitUntil: 'networkidle' });
+    await page.goto(localeUrl('?utm_source=theme-mobile', { locale: 'de-de' }), {
+      waitUntil: 'networkidle',
+    });
 
     const trigger = page.locator('[data-nav-drawer-trigger]');
     await trigger.click();

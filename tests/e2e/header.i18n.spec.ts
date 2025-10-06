@@ -1,12 +1,13 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { localeUrl } from './_utils/url';
 
 const EXPECTED_HREFLANGS = ['en', 'de', 'en-de', 'de-de', 'de-at', 'x-default'] as const;
 
 test.describe('Header locale switcher', () => {
   test('desktop switch preserves path, query, and metadata', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto('/en-de/method?utm_source=playwright', { waitUntil: 'networkidle' });
+    await page.goto(localeUrl('/method?utm_source=playwright'), { waitUntil: 'networkidle' });
 
     const select = page.getByTestId('header-locale-select-desktop');
     await select.selectOption('de-de');
@@ -40,7 +41,7 @@ test.describe('Header locale switcher', () => {
 
   test('mobile drawer switch closes after changing locale', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto('/en?ref=mobile-test', { waitUntil: 'networkidle' });
+    await page.goto(localeUrl('?ref=mobile-test'), { waitUntil: 'networkidle' });
 
     const trigger = page.locator('[data-nav-drawer-trigger]');
     await trigger.click();
@@ -49,9 +50,9 @@ test.describe('Header locale switcher', () => {
     await expect(drawer).toBeVisible();
 
     const select = page.getByTestId('header-locale-select-mobile');
-    await select.selectOption('de');
+    await select.selectOption('de-de');
 
-    await expect(page).toHaveURL(/\/de\?ref=mobile-test/);
+    await expect(page).toHaveURL(/\/de-de\?ref=mobile-test/);
     await expect(drawer).toHaveCount(0);
 
     const skipLink = page.getByTestId('header-skip-link');

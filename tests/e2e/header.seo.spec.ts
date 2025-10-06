@@ -1,10 +1,11 @@
 import { test, expect } from '@playwright/test';
+import { localeUrl } from './_utils/url';
 
 const SUPPORTED_HREFLANGS = ['en', 'de', 'en-de', 'de-de', 'de-at', 'x-default'] as const;
 
 test.describe('Header SEO touchpoints', () => {
   test('privacy page canonical + hreflang per locale', async ({ page }) => {
-    await page.goto('/legal/privacy', { waitUntil: 'networkidle' });
+    await page.goto(localeUrl('/legal/privacy'), { waitUntil: 'networkidle' });
 
     const canonical = await page.locator('link[rel="canonical"]').first().getAttribute('href');
     expect(canonical).toContain('/legal/privacy');
@@ -14,7 +15,7 @@ test.describe('Header SEO touchpoints', () => {
       expect(href as string).toContain('/legal/privacy');
     }
 
-    await page.goto('/de/legal/privacy', { waitUntil: 'networkidle' });
+    await page.goto(localeUrl('/legal/privacy', { locale: 'de-de' }), { waitUntil: 'networkidle' });
     const canonicalDe = await page.locator('link[rel="canonical"]').first().getAttribute('href');
     expect(canonicalDe).toContain('/de/legal/privacy');
   });
@@ -24,7 +25,7 @@ test.describe('Header SEO touchpoints', () => {
       content: `window.__LOUHEN_PROMO_RIBBON__ = { id: 'playwright-test', href: '/promo' };`,
     });
 
-    await page.goto('/en', { waitUntil: 'networkidle' });
+    await page.goto(localeUrl(), { waitUntil: 'networkidle' });
 
     const cta = page.getByTestId('header-cta');
     const ctaHref = await cta.getAttribute('href');
