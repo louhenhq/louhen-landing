@@ -1,9 +1,13 @@
 import { Buffer } from 'node:buffer';
+import { mkdirSync } from 'node:fs';
 import { defineConfig, devices } from '@playwright/test';
 import type { PlaywrightTestConfig } from '@playwright/test';
 
-const baseURL = process.env.BASE_URL ?? 'http://localhost:4311';
+const baseURL = process.env.BASE_URL ?? 'http://127.0.0.1:4311';
 const shouldSkipWebServer = process.env.PLAYWRIGHT_SKIP === '1';
+
+mkdirSync('playwright-report', { recursive: true });
+mkdirSync('test-results', { recursive: true });
 
 const statusUser = process.env.STATUS_USER ?? process.env.CI_STATUS_USER ?? 'status-ops';
 const statusPass = process.env.STATUS_PASS ?? process.env.CI_STATUS_PASS ?? 'status-secret';
@@ -29,7 +33,8 @@ const testEnv = {
   RESEND_API_KEY: process.env.RESEND_API_KEY ?? 'ci-resend-key',
   RESEND_FROM: process.env.RESEND_FROM ?? 'no-reply@ci.louhen.app',
   RESEND_REPLY_TO: process.env.RESEND_REPLY_TO ?? 'hello@ci.louhen.app',
-  NODE_ENV: 'test',
+  NODE_ENV: 'production',
+  HOST: process.env.HOST ?? '127.0.0.1',
   SUPPRESSION_SALT: process.env.SUPPRESSION_SALT ?? 'test-salt',
   EMAIL_TRANSPORT: process.env.EMAIL_TRANSPORT ?? 'noop',
   STATUS_USER: statusUser,
@@ -47,9 +52,10 @@ const httpCredentials = statusUser && statusPass ? { username: statusUser, passw
 const config: PlaywrightTestConfig = {
   testDir: 'tests/e2e',
   retries: process.env.CI ? 1 : 0,
+  workers: process.env.CI ? 1 : 2,
   reporter: [
     ['html'],
-    ['json'],
+    ['json', { outputFile: 'playwright-report/report.json' }],
   ],
   use: {
     baseURL,
@@ -81,7 +87,7 @@ if (shouldSkipWebServer) {
     command: 'npm run start:test',
     url: baseURL,
     reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
+    timeout: 180_000,
     env: {
       ...testEnv,
     },

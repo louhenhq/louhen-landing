@@ -80,7 +80,7 @@ jobs:
 
       - name: Check Playwright env wiring
         env:
-          APP_BASE_URL: http://localhost:4311
+          APP_BASE_URL: http://127.0.0.1:4311
           NEXT_PUBLIC_ENV: 'ci'
           NEXT_PUBLIC_SITE_URL: 'https://ci.louhen.app'
           NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
@@ -136,7 +136,9 @@ jobs:
 
       - name: E2E tests (Playwright)
         env:
-          APP_BASE_URL: http://localhost:4311
+          APP_BASE_URL: http://127.0.0.1:4311
+          BASE_URL: http://127.0.0.1:4311
+          HOST: 127.0.0.1
           TEST_E2E_SHORTCIRCUIT: 'true'
           TEST_E2E_BYPASS_TOKEN: e2e-mocked-token
           CI_SKIP_LANDING: '1'
@@ -160,16 +162,27 @@ jobs:
           STATUS_USER: ci-status
           STATUS_PASS: ci-secret
           SUPPRESSION_SALT: ci-suppression-salt
-          NODE_ENV: test
+          NODE_ENV: production
         run: |
-          mkdir -p playwright-report
-          set -o pipefail
-          npx playwright test --reporter=html,json --workers=2 | tee playwright-report/report.json
+          mkdir -p playwright-report test-results
+          npx playwright test --project=chromium --workers=1
         continue-on-error: false
+
+      - name: Tail Next.js test server log
+        if: always()
+        run: |
+          if [ -f .next/test-server.log ]; then
+            echo 'Last 200 lines from .next/test-server.log'
+            tail -n 200 .next/test-server.log
+          else
+            echo 'No server log found'
+          fi
 
       - name: Accessibility smoke (axe)
         env:
-          APP_BASE_URL: http://localhost:4311
+          APP_BASE_URL: http://127.0.0.1:4311
+          BASE_URL: http://127.0.0.1:4311
+          HOST: 127.0.0.1
           TEST_E2E_SHORTCIRCUIT: 'true'
           TEST_E2E_BYPASS_TOKEN: e2e-mocked-token
           CI_SKIP_LANDING: '1'
@@ -191,10 +204,10 @@ jobs:
           STATUS_USER: ci-status
           STATUS_PASS: ci-secret
           SUPPRESSION_SALT: ci-suppression-salt
-          NODE_ENV: test
+          NODE_ENV: production
         run: |
           mkdir -p playwright-a11y-report
-          IS_PRELAUNCH=true npx playwright test tests/e2e/legal.a11y.spec.ts --reporter=html,json --workers=2 | tee playwright-a11y-report/report.json
+          IS_PRELAUNCH=true PLAYWRIGHT_HTML_REPORT=playwright-a11y-report npx playwright test tests/e2e/legal.a11y.spec.ts --reporter=html --reporter=json=playwright-a11y-report/report.json --workers=1
         continue-on-error: false
 
       - name: Upload a11y report
@@ -208,17 +221,20 @@ jobs:
       - name: Lighthouse (LHCI)
         timeout-minutes: 10
         env:
-          BASE_URL: http://localhost:4311
+          BASE_URL: http://127.0.0.1:4311
         run: npm run lighthouse
         continue-on-error: false
 
-      - name: Upload Playwright report
+      - name: Upload Playwright artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
-          path: playwright-report/
-          if-no-files-found: ignore
+          name: playwright-artifacts
+          path: |
+            playwright-report
+            test-results
+            .next/test-server.log
+          if-no-files-found: warn
 
       - name: Upload Lighthouse results
         if: always()

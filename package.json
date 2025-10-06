@@ -11,7 +11,7 @@
     "prepare": "husky",
     "build": "next build",
     "start": "next start",
-    "start:test": "PORT=4311 next start",
+    "start:test": "mkdir -p .next && cross-env NODE_ENV=production PORT=4311 HOST=127.0.0.1 next start -p 4311 -H 127.0.0.1 > .next/test-server.log 2>&1",
     "lint": "next lint",
     "guard:hex": "node scripts/guard-hex.mjs",
     "ci:color-policy": "node scripts/guard-hex.mjs --ci --report ci-artifacts/color-policy-report.txt",
