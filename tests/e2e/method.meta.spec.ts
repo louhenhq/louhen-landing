@@ -2,7 +2,8 @@ import { expect, test } from '@playwright/test';
 import { loadMessages } from '@/lib/intl/loadMessages';
 import { methodPath } from '@/lib/routing/methodPath';
 import { hreflangMapFor, makeCanonical } from '@/lib/seo/shared';
-import { locales, defaultLocale } from '@/next-intl.locales';
+import { defaultLocale, type SupportedLocale } from '@/next-intl.locales';
+import { getTestLocales } from './_utils/url';
 
 const PRELAUNCH_FLAG =
   (process.env.IS_PRELAUNCH?.trim() === 'true' || process.env.IS_PRELAUNCH?.trim() === '1') ||
@@ -22,8 +23,10 @@ const defaultMethodMessagesPromise = loadMessages(defaultLocale).then((messages)
   return typed.method ?? {};
 });
 
+const localesToTest = getTestLocales() as SupportedLocale[];
+
 test.describe('Method page metadata', () => {
-  for (const locale of locales) {
+  for (const locale of localesToTest) {
     test(`${locale} metadata reflects localized copy and canonical policy`, async ({ page }) => {
       const messages = (await loadMessages(locale)) as { method?: MethodMessages };
       const methodMessages = messages.method ?? {};

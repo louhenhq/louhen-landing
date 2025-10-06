@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { locales } from '@/next-intl.locales';
 import { legalPath } from '@/lib/routing/legalPath';
+import { getTestLocales, localeUrl } from './_utils/url';
 
 const SLUGS = ['terms', 'privacy'] as const;
 
@@ -14,13 +14,15 @@ function getSeriousOrCriticalViolations(violations: AxeResults['violations']) {
   });
 }
 
+const localesToTest = getTestLocales();
+
 test.describe('Legal pages accessibility', () => {
-  for (const locale of locales) {
+  for (const locale of localesToTest) {
     for (const slug of SLUGS) {
       const path = legalPath(locale, slug);
 
       test(`${locale} ${path} has no serious accessibility violations`, async ({ page }) => {
-        await page.goto(path, { waitUntil: 'networkidle' });
+        await page.goto(localeUrl(`/legal/${slug}`, { locale }), { waitUntil: 'networkidle' });
 
         await expect(page.locator('h1')).toHaveCount(1);
         await expect(page.getByTestId('last-updated')).toBeVisible();

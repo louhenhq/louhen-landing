@@ -1,7 +1,8 @@
 import { expect, test } from '@playwright/test';
-import { locales, type SupportedLocale } from '@/next-intl.locales';
+import type { SupportedLocale } from '@/next-intl.locales';
 import { loadMessages } from '@/lib/intl/loadMessages';
 import { methodPath } from '@/lib/routing/methodPath';
+import { getTestLocales } from './_utils/url';
 
 type MethodMessages = {
   seo: { title: string };
@@ -12,8 +13,10 @@ type MethodMessages = {
   cta: { button: string };
 };
 
+const localesToTest = getTestLocales();
+
 test.describe('Method page smoke test', () => {
-  for (const locale of locales) {
+  for (const locale of localesToTest as SupportedLocale[]) {
     test(`${locale} renders localized hero and key content`, async ({ page }) => {
       const messages = (await loadMessages(locale)) as { method?: Partial<MethodMessages> };
       const methodMessages = messages.method ?? {};

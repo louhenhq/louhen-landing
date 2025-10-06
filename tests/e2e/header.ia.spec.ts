@@ -1,13 +1,15 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { buildHeaderNavigation } from '@/lib/nav/config';
-import { locales, type SupportedLocale } from '@/next-intl.locales';
-import { localeUrl } from './_utils/url';
+import type { SupportedLocale } from '@/next-intl.locales';
+import { getTestLocales, localeUrl } from './_utils/url';
 
 const SERIOUS_IMPACT = new Set(['serious', 'critical']);
 
+const localesToTest = getTestLocales();
+
 test.describe('Header information architecture', () => {
-  for (const locale of locales) {
+  for (const locale of localesToTest) {
     const path = getHomePath(locale as SupportedLocale);
 
     test(`${locale} primary nav links are localized and accessible`, async ({ page }) => {

@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { defaultLocale, locales } from '@/next-intl.locales';
-import { legalPath, localeHomePath, type LegalSlug } from '@/lib/routing/legalPath';
+import { defaultLocale } from '@/next-intl.locales';
+import { legalPath, type LegalSlug } from '@/lib/routing/legalPath';
+import { getTestLocales, localeUrl } from './_utils/url';
 
 const TERMS_PATTERNS = [/terms/i, /allgemeine\s+geschäftsbedingungen/iu];
 const PRIVACY_PATTERNS = [/privacy/i, /datenschutz/i];
@@ -64,7 +65,8 @@ function matchesAny(text: string | null, patterns: RegExp[]): boolean {
 }
 
 test.describe('Localized legal pages', () => {
-  for (const locale of locales) {
+  const localesToTest = getTestLocales();
+  for (const locale of localesToTest) {
     test.describe(`${locale}`, () => {
       const routes = [
         { slug: 'terms', patterns: TERMS_PATTERNS },
@@ -74,8 +76,9 @@ test.describe('Localized legal pages', () => {
       for (const { slug, patterns } of routes) {
         const path = legalPath(locale, slug);
 
-        test(`${path} renders localized content`, async ({ page }) => {
-          const response = await page.goto(path, { waitUntil: 'networkidle' });
+        test(`${locale} ${path} renders localized content`, async ({ page }) => {
+          const url = localeUrl(`/legal/${slug}`, { locale });
+          const response = await page.goto(url, { waitUntil: 'networkidle' });
           expect(response?.status()).toBe(200);
 
           const h1 = page.locator('h1').first();
@@ -137,12 +140,13 @@ test.describe('Localized legal pages', () => {
   }
 
   test('footer legal links route per locale', async ({ browser }) => {
-    for (const locale of locales) {
+    const localesToTest = getTestLocales();
+    for (const locale of localesToTest) {
       const context = await browser.newContext();
       const page = await context.newPage();
 
-      const homePath = localeHomePath(locale);
-      await page.goto(homePath, { waitUntil: 'networkidle' });
+      const homeUrl = locale === defaultLocale ? localeUrl() : localeUrl(undefined, { locale });
+      await page.goto(homeUrl, { waitUntil: 'networkidle' });
 
       const footer = page.locator('footer');
       await expect(footer).toBeVisible();
