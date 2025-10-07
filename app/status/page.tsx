@@ -38,10 +38,18 @@ function resolveStatusEndpoint(headerStore: HeaderStore): string {
   }
 
   const host = headerStore.get('x-forwarded-host') || headerStore.get('host');
-  const proto = headerStore.get('x-forwarded-proto') || 'https';
   if (!host) {
     throw new Error('Unable to resolve host for status fetch');
   }
+
+  const forwardedProto = headerStore.get('x-forwarded-proto');
+  const normalizedHost = host.toLowerCase();
+  const isLoopbackHost =
+    normalizedHost.startsWith('127.0.0.1') ||
+    normalizedHost.startsWith('localhost') ||
+    normalizedHost.startsWith('[::1]');
+  const proto = forwardedProto ?? (isLoopbackHost ? 'http' : 'https');
+
   return `${proto}://${host}/api/status`;
 }
 
