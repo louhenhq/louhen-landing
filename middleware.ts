@@ -67,5 +67,17 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/(en|de)', '/(en|de)/:path*'],
+  matcher: [
+    '/',
+    '/en',
+    '/en/:path*',
+    '/de',
+    '/de/:path*',
+    '/en-de',
+    '/en-de/:path*',
+    '/de-de',
+    '/de-de/:path*',
+    '/de-at',
+    '/de-at/:path*',
+  ],
 };
