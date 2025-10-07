@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import { isPrelaunch } from '@/lib/env/prelaunch';
-import { methodPath } from '@/lib/routing/methodPath';
-import { hreflangMapFor, makeCanonical, resolveBaseUrl } from '@/lib/seo/shared';
+import { isPrelaunch } from '@lib/env/prelaunch';
+import { methodPath } from '@lib/shared/routing/method-path';
+import { hreflangMapFor, makeCanonical, resolveBaseUrl } from '@lib/seo/shared';
 import { type SupportedLocale } from '@/next-intl.locales';
 
 const OG_IMAGE_PATH = '/opengraph-image.png';

@@ -9,7 +9,7 @@ type Step = {
   body: string;
 };
 
-export default function HowItWorks() {
+export default function MethodHowItWorks() {
   const t = useTranslations('method.how');
 
   const steps = useMemo<Step[]>(() => {
@@ -26,14 +26,19 @@ export default function HowItWorks() {
   }, [t]);
 
   return (
-    <section id="how" className={cn(layout.section, 'bg-bg')} aria-labelledby="method-how-title">
+    <section
+      id="how"
+      data-ll="method-how"
+      className={cn(layout.section, 'bg-bg')}
+      aria-labelledby="method-how-title"
+    >
       <div className={cn(layout.container, 'flex flex-col gap-xl')}>
         <div className="max-w-3xl">
           <h2 id="method-how-title" className={cn(text.heading, 'text-balance')}>
             {t('title')}
           </h2>
         </div>
-        <div className="grid gap-lg md:grid-cols-2 xl:grid-cols-4">
+        <div data-ll="method-steps" className="grid gap-lg md:grid-cols-2 xl:grid-cols-4">
           {steps.map((step, index) => (
             <article key={step.title} className={cn(layout.card, 'flex h-full flex-col gap-sm px-gutter py-xl')}>
               <div className="text-sm font-semibold uppercase tracking-wide text-brand-primary">

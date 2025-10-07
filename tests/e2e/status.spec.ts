@@ -27,9 +27,7 @@ test.describe('status diagnostics API', () => {
   });
 
   test('returns JSON payload when authorized', async ({ request }) => {
-    if (!HAS_CREDS) {
-      test.skip('STATUS credentials missing');
-    }
+    test.skip(!HAS_CREDS, 'STATUS credentials missing');
 
     const response = await request.get('/api/status', {
       headers: {

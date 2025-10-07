@@ -6,6 +6,14 @@ See [BADGES.md](BADGES.md) for full project status and quality metrics.
 
 Louhen Landing is the official marketing site for Louhen, designed to provide a seamless user experience and showcase our brand. This project leverages modern web technologies to deliver fast, accessible, and maintainable content.
 
+- Before you start: review [CONTRIBUTING.md](CONTRIBUTING.md).
+
+> **Start Here**
+> - Locked decisions: [/CONTEXT/decision_log.md](CONTEXT/decision_log.md)
+> - Naming & structure: [/CONTEXT/naming.md](CONTEXT/naming.md)
+> - Migration plan: [/CONTEXT/rename_map.md](CONTEXT/rename_map.md)
+> - Workflow & QA: [CONTRIBUTING.md](CONTRIBUTING.md)
+
 ## Tech Stack
 
 - **Framework:** Next.js (App Router)
@@ -40,6 +48,40 @@ To get started locally:
 5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 > Tokens for design system are automatically built after install and before site builds.
+
+## Scripts Matrix
+
+| Script | Purpose | Run When |
+| --- | --- | --- |
+| `npm run lint` | Lint all source files with ESLint. | Before every PR; CI default. |
+| `npm run typecheck` | Type-check project via `tsc --noEmit`. | Alongside lint in PRs and CI. |
+| `npm run typecheck:build` | Strict build subset (app/lib only). | Before release branches / CI debug. |
+| `npm run typecheck:strict:method` | Strict pilot for method feature paths. | Use during method migration slices. |
+| `npm run typecheck:strict:feature` | Run strict config after populating `tsconfig.strict.json#include`. | Ad-hoc pilots (update include globs, then revert). |
+| `npm run build` | Production Next.js build. | Required before merging; CI always. |
+| `npm run test:unit` | Execute Vitest suite (`--passWithNoTests`). | During feature work and CI. |
+| `npm run test:e2e` | Playwright smoke pass (Chromium, 1 worker). | Local validation + CI regression. |
+| `npm run test:axe` | Axe accessibility suite via Playwright. | Run after UI changes; part of `validate:local`. |
+| `npm run lhci` | Lighthouse CI autorun; logs failures instead of exiting non-zero. | CI performance gate; optional local audit. |
+| `npm run validate:local` | Full lint → typecheck → build → production server (`start:test`) → unit/e2e/axe → Lighthouse, then teardown. | Final local confidence check before large PRs. |
+
+### Install Policy & Determinism
+
+- **CI:** `npm ci --include=dev`
+- **Local development:** use `npm install` only when adjusting dependencies/lockfile; otherwise prefer `npm ci` for clean states.
+- `package-lock.json` is the source of truth—avoid `--force` or `--legacy-peer-deps` in CI or PR workflows.
+
+## Structure (quick)
+
+See [/CONTEXT/naming.md](CONTEXT/naming.md) for repository-wide naming and layout conventions.
+- See [/CONTEXT/rename_map.md](CONTEXT/rename_map.md) for the source→target plan used in migration PRs.
+
+```
+app/(site)/[locale]/
+components/{ui,blocks,features/…}
+lib/{shared,server}
+tests/{unit,e2e,axe}
+```
 
 ## Quickstart: Waitlist + Env
 

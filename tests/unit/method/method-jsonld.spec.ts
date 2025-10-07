@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildMethodTechArticleSchema } from '@/app/(marketing)/[locale]/method/articleSchema';
+import { buildMethodTechArticleSchema } from '@lib/shared/method/article-schema';
 
-const baseInput = {
+type MethodArticleInput = Parameters<typeof buildMethodTechArticleSchema>[0];
+
+const baseInput: MethodArticleInput = {
   url: 'https://example.com/en/method',
   headline: 'Fit intelligence that keeps up with growing feet.',
   description: 'Discover how Louhen blends kid-safe scanning with verified fit science.',
@@ -13,7 +15,7 @@ const baseInput = {
   image: 'https://example.com/opengraph-image.png',
   datePublished: '2025-01-15T00:00:00.000Z',
   dateModified: '2025-01-15T00:00:00.000Z',
-} as const;
+};
 
 describe('buildMethodTechArticleSchema', () => {
   it('returns a TechArticle schema with essential fields', () => {

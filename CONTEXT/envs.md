@@ -18,6 +18,8 @@ Canonical reference for environment configuration across stages. Update this mat
 | **NEXT_PUBLIC_SITE_URL** | `http://localhost:3000` | `https://staging.louhen.app` | `https://www.louhen.app` | Must mirror `APP_BASE_URL` for link canonicalisation. |
 | **STATUS_USER** | Simple dev credential (e.g., `status-ops`) | Strong random secret (Vercel + GitHub) | Strong random secret (Vercel + GitHub) | Required for `/status` and status GitHub Action. |
 | **STATUS_PASS** | Simple dev credential (e.g., `status-secret`) | Strong random secret (Vercel + GitHub) | Strong random secret (Vercel + GitHub) | Rotate alongside STATUS_USER. |
+| **NEXT_USE_REMOTE_FONTS** | `false` (self-hosted) | `false` unless experiment approved | `false` (default); enable only with legal sign-off | Toggles between bundled fonts and remote providers. |
+| **FEATURE_* / FLAG_* vars** | Scoped to `lib/shared/env/flags.ts`; default `false` | Configure per rollout | Configure per rollout | All flags must be documented below; no ad-hoc env names. |
 
 ## Operational Notes
 - Maintain parity between `APP_BASE_URL` and `NEXT_PUBLIC_SITE_URL` within each environment to avoid mismatched redirects and metadata.
@@ -28,3 +30,16 @@ Canonical reference for environment configuration across stages. Update this mat
 - Mirror the dummy `NEXT_PUBLIC_*` variables configured in CI within Vercel preview env settings to keep builds passing without server secrets.
 - When rotating STATUS_* credentials, update Vercel, GitHub Secrets, and re-run the status monitor workflow to confirm success.
 - Apex `https://louhen.app` must continue issuing a 301 redirect to `https://www.louhen.app`; never point application URLs to the bare domain.
+
+## Feature Flag Policy
+- All flags live in `lib/shared/env/flags.ts` (isomorphic) or `lib/server/env/guard.ts` (server-only). Do not introduce new env names outside these modules without updating this doc.
+- Flag naming: `FEATURE_<CAPS>` for temporary launches; `FLAG_<CAPS>` for persistent toggles. Mirror names in tests when asserting behaviour.
+- Default values must keep production safe (usually `false`). CI and local development should exercise both code paths via unit/e2e tests.
+- Remove stale flags within two weeks of launch; update [/CONTEXT/rename_map.md](rename_map.md) if directory moves affect flag consumers.
+
+## Fonts Toggle Strategy
+- `NEXT_USE_REMOTE_FONTS=false` self-hosts all fonts (default). Keep this setting unless legal signs off on remote providers.
+- When set to `true`, remote fonts load via `next/font` using Google Fonts. Must ship alongside:
+  - Performance verification (`npm run lhci`) recorded in PR.
+  - CSP updates reviewed via [/CONTEXT/security.md](security.md).
+  - Communication to design/legal teams documenting the change.

@@ -7,17 +7,23 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
 
 ## Locked Decisions
 
-- **Framework**: Next.js App Router with TypeScript + Tailwind.  
-- **Hosting**: Vercel.  
-- **Data writes**: Firebase Admin SDK (server-side only).  
-- **Form security**: hCaptcha required on public submissions.  
-- **Emails**: Resend for transactional flows (after domain verification).  
-- **Release management**: semantic-release with Conventional Commits.  
-- **Testing**: Playwright E2E + Lighthouse CI.  
-- **Payments**: Adyen is company-wide provider (not yet used here).  
-- **i18n**: next-intl scaffolding; ready for Locize + DeepL later.  
-- **Security baseline**: no client-side secrets; GDPR-first handling of PII.
-- **Environment & Domains locked**: Canonical host `www.louhen.app` (production). Apex `louhen.app` issues 301 redirect to `www.louhen.app`. Preview domain `staging.louhen.app` (maps to `staging` branch). Wildcard previews `*.staging.louhen.app` CNAME to `cname.vercel-dns.com` (DNS only). Deployment Protection does not cover custom production domains without Vercel Business; mitigation is keeping production DNS dark until launch.
+| Decision | Rationale | Date | Links |
+| --- | --- | --- | --- |
+| Next.js 15 App Router | Leverage server components, route groups, and streaming for marketing + waitlist flows; aligns with Vercel hosting. | 2025-10-09 | [architecture.md](architecture.md) · [naming.md](naming.md) |
+| TypeScript strict mode | Catch regressions at compile time and enforce typed APIs across app/lib/tests. | 2025-10-09 | [architecture.md](architecture.md) · [coding_conventions.md](coding_conventions.md) |
+| Tailwind + Style Dictionary tokens | Design tokens remain single source; Tailwind consumes generated variables to keep brand parity. | 2025-10-09 | [performance.md](performance.md) · [naming.md](naming.md) |
+| BCP-47 routing & default-locale rule | Every page lives under `app/(site)/[locale]/…`; default locale must call `unstable_setRequestLocale` to avoid flashes. | 2025-10-09 | [i18n.md](i18n.md) · [naming.md](naming.md) · [rename_map.md](rename_map.md) |
+| CSP nonce lifecycle | Single SSR nonce shared across scripts (ThemeInit, JSON-LD); dev-only relaxations documented. | 2025-10-09 | [security.md](security.md) · [seo.md](seo.md) |
+| Consent-gated analytics | No third-party CMP; custom consent store gates analytics/marketing payloads before firing. | 2025-10-09 | [analytics_privacy.md](analytics_privacy.md) · [security.md](security.md) |
+| Testing pyramid: unit / e2e / axe | Unit for logic, Playwright e2e for flows, axe for accessibility; selectors via `data-ll`. | 2025-10-09 | [testing.md](testing.md) |
+| Lighthouse budgets in CI | Keep `/` and key flows ≥90/95/95/95 (P/A/SEO/BP); CI uploads artifacts and blocks regressions. | 2025-10-09 | [performance.md](performance.md) · [architecture.md](architecture.md) |
+| semantic-release branches (main/next/beta) | Automated releases via Conventional Commits; `main` stable, `next` preview, `beta` prerelease cuts. | 2025-10-09 | [release.md](release.md) |
+| Environment & feature flags policy | All secrets in Vercel/GitHub; flags live under `lib/shared/env` + `lib/server/env`; no ad-hoc envs. | 2025-10-09 | [envs.md](envs.md) · [architecture.md](architecture.md) |
+| Local vs remote fonts toggle | `NEXT_USE_REMOTE_FONTS` controls fallback; default to self-hosted local fonts for performance/legal review. | 2025-10-09 | [envs.md](envs.md) · [performance.md](performance.md) |
+| Canonical host + DNS strategy | Production canonical `https://www.louhen.app`, apex 301 redirect, preview `https://staging.louhen.app`. | 2025-09-24 | [seo.md](seo.md) · [domains.md](domains.md) |
+| Form security: hCaptcha required | Blocks bot submissions; test keys in dev, secrets per env. | 2025-09-24 | [architecture.md](architecture.md) · [envs.md](envs.md) |
+| Transactional email via Resend | Domain-verified sender with noop fallback locally. | 2025-09-22 | [email.md](email.md) |
+| Data writes via Firebase Admin | Server-only Firestore access; no client SDK on marketing site. | 2025-09-19 | [architecture.md](architecture.md) |
 
 ---
 
@@ -99,7 +105,7 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
   - Notes → `/tokens` remains dynamic/noindex; long-term static export requires refactoring the root layout’s header/cookie access.  
 
 - **2025-10-06 — Header Slice 9 SEO 2025 Audit**  
-  - Keep → `lib/seo/shared.ts`, `lib/seo/methodMetadata.ts`, and `lib/seo/legalMetadata.ts` already generate locale-aware canonical + hreflang maps; `components/SeoJsonLd.tsx` stays the nonce-aware JSON-LD helper; `lib/header/ctaConfig.ts`, `lib/header/ribbonConfig.ts`, and `lib/nav/config.ts` consistently route header links through `appendUtmParams`.  
+  - Keep → `lib/seo/shared.ts`, `lib/shared/seo/method-metadata.ts`, and `lib/seo/legalMetadata.ts` already generate locale-aware canonical + hreflang maps; `components/SeoJsonLd.tsx` stays the nonce-aware JSON-LD helper; `lib/header/ctaConfig.ts`, `lib/header/ribbonConfig.ts`, and `lib/nav/config.ts` consistently route header links through `appendUtmParams`.
   - Adjust → `app/(site)/components/Header.tsx` needs the brand link to reuse `localeHomePath` so locale switching preserves the path; `app/(site)/waitlist/page.tsx` should call `hreflangMapFor(() => '/waitlist')` to keep alternates aligned with the shared helper.  
   - Delete → None.  
   - Notes → Verified header surfaces share analytics targets and promo ribbon preserves nonce-safe structured data context.  

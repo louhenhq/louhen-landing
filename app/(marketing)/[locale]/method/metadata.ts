@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { buildMethodMetadata } from '@/lib/seo/methodMetadata';
+import { buildMethodMetadata } from '@lib/shared/seo/method-metadata';
 import type { SupportedLocale } from '@/next-intl.locales';
 
 type MethodPageProps = {

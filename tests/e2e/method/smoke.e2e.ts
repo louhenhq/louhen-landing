@@ -1,8 +1,8 @@
 import { expect, test } from '@playwright/test';
 import type { SupportedLocale } from '@/next-intl.locales';
-import { loadMessages } from '@/lib/intl/loadMessages';
-import { methodPath } from '@/lib/routing/methodPath';
-import { getTestLocales } from './_utils/url';
+import { loadMessages } from '@lib/intl/loadMessages';
+import { methodPath } from '@lib/shared/routing/method-path';
+import { getTestLocales } from '../_utils/url';
 
 type MethodMessages = {
   seo: { title: string };
@@ -28,26 +28,35 @@ test.describe('Method page smoke test', () => {
         await expect(page).toHaveTitle(methodMessages.seo.title);
       }
 
-      const heroHeading = page.getByRole('heading', { level: 1 }).first();
-      await expect(heroHeading).toBeVisible();
+      const hero = page.locator('[data-ll="method-hero"]');
+      await expect(hero).toBeVisible();
+      const heroHeading = hero.getByRole('heading', { level: 1 }).first();
       if (methodMessages.hero?.title) {
         await expect(heroHeading).toHaveText(methodMessages.hero.title);
       }
 
+      const pillars = page.locator('[data-ll="method-pillars"]');
+      await expect(pillars).toBeVisible();
       if (methodMessages.pillars?.title) {
-        await expect(page.getByRole('heading', { level: 2, name: methodMessages.pillars.title })).toBeVisible();
+        await expect(pillars.getByRole('heading', { level: 2 })).toHaveText(methodMessages.pillars.title);
       }
 
+      const how = page.locator('[data-ll="method-how"]');
+      await expect(how).toBeVisible();
       if (methodMessages.how?.title) {
-        await expect(page.getByRole('heading', { level: 2, name: methodMessages.how.title })).toBeVisible();
+        await expect(how.getByRole('heading', { level: 2 })).toHaveText(methodMessages.how.title);
       }
 
+      const trust = page.locator('[data-ll="method-trust"]');
+      await expect(trust).toBeVisible();
       if (methodMessages.trust?.headline) {
-        await expect(page.getByRole('heading', { level: 2, name: methodMessages.trust.headline })).toBeVisible();
+        await expect(trust.getByRole('heading', { level: 2 })).toHaveText(methodMessages.trust.headline);
       }
 
+      const cta = page.locator('[data-ll="method-hero-cta"]');
       if (methodMessages.cta?.button) {
-        await expect(page.getByRole('link', { name: methodMessages.cta.button })).toBeVisible();
+        await expect(cta).toBeVisible();
+        await expect(cta).toHaveText(methodMessages.cta.button);
       }
     });
   }

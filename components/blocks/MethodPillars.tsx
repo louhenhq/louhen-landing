@@ -9,7 +9,7 @@ type Pillar = {
   body: string;
 };
 
-export default function Pillars() {
+export default function MethodPillars() {
   const t = useTranslations('method.pillars');
 
   const pillars = useMemo<Pillar[]>(() => {
@@ -27,7 +27,11 @@ export default function Pillars() {
   }, [t]);
 
   return (
-    <section className={cn(layout.section, 'bg-bg')} aria-labelledby="method-pillars-title">
+    <section
+      data-ll="method-pillars"
+      className={cn(layout.section, 'bg-bg')}
+      aria-labelledby="method-pillars-title"
+    >
       <div className={cn(layout.container, 'flex flex-col gap-xl')}>
         <div className="max-w-3xl">
           <h2 id="method-pillars-title" className={cn(text.heading, 'text-balance')}>

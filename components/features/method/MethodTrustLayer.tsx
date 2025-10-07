@@ -2,13 +2,17 @@
 
 import { useTranslations } from 'next-intl';
 import { badges, cn, layout, text } from '@/app/(site)/_lib/ui';
-import TrustSchema from '@/components/TrustSchema';
+import TrustSchema from '@components/TrustSchema';
 
-export default function TrustLayer() {
+export default function MethodTrustLayer() {
   const t = useTranslations('method.trust');
 
   return (
-    <section className={cn(layout.section, 'bg-bg')} aria-labelledby="method-trust-title">
+    <section
+      data-ll="method-trust"
+      className={cn(layout.section, 'bg-bg')}
+      aria-labelledby="method-trust-title"
+    >
       <div className={cn(layout.container, 'flex flex-col gap-xl')}>
         <div className="flex flex-col gap-sm">
           <span className={badges.pill}>{t('badge')}</span>

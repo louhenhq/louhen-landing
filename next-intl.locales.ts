@@ -16,10 +16,11 @@ function normalizeLocales(raw?: string | null): SupportedLocale[] {
   return unique.length ? unique : [...DEFAULT_LOCALES];
 }
 
-const fallbackDefault: SupportedLocale = DEFAULT_LOCALES[0];
+const fallbackDefault: SupportedLocale = DEFAULT_LOCALES[0] ?? 'en';
 const parsedLocales = normalizeLocales(process.env.NEXT_PUBLIC_LOCALES);
 const envDefault = (process.env.NEXT_PUBLIC_DEFAULT_LOCALE ?? '').trim();
 const normalizedDefault = isSupportedLocale(envDefault) ? envDefault : fallbackDefault;
 
-export const locales: SupportedLocale[] = parsedLocales;
-export const defaultLocale: SupportedLocale = locales.includes(normalizedDefault) ? normalizedDefault : locales[0];
+export const locales: SupportedLocale[] = parsedLocales.length ? parsedLocales : [fallbackDefault];
+export const defaultLocale: SupportedLocale =
+  locales.includes(normalizedDefault) ? normalizedDefault : locales[0] ?? fallbackDefault;

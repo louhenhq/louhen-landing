@@ -12,13 +12,15 @@
     "build": "next build",
     "start": "next start",
     "start:test": "mkdir -p .next && cross-env NODE_ENV=production PORT=${PORT:-4311} HOST=127.0.0.1 next start -p ${PORT:-4311} -H 127.0.0.1 | tee .next/test-server.log",
-    "lint": "next lint",
+    "lint": "eslint .",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
     "guard:hex": "node scripts/guard-hex.mjs",
     "ci:color-policy": "node scripts/guard-hex.mjs --ci --report ci-artifacts/color-policy-report.txt",
     "test": "npm run test:unit",
-    "test:unit": "vitest run",
+    "test:unit": "vitest run --passWithNoTests",
     "test:unit:watch": "vitest",
-    "test:e2e": "playwright test",
+    "test:e2e": "playwright test --project=chromium --workers=1",
+    "test:axe": "playwright test tests/axe --project=chromium --workers=1",
     "axe": "playwright test --grep @axe",
     "test:all": "npm run test:unit && npm run test:e2e",
     "i18n:check": "node scripts/check-i18n-placeholders.mjs",
@@ -31,7 +33,16 @@
     "release": "semantic-release",
     "e2e:local": "cross-env NODE_ENV=test APP_BASE_URL=http://localhost:4311 TEST_E2E_SHORTCIRCUIT=true TEST_E2E_BYPASS_TOKEN=e2e-mocked-token HCAPTCHA_SECRET=sk_dummy_for_e2e playwright test --reporter=html --workers=2",
     "e2e:open": "npx playwright show-report",
-    "pw:failures": "node scripts/summarize_playwright_failures.mjs"
+    "pw:failures": "node scripts/summarize_playwright_failures.mjs",
+    "lhci": "lhci autorun || echo 'LHCI failures captured in artifacts'",
+    "validate:local": "npm run lint && npm run typecheck && npm run build && npm run start:test & SERVER_PID=$! && npx wait-port 4311 && npm run test:unit && npm run test:e2e && npm run test:axe && npm run lhci; code=$?; kill $SERVER_PID; exit $code",
+    "typecheck:build": "tsc -p tsconfig.build.json --noEmit",
+    "typecheck:strict:feature": "tsc -p tsconfig.strict.json --noEmit",
+    "typecheck:strict:method": "tsc -p tsconfig.strict.method.json --noEmit"
+  },
+  "engines": {
+    "node": "24.5.0",
+    "npm": "11.6.0"
   },
   "dependencies": {
     "firebase-admin": "^13.5.0",

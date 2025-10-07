@@ -1,20 +1,20 @@
-import Header from '@/app/(site)/components/Header';
-import Footer from '@/app/(site)/components/Footer';
-import { layout } from '@/app/(site)/_lib/ui';
-import { BreadcrumbJsonLd, TechArticleJsonLd } from '@/components/SeoJsonLd';
-import { localeHomePath } from '@/lib/routing/legalPath';
-import { methodPath } from '@/lib/routing/methodPath';
-import { resolveBaseUrl } from '@/lib/seo/shared';
-import { getHeaderUserState } from '@/lib/auth/userState.server';
+import Header from '@app/(site)/components/Header';
+import Footer from '@app/(site)/components/Footer';
+import { layout } from '@app/(site)/_lib/ui';
+import { BreadcrumbJsonLd, TechArticleJsonLd } from '@components/SeoJsonLd';
+import MethodHero from '@components/features/method/MethodHero';
+import MethodCta from '@components/features/method/MethodCta';
+import MethodTrustLayer from '@components/features/method/MethodTrustLayer';
+import MethodHowItWorks from '@components/blocks/MethodHowItWorks';
+import MethodPillars from '@components/blocks/MethodPillars';
+import { getHeaderUserState } from '@lib/auth/userState.server';
+import { localeHomePath } from '@lib/routing/legalPath';
+import { methodPath } from '@lib/shared/routing/method-path';
+import { resolveBaseUrl } from '@lib/seo/shared';
+import { buildMethodTechArticleSchema } from '@lib/shared/method/article-schema';
 import type { SupportedLocale } from '@/next-intl.locales';
 import { headers } from 'next/headers';
 import { getTranslations, unstable_setRequestLocale } from 'next-intl/server';
-import MethodHero from './_components/MethodHero';
-import Pillars from './_components/Pillars';
-import HowItWorks from './_components/HowItWorks';
-import TrustLayer from './_components/TrustLayer';
-import MethodCta from './_components/MethodCta';
-import { buildMethodTechArticleSchema } from './articleSchema';
 
 export const runtime = 'nodejs';
 
@@ -86,9 +86,9 @@ export default async function MethodPage({ params }: MethodPageProps) {
       <Header userState={headerUserState} />
       <main id="main-content">
         <MethodHero />
-        <Pillars />
-        <HowItWorks />
-        <TrustLayer />
+        <MethodPillars />
+        <MethodHowItWorks />
+        <MethodTrustLayer />
         <MethodCta locale={locale} />
       </main>
       <Footer />

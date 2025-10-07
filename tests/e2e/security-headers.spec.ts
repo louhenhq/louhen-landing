@@ -32,7 +32,9 @@ test.describe('Security headers', () => {
     await page.goto(homeUrl);
 
     const jsonLdHasNonce = await page.evaluate(() =>
-      Array.from(document.querySelectorAll('script[type="application/ld+json"]')).every((node) => node.nonce && node.nonce.length > 0)
+      Array.from(document.querySelectorAll<HTMLScriptElement>('script[type="application/ld+json"]')).every(
+        (node) => typeof node.nonce === 'string' && node.nonce.length > 0
+      )
     );
     expect(jsonLdHasNonce).toBeTruthy();
 

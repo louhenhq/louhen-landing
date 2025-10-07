@@ -1,6 +1,4 @@
-import type { TechArticleSchema } from '@/components/SeoJsonLd';
-
-type BuildMethodTechArticleInput = {
+export type BuildMethodTechArticleInput = {
   url: string;
   headline: string;
   description: string;
@@ -12,6 +10,11 @@ type BuildMethodTechArticleInput = {
   datePublished: string;
   dateModified: string;
 };
+
+type TechArticleSchema = {
+  '@context': 'https://schema.org';
+  '@type': 'TechArticle';
+} & Record<string, unknown>;
 
 export function buildMethodTechArticleSchema({
   url,

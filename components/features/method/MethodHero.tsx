@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { cn, layout, text } from '@/app/(site)/_lib/ui';
-import { track } from '@/lib/clientAnalytics';
+import { track } from '@lib/clientAnalytics';
 
 export default function MethodHero() {
   const t = useTranslations('method.hero');
@@ -13,7 +13,11 @@ export default function MethodHero() {
   }, []);
 
   return (
-    <section className={cn(layout.section, 'bg-bg')} aria-labelledby="method-hero-title">
+    <section
+      data-ll="method-hero"
+      className={cn(layout.section, 'bg-bg')}
+      aria-labelledby="method-hero-title"
+    >
       <div className={cn(layout.container, 'flex flex-col items-center gap-xl text-center')}>
         <div className="flex max-w-3xl flex-col gap-md">
           {t('eyebrow') ? (

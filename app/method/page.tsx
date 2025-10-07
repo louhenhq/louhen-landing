@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
-import MethodPageImpl from '@/app/(marketing)/[locale]/method/page';
-import { buildMethodMetadata } from '@/lib/seo/methodMetadata';
+import MethodPageImpl from '@app/(marketing)/[locale]/method/page';
+import { buildMethodMetadata } from '@lib/shared/seo/method-metadata';
 import { defaultLocale } from '@/next-intl.locales';
 import { unstable_setRequestLocale } from 'next-intl/server';
 

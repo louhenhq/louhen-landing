@@ -1,9 +1,9 @@
 import { expect, test } from '@playwright/test';
-import { loadMessages } from '@/lib/intl/loadMessages';
-import { methodPath } from '@/lib/routing/methodPath';
-import { hreflangMapFor, makeCanonical } from '@/lib/seo/shared';
+import { loadMessages } from '@lib/intl/loadMessages';
+import { methodPath } from '@lib/shared/routing/method-path';
+import { hreflangMapFor, makeCanonical } from '@lib/seo/shared';
 import { defaultLocale, type SupportedLocale } from '@/next-intl.locales';
-import { getTestLocales } from './_utils/url';
+import { getTestLocales } from '../_utils/url';
 
 const PRELAUNCH_FLAG =
   (process.env.IS_PRELAUNCH?.trim() === 'true' || process.env.IS_PRELAUNCH?.trim() === '1') ||

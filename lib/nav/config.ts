@@ -1,6 +1,6 @@
-import { legalPath, localeHomePath, type LegalSlug } from '@/lib/routing/legalPath';
-import { methodPath } from '@/lib/routing/methodPath';
-import { appendUtmParams, type UtmParams } from '@/lib/url/appendUtmParams';
+import { legalPath, localeHomePath, type LegalSlug } from '@lib/routing/legalPath';
+import { methodPath } from '@lib/shared/routing/method-path';
+import { appendUtmParams, type UtmParams } from '@lib/url/appendUtmParams';
 import { defaultLocale, type SupportedLocale } from '@/next-intl.locales';
 
 type AnalyticsEventName = 'header_nav_click';

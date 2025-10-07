@@ -3,6 +3,14 @@
 Thanks for helping build Louhen 👟  
 This guide explains the workflow, standards, and guardrails for contributing to **louhen-landing**.
 
+## Quicklinks
+- Locked decisions: [/CONTEXT/decision_log.md](CONTEXT/decision_log.md)
+- Naming & structure: [/CONTEXT/naming.md](CONTEXT/naming.md)
+- Migration map: [/CONTEXT/rename_map.md](CONTEXT/rename_map.md)
+- Testing strategy: [/CONTEXT/testing.md](CONTEXT/testing.md)
+- Performance budgets: [/CONTEXT/performance.md](CONTEXT/performance.md)
+- Release process: [/CONTEXT/release.md](CONTEXT/release.md)
+
 ---
 
 ## 1) Read This First: /CONTEXT
@@ -12,8 +20,11 @@ Before any change, skim:
 - /CONTEXT/coding_conventions.md — style, structure, commits
 - /CONTEXT/decision_log.md — locked decisions (don’t break these)
 - /CONTEXT/architecture.md — routes, data flow, envs, CI/CD
+- /CONTEXT/naming.md — repo-wide naming, folders, routing, and selector spec
 
 VS Code users: a pre-prompt in `.vscode/settings.json` already points Codex to these files.
+
+Before you code, reaffirm the PLAN → DIFF → VALIDATE → REVERT ritual and follow the one-feature-per-PR rule when renaming or moving files (see `/CONTEXT/rename_map.md` for planned moves).
 
 ---
 
@@ -45,6 +56,10 @@ Run full checks before a PR
 - Create a feature/fix branch from `main` (e.g., `feat/waitlist-i18n`).
 - Keep changes small and surgical (minimal diff).
 - Every PR must include the **QA — Validation Steps** block (auto-added by `.github/pull_request_template.md`).
+- When moving files, use `git mv`, keep scope to one feature per PR, and update `/CONTEXT/rename_map.md` if the destination diverges from the plan.
+- Run `npm run typecheck:build` before opening or updating a PR to ensure the production build config remains green.
+- Prefer path aliases (`@components/...`, `@lib/...`, etc.) over deep relative imports as files migrate.
+- When moving files, use `git mv`, keep scope to one feature per PR, and update `/CONTEXT/rename_map.md` if the destination diverges from the plan.
 
 PR size & scope
 - One logical change per PR.
@@ -88,6 +103,8 @@ VALIDATE
 
 REVERT
     Git commands to roll back if validation fails.
+
+Renames must reference `/CONTEXT/rename_map.md`; update the table in the PR if plan deviates.
 
 Guardrails
 - Do not introduce new dependencies without a 1–2 bullet justification (why, footprint, alternatives).
