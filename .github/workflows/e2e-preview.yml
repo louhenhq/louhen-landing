@@ -30,7 +30,7 @@ jobs:
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 0
       PREVIEW_BASE_URL: https://staging.louhen.app
       # Secrets are masked by GitHub — never echo this token in logs.
-      PROTECTION_HEADER: X-Bypass-Token: ${{ secrets.PREVIEW_BYPASS_TOKEN }}
+      PROTECTION_HEADER: "X-Bypass-Token: ${{ secrets.PREVIEW_BYPASS_TOKEN }}"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -220,7 +220,7 @@ jobs:
       CI: true
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 0
       PREVIEW_BASE_URL: https://staging.louhen.app
-      PROTECTION_HEADER: X-Bypass-Token: ${{ secrets.PREVIEW_BYPASS_TOKEN }}
+      PROTECTION_HEADER: "X-Bypass-Token: ${{ secrets.PREVIEW_BYPASS_TOKEN }}"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
