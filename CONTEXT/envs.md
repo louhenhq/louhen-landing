@@ -2,39 +2,55 @@
 
 Canonical reference for environment configuration across stages. Update this matrix whenever a variable is added, renamed, or its contract changes.
 
-| Variable | Local (`.env.local`) | Preview (`staging.louhen.app`) | Production (`www.louhen.app`) | Notes |
-|----------|----------------------|--------------------------------|---------------------------|-------|
-| **FIREBASE_ADMIN_SA_B64** | Base64-encoded dev service account JSON | Preview service account | Production service account | Server-only; rotate via Firebase if leaked. |
-| **FIREBASE_PROJECT_ID** | Dev project ID (e.g., `louhen-dev`) | `louhen-staging` | `louhen-prod` | Must align with Firestore instance in each stage. |
-| **FIREBASE_DB_REGION** | `eur3` | `eur3` | `eur3` | Region locked; do not change without migration plan. |
-| **RESEND_API_KEY** | `louhen-dev` key; optional (omit to use noop transport) | `louhen-preview` key | `louhen-prod` key | Manage in Resend; rotate quarterly. |
-| **RESEND_FROM** | `no-reply@louhen.app` | `no-reply@louhen.app` | `no-reply@louhen.app` | Locked sender identity. |
-| **RESEND_REPLY_TO** | `hello@louhen.app` | `hello@louhen.app` | `hello@louhen.app` | Locked reply channel. |
-| **NEXT_PUBLIC_HCAPTCHA_SITE_KEY** | `10000000-ffff-ffff-ffff-000000000001` (universal test key) | Staging key scoped to `staging.louhen.app` | Production key scoped to `louhen.app` | Test key always succeeds; never ship to preview/prod. |
-| **HCAPTCHA_SECRET** | `0x0000000000000000000000000000000000000000` (test secret) | Secret tied to staging key | Secret tied to production key | Keep server-side only. |
-| **WAITLIST_CONFIRM_TTL_DAYS** | `7` | `1` | `7` | Preview uses shorter TTL for expiry QA. |
-| **NEXT_PUBLIC_WAITLIST_URGENCY** | `true` (default) | toggle per experiment | toggle per experiment | Surface urgency copy flag; coordinate with growth. |
-| **APP_BASE_URL** | `http://localhost:3000` | `https://staging.louhen.app` | `https://www.louhen.app` | Always matches deployment origin (apex redirects to canonical www). |
-| **NEXT_PUBLIC_SITE_URL** | `http://localhost:3000` | `https://staging.louhen.app` | `https://www.louhen.app` | Must mirror `APP_BASE_URL` for link canonicalisation. |
-| **STATUS_USER** | Simple dev credential (e.g., `status-ops`) | Strong random secret (Vercel + GitHub) | Strong random secret (Vercel + GitHub) | Required for `/status` and status GitHub Action. |
-| **STATUS_PASS** | Simple dev credential (e.g., `status-secret`) | Strong random secret (Vercel + GitHub) | Strong random secret (Vercel + GitHub) | Rotate alongside STATUS_USER. |
-| **NEXT_USE_REMOTE_FONTS** | `false` (self-hosted) | `false` unless experiment approved | `false` (default); enable only with legal sign-off | Toggles between bundled fonts and remote providers. |
-| **FEATURE_* / FLAG_* vars** | Scoped to `lib/shared/env/flags.ts`; default `false` | Configure per rollout | Configure per rollout | All flags must be documented below; no ad-hoc env names. |
+| Variable | Local (`.env.local`) | Vercel (Preview / Production) | GitHub Actions (var / secret) | Owner | Notes |
+| --- | --- | --- | --- | --- | --- |
+| **APP_BASE_URL** | `http://localhost:3000` | Preview: `https://staging.louhen.app`<br>Production: `https://www.louhen.app` | workflow env (`ci.yml` -> `http://localhost:4311`) | Platform | Must mirror `NEXT_PUBLIC_SITE_URL`; Playwright overrides to loopback for determinism. |
+| **NEXT_PUBLIC_SITE_URL** | `http://localhost:3000` | Preview: `https://staging.louhen.app`<br>Production: `https://www.louhen.app` | workflow env (`ci.yml`) | Platform | Keep in sync with `APP_BASE_URL` to avoid canonical/link drift. |
+| **NEXT_PUBLIC_ENV** | `development` | Preview: `preview` | workflow env (`ci.yml` -> `ci`) | Platform | Drives runtime guard rails; production is set to `production` via Vercel. |
+| **IS_PRELAUNCH** | `true` for local QA | Preview: `true` | workflow env (`ci.yml`) | Platform | Forces noindex + staging copy in CI/preview; set `false` only in production. |
+| **NEXT_PUBLIC_ALLOW_INDEXING** | `false` | Preview: `false` | workflow env (`ci.yml`) | Platform | Production flips to `true` once public launch is approved. Guard enforced by CI. |
+| **EMAIL_TRANSPORT** | `noop` | Preview: `noop` | workflow env (`ci.yml`) | Platform | Production switches to `resend`; CI guard rejects accidental upgrades. |
+| **ANALYTICS_STORE_IP** | `false` | Preview: `false` | workflow env (`ci.yml`) | Platform | Production toggles to `true` only if privacy review approves. |
+| **NEXT_PUBLIC_ANALYTICS_DISABLED** | `1` | Preview: `1` | workflow env (`ci.yml`) | Platform | Keeps analytics off in tests; production sets `0`. |
+| **NEXT_PUBLIC_ANALYTICS_DEBUG** | `0` | Preview: `0` | workflow env (`ci.yml`) | Platform | Enable (`1`) manually only when diagnosing client analytics. |
+| **NEXT_PUBLIC_HCAPTCHA_SITE_KEY** | Universal test key (`10000000-ffff-ffff-ffff-000000000001`) | Preview: staging key | workflow env (`ci.yml`) | Platform | Production uses live site key provided by hCaptcha. |
+| **HCAPTCHA_SECRET** | Test secret (`0x000...000`) | Preview: staging secret | secret: `CI_HCAPTCHA_SECRET` | Platform | Production secret stored as Vercel encrypted env. |
+| **FIREBASE_ADMIN_SA_B64** | Dev service account (Base64) | Preview: preview SA | secret: `CI_FIREBASE_ADMIN_SA_B64` | Platform | Rotate via Google IAM; never commit JSON. |
+| **FIREBASE_PROJECT_ID** | `louhen-dev` | Preview: `louhen-staging` | secret: `CI_FIREBASE_PROJECT_ID` | Platform | Ensure ID aligns with the active service account. |
+| **FIREBASE_DB_REGION** | `eur3` | Preview: `eur3` | secret: `CI_FIREBASE_DB_REGION` | Platform | Region locked; update only with a migration plan. |
+| **RESEND_API_KEY** | Optional dev key (omit to stay noop) | Preview: preview key | secret: `CI_RESEND_API_KEY` | Platform | Production key held in Vercel; rotate quarterly. |
+| **RESEND_FROM** | `no-reply@louhen.app` | Same as local | workflow env (`ci.yml`) | Growth Ops | Sender identity is fixed; update DNS before changing. |
+| **RESEND_REPLY_TO** | `hello@louhen.app` | Same as local | workflow env (`ci.yml`) | Growth Ops | Customer-facing reply channel; coordinate with support before edits. |
+| **WAITLIST_CONFIRM_TTL_DAYS** | `7` | Preview: `1` | workflow env (`ci.yml`) | Growth Ops | Preview shortens expiry for QA; production returns to `7`. |
+| **WAITLIST_RATE_HASH_SECRET** | `rate-limit-secret` | Preview: same | - (falls back to hCaptcha/Resend secrets) | Platform | Supply explicitly if hCaptcha/Resend rotate simultaneously. |
+| **SUPPRESSION_SALT** | `unsubscribe-secret` | Preview: preview salt | secret: `CI_SUPPRESSION_SALT` | Platform | Required to generate deterministic unsubscribe tokens. |
+| **STATUS_USER / STATUS_PASS** | `status-ops` / `status-secret` | Preview: strong random | secret: `CI_STATUS_USER` / `CI_STATUS_PASS` | Platform | Used by `/status`; rotate with every credential change. |
+| **PREVIEW_BYPASS_TOKEN** | - (set via GitHub secret only) | Vercel Protection Token | secret: `PREVIEW_BYPASS_TOKEN` | Platform | Required for preview Playwright runs; never echo in logs. |
+| **NEXT_PUBLIC_LOCALES / NEXT_PUBLIC_DEFAULT_LOCALE** | `en-de,de-de` / `en-de` | Preview: same as production | workflow env (`ci.yml`) | Localization | Update alongside locale additions in `next-intl`. |
+| **NEXT_PUBLIC_WAITLIST_URGENCY** | `true` default | Preview: experiment-specific | workflow env (`ci.yml`) | Growth Ops | Toggle per campaign; document changes in release notes. |
+| **TEST_MODE** | `0` (set manually for local unit tests) | Preview: `0` | workflow env (`ci.yml` -> `1`) | Platform | CI forces `1` to stub external integrations. |
+| **TEST_E2E_SHORTCIRCUIT** | `true` | Preview: `true` | workflow env (`ci.yml`) | Platform | Ensures Playwright bypasses third-party services. |
+| **NEXT_PUBLIC_ALLOW_INDEXING** | `false` | Preview: `false` | workflow env (`ci.yml`) | Platform | Production toggles to `true`; CI guard prevents accidental enablement. |
+| **NEXT_PUBLIC_CANONICAL_HOST** | (optional) `www.louhen.app` | Preview: `staging.louhen.app` | - | Platform | Only set if overriding default host metadata. |
 
 ## Operational Notes
-- Maintain parity between `APP_BASE_URL` and `NEXT_PUBLIC_SITE_URL` within each environment to avoid mismatched redirects and metadata.
-- Any environment change requires a redeploy for Next.js serverless functions and static output to pick up new values.
-- The waitlist env guard caches public/server snapshots; restart `next dev` after editing `.env*` files so updates are recognised.
-- CI build job runs with public `NEXT_PUBLIC_*` vars only; the Playwright e2e job injects dummy analytics + server envs (never real secrets) so runtime guards and feature tests can execute (including a non-sensitive `HCAPTCHA_SECRET` so schema validation is exercised).
-- Manage preview/production secrets exclusively in Vercel + GitHub; never commit secrets to the repository.
-- Mirror the dummy `NEXT_PUBLIC_*` variables configured in CI within Vercel preview env settings to keep builds passing without server secrets.
-- When rotating STATUS_* credentials, update Vercel, GitHub Secrets, and re-run the status monitor workflow to confirm success.
-- Apex `https://louhen.app` must continue issuing a 301 redirect to `https://www.louhen.app`; never point application URLs to the bare domain.
+- CI enforces secret hygiene (`jobs.policy-guards`) via a regex scanner and fails any run that finds suspicious secret-like literals outside `.env.example`.
+- The same guard ensures `EMAIL_TRANSPORT` remains `noop` and `NEXT_PUBLIC_ALLOW_INDEXING` stays `false` across CI workflows. Do not override without updating the guard.
+- All CI secrets use the `CI_*` naming convention. Store dummy values (not production credentials) to keep runs deterministic.
+- Preview workflows (`e2e-preview.yml`) run against staging with `TEST_MODE=1`, `IS_PRELAUNCH=true`, `EMAIL_TRANSPORT=noop`, and must source bypass headers from `secrets.PREVIEW_BYPASS_TOKEN`.
+- Never commit real credentials. `.env.example` documents placeholders only and mirrors the values required in Vercel / GitHub Actions.
+- When adjusting environment variables, update this matrix, `.env.example`, and README simultaneously to avoid drift.
+
+## Rotation Playbook
+1. **Resend**: create new API key in Resend, update Vercel (Preview + Production) secrets, rotate GitHub secret `CI_RESEND_API_KEY`, then remove the old key. Validate by running `/status` and sending a waitlist confirmation from staging.
+2. **Firebase Admin**: generate a new service account JSON in Google Cloud, encode to Base64, update Vercel secrets and `CI_FIREBASE_ADMIN_SA_B64`, then revoke the old key in IAM. Confirm Firestore writes via the waitlist API smoke test.
+3. **hCaptcha**: provision a new secret/site key pair; deploy to staging first, update GitHub `CI_HCAPTCHA_SECRET`, then swap production. Monitor error rate and revert if verification fails.
+4. **Waitlist hash + suppression salts**: generate cryptographically random strings, update `SUPPRESSION_SALT` and (optionally) `WAITLIST_RATE_HASH_SECRET` in Vercel and GitHub, then re-run `npm run validate:local` to ensure deterministic hashes.
 
 ## Feature Flag Policy
 - All flags live in `lib/shared/env/flags.ts` (isomorphic) or `lib/server/env/guard.ts` (server-only). Do not introduce new env names outside these modules without updating this doc.
 - Flag naming: `FEATURE_<CAPS>` for temporary launches; `FLAG_<CAPS>` for persistent toggles. Mirror names in tests when asserting behaviour.
-- Default values must keep production safe (usually `false`). CI and local development should exercise both code paths via unit/e2e tests.
+- Defaults must keep production safe (usually `false`). CI and local development should exercise both code paths via unit/e2e tests.
 - Remove stale flags within two weeks of launch; update [/CONTEXT/rename_map.md](rename_map.md) if directory moves affect flag consumers.
 
 ## Fonts Toggle Strategy

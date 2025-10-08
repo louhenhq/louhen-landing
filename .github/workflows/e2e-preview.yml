@@ -5,7 +5,7 @@ on:
 
 jobs:
   e2e-preview:
-    name: Playwright (preview — ${{ matrix.suite }})
+    name: Playwright (preview - ${{ matrix.suite }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: preview
@@ -27,9 +27,17 @@ jobs:
     env:
       NODE_ENV: test
       CI: true
+      TEST_MODE: '1'
+      IS_PRELAUNCH: true
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 0
       PREVIEW_BASE_URL: https://staging.louhen.app
-      # Secrets are masked by GitHub — never echo this token in logs.
+      EMAIL_TRANSPORT: noop
+      ANALYTICS_STORE_IP: false
+      NEXT_PUBLIC_ENV: preview
+      NEXT_PUBLIC_ANALYTICS_DISABLED: 1
+      NEXT_PUBLIC_ANALYTICS_DEBUG: 0
+      NEXT_PUBLIC_ALLOW_INDEXING: false
+      # Secrets are masked by GitHub - never echo this token in logs.
       PROTECTION_HEADER: "X-Bypass-Token: ${{ secrets.PREVIEW_BYPASS_TOKEN }}"
     steps:
       - name: Checkout
@@ -169,7 +177,7 @@ jobs:
 
           function formatRow(stats, outcomeEnv) {
             if (!stats.present) {
-              return `| ${stats.label} | not run | – | – | – | – | – |`;
+              return `| ${stats.label} | not run | - | - | - | - | - |`;
             }
             const status = (outcomeEnv === 'success' || outcomeEnv === 'neutral') ? 'passed' : 'failed';
             return `| ${stats.label} | ${status} | ${stats.total ?? 0} | ${stats.passed ?? 0} | ${stats.failed ?? 0} | ${stats.flaky ?? 0} | ${stats.skipped ?? 0} | ${Math.round((stats.duration ?? 0) / 1000)}s |`;
@@ -183,7 +191,7 @@ jobs:
             formatRow(e2eStats, process.env.E2E_OUTCOME ?? ''),
             formatRow(axeStats, process.env.AXE_OUTCOME ?? ''),
             '',
-            '- Playwright artifacts: `playwright-' + suite + '-e2e` · `playwright-' + suite + '-axe`',
+            '- Playwright artifacts: `playwright-' + suite + '-e2e` - `playwright-' + suite + '-axe`',
             '- Reports do not contain secrets; GitHub masks known tokens automatically.',
           ];
 
@@ -195,7 +203,7 @@ jobs:
         run: exit 1
 
   e2e-preview-quarantine:
-    name: Playwright (quarantine — ${{ matrix.suite }})
+    name: Playwright (quarantine - ${{ matrix.suite }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
     continue-on-error: true
@@ -346,7 +354,7 @@ jobs:
 
           function formatRow(stats, outcomeEnv) {
             if (!stats.present) {
-              return `| ${stats.label} | not run | – | – | – | – | – |`;
+              return `| ${stats.label} | not run | - | - | - | - | - |`;
             }
             const status = (outcomeEnv === 'success' || outcomeEnv === 'neutral') ? 'passed' : 'failed';
             return `| ${stats.label} | ${status} | ${stats.total ?? 0} | ${stats.passed ?? 0} | ${stats.failed ?? 0} | ${stats.flaky ?? 0} | ${stats.skipped ?? 0} | ${Math.round((stats.duration ?? 0) / 1000)}s |`;
@@ -360,7 +368,7 @@ jobs:
             formatRow(e2eStats, process.env.E2E_OUTCOME ?? ''),
             formatRow(axeStats, process.env.AXE_OUTCOME ?? ''),
             '',
-            '- Playwright artifacts: `playwright-' + suite + '-e2e-quarantine` · `playwright-' + suite + '-axe-quarantine`',
+            '- Playwright artifacts: `playwright-' + suite + '-e2e-quarantine` - `playwright-' + suite + '-axe-quarantine`',
             '- These runs capture flaky specs only (`@flaky`). Remove the tag once stabilized.',
           ];
 

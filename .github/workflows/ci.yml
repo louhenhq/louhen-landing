@@ -14,6 +14,23 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/production' }}
 
+env:
+  TEST_MODE: '1'
+  TEST_E2E_SHORTCIRCUIT: 'true'
+  IS_PRELAUNCH: 'true'
+  EMAIL_TRANSPORT: noop
+  ANALYTICS_STORE_IP: 'false'
+  NEXT_PUBLIC_ENV: 'ci'
+  NEXT_PUBLIC_LOCALES: 'en-de,de-de'
+  NEXT_PUBLIC_DEFAULT_LOCALE: 'en-de'
+  NEXT_PUBLIC_ANALYTICS_DISABLED: '1'
+  NEXT_PUBLIC_ANALYTICS_DEBUG: '0'
+  NEXT_PUBLIC_ALLOW_INDEXING: 'false'
+  NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
+  NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
+  COMMIT_SHA: ${{ github.sha }}
+  NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
+
 jobs:
   policy-guards:
     runs-on: ubuntu-latest
@@ -52,6 +69,74 @@ jobs:
           path: ci-artifacts/color-policy-report.txt
           if-no-files-found: warn
 
+      - name: Secret hygiene guard
+        run: |
+          node <<'NODE'
+          const { readdirSync, statSync, readFileSync } = require('node:fs');
+          const { join, relative } = require('node:path');
+
+          const ignoreDirs = new Set(['.git', 'node_modules', '.next', 'tmp', 'artifacts', 'ci-artifacts', 'playwright-report', 'lighthouse-report']);
+          const allowFiles = new Set(['.env.example']);
+          const suspicious = [];
+          const pattern = /(api[_-]?key|secret|token|password)[^=:\\n]{0,40}[:=]\s*(['"]?)([A-Za-z0-9][_A-Za-z0-9\-]{16,})\2/gi;
+          const allowedHints = [/dummy/i, /test/i, /example/i, /sample/i, /ci[-_]?/, /dev/i, /local/i, /^0x0+$/i, /louhen/i, /status-ops/i, /status-secret/i];
+
+          function shouldSkipValue(value) {
+            return allowedHints.some((regex) => regex.test(value));
+          }
+
+          function walk(dir) {
+            for (const entry of readdirSync(dir)) {
+              const full = join(dir, entry);
+              const rel = relative(process.cwd(), full);
+              if (rel.startsWith('.git/')) continue;
+              const stat = statSync(full);
+              if (stat.isDirectory()) {
+                if (ignoreDirs.has(entry)) continue;
+                walk(full);
+              } else if (stat.isFile()) {
+                if (allowFiles.has(rel)) continue;
+                if (/\.(png|jpg|jpeg|webp|gif|ico|icns|woff2?|ttf|otf|wasm|lock|zip|tar|gz|svg)$/i.test(entry)) continue;
+                const content = readFileSync(full, 'utf8');
+                const lines = content.split(/\r?\n/);
+                lines.forEach((line, index) => {
+                  let match;
+                  while ((match = pattern.exec(line)) !== null) {
+                    const value = match[3];
+                    if (!shouldSkipValue(value)) {
+                      suspicious.push(`${rel}:${index + 1}: ${line.trim()}`);
+                    }
+                  }
+                });
+              }
+            }
+          }
+
+          walk(process.cwd());
+
+          if (suspicious.length) {
+            console.error('Potential secret-like strings detected:');
+            for (const line of suspicious) {
+              console.error(`  ${line}`);
+            }
+            process.exit(1);
+          if (!suspicious.length) {
+            console.log('Secret hygiene guard passed - no high-risk patterns found.');
+          }
+          NODE
+
+      - name: Verify CI safety toggles
+        run: |
+          if rg -n "EMAIL_TRANSPORT: *['\"]\?resend" .github/workflows/ci.yml; then
+            echo "::error::EMAIL_TRANSPORT must remain 'noop' in CI workflows."
+            exit 1
+          fi
+          if rg -n "NEXT_PUBLIC_ALLOW_INDEXING: *['\"]\?true" .github/workflows/ci.yml; then
+            echo "::error::NEXT_PUBLIC_ALLOW_INDEXING must remain false in CI/preview."
+            exit 1
+          fi
+          echo "CI safety toggles verified."
+
   build-and-test:
     needs: policy-guards
     runs-on: ubuntu-latest
@@ -59,14 +144,11 @@ jobs:
     env:
       CI: true
       SKIP_LHCI: ${{ vars.SKIP_LHCI }}
-      NEXT_PUBLIC_ANALYTICS_DISABLED: '1'
-      NEXT_PUBLIC_ANALYTICS_DEBUG: '0'
-      NEXT_PUBLIC_ENV: 'ci'
       NEXT_PUBLIC_SITE_URL: 'https://ci.louhen.app'
-      NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
       NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
-      NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
       PW_HEALTH_PATH: /icon.svg
+      EMAIL_TRANSPORT: noop
+      ANALYTICS_STORE_IP: 'false'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -126,34 +208,23 @@ jobs:
     env:
       CI: true
       NODE_ENV: production
-      TEST_MODE: '1'
       APP_BASE_URL: http://localhost:4311
       NEXT_PUBLIC_SITE_URL: http://localhost:4311
-      NEXT_PUBLIC_ENV: 'ci'
-      NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
-      NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
-      NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
-      NEXT_PUBLIC_LOCALES: 'en-de,de-de'
-      NEXT_PUBLIC_DEFAULT_LOCALE: 'en-de'
-      NEXT_PUBLIC_ANALYTICS_DISABLED: '1'
-      NEXT_PUBLIC_ANALYTICS_DEBUG: '0'
-      NEXT_PUBLIC_METHOD_STICKY_CTA: 'true'
-      NEXT_PUBLIC_METHOD_EXIT_NUDGE: 'true'
-      NEXT_TELEMETRY_DISABLED: '1'
       DEFAULT_LOCALE: 'en-de'
       BASE_URL: http://localhost:4311
-      HCAPTCHA_SECRET: ci-hcaptcha-secret
       WAITLIST_CONFIRM_TTL_DAYS: '7'
-      FIREBASE_PROJECT_ID: ci-firebase
-      FIREBASE_DB_REGION: eur3
-      FIREBASE_ADMIN_SA_B64: eyJwcm9qZWN0X2lkIjoiY2ktZmlyZWJhc2UifQ==
-      RESEND_API_KEY: ci-resend-key
+      HCAPTCHA_SECRET: ${{ secrets.CI_HCAPTCHA_SECRET }}
+      FIREBASE_PROJECT_ID: ${{ secrets.CI_FIREBASE_PROJECT_ID }}
+      FIREBASE_DB_REGION: ${{ secrets.CI_FIREBASE_DB_REGION }}
+      FIREBASE_ADMIN_SA_B64: ${{ secrets.CI_FIREBASE_ADMIN_SA_B64 }}
+      RESEND_API_KEY: ${{ secrets.CI_RESEND_API_KEY }}
       RESEND_FROM: no-reply@ci.louhen.app
       RESEND_REPLY_TO: hello@ci.louhen.app
-      STATUS_USER: ci-status
-      STATUS_PASS: ci-secret
-      SUPPRESSION_SALT: ci-suppression-salt
+      STATUS_USER: ${{ secrets.CI_STATUS_USER }}
+      STATUS_PASS: ${{ secrets.CI_STATUS_PASS }}
+      SUPPRESSION_SALT: ${{ secrets.CI_SUPPRESSION_SALT }}
       EMAIL_TRANSPORT: noop
+      ANALYTICS_STORE_IP: 'false'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -186,28 +257,6 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Check Playwright env wiring
-        env:
-          APP_BASE_URL: http://127.0.0.1:4311
-          NEXT_PUBLIC_ENV: 'ci'
-          NEXT_PUBLIC_SITE_URL: 'https://ci.louhen.app'
-          NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
-          NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
-          NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
-          NEXT_PUBLIC_LOCALES: 'en-de,de-de'
-          NEXT_PUBLIC_DEFAULT_LOCALE: 'en-de'
-          NEXT_PUBLIC_ANALYTICS_DISABLED: '0'
-          NEXT_PUBLIC_ANALYTICS_DEBUG: '1'
-          HCAPTCHA_SECRET: ci-hcaptcha-secret
-          WAITLIST_CONFIRM_TTL_DAYS: '7'
-          FIREBASE_PROJECT_ID: ci-firebase
-          FIREBASE_DB_REGION: eur3
-          FIREBASE_ADMIN_SA_B64: eyJwcm9qZWN0X2lkIjoiY2ktZmlyZWJhc2UifQ==
-          RESEND_API_KEY: ci-resend-key
-          RESEND_FROM: no-reply@ci.louhen.app
-          RESEND_REPLY_TO: hello@ci.louhen.app
-          STATUS_USER: ci-status
-          STATUS_PASS: ci-secret
-          SUPPRESSION_SALT: ci-suppression-salt
         run: |
           required_envs=(
             NEXT_PUBLIC_ANALYTICS_DISABLED
@@ -219,6 +268,7 @@ jobs:
             NEXT_PUBLIC_COMMIT_SHA
             NEXT_PUBLIC_LOCALES
             NEXT_PUBLIC_DEFAULT_LOCALE
+            NEXT_PUBLIC_ALLOW_INDEXING
             APP_BASE_URL
             FIREBASE_PROJECT_ID
             FIREBASE_DB_REGION
@@ -231,15 +281,61 @@ jobs:
             STATUS_USER
             STATUS_PASS
             SUPPRESSION_SALT
+            EMAIL_TRANSPORT
+            ANALYTICS_STORE_IP
+            IS_PRELAUNCH
+            TEST_MODE
           )
           for key in "${required_envs[@]}"; do
             if [ -z "${!key+x}" ]; then
               echo "::error::missing $key"
               exit 1
             else
-              echo "✅ $key present"
+              echo "[ok] $key present"
             fi
           done
+
+          if [ "${EMAIL_TRANSPORT}" != "noop" ]; then
+            echo "::error::EMAIL_TRANSPORT must remain 'noop' in CI (found '${EMAIL_TRANSPORT}')"
+            exit 1
+          fi
+
+          if [ "${ANALYTICS_STORE_IP}" != "false" ]; then
+            echo "::error::ANALYTICS_STORE_IP must be 'false' in CI (found '${ANALYTICS_STORE_IP}')"
+            exit 1
+          fi
+
+          if [ "${NEXT_PUBLIC_ALLOW_INDEXING}" = "true" ]; then
+            echo "::error::NEXT_PUBLIC_ALLOW_INDEXING must be false in CI"
+            exit 1
+          fi
+
+          if [ "${NEXT_PUBLIC_ANALYTICS_DISABLED}" != "1" ]; then
+            echo "::error::NEXT_PUBLIC_ANALYTICS_DISABLED must be '1' in CI (found '${NEXT_PUBLIC_ANALYTICS_DISABLED}')"
+            exit 1
+          fi
+
+          if [ "${NEXT_PUBLIC_ANALYTICS_DEBUG}" != "0" ]; then
+            echo "::error::NEXT_PUBLIC_ANALYTICS_DEBUG must be '0' in CI (found '${NEXT_PUBLIC_ANALYTICS_DEBUG}')"
+            exit 1
+          fi
+
+          if [ "${NEXT_PUBLIC_ENV}" != "ci" ]; then
+            echo "::error::NEXT_PUBLIC_ENV must be 'ci' during CI runs (found '${NEXT_PUBLIC_ENV}')"
+            exit 1
+          fi
+
+          if [ "${IS_PRELAUNCH}" != "true" ] && [ "${IS_PRELAUNCH}" != "1" ]; then
+            echo "::error::IS_PRELAUNCH must be enabled in CI (found '${IS_PRELAUNCH}')"
+            exit 1
+          fi
+
+          if [ "${TEST_MODE}" != "1" ]; then
+            echo "::error::TEST_MODE must be '1' in CI (found '${TEST_MODE}')"
+            exit 1
+          fi
+
+          echo "Playwright environment wiring verified."
 
       - name: E2E tests (Playwright)
         env:
@@ -247,33 +343,12 @@ jobs:
           BASE_URL: http://127.0.0.1:4311
           HOST: 127.0.0.1
           PORT: '4311'
-          TEST_E2E_SHORTCIRCUIT: 'true'
           TEST_E2E_BYPASS_TOKEN: e2e-mocked-token
           PLAYWRIGHT_ARTIFACTS_DIR: artifacts/playwright/e2e
-          NEXT_PUBLIC_ENV: 'ci'
-          NEXT_PUBLIC_SITE_URL: 'https://ci.louhen.app'
-          NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
-          NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
-          NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
-          NEXT_PUBLIC_LOCALES: 'en-de,de-de'
-          NEXT_PUBLIC_DEFAULT_LOCALE: 'en-de'
-          NEXT_PUBLIC_ANALYTICS_DISABLED: '0'
-          NEXT_PUBLIC_ANALYTICS_DEBUG: '1'
-          HCAPTCHA_SECRET: ci-hcaptcha-secret
-          WAITLIST_CONFIRM_TTL_DAYS: '7'
-          FIREBASE_PROJECT_ID: ci-firebase
-          FIREBASE_DB_REGION: eur3
-          FIREBASE_ADMIN_SA_B64: eyJwcm9qZWN0X2lkIjoiY2ktZmlyZWJhc2UifQ==
-          RESEND_API_KEY: ci-resend-key
-          RESEND_FROM: no-reply@ci.louhen.app
-          RESEND_REPLY_TO: hello@ci.louhen.app
-          STATUS_USER: ci-status
-          STATUS_PASS: ci-secret
-          SUPPRESSION_SALT: ci-suppression-salt
-          NODE_ENV: production
           PW_HEALTH_PATH: /icon.svg
+          DEBUG: pw:webserver,pw:api
         run: |
-          DEBUG=pw:webserver,pw:api npm run test:e2e
+          npm run test:e2e
         continue-on-error: false
 
       - name: Tail Next.js test server log
@@ -291,28 +366,8 @@ jobs:
           APP_BASE_URL: http://127.0.0.1:4311
           BASE_URL: http://127.0.0.1:4311
           HOST: 127.0.0.1
-          TEST_E2E_SHORTCIRCUIT: 'true'
           TEST_E2E_BYPASS_TOKEN: e2e-mocked-token
           PLAYWRIGHT_ARTIFACTS_DIR: artifacts/playwright/axe
-          NEXT_PUBLIC_ENV: 'ci'
-          NEXT_PUBLIC_SITE_URL: 'https://ci.louhen.app'
-          NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
-          NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
-          NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
-          NEXT_PUBLIC_ANALYTICS_DISABLED: '0'
-          NEXT_PUBLIC_ANALYTICS_DEBUG: '1'
-          HCAPTCHA_SECRET: ci-hcaptcha-secret
-          WAITLIST_CONFIRM_TTL_DAYS: '7'
-          FIREBASE_PROJECT_ID: ci-firebase
-          FIREBASE_DB_REGION: eur3
-          FIREBASE_ADMIN_SA_B64: eyJwcm9qZWN0X2lkIjoiY2ktZmlyZWJhc2UifQ==
-          RESEND_API_KEY: ci-resend-key
-          RESEND_FROM: no-reply@ci.louhen.app
-          RESEND_REPLY_TO: hello@ci.louhen.app
-          STATUS_USER: ci-status
-          STATUS_PASS: ci-secret
-          SUPPRESSION_SALT: ci-suppression-salt
-          NODE_ENV: production
           PW_HEALTH_PATH: /icon.svg
         run: |
           IS_PRELAUNCH=true npm run test:axe
@@ -379,15 +434,24 @@ jobs:
     timeout-minutes: 30
     env:
       CI: true
-      NEXT_PUBLIC_ANALYTICS_DISABLED: '1'
-      NEXT_PUBLIC_ANALYTICS_DEBUG: '0'
-      NEXT_PUBLIC_ENV: 'ci'
-      NEXT_PUBLIC_SITE_URL: 'https://ci.louhen.app'
-      NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
-      NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
-      NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
+      NODE_ENV: production
       HOST: 127.0.0.1
       PORT: '4311'
+      APP_BASE_URL: http://localhost:4311
+      NEXT_PUBLIC_SITE_URL: http://localhost:4311
+      WAITLIST_CONFIRM_TTL_DAYS: '7'
+      HCAPTCHA_SECRET: ${{ secrets.CI_HCAPTCHA_SECRET }}
+      FIREBASE_PROJECT_ID: ${{ secrets.CI_FIREBASE_PROJECT_ID }}
+      FIREBASE_DB_REGION: ${{ secrets.CI_FIREBASE_DB_REGION }}
+      FIREBASE_ADMIN_SA_B64: ${{ secrets.CI_FIREBASE_ADMIN_SA_B64 }}
+      RESEND_API_KEY: ${{ secrets.CI_RESEND_API_KEY }}
+      RESEND_FROM: no-reply@ci.louhen.app
+      RESEND_REPLY_TO: hello@ci.louhen.app
+      STATUS_USER: ${{ secrets.CI_STATUS_USER }}
+      STATUS_PASS: ${{ secrets.CI_STATUS_PASS }}
+      SUPPRESSION_SALT: ${{ secrets.CI_SUPPRESSION_SALT }}
+      EMAIL_TRANSPORT: noop
+      ANALYTICS_STORE_IP: 'false'
       PW_HEALTH_PATH: /icon.svg
     steps:
       - name: Checkout
@@ -461,33 +525,11 @@ jobs:
           BASE_URL: http://127.0.0.1:${{ env.PORT }}
           HOST: 127.0.0.1
           PORT: ${{ env.PORT }}
-          TEST_E2E_SHORTCIRCUIT: 'true'
           TEST_E2E_BYPASS_TOKEN: e2e-mocked-token
           PLAYWRIGHT_ARTIFACTS_DIR: artifacts/playwright/fallback
-          NEXT_PUBLIC_ENV: 'ci'
-          NEXT_PUBLIC_SITE_URL: 'https://ci.louhen.app'
-          NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
-          NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
-          NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
-          NEXT_PUBLIC_LOCALES: 'en-de,de-de'
-          NEXT_PUBLIC_DEFAULT_LOCALE: 'en-de'
-          NEXT_PUBLIC_ANALYTICS_DISABLED: '0'
-          NEXT_PUBLIC_ANALYTICS_DEBUG: '1'
-          HCAPTCHA_SECRET: ci-hcaptcha-secret
-          WAITLIST_CONFIRM_TTL_DAYS: '7'
-          FIREBASE_PROJECT_ID: ci-firebase
-          FIREBASE_DB_REGION: eur3
-          FIREBASE_ADMIN_SA_B64: eyJwcm9qZWN0X2lkIjoiY2ktZmlyZWJhc2UifQ==
-          RESEND_API_KEY: ci-resend-key
-          RESEND_FROM: no-reply@ci.louhen.app
-          RESEND_REPLY_TO: hello@ci.louhen.app
-          STATUS_USER: ci-status
-          STATUS_PASS: ci-secret
-          SUPPRESSION_SALT: ci-suppression-salt
-          NODE_ENV: production
           PW_REUSE: '1'
-          DEBUG: pw:api
           PW_HEALTH_PATH: /icon.svg
+          DEBUG: pw:api
         run: |
           npm run test:e2e
 
@@ -529,37 +571,24 @@ jobs:
       - name: Fail if head is not staging
         run: |
           if [ "${{ github.event.pull_request.head.ref }}" != "staging" ]; then
-            echo "❌ PRs into 'production' must originate from 'staging'."
+            echo "[fail] PRs into 'production' must originate from 'staging'."
             exit 1
           fi
-          echo "✅ Source branch is 'staging' — release guard passed."
+          echo "[ok] Source branch is 'staging' - release guard passed."
 
   release:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/production'
-    needs: build-and-test
+    if: github.ref == 'refs/heads/production'
+    name: release
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      issues: write
-      pull-requests: write
+      contents: write          # required for tags and changelog commits
+      issues: write            # required if semantic-release comments on issues
+      pull-requests: write     # required if semantic-release posts PR notes
     env:
-      CI: true
-      NEXT_PUBLIC_ANALYTICS_DISABLED: '1'
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
+      - uses: actions/checkout@v4
       - name: Install dependencies
         run: npm ci
-
-      - name: Semantic-release
-        run: npx semantic-release --debug
+      - name: Run semantic-release
+        run: npx semantic-release
