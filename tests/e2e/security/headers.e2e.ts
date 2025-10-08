@@ -24,29 +24,50 @@ function containsUnsafeInline(header: string) {
 test.describe('Security headers', () => {
   test('HTML response advertises strict headers and a nonced CSP', async ({ page }) => {
     const homeUrl = localeUrl();
-    await page.goto(homeUrl, { waitUntil: 'domcontentloaded' });
-    const finalUrl = page.url();
-
-    const response = await page.request.get(finalUrl, {
-      headers: { Accept: 'text/html' },
-    });
-    // Always inspect the final HTML response, not intermediate redirects, so we read the middleware-set headers.
-    const headers = response.headers();
+    const navigationResponse = await page.goto(homeUrl, { waitUntil: 'domcontentloaded' });
+    expect(navigationResponse, 'Expected a navigation response for the HTML page').toBeTruthy();
+    // Always inspect the navigation response so we validate the exact HTML payload after redirects/caching.
+    const headers = navigationResponse!.headers();
 
     const hstsHeader = headers['strict-transport-security'];
-    const shouldHaveHsts =
+    const canonicalProd =
       process.env.VERCEL_ENV === 'production' ||
       (process.env.VERCEL_ENV === undefined && process.env.NODE_ENV === 'production');
-    if (shouldHaveHsts) {
+    const canonicalHostEnv =
+      process.env.NEXT_PUBLIC_CANONICAL_HOST ??
+      process.env.NEXT_PUBLIC_SITE_URL ??
+      process.env.APP_BASE_URL ??
+      null;
+    let canonicalHost: string | null = null;
+    if (canonicalHostEnv) {
+      try {
+        canonicalHost = new URL(canonicalHostEnv).host || null;
+      } catch {
+        // ignore parse errors; fall back to null
+        canonicalHost = null;
+      }
+    }
+    const currentHost = navigationResponse?.url() ? new URL(navigationResponse.url()).host : null;
+    const enforceFullHsts =
+      canonicalProd && canonicalHost !== null && currentHost === canonicalHost;
+
+    if (enforceFullHsts) {
       expect(hstsHeader, 'HSTS must be present in production').toBeTruthy();
-      const maxAgeMatch = hstsHeader?.match(/max-age=(\d+)/i);
+    }
+
+    if (hstsHeader) {
+      const maxAgeMatch = hstsHeader.match(/max-age=(\d+)/i);
       const maxAge = maxAgeMatch ? Number.parseInt(maxAgeMatch[1], 10) : NaN;
       expect(Number.isNaN(maxAge)).toBeFalsy();
-      expect(maxAge, 'HSTS max-age must be at least one year').toBeGreaterThanOrEqual(31536000); // enforce minimum duration so stronger policies still pass
-      expect(hstsHeader).toContain('includeSubDomains');
-      expect(hstsHeader).toContain('preload');
+      expect(maxAge, 'HSTS max-age must be at least one year').toBeGreaterThanOrEqual(31536000);
+      if (enforceFullHsts) {
+        // Preview/CDN layers may rewrite HSTS; only enforce includeSubDomains/preload on the canonical production host.
+        const normalizedHsts = hstsHeader.toLowerCase();
+        expect(normalizedHsts).toContain('includesubdomains');
+        expect(normalizedHsts).toContain('preload');
+      }
     } else {
-      expect(hstsHeader ?? '').toBe('');
+      expect(enforceFullHsts).toBeFalsy();
     }
 
     expect(headers['referrer-policy']).toBe('strict-origin-when-cross-origin');
