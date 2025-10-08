@@ -24,9 +24,13 @@ function containsUnsafeInline(header: string) {
 test.describe('Security headers', () => {
   test('HTML response advertises strict headers and a nonced CSP', async ({ page }) => {
     const homeUrl = localeUrl();
-    const response = await page.request.get(homeUrl, {
+    await page.goto(homeUrl, { waitUntil: 'domcontentloaded' });
+    const finalUrl = page.url();
+
+    const response = await page.request.get(finalUrl, {
       headers: { Accept: 'text/html' },
     });
+    // Always inspect the final HTML response, not intermediate redirects, so we read the middleware-set headers.
     const headers = response.headers();
 
     const hstsHeader = headers['strict-transport-security'];
@@ -47,7 +51,7 @@ test.describe('Security headers', () => {
 
     expect(headers['referrer-policy']).toBe('strict-origin-when-cross-origin');
     expect(headers['x-content-type-options']).toBe('nosniff');
-    const permissionsPolicy = headers['permissions-policy'] ?? '';
+    const permissionsPolicy = (headers['permissions-policy'] ?? '').toLowerCase();
     expect(permissionsPolicy).toContain('camera=()');
     const hasInterestCohort = permissionsPolicy.includes('interest-cohort=()');
     const hasBrowsingTopics = permissionsPolicy.includes('browsing-topics=()');
@@ -72,8 +76,6 @@ test.describe('Security headers', () => {
     if (process.env.NODE_ENV === 'production' && process.env.VERCEL_ENV === 'production') {
       expect(scriptSources).not.toContain("'unsafe-eval'");
     }
-
-    await page.goto(homeUrl);
 
     const allInlineScriptsHaveNonce = await page.evaluate(() =>
       Array.from(document.querySelectorAll<HTMLScriptElement>('script:not([src])')).every(

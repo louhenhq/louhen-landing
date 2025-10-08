@@ -8,7 +8,7 @@ const intlMiddleware = createIntlMiddleware({
 });
 
 const supportedLocales = new Set(intlRoutingConfig.locales);
-const HSTS_MAX_AGE_SECONDS = 60 * 60 * 24 * 365; // 1 year
+const HSTS_MAX_AGE_SECONDS = 60 * 60 * 24 * 730; // 2 years
 const REPORT_ONLY_ENV =
   process.env.NEXT_PUBLIC_CSP_REPORT_ONLY === '1' || process.env.CSP_REPORT_ONLY === '1';
 
