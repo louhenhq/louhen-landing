@@ -129,22 +129,16 @@ Add guard clauses for missing envs (fail fast with clear, friendly errors).
 
 ## 7) Testing
 
-E2E (Playwright)
-    npx playwright test
-
-Lint & build
-    npm run lint
-    npm run build
-
-Accessibility & Perf
-- Lighthouse thresholds on `/`:
-  - Performance ≥ 90
-  - Accessibility ≥ 95
-  - SEO ≥ 95
-  - Best Practices ≥ 95
-
-Negative paths
-- For forms/APIs, include at least one failing test (e.g., invalid email, captcha failure).
+- **Single entry point:** `npm run validate:local` mirrors CI (lint → typecheck → build → production server → unit → Playwright e2e + axe → Lighthouse) and writes reports to `artifacts/playwright/` and `artifacts/lighthouse/`. Run it before requesting review.
+- **Playwright projects:** `desktop-chromium` runs everything by default; add `@mobile` to suites that must run on the `mobile-chromium` project, and use `@desktop-only` to opt out when behaviour diverges.
+- **Targeted commands:**
+  - `npm run test:e2e` — full Playwright suite (desktop + tagged mobile).
+  - `npm run test:axe` — axe scans on the canonical desktop viewport.
+  - `npm run lhci` — Lighthouse CI thresholds (`/`, `/waitlist`, `/method`).
+- Accessibility checks live in `tests/axe/canonical.axe.ts`; update the canonical matrix instead of creating new axe suites.
+- **Negative paths:** Always cover at least one failing case for forms/APIs (invalid email, captcha failure, etc.).
+- **Budgets:** Lighthouse thresholds stay Performance ≥ 90, Accessibility ≥ 95, SEO ≥ 95, Best Practices ≥ 95.
+- **Guardrails:** Import `test`/`expect` from `@tests/fixtures/playwright`, prefer `data-testid` selectors, avoid `page.waitForTimeout`, intercept new third-party calls in the fixture, and mark unstable specs with `@quarantine` + a tracking issue. Lighthouse budgets live in `lighthouse-budgets.json`; raise limits only after sustained headroom (≥5 green runs).
 
 ---
 
@@ -180,8 +174,8 @@ Blank issues are disabled; for questions, use Discussions (link in issue config)
 
 ## 11) Release & CI
 
-- Every PR runs: lint → build → tests (Playwright) → Lighthouse (artifacts uploaded).
-- Merges to `main` trigger `semantic-release` to tag and update CHANGELOG.
+- Every PR and push to `staging` runs the unified pipeline (policy guards → build/test job mirroring `npm run validate:local`).
+- Releases happen by promoting `staging` → `production`; pushes to `production` run `semantic-release` to tag and update the changelog.
 - Keep CI logs clean; fail fast on critical errors.
 
 ---
@@ -192,18 +186,14 @@ Copy into your PR (already pre-filled by template):
 
 VALIDATE
     npm ci
-    npm run lint
-    npm run build
-    npx playwright test
-    # optional if configured
-    npm run lhci
+    npm run validate:local
 
 Manual QA
 - [ ] Load `/` → no console errors
 - [ ] Submit waitlist with valid email + captcha → success UI, 200 response
 - [ ] Invalid email → inline error
 - [ ] Missing/invalid captcha → friendly error, no write
-- [ ] Lighthouse targets met on `/`
+- [ ] Check `artifacts/lighthouse/summary.md` (scores & budgets) or rerun `npm run lhci` locally if needed
 
 REVERT
     git revert <commit>

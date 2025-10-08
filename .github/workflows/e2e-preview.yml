@@ -71,83 +71,66 @@ jobs:
       - name: Run Playwright E2E (preview)
         id: run_e2e
         continue-on-error: true
-        run: PREVIEW_BASE_URL=$PREVIEW_BASE_URL npx playwright test tests/e2e/${{ matrix.suite }} tests/e2e/seo --project=chromium --workers=1 --retries=1
+        run: |
+          PLAYWRIGHT_ARTIFACTS_DIR=artifacts/playwright/${{ matrix.suite }}-e2e \
+          PREVIEW_BASE_URL=$PREVIEW_BASE_URL \
+          npx playwright test tests/e2e/${{ matrix.suite }} tests/e2e/seo --project=desktop-chromium --workers=1 --retries=1
         # Remote-only: connects to staging; do not spin up a local server or log secrets. Includes SEO add-ons under tests/e2e/seo.
 
       - name: Collect E2E summary
         if: always()
         run: |
-          if [ -f playwright-report/report.json ]; then
-            cp playwright-report/report.json summary/${{ matrix.suite }}-e2e-report.json
+          if [ -f artifacts/playwright/${{ matrix.suite }}-e2e/report.json ]; then
+            cp artifacts/playwright/${{ matrix.suite }}-e2e/report.json summary/${{ matrix.suite }}-e2e-report.json
           fi
 
       - name: Verify Playwright artifacts (E2E)
         if: always()
         run: |
-          test -d playwright-report
-          test -d test-results
+          test -d artifacts/playwright/${{ matrix.suite }}-e2e
 
       - name: Upload Playwright HTML report (E2E)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-${{ matrix.suite }}-e2e
-          path: playwright-report/
+          name: playwright-${{ matrix.suite }}-e2e
+          path: artifacts/playwright/${{ matrix.suite }}-e2e/
           retention-days: 10
           if-no-files-found: warn
           compression-level: 6
         # Reports must never contain secrets; GitHub masks known tokens automatically.
 
-      - name: Upload raw results (E2E)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results-${{ matrix.suite }}-e2e
-          path: test-results/
-          retention-days: 10
-          if-no-files-found: warn
-          compression-level: 6
-        # Artifacts are for debugging only; never surface secrets in logs or attachments.
-
       - name: Reset Playwright artifacts directory
         if: always()
-        run: rm -rf playwright-report test-results
+        run: rm -rf artifacts/playwright/${{ matrix.suite }}-e2e
 
       - name: Run Playwright Axe (preview)
         id: run_axe
         continue-on-error: true
-        run: PREVIEW_BASE_URL=$PREVIEW_BASE_URL npx playwright test tests/axe/${{ matrix.suite }} --project=chromium --workers=1 --retries=1
+        run: |
+          PLAYWRIGHT_ARTIFACTS_DIR=artifacts/playwright/${{ matrix.suite }}-axe \
+          PREVIEW_BASE_URL=$PREVIEW_BASE_URL \
+          npx playwright test tests/axe/${{ matrix.suite }} --project=desktop-chromium --workers=1 --retries=1
         # Remote-only: Axe scans the deployed preview; never echo secrets.
 
       - name: Collect Axe summary
         if: always()
         run: |
-          if [ -f playwright-report/report.json ]; then
-            cp playwright-report/report.json summary/${{ matrix.suite }}-axe-report.json
+          if [ -f artifacts/playwright/${{ matrix.suite }}-axe/report.json ]; then
+            cp artifacts/playwright/${{ matrix.suite }}-axe/report.json summary/${{ matrix.suite }}-axe-report.json
           fi
 
       - name: Verify Playwright artifacts (Axe)
         if: always()
         run: |
-          test -d playwright-report
-          test -d test-results
+          test -d artifacts/playwright/${{ matrix.suite }}-axe
 
       - name: Upload Playwright HTML report (Axe)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-${{ matrix.suite }}-axe
-          path: playwright-report/
-          retention-days: 10
-          if-no-files-found: warn
-          compression-level: 6
-
-      - name: Upload raw results (Axe)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results-${{ matrix.suite }}-axe
-          path: test-results/
+          name: playwright-${{ matrix.suite }}-axe
+          path: artifacts/playwright/${{ matrix.suite }}-axe/
           retention-days: 10
           if-no-files-found: warn
           compression-level: 6
@@ -200,8 +183,7 @@ jobs:
             formatRow(e2eStats, process.env.E2E_OUTCOME ?? ''),
             formatRow(axeStats, process.env.AXE_OUTCOME ?? ''),
             '',
-            '- HTML report artifacts: `playwright-report-' + suite + '-e2e` · `playwright-report-' + suite + '-axe`',
-            '- Raw results (JSON/traces): `test-results-' + suite + '-e2e` · `test-results-' + suite + '-axe`',
+            '- Playwright artifacts: `playwright-' + suite + '-e2e` · `playwright-' + suite + '-axe`',
             '- Reports do not contain secrets; GitHub masks known tokens automatically.',
           ];
 
@@ -279,80 +261,54 @@ jobs:
       - name: Run Playwright E2E (quarantine)
         id: run_e2e_quarantine
         continue-on-error: true
-        run: PREVIEW_BASE_URL=$PREVIEW_BASE_URL npx playwright test tests/e2e/${{ matrix.suite }} tests/e2e/seo --project=chromium --workers=1 --retries=2 --grep "@flaky"
-        # Runs only tests flagged with @flaky. Keeps retries CI-only (2) to aid diagnosis without blocking merges.
-
-      - name: Ensure artifact directories exist (E2E)
-        if: always()
         run: |
-          mkdir -p playwright-report
-          mkdir -p test-results
+          PLAYWRIGHT_ARTIFACTS_DIR=artifacts/playwright/${{ matrix.suite }}-e2e-quarantine \
+          PREVIEW_BASE_URL=$PREVIEW_BASE_URL \
+          npx playwright test tests/e2e/${{ matrix.suite }} tests/e2e/seo --project=desktop-chromium --workers=1 --retries=2 --grep "@quarantine"
+        # Runs only tests flagged with @quarantine. Keeps retries CI-only (2) to aid diagnosis without blocking merges.
 
       - name: Collect E2E summary (quarantine)
         if: always()
         run: |
-          if [ -f playwright-report/report.json ]; then
-            cp playwright-report/report.json summary/${{ matrix.suite }}-e2e-quarantine.json
+          if [ -f artifacts/playwright/${{ matrix.suite }}-e2e-quarantine/report.json ]; then
+            cp artifacts/playwright/${{ matrix.suite }}-e2e-quarantine/report.json summary/${{ matrix.suite }}-e2e-quarantine.json
           fi
 
       - name: Upload Playwright HTML report (E2E quarantine)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-${{ matrix.suite }}-e2e-quarantine
-          path: playwright-report/
-          retention-days: 7
-          if-no-files-found: warn
-          compression-level: 6
-
-      - name: Upload raw results (E2E quarantine)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results-${{ matrix.suite }}-e2e-quarantine
-          path: test-results/
+          name: playwright-${{ matrix.suite }}-e2e-quarantine
+          path: artifacts/playwright/${{ matrix.suite }}-e2e-quarantine/
           retention-days: 7
           if-no-files-found: warn
           compression-level: 6
 
       - name: Reset Playwright artifacts directory (quarantine)
         if: always()
-        run: rm -rf playwright-report test-results
+        run: rm -rf artifacts/playwright/${{ matrix.suite }}-e2e-quarantine
 
       - name: Run Playwright Axe (quarantine)
         id: run_axe_quarantine
         continue-on-error: true
-        run: PREVIEW_BASE_URL=$PREVIEW_BASE_URL npx playwright test tests/axe/${{ matrix.suite }} --project=chromium --workers=1 --retries=2 --grep "@flaky"
-
-      - name: Ensure artifact directories exist (Axe)
-        if: always()
         run: |
-          mkdir -p playwright-report
-          mkdir -p test-results
+          PLAYWRIGHT_ARTIFACTS_DIR=artifacts/playwright/${{ matrix.suite }}-axe-quarantine \
+          PREVIEW_BASE_URL=$PREVIEW_BASE_URL \
+          npx playwright test tests/axe/${{ matrix.suite }} --project=desktop-chromium --workers=1 --retries=2 --grep "@quarantine"
 
       - name: Collect Axe summary (quarantine)
         if: always()
         run: |
-          if [ -f playwright-report/report.json ]; then
-            cp playwright-report/report.json summary/${{ matrix.suite }}-axe-quarantine.json
+          if [ -f artifacts/playwright/${{ matrix.suite }}-axe-quarantine/report.json ]; then
+            cp artifacts/playwright/${{ matrix.suite }}-axe-quarantine/report.json summary/${{ matrix.suite }}-axe-quarantine.json
           fi
 
       - name: Upload Playwright HTML report (Axe quarantine)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-${{ matrix.suite }}-axe-quarantine
-          path: playwright-report/
-          retention-days: 7
-          if-no-files-found: warn
-          compression-level: 6
-
-      - name: Upload raw results (Axe quarantine)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results-${{ matrix.suite }}-axe-quarantine
-          path: test-results/
+          name: playwright-${{ matrix.suite }}-axe-quarantine
+          path: artifacts/playwright/${{ matrix.suite }}-axe-quarantine/
           retention-days: 7
           if-no-files-found: warn
           compression-level: 6
@@ -404,8 +360,7 @@ jobs:
             formatRow(e2eStats, process.env.E2E_OUTCOME ?? ''),
             formatRow(axeStats, process.env.AXE_OUTCOME ?? ''),
             '',
-            '- HTML report artifacts: `playwright-report-' + suite + '-e2e-quarantine` · `playwright-report-' + suite + '-axe-quarantine`',
-            '- Raw results: `test-results-' + suite + '-e2e-quarantine` · `test-results-' + suite + '-axe-quarantine`',
+            '- Playwright artifacts: `playwright-' + suite + '-e2e-quarantine` · `playwright-' + suite + '-axe-quarantine`',
             '- These runs capture flaky specs only (`@flaky`). Remove the tag once stabilized.',
           ];
 

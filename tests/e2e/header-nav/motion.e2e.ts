@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from '@tests/fixtures/playwright';
 import { localeUrl } from '../_utils/url';
 
 test.describe('Header motion', () => {
@@ -33,7 +33,7 @@ test.describe('Header motion', () => {
     await expect.poll(async () => header.getAttribute('data-header-state')).toBe('shrink');
 
     await page.keyboard.press('Tab');
-    await page.waitForTimeout(50);
+    await expect.poll(async () => header.getAttribute('data-header-state')).toBe('shrink');
     await page.evaluate(() => window.scrollTo(0, 220));
     await expect.poll(async () => header.getAttribute('data-header-state')).toBe('hidden');
   });

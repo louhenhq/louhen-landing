@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '@tests/fixtures/playwright';
 import { localeUrl } from '../_utils/url';
 
 const EXPECTED_HREFLANGS = ['en', 'de', 'en-de', 'de-de', 'de-at', 'x-default'] as const;

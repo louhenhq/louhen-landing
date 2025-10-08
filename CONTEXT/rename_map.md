@@ -149,7 +149,7 @@ _Tables sorted by `Current Path`; `Status=DECIDE` rows include the follow-up nee
 | components/TrustSchema.tsx | feature-comp | components/features/seo/TrustSchema.tsx | same | no | OK | Shared trust schema between home + method. |
 | lib/seo/legalMetadata.ts | util | lib/shared/seo/legal-metadata.ts | legal-metadata.ts | no | OK | Kebab-case util; ensure named export. |
 | lib/seo/shared.ts | util | lib/shared/seo/shared.ts | same | no | OK | Houses helpers consumed by metadata builders. |
-| tests/e2e/seo.spec.ts | test:e2e | tests/e2e/seo/seo.e2e.ts | seo.e2e.ts | yes (data-ll="seo-jsonld") | DECIDE | Do we add data attr to JSON-LD mount node or mock DOM query instead? |
+| tests/e2e/seo.spec.ts | test:e2e | tests/e2e/seo/home.meta.e2e.ts | home.meta.e2e.ts | no | RETIRED | Slice 2 replaced the legacy catch-all with modular home/method metadata specs; no selectors required. |
 | tests/unit/metadata.ref.test.ts | test:unit | tests/unit/seo/metadata-ref.spec.ts | metadata-ref.spec.ts | no | OK | Update import to shared metadata util after move. |
 
 ### Feature: i18n-core
@@ -278,7 +278,7 @@ _Tables sorted by `Current Path`; `Status=DECIDE` rows include the follow-up nee
 | app/locale/switch/route.ts | route | app/locale/switch/route.ts | same | no | SKIP | Locale switcher remains in place pending Slice E routing overhaul. |
 | lib/http/errors.ts | util | lib/shared/http/errors.ts | errors.ts | no | OK | Shared HTTP helper; update API handlers after move. |
 | lib/routing/legalPath.ts | util | lib/shared/routing/legal-path.ts | legal-path.ts | no | MIGRATED | Helper moved to shared routing; aliases updated across footer + legal flows. |
-| tests/e2e/legal.a11y.spec.ts | test:axe | tests/axe/legal/legal.axe.ts | legal.axe.ts | yes (data-ll="footer-privacy-ribbon") | OK | Accessibility spec leverages new footer selector. |
+| tests/e2e/legal.a11y.spec.ts | test:axe | tests/axe/canonical.axe.ts | canonical.axe.ts | no | RETIRED | Slice 6 replaced per-page legal scan with canonical axe coverage (/, /waitlist, /method). |
 | tests/e2e/legal.spec.ts | test:e2e | tests/e2e/legal/legal.e2e.ts | legal.e2e.ts | yes (data-ll="footer-shell") | OK | Legal nav assertions rely on footer shell attr. |
 | tests/e2e/unsubscribe.spec.ts | test:e2e | tests/e2e/unsubscribe/unsubscribe.e2e.ts | unsubscribe.e2e.ts | yes (data-ll="unsubscribe-form") | DECIDE | Need explicit selector on unsubscribe form—where to add `data-ll`? |
 
@@ -353,8 +353,8 @@ Pending moves use new `tests/{unit,e2e,axe}/<feature>/` layout; selectors noted 
 | waitlist | `e2e/waitlist.spec.ts`, `tests/e2e/waitlist.api.spec.ts`, `tests/unit/waitlist*.test.ts`, `tests/unit/referral.unit.test.ts`, `tests/unit/validation.waitlist.test.ts` | `tests/e2e/waitlist/*.e2e.ts`, `tests/unit/waitlist/*.spec.ts` | Add `data-ll="waitlist-form"`, `data-ll="waitlist-resend-form"`, `data-ll="waitlist-referral"`. |
 | forms | Reuses waitlist specs above | Same as waitlist | Same selectors as waitlist features; ensure legacy form flagged if retained. |
 | header-nav | `tests/e2e/header.*.spec.ts` (12 specs) | `tests/e2e/header/*.e2e.ts` | Provide `data-ll` for `header-shell`, `header-cta`, `header-consent`, `header-drawer`, `header-locale`, `header-theme-toggle`. |
-| footer / routing | `tests/e2e/legal.spec.ts`, `tests/e2e/legal.a11y.spec.ts`, `tests/e2e/unsubscribe.spec.ts` | `tests/e2e/legal/legal.e2e.ts`, `tests/axe/legal/legal.axe.ts`, `tests/e2e/unsubscribe/unsubscribe.e2e.ts` | Add `data-ll="footer-shell"`, `data-ll="footer-privacy-ribbon"`, and introduce `data-ll="unsubscribe-form"`. |
-| seo-jsonld | `tests/e2e/seo.spec.ts`, `tests/unit/metadata.ref.test.ts` | `tests/e2e/seo/seo.e2e.ts`, `tests/unit/seo/metadata-ref.spec.ts` | Decide on `[data-ll="seo-jsonld"]` mount or mocked query. |
+| footer / routing | `tests/e2e/legal.spec.ts`, `tests/e2e/unsubscribe.spec.ts` | `tests/e2e/legal/legal.e2e.ts`, `tests/e2e/unsubscribe/unsubscribe.e2e.ts` | Add `data-ll="footer-shell"`, `data-testid="unsubscribe-root"`, and ensure canonical axe coverage remains in `tests/axe/canonical.axe.ts`. |
+| seo-jsonld | `tests/e2e/seo/home.meta.e2e.ts`, `tests/e2e/seo/canonical-uniqueness.e2e.ts`, `tests/e2e/method/method.meta.e2e.ts`, `tests/unit/metadata.ref.test.ts` | `tests/e2e/seo/*.e2e.ts`, `tests/unit/seo/metadata-ref.spec.ts` | JSON-LD assertions now split across modular specs; no additional selectors required. |
 | i18n-core | `tests/unit/i18n.keys.test.ts` | `tests/unit/i18n/keys.spec.ts` | No selectors; update imports to `content/i18n`. |
 | csp-headers | `tests/e2e/security/headers.e2e.ts` | `tests/e2e/csp/security-headers.e2e.ts` | No DOM selectors. |
 | status-api | `tests/e2e/status.spec.ts`, `tests/unit/status-auth.spec.ts` | `tests/e2e/status/status.e2e.ts`, `tests/unit/status/auth.spec.ts` | No selectors; ensure server mocks updated. |

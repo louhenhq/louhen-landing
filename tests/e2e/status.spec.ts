@@ -1,6 +1,6 @@
 import { Buffer } from 'node:buffer';
 
-import { expect, test } from '@playwright/test';
+import { expect, test } from '@tests/fixtures/playwright';
 
 const STATUS_USER = process.env.STATUS_USER ?? '';
 const STATUS_PASS = process.env.STATUS_PASS ?? '';
@@ -68,9 +68,9 @@ test.describe('status diagnostics page', () => {
       const response = await authedPage.goto('/status', { waitUntil: 'networkidle' });
       expect(response?.status()).toBe(200);
       await expect(authedPage.getByRole('heading', { name: /Operational diagnostics/i })).toBeVisible();
-      await expect(authedPage.getByText(/CSP nonce/i)).toBeVisible();
-      await expect(authedPage.getByText(/Transport mode/i)).toBeVisible();
-      await expect(authedPage.getByText(/Vercel env/i)).toBeVisible();
+      await expect(authedPage.getByTestId('status-csp-nonce-value')).toBeVisible();
+      await expect(authedPage.getByTestId('status-transport-mode-value')).toBeVisible();
+      await expect(authedPage.getByTestId('status-env-vercel-value')).toBeVisible();
     } finally {
       await context.close();
     }

@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from '@tests/fixtures/playwright';
 import { defaultLocale } from '@/next-intl.locales';
 import { legalPath } from '@lib/shared/routing/legal-path';
 import { getTestLocales, localeUrl } from './_utils/url';

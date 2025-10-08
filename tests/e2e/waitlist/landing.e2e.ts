@@ -1,8 +1,9 @@
-import { expect, test } from '@playwright/test';
-import { getTestLocales, localeUrl } from '@tests/e2e/_utils/url';
+import { expect, test } from '@tests/fixtures/playwright';
+import { getDefaultLocale, getTestLocales, localeUrl } from '@tests/e2e/_utils/url';
 
 const locales = getTestLocales();
 const WAITLIST_API = '**/api/waitlist';
+const defaultLocale = getDefaultLocale();
 
 test.describe('Waitlist form (waitlist page)', () => {
   for (const locale of locales) {
@@ -74,4 +75,12 @@ test.describe('Waitlist form (waitlist page)', () => {
       }
     });
   }
+});
+
+test.describe('@mobile waitlist mobile smoke', () => {
+  test('renders waitlist form on mobile view', async ({ page }) => {
+    await page.goto(localeUrl('/waitlist', { locale: defaultLocale }), { waitUntil: 'networkidle' });
+    await expect(page.locator('[data-ll="wl-form"]').first()).toBeVisible();
+    await expect(page.locator('[data-ll="wl-submit"]').first()).toBeVisible();
+  });
 });

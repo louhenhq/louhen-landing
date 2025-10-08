@@ -1,299 +1,239 @@
 #!/usr/bin/env node
 
 import { spawn } from 'node:child_process';
-import { rm, readFile, readdir } from 'node:fs/promises';
+import { rm, readFile, mkdir, writeFile, cp, appendFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { setTimeout as delay } from 'node:timers/promises';
+import { createRequire } from 'node:module';
 
-const BASE_URL = process.env.BASE_URL ?? 'http://localhost:4311';
+const require = createRequire(import.meta.url);
+const config = require('../lighthouserc.cjs');
+const { defaultLocale, targetLocales, ROUTES } = config;
+
+const BASE_URL = process.env.BASE_URL ?? 'http://127.0.0.1:4311';
 const READINESS_PATH = process.env.LHCI_READINESS_PATH ?? '/';
-const MAX_DURATION_MS = (() => {
-  const parsed = Number.parseInt(process.env.LHCI_TIMEOUT_MS ?? '', 10);
-  if (Number.isFinite(parsed) && parsed > 0) {
-    return parsed;
-  }
-  return 10 * 60 * 1000;
-})();
-const thresholds = {
-  performance: 0.9,
-  accessibility: 0.9,
-  'best-practices': 0.9,
-  seo: 0.9,
-};
-
 const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 const npxCmd = process.platform === 'win32' ? 'npx.cmd' : 'npx';
 let serverProcess = null;
-let terminationHandlers = [];
 let exiting = false;
 
-function resolveReadinessUrl() {
-  try {
-    return new URL(READINESS_PATH, BASE_URL).toString();
-  } catch {
-    return BASE_URL;
-  }
-}
-
-async function isServerReady() {
-  try {
-    const response = await fetch(resolveReadinessUrl(), { method: 'GET', redirect: 'manual' });
-    return response.status >= 200 && response.status < 300;
-  } catch (error) {
-    if (error && typeof error === 'object' && 'code' in error && error.code === 'ECONNREFUSED') {
-      return false;
-    }
-    return false;
-  }
-}
-
-async function waitForServerReady() {
-  const retries = 40;
-  for (let attempt = 0; attempt < retries; attempt += 1) {
-    if (await isServerReady()) return;
-    await delay(500);
-  }
-  throw new Error(`Timed out waiting for server at ${BASE_URL}`);
-}
-
-async function ensureServer() {
-  if (await isServerReady()) {
-    return false;
-  }
-
-  let port = '4311';
-  try {
-    const url = new URL(BASE_URL);
-    port = url.port || (url.protocol === 'https:' ? '443' : '3000');
-  } catch {
-    // fall back to default port
-  }
-
-  serverProcess = spawn(npmCmd, ['run', 'start', '--', '--port', port], {
-    env: { ...process.env, PORT: port, BASE_URL },
-    stdio: 'inherit',
-  });
-
-  serverProcess.on('error', (error) => {
-    console.error('[lhci] Failed to start Next.js server', error);
-  });
-
-  const readyPromise = waitForServerReady();
-  let earlyExitHandler;
-  const earlyExitPromise = new Promise((_, reject) => {
-    earlyExitHandler = (code, signal) => {
-      reject(new Error(`[lhci] Next.js server exited early (code: ${code ?? 'null'}, signal: ${signal ?? 'null'})`));
-    };
-    serverProcess.once('exit', earlyExitHandler);
-  });
-
-  try {
-    await Promise.race([readyPromise, earlyExitPromise]);
-  } finally {
-    if (earlyExitHandler) {
-      serverProcess.removeListener('exit', earlyExitHandler);
-    }
-  }
-  return true;
-}
-
-async function readLatestSummary() {
-  const directory = '.lighthouseci';
-  const manifestPath = path.join(directory, 'manifest.json');
-  try {
-    const rawManifest = await readFile(manifestPath, 'utf8');
-    const manifest = JSON.parse(rawManifest);
-    if (Array.isArray(manifest) && manifest.length > 0 && manifest[manifest.length - 1]?.summary) {
-      return manifest[manifest.length - 1].summary;
-    }
-  } catch (error) {
-    const errno = error && typeof error === 'object' && 'code' in error ? error.code : undefined;
-    if (errno !== 'ENOENT') {
-      throw error;
-    }
-  }
-
-  const files = await readdir(directory);
-  const jsonFiles = files.filter((file) => file.endsWith('.json'));
-  if (jsonFiles.length === 0) {
-    throw new Error('No Lighthouse JSON reports found.');
-  }
-  const latestReport = jsonFiles.sort().at(-1);
-  if (!latestReport) {
-    throw new Error('Unable to resolve latest Lighthouse report.');
-  }
-  const report = JSON.parse(await readFile(path.join(directory, latestReport), 'utf8'));
-  if (!report || typeof report !== 'object' || !('categories' in report)) {
-    throw new Error('Lighthouse report missing categories.');
-  }
-  const categories = report.categories;
-  return Object.fromEntries(
-    Object.entries(categories).map(([key, value]) => {
-      const score = value && typeof value === 'object' && 'score' in value && typeof value.score === 'number' ? value.score : 0;
-      return [key, score];
-    })
-  );
-}
-
-async function stopServer() {
-  if (!serverProcess) {
-    return;
-  }
-
-  const child = serverProcess;
-  serverProcess = null;
-
-  if (!child.killed) {
-    child.kill('SIGTERM');
-  }
-
-  const forceTimer = setTimeout(() => {
-    if (!child.killed) {
-      child.kill('SIGKILL');
-    }
-  }, 5_000);
-
-  await new Promise((resolve) => {
-    child.once('exit', () => {
-      clearTimeout(forceTimer);
-      resolve();
-    });
-  });
-}
-
-function registerTerminationHandlers() {
-  const entries = [
-    ['SIGINT', () => gracefulExit(130)],
-    ['SIGTERM', () => gracefulExit(143)],
-    [
-      'uncaughtException',
-      (error) => {
-        console.error('[lhci] Uncaught exception', error);
-        gracefulExit(1);
-      },
-    ],
-    [
-      'unhandledRejection',
-      (reason) => {
-        console.error('[lhci] Unhandled rejection', reason);
-        gracefulExit(1);
-      },
-    ],
-  ];
-
-  terminationHandlers = entries;
-  entries.forEach(([event, handler]) => {
-    process.once(event, handler);
-  });
-}
-
-function removeTerminationHandlers() {
-  terminationHandlers.forEach(([event, handler]) => {
-    process.removeListener(event, handler);
-  });
-  terminationHandlers = [];
-}
-
-async function gracefulExit(code) {
-  if (exiting) {
-    return;
-  }
-  exiting = true;
-  await stopServer();
-  removeTerminationHandlers();
-  process.exitCode = code;
-  process.exit(code);
-}
-
-function formatDuration(ms) {
-  const minutes = Math.floor(ms / 60_000);
-  const seconds = Math.round((ms % 60_000) / 1000);
-  if (minutes <= 0) {
-    return `${seconds}s`;
-  }
-  return `${minutes}m ${seconds}s`;
-}
-
-async function runLighthouseWithTimeout() {
+async function runStep(label, command, args = [], options = {}) {
   return new Promise((resolve, reject) => {
-    const child = spawn(npxCmd, ['lhci', 'autorun', '--config=lighthouserc.cjs'], {
-      env: { ...process.env, BASE_URL },
+    const child = spawn(command, args, {
       stdio: 'inherit',
+      shell: false,
+      ...options,
     });
-
-    let timedOut = false;
-    let forceTimer;
-
-    const timeoutTimer = setTimeout(() => {
-      timedOut = true;
-      console.error(`[lhci] Timeout after ${formatDuration(MAX_DURATION_MS)} — terminating Lighthouse run`);
-      child.kill('SIGTERM');
-      forceTimer = setTimeout(() => {
-        if (!child.killed) {
-          child.kill('SIGKILL');
-        }
-      }, 5_000);
-    }, MAX_DURATION_MS);
 
     child.on('error', (error) => {
-      clearTimeout(timeoutTimer);
-      if (forceTimer) clearTimeout(forceTimer);
-      reject(error);
+      reject(new Error(`[${label}] failed: ${error.message}`));
     });
 
     child.on('exit', (code, signal) => {
-      clearTimeout(timeoutTimer);
-      if (forceTimer) clearTimeout(forceTimer);
-      if (timedOut) {
-        reject(new Error(`Lighthouse run exceeded ${formatDuration(MAX_DURATION_MS)}`));
-        return;
+      if (code === 0) {
+        resolve();
+      } else {
+        const reason = signal ? `signal ${signal}` : `exit code ${code}`;
+        reject(new Error(`[${label}] exited with ${reason}`));
       }
-      if (signal && code === null) {
-        resolve(1);
-        return;
-      }
-      resolve(code ?? 0);
     });
   });
 }
 
-(async () => {
-  registerTerminationHandlers();
-  let exitCode = 0;
-  try {
-    const startedServer = await ensureServer();
-    if (startedServer) {
-      console.log('[lhci] Started local Next.js server');
-    } else {
-      console.log('[lhci] Reusing existing server at', BASE_URL);
+async function waitForServerReady(url) {
+  const retries = 40;
+  for (let attempt = 0; attempt < retries; attempt += 1) {
+    try {
+      const response = await fetch(url, { method: 'GET', redirect: 'manual' });
+      if (response.ok) return;
+    } catch (error) {
+      // ignore ECONNREFUSED etc
     }
-    await rm('.lighthouseci', { recursive: true, force: true });
+    await delay(500);
+  }
+  throw new Error(`Timed out waiting for server at ${url}`);
+}
 
-    const runExitCode = await runLighthouseWithTimeout();
-    exitCode = runExitCode;
+async function startServer() {
+  if (serverProcess) return;
 
-    const summary = await readLatestSummary().catch(() => null);
-    if (summary && typeof summary === 'object') {
-      const report = Object.fromEntries(
-        Object.keys(thresholds).map((key) => [key, Number.isFinite(summary[key]) ? summary[key].toFixed(2) : '0.00'])
-      );
-      console.log('Lighthouse scores', report);
+  serverProcess = spawn(npmCmd, ['run', 'start:test'], {
+    stdio: 'inherit',
+    env: { ...process.env },
+    shell: false,
+  });
+
+  serverProcess.on('error', (error) => {
+    console.error('[lhci] failed to start Next.js server', error);
+  });
+
+  serverProcess.on('exit', (code, signal) => {
+    if (!exiting && (code !== 0 || signal)) {
+      console.error(`[lhci] Next.js server exited early (code: ${code}, signal: ${signal})`);
+    }
+  });
+
+  const readinessUrl = new URL(READINESS_PATH, BASE_URL).toString();
+  await waitForServerReady(readinessUrl);
+}
+
+async function ensureServer() {
+  const readinessUrl = new URL(READINESS_PATH, BASE_URL).toString();
+  try {
+    const response = await fetch(readinessUrl, { method: 'GET', redirect: 'manual' });
+    if (response.ok) {
+      return false;
     }
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error('[lhci] run failed:', message);
-    if (exitCode === 0) {
-      exitCode = 1;
+    // ignore
+  }
+  await startServer();
+  return true;
+}
+
+async function stopServer() {
+  if (!serverProcess) return;
+  serverProcess.kill('SIGTERM');
+  await delay(500);
+  serverProcess = null;
+}
+
+function deviceEnv(device) {
+  if (device === 'desktop') {
+    return {
+      LHCI_COLLECT__SETTINGS__FORM_FACTOR: 'desktop',
+      LHCI_COLLECT__SETTINGS__SCREEN_EMULATION__DISABLED: 'true',
+      LHCI_COLLECT__SETTINGS__SCREEN_EMULATION__MOBILE: 'false',
+    };
+  }
+  return {
+    LHCI_COLLECT__SETTINGS__FORM_FACTOR: 'mobile',
+    LHCI_COLLECT__SETTINGS__SCREEN_EMULATION__DISABLED: 'false',
+    LHCI_COLLECT__SETTINGS__SCREEN_EMULATION__MOBILE: 'true',
+  };
+}
+
+async function runLighthousePass(device) {
+  const env = {
+    ...process.env,
+    BASE_URL,
+    ...deviceEnv(device),
+  };
+
+  await runStep(`lhci collect (${device})`, npxCmd, ['lhci', 'collect', '--config=lighthouserc.cjs', '--output=json', '--output=html'], { env });
+  await runStep(`lhci assert (${device})`, npxCmd, ['lhci', 'assert', '--config=lighthouserc.cjs'], { env });
+}
+
+function parseRouteAndLocale(urlString) {
+  const url = new URL(urlString);
+  const segments = url.pathname.replace(/\/$/, '').split('/').filter(Boolean);
+  let locale = defaultLocale;
+  if (segments.length > 0 && targetLocales.includes(segments[0])) {
+    locale = segments.shift();
+  }
+  const routePath = '/' + segments.join('/');
+  const normalizedRoute = routePath === '/' ? '/' : routePath;
+  const routeSlug = normalizedRoute === '/' ? 'home' : normalizedRoute.replace(/^\//, '').replace(/\//g, '-');
+  return { locale, route: normalizedRoute, routeSlug };
+}
+
+function formatLocale(locale) {
+  return locale.replace(/-/g, '_');
+}
+
+async function buildArtifacts() {
+  const reportDir = '.lighthouseci';
+  const artifactDir = 'artifacts/lighthouse';
+
+  await rm(artifactDir, { recursive: true, force: true });
+  await mkdir(artifactDir, { recursive: true });
+
+  const manifestPath = path.join(reportDir, 'manifest.json');
+  const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
+  await cp(manifestPath, path.join(artifactDir, 'manifest.json'), { force: true });
+
+  const summaryRows = [];
+
+  for (const entry of manifest) {
+    const jsonPath = path.join(reportDir, entry.jsonPath);
+    const htmlPath = entry.htmlPath ? path.join(reportDir, entry.htmlPath) : null;
+    const lhr = JSON.parse(await readFile(jsonPath, 'utf8'));
+    const device = lhr.configSettings.formFactor || lhr.configSettings.emulatedFormFactor || 'mobile';
+    const { locale, route, routeSlug } = parseRouteAndLocale(entry.url);
+    const slug = `${routeSlug}_${formatLocale(locale)}_${device}`;
+
+    await cp(jsonPath, path.join(artifactDir, `${slug}.json`), { force: true });
+    if (htmlPath) {
+      await cp(htmlPath, path.join(artifactDir, `${slug}.html`), { force: true });
     }
+
+    const categories = lhr.categories ?? {};
+    const audits = lhr.audits ?? {};
+    const perf = Math.round((categories.performance?.score ?? 0) * 100);
+    const a11y = Math.round((categories.accessibility?.score ?? 0) * 100);
+    const seo = Math.round((categories.seo?.score ?? 0) * 100);
+    const lcp = Math.round((audits['largest-contentful-paint']?.numericValue ?? 0));
+    const tbt = Math.round((audits['total-blocking-time']?.numericValue ?? 0));
+    const cls = Number((audits['cumulative-layout-shift']?.numericValue ?? 0).toFixed(3));
+
+    summaryRows.push({ route, locale, device, slug, perf, a11y, seo, lcp, tbt, cls });
+  }
+
+  summaryRows.sort((a, b) => a.slug.localeCompare(b.slug));
+
+  const summaryLines = [
+    '### Lighthouse Summary',
+    '',
+    '| Page | Locale | Device | Perf | A11y | SEO | LCP (ms) | TBT (ms) | CLS |',
+    '| --- | --- | --- | --- | --- | --- | --- | --- | --- |',
+    ...summaryRows.map((row) => `| ${row.route} | ${row.locale} | ${row.device} | ${row.perf} | ${row.a11y} | ${row.seo} | ${row.lcp} | ${row.tbt} | ${row.cls} |`),
+    '',
+  ];
+
+  const summaryText = summaryLines.join('\n');
+  await writeFile(path.join(artifactDir, 'summary.md'), summaryText, 'utf8');
+
+  if (process.env.GITHUB_STEP_SUMMARY) {
+    await appendFile(process.env.GITHUB_STEP_SUMMARY, `\n${summaryText}\n`, 'utf8');
+  }
+}
+
+async function main() {
+  const startedServer = await ensureServer();
+  try {
+    await rm('.lighthouseci', { recursive: true, force: true });
+
+    process.stdout.write('[lhci] Running mobile profiles...\n');
+    await runLighthousePass('mobile');
+
+    process.stdout.write('[lhci] Running desktop profiles...\n');
+    await runLighthousePass('desktop');
+
+    await buildArtifacts();
   } finally {
-    removeTerminationHandlers();
-    await stopServer();
-    if (!exiting) {
-      exiting = true;
-      process.exit(exitCode);
-    } else {
-      process.exitCode = exitCode;
+    exiting = true;
+    if (startedServer) {
+      await stopServer();
     }
   }
-})();
+}
+
+process.on('SIGINT', async () => {
+  exiting = true;
+  await stopServer();
+  process.exit(130);
+});
+
+process.on('SIGTERM', async () => {
+  exiting = true;
+  await stopServer();
+  process.exit(143);
+});
+
+main().catch(async (error) => {
+  console.error(error instanceof Error ? error.message : error);
+  exiting = true;
+  await stopServer();
+  process.exit(1);
+});

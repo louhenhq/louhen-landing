@@ -8,7 +8,7 @@ Testing follows the locked pyramid in [/CONTEXT/decision_log.md](decision_log.md
 | --- | --- | --- | --- |
 | Unit (`tests/unit/`) | Pure functions, hooks, server utilities (`lib/shared`, `lib/server`) | Vitest (JSDOM/Node) | Fast, deterministic, no network or timers. Snapshot only when meaningful. |
 | End-to-End (`tests/e2e/`) | Full user journeys: waitlist submit, method flow, header/nav, legal routes, status API | Playwright | Run against local server by default (`npx playwright test`). Remote, authenticated runs against preview happen via the `e2e:preview` GitHub Action leveraging the `PREVIEW_BYPASS_TOKEN` environment secret. |
-| Accessibility (`tests/axe/`) | Axe-core audits for critical pages (landing, waitlist, legal, method, status) | Playwright + `@axe-core/playwright` | Fail on serious/critical issues. Respect reduced-motion and theme toggles during scans. Remote coverage runs in the same preview workflow as E2E. |
+| Accessibility (`tests/axe/canonical.axe.ts`) | Axe-core audits for `/`, `/waitlist`, `/method` (default + secondary locale, desktop + mobile) | Playwright + `@axe-core/playwright` | Fail on serious/critical issues. Respect reduced-motion and theme toggles during scans. Remote coverage runs in the same preview workflow as E2E. |
 
 - Security headers coverage lives in `tests/e2e/security/headers.e2e.ts`; it enforces CSP nonce wiring, checks that HSTS `max-age` stays ≥ 31,536,000 seconds (with `includeSubDomains`/`preload` asserted only on the canonical production host), and ensures `camera=()` plus at least one of `interest-cohort=()` or `browsing-topics=()` is present. The spec always evaluates the **final** HTML response (after locale redirects and caching) because middleware headers are attached post-routing.
 
@@ -23,10 +23,10 @@ Testing follows the locked pyramid in [/CONTEXT/decision_log.md](decision_log.md
 
 ## Preview Workflow (Remote)
 - The `e2e:preview` workflow is manual (`workflow_dispatch`) and runs fully remote against `https://staging.louhen.app`. Never start a local server or print secret headers in those jobs.
-- A matrix fans out four suites (`method`, `header-nav`, `footer`, `waitlist` — waitlist coverage was added 2025-10-07). Each job runs both E2E (`tests/e2e/<suite>`) and Axe (`tests/axe/<suite>`) against the preview deployment.
+- A matrix fans out four suites (`method`, `header-nav`, `footer`, `waitlist`). Each job runs both E2E (`tests/e2e/<suite>`) and the canonical axe suite (`tests/axe/canonical.axe.ts`).
 - Playwright retries are set to `--retries=1` only inside CI to absorb isolated flakes; keep retries disabled locally so regressions surface during development.
-- Artifacts upload per job: `playwright-report-<suite>-e2e`, `test-results-<suite>-e2e`, `playwright-report-<suite>-axe`, and `test-results-<suite>-axe` with a 10-day retention.
-- Adding a new feature suite requires creating `tests/e2e/<feature>` and `tests/axe/<feature>` folders first, then appending `<feature>` to the workflow matrix.
+- Artifacts upload per job: `playwright-<suite>-e2e`, `playwright-<suite>-axe` (10-day retention) and matching `*-quarantine` archives; all written to `artifacts/playwright/`.
+- Adding a new feature suite requires updating the canonical matrix in `tests/axe/canonical.axe.ts`; do not create standalone axe runners.
 - SEO add-on specs (`tests/e2e/seo/`) run alongside every matrix entry; they cover sitemap HTTP integrity and canonical uniqueness.
 
 ## SEO add-ons
@@ -40,14 +40,15 @@ Testing follows the locked pyramid in [/CONTEXT/decision_log.md](decision_log.md
 - Preview workflow jobs run with a 30-minute timeout and concurrency guard `e2e-preview-${ref}-${suite}` that cancels superseded entries per branch/suite.
 - Caching: npm cache at `~/.npm` keyed by `npm-${os}-${hash(package-lock)}` with `${os}` restore key; Playwright browsers cached at `~/.cache/ms-playwright` keyed `pw-${os}-${hash(package-lock)}` with `${os}` restore key.
 - CI forces `--retries=1`; local runs stay flake-free (no retries). Playwright keeps `trace: on-first-retry`, `screenshot: only-on-failure`, and `video: retain-on-failure` so artifacts surface only when needed.
-- Expected artifacts per suite: `playwright-report-<suite>-{e2e,axe}` and `test-results-<suite>-{e2e,axe}` (retained 10 days). Missing folders fail the job.
+- Expected artifacts per suite: `playwright-<suite>-{e2e,axe}` (retained 10 days). Missing folders fail the job.
 - Each job writes a summary (`GITHUB_STEP_SUMMARY`) with totals, pass/fail counts, and quick references to the artifact names; reports never contain secrets.
 
 ## Flaky Quarantine Lane
-- Tag flaky specs by including `@flaky` in the test title (e.g., `test('@flaky waitlist social share', ...)`). Keep the tag until the spec produces two green preview runs, then remove it.
-- Preview workflow adds a non-blocking `Playwright (quarantine — <suite>)` job that filters on `@flaky`, runs with `--retries=2`, and uploads artifacts suffixed with `-quarantine` (retention 7 days). These jobs are `continue-on-error`; red runs flag attention without blocking merges.
+- Tag flaky specs by including `@quarantine` in the test title (e.g., `test('@quarantine waitlist social share', ...)`). Keep the tag until the spec produces two green preview runs, then remove it.
+- Preview workflow adds a non-blocking `Playwright (quarantine — <suite>)` job that filters on `@quarantine`, runs with `--retries=2`, and uploads artifacts suffixed with `-quarantine` (retention 7 days). These jobs are `continue-on-error`; red runs flag attention without blocking merges.
 - Quarantined specs must be triaged and deflaked within 7 calendar days. Options: fix the regression, rewrite the test, or delete it if redundant. Long-lived flakes should not stay in quarantine—open a tracked issue and skip the test with context if a fix is not immediate.
-- When a spec stabilises, remove the `@flaky` tag and verify the main preview lane passes twice consecutively before deleting any quarantine artefacts from backlog notes.
+- When a spec stabilises, remove the `@quarantine` tag and verify the main preview lane passes twice consecutively before deleting any quarantine artefacts from backlog notes.
+- Do not promote `staging → production` while the quarantine suite is red; resolve or remove the tag before releasing.
 
 ## Style Guardrails (Tokens)
 - During code review ensure components rely on semantic Tailwind utilities or token-backed helpers—no raw `#hex`, `rgb()`, or arbitrary `bg-[...]` / `text-[...]` / `shadow-[...]` utilities. Details in [/CONTEXT/design_system.md](design_system.md).

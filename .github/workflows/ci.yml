@@ -3,28 +3,24 @@ name: CI
 on:
   push:
     branches:
-      - '**'
+      - staging
+      - production
   pull_request:
+    branches:
+      - staging
   workflow_dispatch:
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/production' }}
+
 jobs:
-  build-and-test:
+  policy-guards:
     runs-on: ubuntu-latest
-    env:
-      CI: true
-      NEXT_PUBLIC_ANALYTICS_DISABLED: '1'
-      NEXT_PUBLIC_ANALYTICS_DEBUG: '0'
-      NEXT_PUBLIC_ENV: 'ci'
-      NEXT_PUBLIC_SITE_URL: 'https://ci.louhen.app'
-      NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
-      NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
-      NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
-      PW_HEALTH_PATH: /icon.svg
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -55,6 +51,38 @@ jobs:
           name: color-policy-report
           path: ci-artifacts/color-policy-report.txt
           if-no-files-found: warn
+
+  build-and-test:
+    needs: policy-guards
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      CI: true
+      NEXT_PUBLIC_ANALYTICS_DISABLED: '1'
+      NEXT_PUBLIC_ANALYTICS_DEBUG: '0'
+      NEXT_PUBLIC_ENV: 'ci'
+      NEXT_PUBLIC_SITE_URL: 'https://ci.louhen.app'
+      NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
+      NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
+      NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
+      PW_HEALTH_PATH: /icon.svg
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build design tokens
+        run: npm run -w @louhen/design-tokens build
 
       - name: Lint
         run: npm run lint
@@ -143,7 +171,7 @@ jobs:
           PORT: '4311'
           TEST_E2E_SHORTCIRCUIT: 'true'
           TEST_E2E_BYPASS_TOKEN: e2e-mocked-token
-          CI_SKIP_LANDING: '1'
+          PLAYWRIGHT_ARTIFACTS_DIR: artifacts/playwright/e2e
           NEXT_PUBLIC_ENV: 'ci'
           NEXT_PUBLIC_SITE_URL: 'https://ci.louhen.app'
           NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
@@ -167,8 +195,7 @@ jobs:
           NODE_ENV: production
           PW_HEALTH_PATH: /icon.svg
         run: |
-          mkdir -p playwright-report test-results
-          DEBUG=pw:webserver,pw:api npx playwright test --project=chromium --workers=1
+          DEBUG=pw:webserver,pw:api npm run test:e2e
         continue-on-error: false
 
       - name: Tail Next.js test server log
@@ -188,7 +215,7 @@ jobs:
           HOST: 127.0.0.1
           TEST_E2E_SHORTCIRCUIT: 'true'
           TEST_E2E_BYPASS_TOKEN: e2e-mocked-token
-          CI_SKIP_LANDING: '1'
+          PLAYWRIGHT_ARTIFACTS_DIR: artifacts/playwright/axe
           NEXT_PUBLIC_ENV: 'ci'
           NEXT_PUBLIC_SITE_URL: 'https://ci.louhen.app'
           NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
@@ -210,16 +237,15 @@ jobs:
           NODE_ENV: production
           PW_HEALTH_PATH: /icon.svg
         run: |
-          mkdir -p playwright-a11y-report
-          IS_PRELAUNCH=true PLAYWRIGHT_HTML_REPORT=playwright-a11y-report npx playwright test tests/e2e/legal.a11y.spec.ts --reporter=html --reporter=json=playwright-a11y-report/report.json --workers=1
+          IS_PRELAUNCH=true npm run test:axe
         continue-on-error: false
 
-      - name: Upload a11y report
+      - name: Upload accessibility artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-a11y-report
-          path: playwright-a11y-report/
+          name: playwright-axe
+          path: artifacts/playwright/axe/
           if-no-files-found: ignore
 
       - name: Lighthouse (LHCI)
@@ -235,8 +261,7 @@ jobs:
         with:
           name: playwright-artifacts
           path: |
-            playwright-report
-            test-results
+            artifacts/playwright
             .next/test-server.log
           if-no-files-found: warn
 
@@ -245,8 +270,20 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: lighthouse-results
-          path: .lighthouseci/
+          path: artifacts/lighthouse/
           if-no-files-found: ignore
+
+      - name: Append CI summary
+        if: always()
+        run: |
+          if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+            {
+              echo '### CI Artifacts';
+              echo '';
+              echo '- Playwright reports: `artifacts/playwright/` (open `e2e/html/index.html` or `axe/html/index.html`)';
+              echo '- Lighthouse summary: `artifacts/lighthouse/summary.md`';
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Upload Next.js traces
         if: always()
@@ -261,6 +298,7 @@ jobs:
     needs: build-and-test
     if: needs.build-and-test.result == 'failure'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     env:
       CI: true
       NEXT_PUBLIC_ANALYTICS_DISABLED: '1'
@@ -347,7 +385,7 @@ jobs:
           PORT: ${{ env.PORT }}
           TEST_E2E_SHORTCIRCUIT: 'true'
           TEST_E2E_BYPASS_TOKEN: e2e-mocked-token
-          CI_SKIP_LANDING: '1'
+          PLAYWRIGHT_ARTIFACTS_DIR: artifacts/playwright/fallback
           NEXT_PUBLIC_ENV: 'ci'
           NEXT_PUBLIC_SITE_URL: 'https://ci.louhen.app'
           NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
@@ -373,8 +411,7 @@ jobs:
           DEBUG: pw:api
           PW_HEALTH_PATH: /icon.svg
         run: |
-          mkdir -p playwright-report test-results
-          npx playwright test --project=chromium --workers=1
+          npm run test:e2e
 
       - name: Tail Next.js test server log (fallback)
         if: always()
@@ -392,8 +429,7 @@ jobs:
         with:
           name: playwright-artifacts-fallback
           path: |
-            playwright-report
-            test-results
+            artifacts/playwright
             .next/test-server.log
           if-no-files-found: warn
 

@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from '@tests/fixtures/playwright';
 import { localeUrl } from '../_utils/url';
 
 type Scenario = {

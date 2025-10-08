@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '@tests/fixtures/playwright';
 import AxeBuilder from '@axe-core/playwright';
 import { buildHeaderNavigation } from '@lib/nav/config';
 import type { SupportedLocale } from '@/next-intl.locales';

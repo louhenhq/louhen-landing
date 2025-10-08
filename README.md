@@ -60,10 +60,14 @@ To get started locally:
 | `npm run typecheck:strict:feature` | Run strict config after populating `tsconfig.strict.json#include`. | Ad-hoc pilots (update include globs, then revert). |
 | `npm run build` | Production Next.js build. | Required before merging; CI always. |
 | `npm run test:unit` | Execute Vitest suite (`--passWithNoTests`). | During feature work and CI. |
-| `npm run test:e2e` | Playwright smoke pass (Chromium, 1 worker). | Local validation + CI regression. |
-| `npm run test:axe` | Axe accessibility suite via Playwright. | Run after UI changes; part of `validate:local`. |
-| `npm run lhci` | Lighthouse CI autorun; logs failures instead of exiting non-zero. | CI performance gate; optional local audit. |
-| `npm run validate:local` | Full lint → typecheck → build → production server (`start:test`) → unit/e2e/axe → Lighthouse, then teardown. | Final local confidence check before large PRs. |
+| `npm run test:e2e` | Playwright suite (`desktop-chromium` + tagged `@mobile` specs). | Local validation + CI regression. |
+| `npm run test:axe` | Playwright axe scans (`desktop-chromium`). | Run after UI changes; part of `validate:local`. |
+| `npm run lhci` | Lighthouse CI autorun; enforces score + budget thresholds (see `lighthouse-budgets.json`). | CI performance gate; optional local audit. |
+| `npm run validate:local` | Orchestrates lint → typecheck → build → prod server → unit → Playwright (e2e + axe) → Lighthouse against the same base URL, then teardown. | One-click local QA; mirrors CI and writes reports under `artifacts/`. |
+
+### Local QA Artifacts
+
+`npm run validate:local` places Playwright outputs under `artifacts/playwright/<run>/` (open `html/index.html` for the full report) and Lighthouse bundles under `artifacts/lighthouse/` (JSON, HTML, and `summary.md`). The command boots the production build in pre-launch mode (`IS_PRELAUNCH=true`), runs every check against the same base URL, and re-creates these directories on each run.
 
 ### Install Policy & Determinism
 
@@ -147,3 +151,17 @@ tests/{unit,e2e,axe}
 ## License
 
 This project and its contents are proprietary and confidential. Unauthorized use, distribution, or reproduction is strictly prohibited. For licensing inquiries, please contact the Louhen team. See [NOTICE.md](NOTICE.md) for attributions of third-party dependencies and services used in this project.
+
+## CI Overview
+
+- Pull requests target `staging` and must pass `policy-guards` and `build-and-test`.
+- Pushes to `staging` rerun the same pipeline; pushes to `production` rerun it and execute `semantic-release`.
+- Artifacts: Playwright reports in `artifacts/playwright/`, Lighthouse reports + `summary.md` in `artifacts/lighthouse/`.
+
+
+### Branch Protections & Required Checks
+
+- `staging` (default): pull requests only, required checks `policy-guards` + `build-and-test`, branch must be up to date, squash merge recommended.
+- `production`: merges only from `staging` via PR, same required checks, release job runs after they pass; administrators follow the same gates.
+- `semantic-release` publishes prereleases on `staging` (channel `next`) and stable tags/releases on `production`.
+

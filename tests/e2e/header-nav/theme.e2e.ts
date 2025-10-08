@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from '@tests/fixtures/playwright';
 import { localeUrl } from '../_utils/url';
 
 test.describe('Header theme toggle', () => {
@@ -20,12 +20,10 @@ test.describe('Header theme toggle', () => {
     await expect(themeSelect).toHaveValue('system');
 
     await page.emulateMedia({ colorScheme: 'dark' });
-    await page.waitForTimeout(100);
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await expect.poll(async () => page.evaluate(() => document.documentElement.getAttribute('data-theme'))).toBe('dark');
 
     await page.emulateMedia({ colorScheme: 'light' });
-    await page.waitForTimeout(100);
-    await expect(page.locator('html')).not.toHaveAttribute('data-theme', 'dark');
+    await expect.poll(async () => page.evaluate(() => document.documentElement.getAttribute('data-theme'))).not.toBe('dark');
 
     await page.emulateMedia({ colorScheme: null });
   });

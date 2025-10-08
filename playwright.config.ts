@@ -1,6 +1,7 @@
 import type { PlaywrightTestConfig } from '@playwright/test';
 import { Buffer } from 'node:buffer';
 import { mkdirSync } from 'node:fs';
+import path from 'node:path';
 import { defineConfig, devices } from '@playwright/test';
 
 const HOST = process.env.HOST ?? '127.0.0.1';
@@ -12,9 +13,10 @@ const envBaseURL = process.env.BASE_URL ?? process.env.PREVIEW_BASE_URL ?? null;
 const baseURL = envBaseURL ?? fallbackLocalURL;
 const isRemote = envBaseURL !== null;
 const shouldSkipWebServer = process.env.PLAYWRIGHT_SKIP === '1';
+const artifactsRoot = process.env.PLAYWRIGHT_ARTIFACTS_DIR ?? 'artifacts/playwright';
+const playwrightResultsDir = path.join(artifactsRoot, 'results');
 
-mkdirSync('playwright-report', { recursive: true });
-mkdirSync('test-results', { recursive: true });
+mkdirSync(playwrightResultsDir, { recursive: true });
 
 const statusUser = process.env.STATUS_USER ?? process.env.CI_STATUS_USER ?? 'status-ops';
 const statusPass = process.env.STATUS_PASS ?? process.env.CI_STATUS_PASS ?? 'status-secret';
@@ -83,12 +85,17 @@ for (const [key, value] of Object.entries(testEnv)) {
 const config: PlaywrightTestConfig = {
   testDir: 'tests',
   testMatch: ['**/*.e2e.ts', '**/*.axe.ts', '**/*.spec.ts'],
+  timeout: process.env.CI ? 90_000 : 60_000,
   retries: process.env.CI ? 1 : 0,
   workers: process.env.CI ? 1 : 2,
   reporter: [
-    ['html'],
-    ['json', { outputFile: 'playwright-report/report.json' }],
+    ['html', { outputFolder: path.join(artifactsRoot, 'html'), open: 'never' }],
+    ['json', { outputFile: path.join(artifactsRoot, 'report.json') }],
   ],
+  outputDir: playwrightResultsDir,
+  expect: {
+    timeout: 5_000,
+  },
   use: {
     baseURL,
     trace: 'on-first-retry',
@@ -106,7 +113,7 @@ const config: PlaywrightTestConfig = {
 if (shouldSkipWebServer) {
   config.projects = [
     {
-      name: 'chromium',
+      name: 'desktop-chromium',
       testMatch: ['**/__skip__.spec.ts'],
       use: { ...devices['Desktop Chrome'] },
     },
@@ -114,8 +121,14 @@ if (shouldSkipWebServer) {
 } else {
   config.projects = [
     {
-      name: 'chromium',
+      name: 'desktop-chromium',
       use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'mobile-chromium',
+      use: { ...devices['Pixel 5'] },
+      grep: /@mobile/,
+      grepInvert: /@desktop-only/,
     },
   ];
   if (!isRemote) {

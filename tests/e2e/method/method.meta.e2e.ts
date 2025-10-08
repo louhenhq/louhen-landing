@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from '@tests/fixtures/playwright';
 import { loadMessages } from '@lib/intl/loadMessages';
 import { methodPath } from '@lib/shared/routing/method-path';
 import { hreflangMapFor, makeCanonical } from '@lib/seo/shared';
@@ -95,6 +95,11 @@ test.describe('Method page metadata', () => {
       }
 
       expect(hreflangMap.get('x-default')).toBe(expectedAlternates['x-default']);
+
+      const jsonLdSnippets = await page
+        .locator('script[type="application/ld+json"]')
+        .evaluateAll((nodes) => nodes.map((node) => node.textContent ?? ''));
+      expect(jsonLdSnippets.some((content) => content.includes('"@type":"BreadcrumbList"'))).toBeTruthy();
     });
   }
 

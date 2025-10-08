@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from '@tests/fixtures/playwright';
 import type { BrowserContext, Page } from '@playwright/test';
 import { localeUrl } from '../_utils/url';
 
@@ -7,15 +7,17 @@ const CONSENT_COOKIE_VALUE = () => {
   return encodeURIComponent(JSON.stringify(payload));
 };
 
+const COOKIE_DOMAIN = new URL(localeUrl()).hostname;
+
 async function seedConsent(context: BrowserContext) {
   await context.addCookies([
-    { name: 'louhen_consent', value: CONSENT_COOKIE_VALUE(), domain: 'localhost', path: '/' },
+    { name: 'louhen_consent', value: CONSENT_COOKIE_VALUE(), domain: COOKIE_DOMAIN, path: '/' },
   ]);
 }
 
 async function applyAuthHint(context: BrowserContext) {
   await context.addCookies([
-    { name: 'LH_AUTH', value: '1', domain: 'localhost', path: '/' },
+    { name: 'LH_AUTH', value: '1', domain: COOKIE_DOMAIN, path: '/' },
   ]);
 }
 

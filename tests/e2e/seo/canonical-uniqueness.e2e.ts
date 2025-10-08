@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from '@tests/fixtures/playwright';
 import type { SupportedLocale } from '@/next-intl.locales';
 import { getTestLocales } from '../_utils/url';
 import { hreflangMapFor, makeCanonical, resolveBaseUrl } from '@lib/seo/shared';

@@ -1,8 +1,8 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from '@tests/fixtures/playwright';
 import type { SupportedLocale } from '@/next-intl.locales';
 import { loadMessages } from '@lib/intl/loadMessages';
 import { methodPath } from '@lib/shared/routing/method-path';
-import { getTestLocales } from '../_utils/url';
+import { getDefaultLocale, getTestLocales, localeUrl } from '../_utils/url';
 
 type MethodMessages = {
   seo: { title: string };
@@ -14,6 +14,7 @@ type MethodMessages = {
 };
 
 const localesToTest = getTestLocales();
+const defaultLocale = getDefaultLocale() as SupportedLocale;
 
 test.describe('Method page smoke test', () => {
   for (const locale of localesToTest as SupportedLocale[]) {
@@ -60,4 +61,12 @@ test.describe('Method page smoke test', () => {
       }
     });
   }
+});
+
+test.describe('@mobile method mobile smoke', () => {
+  test('renders hero and CTA on mobile view', async ({ page }) => {
+    await page.goto(localeUrl('/method', { locale: defaultLocale }), { waitUntil: 'networkidle' });
+    await expect(page.locator('[data-ll="method-hero"]').first()).toBeVisible();
+    await expect(page.locator('[data-ll="method-hero-cta"]').first()).toBeVisible();
+  });
 });

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '@tests/fixtures/playwright';
 import { localeUrl } from '../_utils/url';
 
 test.describe('Header CTA modes', () => {

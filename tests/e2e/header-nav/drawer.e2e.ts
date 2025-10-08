@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from '@tests/fixtures/playwright';
 import type { Page } from '@playwright/test';
 import { localeUrl } from '../_utils/url';
 
@@ -10,9 +10,8 @@ async function activeElementInsideDrawer(page: Page) {
   });
 }
 
-test.describe('Header mobile drawer', () => {
+test.describe('@mobile Header mobile drawer', () => {
   test.beforeEach(async ({ page }) => {
-    await page.setViewportSize({ width: 414, height: 896 });
     await page.goto(localeUrl('?utm_source=drawer-spec'), { waitUntil: 'networkidle' });
   });
 

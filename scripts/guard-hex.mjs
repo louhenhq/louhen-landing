@@ -16,6 +16,7 @@ const SKIP_PATH_SNIPPETS = [
   `${join('', '.cache')}`,
   `${join('', 'playwright-report')}`,
   `${join('', 'test-results')}`,
+  `${join('', 'artifacts')}`,
   `${join('', 'ci-artifacts')}`,
   `${join('', 'public', 'tokens')}`,
   `${join('', 'packages', 'design-tokens')}`,

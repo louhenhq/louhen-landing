@@ -152,9 +152,12 @@ export default async function StatusPage() {
         <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
           <h2 className="text-sm font-semibold text-slate-700">Security signals</h2>
           <dl className="mt-3 space-y-2 text-sm text-slate-600">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between" data-testid="status-csp-nonce">
               <dt>CSP nonce</dt>
-              <dd className={snapshot.noncePresent ? 'text-emerald-600' : 'text-rose-600'}>
+              <dd
+                className={snapshot.noncePresent ? 'text-emerald-600' : 'text-rose-600'}
+                data-testid="status-csp-nonce-value"
+              >
                 {snapshot.noncePresent ? 'present' : 'missing'}
               </dd>
             </div>
@@ -176,15 +179,20 @@ export default async function StatusPage() {
         <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
           <h2 className="text-sm font-semibold text-slate-700">Email</h2>
           <dl className="mt-3 space-y-2 text-sm text-slate-600">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between" data-testid="status-email-transport">
               <dt>Live transport</dt>
-              <dd className={snapshot.emailTransport ? 'text-emerald-600' : 'text-amber-600'}>
+              <dd
+                className={snapshot.emailTransport ? 'text-emerald-600' : 'text-amber-600'}
+                data-testid="status-email-transport-value"
+              >
                 {formatBoolean(snapshot.emailTransport)}
               </dd>
             </div>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between" data-testid="status-transport-mode">
               <dt>Transport mode</dt>
-              <dd className="font-mono text-xs uppercase text-slate-800">{snapshot.emailTransportMode}</dd>
+              <dd className="font-mono text-xs uppercase text-slate-800" data-testid="status-transport-mode-value">
+                {snapshot.emailTransportMode}
+              </dd>
             </div>
             <div className="flex items-center justify-between">
               <dt>Suppressions (last {snapshot.suppressionsSampleLimit})</dt>
@@ -197,9 +205,11 @@ export default async function StatusPage() {
       <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
         <h2 className="text-sm font-semibold text-slate-700">Environment</h2>
         <dl className="mt-3 grid grid-cols-1 gap-3 text-sm text-slate-600 md:grid-cols-3">
-          <div>
+          <div data-testid="status-env-vercel">
             <dt className="text-xs uppercase text-slate-500">Vercel env</dt>
-            <dd className="font-medium text-slate-900">{snapshot.env.vercelEnv ?? '—'}</dd>
+            <dd className="font-medium text-slate-900" data-testid="status-env-vercel-value">
+              {snapshot.env.vercelEnv ?? '—'}
+            </dd>
           </div>
           <div>
             <dt className="text-xs uppercase text-slate-500">Commit SHA</dt>

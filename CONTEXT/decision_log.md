@@ -17,7 +17,7 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
 | Consent-gated analytics | No third-party CMP; custom consent store gates analytics/marketing payloads before firing. | 2025-10-09 | [analytics_privacy.md](analytics_privacy.md) · [security.md](security.md) |
 | Testing pyramid: unit / e2e / axe | Unit for logic, Playwright e2e for flows, axe for accessibility; selectors via `data-ll`. | 2025-10-09 | [testing.md](testing.md) |
 | Lighthouse budgets in CI | Keep `/` and key flows ≥90/95/95/95 (P/A/SEO/BP); CI uploads artifacts and blocks regressions. | 2025-10-09 | [performance.md](performance.md) · [architecture.md](architecture.md) |
-| semantic-release branches (main/next/beta) | Automated releases via Conventional Commits; `main` stable, `next` preview, `beta` prerelease cuts. | 2025-10-09 | [release.md](release.md) |
+| semantic-release branches (staging/production) | Conventional commits drive prereleases on `staging` (channel `next`) and stable tags on `production`; only staging→production promotes releases. | 2025-10-09 | [release.md](release.md) |
 | Environment & feature flags policy | All secrets in Vercel/GitHub; flags live under `lib/shared/env` + `lib/server/env`; no ad-hoc envs. | 2025-10-09 | [envs.md](envs.md) · [architecture.md](architecture.md) |
 | Local vs remote fonts toggle | `NEXT_USE_REMOTE_FONTS` controls fallback; default to self-hosted local fonts for performance/legal review. | 2025-10-09 | [envs.md](envs.md) · [performance.md](performance.md) |
 | Canonical host + DNS strategy | Production canonical `https://www.louhen.app`, apex 301 redirect, preview `https://staging.louhen.app`. | 2025-09-24 | [seo.md](seo.md) · [domains.md](domains.md) |
@@ -146,8 +146,8 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
 
 - **2025-10-08 — CI/Playwright Server Lifecycle 2025**
   - Adjust → Playwright now owns the e2e server lifecycle via `webServer.command`; CI builds once, then runs `npx playwright test` without manual `npm run start:test` calls.
-  - Add → `start:test` enforces `NODE_ENV=production`, binds to `127.0.0.1:4311`, and captures output in `.next/test-server.log`; Playwright config pre-creates `playwright-report/` + `test-results/` and publishes JSON to `playwright-report/report.json`. Managed run now waits on `/icon.svg` (overridable via `PW_HEALTH_PATH`) for readiness, and a conditional fallback job pre-starts the server and reuses it when the managed path fails so CI still runs coverage.
-  - Notes → CI always tails `.next/test-server.log` and uploads combined artifacts (`playwright-report/`, `test-results/`, `.next/test-server.log`). Local developers run `npx playwright test --project=chromium --workers=1` post-build for equivalent coverage.
+  - Add → `start:test` enforces `NODE_ENV=production`, binds to `127.0.0.1:4311`, and captures output in `.next/test-server.log`; Playwright config now writes to `artifacts/playwright/<run>/` with a JSON summary per run. Managed run waits on `/icon.svg` (overridable via `PW_HEALTH_PATH`) for readiness, and a conditional fallback job pre-starts the server and reuses it when the managed path fails so CI still runs coverage.
+  - Notes → CI always tails `.next/test-server.log` and uploads `artifacts/playwright/**`. Local developers run `npm run validate:local` or `npm run test:e2e` post-build for equivalent coverage.
 
 - **2025-10-08 — Tokens Guardrails (Slice 3)**
   - Keep → `@louhen/design-tokens` remains the canonical source; `app/layout.tsx` continues to import `./styles/tokens.css` once at the root.
