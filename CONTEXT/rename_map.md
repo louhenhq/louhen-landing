@@ -175,7 +175,7 @@ _Tables sorted by `Current Path`; `Status=DECIDE` rows include the follow-up nee
 | lib/env/guard.ts | server | lib/server/env/guard.ts | guard.ts | no | OK | Server-only env snapshot; ensure tests updated to new path. |
 | lib/env/prelaunch.ts | util | lib/shared/env/prelaunch.ts | prelaunch.ts | no | OK | Provide alias-based import for shared prelaunch checks. |
 | middleware.ts | server | middleware.ts | same | no | SKIP | Middleware must remain at repo root per Next. |
-| tests/e2e/security-headers.spec.ts | test:e2e | tests/e2e/csp/security-headers.e2e.ts | security-headers.e2e.ts | no | OK | Uses response header assertions; no selectors required. |
+| tests/e2e/security/headers.e2e.ts | test:e2e | tests/e2e/csp/security-headers.e2e.ts | security-headers.e2e.ts | no | OK | Uses response header assertions; no selectors required. |
 
 ### Feature: status-api
 
@@ -356,7 +356,7 @@ Pending moves use new `tests/{unit,e2e,axe}/<feature>/` layout; selectors noted 
 | footer / routing | `tests/e2e/legal.spec.ts`, `tests/e2e/legal.a11y.spec.ts`, `tests/e2e/unsubscribe.spec.ts` | `tests/e2e/legal/legal.e2e.ts`, `tests/axe/legal/legal.axe.ts`, `tests/e2e/unsubscribe/unsubscribe.e2e.ts` | Add `data-ll="footer-shell"`, `data-ll="footer-privacy-ribbon"`, and introduce `data-ll="unsubscribe-form"`. |
 | seo-jsonld | `tests/e2e/seo.spec.ts`, `tests/unit/metadata.ref.test.ts` | `tests/e2e/seo/seo.e2e.ts`, `tests/unit/seo/metadata-ref.spec.ts` | Decide on `[data-ll="seo-jsonld"]` mount or mocked query. |
 | i18n-core | `tests/unit/i18n.keys.test.ts` | `tests/unit/i18n/keys.spec.ts` | No selectors; update imports to `content/i18n`. |
-| csp-headers | `tests/e2e/security-headers.spec.ts` | `tests/e2e/csp/security-headers.e2e.ts` | No DOM selectors. |
+| csp-headers | `tests/e2e/security/headers.e2e.ts` | `tests/e2e/csp/security-headers.e2e.ts` | No DOM selectors. |
 | status-api | `tests/e2e/status.spec.ts`, `tests/unit/status-auth.spec.ts` | `tests/e2e/status/status.e2e.ts`, `tests/unit/status/auth.spec.ts` | No selectors; ensure server mocks updated. |
 | analytics | `tests/unit/analytics.spec.ts` (plus landing e2e above) | `tests/unit/analytics/analytics.spec.ts` | Hero selector reused from home. |
 | consent | `tests/e2e/consent.spec.ts` | `tests/e2e/consent/consent.e2e.ts` | Add `data-ll="consent-banner"` attr. |

@@ -10,6 +10,8 @@ Testing follows the locked pyramid in [/CONTEXT/decision_log.md](decision_log.md
 | End-to-End (`tests/e2e/`) | Full user journeys: waitlist submit, method flow, header/nav, legal routes, status API | Playwright | Run against local server by default (`npx playwright test`). Remote, authenticated runs against preview happen via the `e2e:preview` GitHub Action leveraging the `PREVIEW_BYPASS_TOKEN` environment secret. |
 | Accessibility (`tests/axe/`) | Axe-core audits for critical pages (landing, waitlist, legal, method, status) | Playwright + `@axe-core/playwright` | Fail on serious/critical issues. Respect reduced-motion and theme toggles during scans. Remote coverage runs in the same preview workflow as E2E. |
 
+- Security headers coverage lives in `tests/e2e/security/headers.e2e.ts`; it enforces CSP nonce wiring, treats HSTS `max-age` as a **minimum** threshold (≥ 31,536,000 seconds), and checks that `camera=()` plus at least one of `interest-cohort=()` or `browsing-topics=()` is present so future browser policy changes keep the suite stable.
+
 ## Selector Guidance
 - Use `data-ll="..."` attributes for all selectors referenced in Playwright or axe specs. Never rely on classes, DOM order, or localized text.
 - Align selector IDs with the entries in [/CONTEXT/rename_map.md](rename_map.md) and directory rules in [/CONTEXT/naming.md](naming.md) so future moves keep tests readable.

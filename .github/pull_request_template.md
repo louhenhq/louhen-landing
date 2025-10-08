@@ -8,8 +8,9 @@
 
 ## Checklist (trust, privacy, governance)
 - [ ] **Consent**: Analytics initialize only after opt-in; no surprise trackers added.  
-- [ ] **CSP Nonce**: No inline scripts without a nonce; JSON-LD keeps nonce parity.  
-- [ ] **Security Headers**: HSTS, Referrer-Policy, Permissions-Policy, and X-Frame-Options remain enforced.  
+- [ ] **CSP Nonce**: All inline scripts carry the SSR nonce (JSON-LD included).  
+- [ ] **Security Headers**: Security headers unchanged (HSTS, Referrer-Policy, X-CTO, Permissions-Policy, X-FO/frame-ancestors).  
+- [ ] **CSP Scope**: No new external origins in CSP without justification.  
 - [ ] **Email Compliance**: List-Unsubscribe (mailto + one-click), List-Unsubscribe-Post, Auto-Submitted, and Reply-To headers accounted for.  
 - [ ] **Status Endpoint**: `/api/status` still requires Basic Auth and returns the required keys.  
 - [ ] **i18n/SEO**: BCP-47 routes, hreflang, canonical host, and preview `noindex` remain correct.  

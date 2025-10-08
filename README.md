@@ -71,6 +71,17 @@ To get started locally:
 - **Local development:** use `npm install` only when adjusting dependencies/lockfile; otherwise prefer `npm ci` for clean states.
 - `package-lock.json` is the source of truth—avoid `--force` or `--legacy-peer-deps` in CI or PR workflows.
 
+### CSP & Security Headers
+
+- The dev server (`npm run dev`) relaxes `script-src` with `'unsafe-eval'` and opens `connect-src` to `ws://localhost:*` so Next.js fast-refresh and inspectors work. Production builds remove these relaxations.
+- To validate the locked-down policy locally, run:
+  ```bash
+  npm run build
+  PORT=4311 npm run start:test
+  ```
+  then inspect headers via `curl -I http://127.0.0.1:4311/en` or run the Playwright check with `npm run test:e2e -- tests/e2e/security/headers.e2e.ts`.
+- Preview environments can temporarily serve `Content-Security-Policy-Report-Only` by exporting `CSP_REPORT_ONLY=1`; production ignores this flag and always enforces.
+
 ## Structure (quick)
 
 See [/CONTEXT/naming.md](CONTEXT/naming.md) for repository-wide naming and layout conventions.
