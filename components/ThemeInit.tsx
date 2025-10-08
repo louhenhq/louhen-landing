@@ -72,13 +72,7 @@ export default function ThemeInit() {
   const nonce = useNonce();
 
   useEffect(() => {
-    const t = getSavedTheme();
-    const c = getSavedContrast();
-    if (t === 'system' || c === 'system') applyThemeFromMedia();
-    else {
-      setTheme(t);
-      setContrast(c);
-    }
+    applyThemeFromMedia();
     setMetaThemeFromTokens();
 
     const mqlDark = window.matchMedia('(prefers-color-scheme: dark)');
@@ -107,14 +101,18 @@ export default function ThemeInit() {
         applyThemeFromMedia();
       }
       setMetaThemeFromTokens();
-    };
-    mqlDark.addEventListener('change', handle);
-    mqlContrast.addEventListener('change', handle);
-    mqlForced.addEventListener('change', handle);
+    });
+
+    const observer = new MutationObserver((mutations) => {
+      if (mutations.some((mutation) => mutation.attributeName === 'data-theme')) {
+        setMetaThemeFromTokens();
+      }
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
     return () => {
-      mqlDark.removeEventListener('change', handle);
-      mqlContrast.removeEventListener('change', handle);
-      mqlForced.removeEventListener('change', handle);
+      unsubscribe();
+      observer.disconnect();
     };
   }, []);
   return (

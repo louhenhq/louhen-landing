@@ -54,7 +54,7 @@ export function ConfirmResendForm() {
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           autoComplete="email"
-          className="rounded-lg border border-border bg-bg px-md py-sm text-base text-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
+          className="rounded-2xl"
         />
       </label>
       <div className="flex items-center gap-sm md:mt-[30px]">
@@ -65,7 +65,7 @@ export function ConfirmResendForm() {
           data-ll="wl-resend-submit"
         >
           {t('cta')}
-        </button>
+        </Button>
         {status === 'success' && (
           <span className="text-sm text-status-success" aria-live="polite" data-ll="wl-resend-status">
             {t('sent')}

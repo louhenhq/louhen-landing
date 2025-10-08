@@ -72,13 +72,19 @@ export default async function MethodPage({ params }: MethodPageProps) {
     headline: t('hero.title'),
     description: t('seo.description'),
     locale,
-    sections: [...pillarTitles, ...howTitles, t('trust.headline')],
+    sections: [...pillarTitles, ...howTitles, t('trust.headline'), t('faqTeaser.title')],
     baseUrl,
     brandName: 'Louhen',
     image: `${baseUrl}/opengraph-image.png`,
     datePublished: '2025-01-15T00:00:00.000Z',
     dateModified: '2025-01-15T00:00:00.000Z',
   });
+
+  const sessionId = await readWaitlistSession();
+  const profileDraft = sessionId ? await getPreOnboardingDraft(sessionId) : null;
+  const primaryChildName = profileDraft?.children?.[0]?.name?.trim() || null;
+  const variantPersonalized = Boolean(primaryChildName);
+  const route = localizedPath;
 
   return (
     <div className={layout.page}>

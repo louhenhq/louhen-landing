@@ -2,6 +2,7 @@ import 'server-only';
 
 import { verifyUnsubToken } from '@/lib/email/tokens';
 import { upsertSuppression } from '@/lib/email/suppress';
+import { buttons, cn } from '@/app/(site)/_lib/ui';
 
 export const runtime = 'nodejs';
 
@@ -79,28 +80,28 @@ export default async function UnsubscribePage({ searchParams }: PageProps) {
         </div>
       )}
 
-      <section className="rounded-xl border border-slate-200 bg-white px-6 py-5 shadow-sm">
-        <h2 className="text-lg font-medium text-slate-900">Unsubscribe manually</h2>
-        <p className="mt-1 text-sm text-slate-600">Enter your email and we&apos;ll stop sending updates to that address.</p>
-        <form className="mt-4 flex flex-col gap-3" method="POST" action="/api/unsubscribe">
+      <section className="rounded-xl border border-border bg-bg-card px-6 py-5 shadow-sm">
+        <h2 className="text-h3 text-text">Unsubscribe manually</h2>
+        <p className="mt-1 text-body text-text-muted">Enter your email and we&apos;ll stop sending updates to that address.</p>
+        <form className="mt-sm flex flex-col gap-sm" method="POST" action="/api/unsubscribe">
           <input type="hidden" name="redirect" value="/unsubscribe?status=manual-success" />
           <input
             type="email"
             name="email"
             required
             placeholder="you@example.com"
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-slate-500 focus:outline-none"
+            className="w-full rounded-lg border border-border px-sm py-xs text-body shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
           />
           <button
             type="submit"
-            className="inline-flex w-full items-center justify-center rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
+            className={cn(buttons.primary, 'w-full rounded-lg px-sm py-xs')}
           >
             Unsubscribe
           </button>
         </form>
       </section>
 
-      <p className="text-xs text-slate-500">
+      <p className="text-body-sm text-text-muted">
         Prefer historical updates again? Reply to any Louhen email or reach out to support@louhen.eu and we&apos;ll help.
       </p>
     </main>

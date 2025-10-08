@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { randomUUID } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { BadRequestError, HttpError, InternalServerError } from '@/lib/http/errors';
 import { upsertPending } from '@lib/server/waitlist/firestore.server';

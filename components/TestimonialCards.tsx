@@ -70,11 +70,11 @@ export default function TestimonialCards() {
 
   return (
     <section className={layout.section}>
-      <div className={cn(layout.container, 'flex flex-col gap-8')}>
-        <div className="max-w-2xl">
+      <div className={cn(layout.container, layout.grid, 'gap-y-xl')}>
+        <div className="md:col-span-4 lg:col-span-4">
           <h2 className={text.heading}>{t('title')}</h2>
         </div>
-        <ol className="grid gap-6 md:grid-cols-3">
+        <ol className="md:col-span-8 lg:col-span-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {items.map((item, index) => (
             <li
               key={`${item.name}-${index}`}
@@ -84,8 +84,8 @@ export default function TestimonialCards() {
               className={cn(layout.card, shadows.soft, 'flex h-full flex-col gap-sm rounded-2xl p-lg')}
               data-testid="testimonial-card"
             >
-              <p className="text-sm font-medium text-text">{item.name}</p>
-              <p className="text-xs uppercase tracking-wide text-text-muted">{item.meta}</p>
+              <p className="text-label text-text">{item.name}</p>
+              <p className="text-meta uppercase tracking-[0.24em] text-text-muted">{item.meta}</p>
               <p className={text.body}>{item.quote}</p>
             </li>
           ))}

@@ -2,10 +2,9 @@ import { NextResponse, type NextRequest } from 'next/server';
 import createIntlMiddleware from 'next-intl/middleware';
 import { config as intlRoutingConfig } from './next-intl.config';
 
-const intlMiddleware = createIntlMiddleware({
-  ...intlRoutingConfig,
-  localePrefix: 'as-needed',
-});
+const SUPPORTED_LOCALE_VALUES = new Set(FULL_LOCALES.map((value) => value.toLowerCase()));
+const ALREADY_LOCALIZED = /^\/(en-de|de-de)(?:\/|$)/;
+const allowIndexOverride = process.env.LH_ALLOW_INDEX === 'true';
 
 const supportedLocales = new Set(intlRoutingConfig.locales);
 const HSTS_MAX_AGE_SECONDS = 60 * 60 * 24 * 730; // 2 years
@@ -106,9 +105,13 @@ function buildPermissionsPolicy() {
   ].join(', ');
 }
 
-export function middleware(request: NextRequest) {
-  const nonce = generateNonce();
-  request.headers.set('x-csp-nonce', nonce);
+function getHostname(request: NextRequest) {
+  const hostHeader = request.headers.get('host');
+  if (hostHeader) {
+    return hostHeader.split(':')[0]?.toLowerCase() ?? '';
+  }
+  return request.nextUrl.hostname?.toLowerCase() ?? '';
+}
 
   const isProdLike =
     process.env.VERCEL_ENV === 'production' ||
@@ -158,6 +161,60 @@ export function middleware(request: NextRequest) {
   response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
   response.headers.set('Cross-Origin-Resource-Policy', 'same-site');
 
+  return response;
+}
+
+export function middleware(request: NextRequest) {
+  const nonce = generateNonce();
+  request.headers.set('x-csp-nonce', nonce);
+
+  const pathname = request.nextUrl.pathname;
+  const hostname = getHostname(request);
+  const isLocalhost = isLoopbackHost(hostname);
+  const shouldAllowIndex = allowIndexOverride || isLocalhost;
+
+  if (shouldAllowIndex) {
+    request.headers.set('x-allow-robots', 'true');
+  }
+
+  if (ALREADY_LOCALIZED.test(pathname)) {
+    const response = NextResponse.next();
+
+    if (shouldAllowIndex) {
+      response.headers.set('x-robots-tag', 'index, follow');
+    }
+
+    if (!shouldHandleHtml(request)) {
+      return response;
+    }
+
+    const csp = buildCsp(nonce);
+    response.headers.set('Content-Security-Policy', csp);
+    return applySecurityHeaders(response, nonce, isLocalhost);
+  }
+
+  const shortLocaleMatch = pathname.match(/^\/([A-Za-z]{2})(?=\/|$)/);
+  if (shortLocaleMatch) {
+    const shortLocale = shortLocaleMatch[1].toLowerCase();
+    const canonical = SHORT_TO_FULL[shortLocale];
+    if (canonical) {
+      const url = request.nextUrl.clone();
+      const remainder = pathname.slice(shortLocaleMatch[0].length) || '/';
+      url.pathname = `/${canonical}${remainder.startsWith('/') ? remainder : `/${remainder}`}`;
+      const response = NextResponse.redirect(url, 308);
+      if (shouldAllowIndex) {
+        response.headers.set('x-robots-tag', 'index, follow');
+      }
+      return response;
+    }
+  }
+
+  const targetLocale = resolvePreferredLocale(request);
+  const url = buildRedirectUrl(request, targetLocale);
+  const response = NextResponse.redirect(url, 308);
+  if (shouldAllowIndex) {
+    response.headers.set('x-robots-tag', 'index, follow');
+  }
   return response;
 }
 

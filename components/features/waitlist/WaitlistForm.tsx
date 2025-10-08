@@ -1,6 +1,5 @@
 'use client';
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useLocale, useTranslations } from 'next-intl';
@@ -44,25 +43,65 @@ const isDevLike = process.env.NODE_ENV !== 'production';
 export function WaitlistForm({ defaultEmail = '', source }: WaitlistFormProps) {
   const t = useTranslations('waitlist.form');
   const locale = useLocale();
+  const prefersReducedMotion = usePrefersReducedMotion();
+
   const [email, setEmail] = useState(defaultEmail);
   const [consent, setConsent] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [status, setStatus] = useState<SubmitState>('idle');
-  const [message, setMessage] = useState<string>('');
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [summaryErrors, setSummaryErrors] = useState<string[]>([]);
+  const [serverHint, setServerHint] = useState<string | null>(null);
+  const [lastSubmittedEmail, setLastSubmittedEmail] = useState<string | null>(null);
+  const [isAnimated, setIsAnimated] = useState(prefersReducedMotion);
+
   const captchaRef = useRef<HCaptchaRef | null>(null);
+  const errorSummaryRef = useRef<HTMLDivElement | null>(null);
+  const emailInputRef = useRef<HTMLInputElement | null>(null);
+  const consentRef = useRef<HTMLInputElement | null>(null);
+  const captchaContainerRef = useRef<HTMLDivElement | null>(null);
+  const successHeadingRef = useRef<HTMLHeadingElement | null>(null);
 
   const normalizedSource = useMemo(() => source?.trim() || null, [source]);
   const captchaRequired = captchaEnabled;
 
-  const resetFeedback = useCallback(() => {
-    setStatus('idle');
-    setMessage('');
-  }, []);
+  useEffect(() => {
+    if (prefersReducedMotion) {
+      setIsAnimated(true);
+      return;
+    }
+    const frame = requestAnimationFrame(() => setIsAnimated(true));
+    return () => cancelAnimationFrame(frame);
+  }, [prefersReducedMotion]);
 
   useEffect(() => {
     setEmail(defaultEmail);
-    resetFeedback();
-  }, [defaultEmail, resetFeedback]);
+  }, [defaultEmail]);
+
+  const [captchaTheme, setCaptchaTheme] = useState<'light' | 'dark'>('light');
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const root = document.documentElement;
+    const updateTheme = () => {
+      const explicit = root.dataset.theme;
+      if (explicit === 'dark' || explicit === 'light') {
+        setCaptchaTheme(explicit);
+        return;
+      }
+      const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+      setCaptchaTheme(prefersDark ? 'dark' : 'light');
+    };
+    updateTheme();
+    const observer = new MutationObserver(updateTheme);
+    observer.observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+    const media = window.matchMedia?.('(prefers-color-scheme: dark)');
+    const handleMediaChange = () => updateTheme();
+    media?.addEventListener?.('change', handleMediaChange);
+    return () => {
+      observer.disconnect();
+      media?.removeEventListener?.('change', handleMediaChange);
+    };
+  }, []);
 
   const resetCaptcha = useCallback(() => {
     if (!captchaEnabled) return;
@@ -72,97 +111,225 @@ export function WaitlistForm({ defaultEmail = '', source }: WaitlistFormProps) {
 
   const onCaptchaVerify: NonNullable<HCaptchaProps['onVerify']> = useCallback((token) => {
     setCaptchaToken(token);
+    setFieldErrors((prev) => ({ ...prev, captcha: undefined }));
   }, []);
 
   const onCaptchaExpire: NonNullable<HCaptchaProps['onExpire']> = useCallback(() => {
     setCaptchaToken(null);
   }, []);
 
-  const disabled = useMemo(() => {
-    if (status === 'loading' || status === 'success') return true;
-    if (!email.trim()) return true;
-    if (!consent) return true;
-    if (captchaRequired && !captchaToken) return true;
-    return false;
-  }, [status, email, consent, captchaRequired, captchaToken]);
+  const clearErrors = useCallback(() => {
+    setFieldErrors({});
+    setSummaryErrors([]);
+    setServerHint(null);
+  }, []);
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (disabled) return;
+  const disabled = status === 'loading';
 
-    setStatus('loading');
-    setMessage('');
+  const focusFirstInvalid = useCallback(
+    (errors: FieldErrors) => {
+      if (errors.email) {
+        emailInputRef.current?.focus({ preventScroll: false });
+        return;
+      }
+      if (errors.consent) {
+        consentRef.current?.focus({ preventScroll: false });
+        return;
+      }
+      if (errors.captcha) {
+        const behavior: ScrollBehavior = prefersReducedMotion ? 'auto' : 'smooth';
+        captchaContainerRef.current?.scrollIntoView({ behavior, block: 'center' });
+        return;
+      }
+    },
+    [prefersReducedMotion]
+  );
 
-    track({
-      name: 'waitlist_signup_submitted',
-      source: normalizedSource,
-      locale,
-      hasConsent: true,
+  useEffect(() => {
+    if (summaryErrors.length === 0) return;
+    const frame = requestAnimationFrame(() => {
+      errorSummaryRef.current?.focus({ preventScroll: false });
+      focusFirstInvalid(fieldErrors);
     });
+    return () => cancelAnimationFrame(frame);
+  }, [summaryErrors, fieldErrors, focusFirstInvalid]);
 
-    try {
-      const response = await fetch('/api/waitlist', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          email: email.trim(),
-          locale,
-          gdprConsent: true,
-          captchaToken: captchaToken ?? (captchaEnabled ? '' : 'dev-mode-bypass'),
-        }),
-      });
-      const payload = await response.json().catch(() => ({}));
-      const code = typeof payload?.code === 'string' ? payload.code : null;
+  useEffect(() => {
+    if (status !== 'success') return;
+    const frame = requestAnimationFrame(() => {
+      successHeadingRef.current?.focus({ preventScroll: false });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [status]);
 
-      track({
-        name: 'waitlist_signup_result',
-        ok: response.ok,
-        code,
-        source: normalizedSource,
-        locale,
-        status: response.status,
-      });
+  const validate = useCallback(() => {
+    const trimmedEmail = email.trim();
+    const errors: FieldErrors = {};
+    const messages: string[] = [];
 
-      if (response.ok) {
-        setStatus('success');
-        setMessage(t('success.body'));
-        return;
-      }
-
-      setStatus('error');
-
-      const bodyMessage = typeof payload?.message === 'string' ? payload.message : '';
-
-      if (response.status === 429) {
-        setMessage(code === 'captcha_failed' ? t('errors.captcha') : t('errors.rateLimited'));
-        resetCaptcha();
-        return;
-      }
-
-      if (response.status === 410 || code === 'token_expired') {
-        setMessage(t('errors.expired'));
-        resetCaptcha();
-        return;
-      }
-
-      if (response.status === 400) {
-        setMessage(bodyMessage || t('errors.invalid'));
-        resetCaptcha();
-        return;
-      }
-
-      setMessage(bodyMessage || t('errors.default'));
-      resetCaptcha();
-    } catch (error) {
-      console.error('waitlist submit failed', error);
-      setStatus('error');
-      setMessage(t('errors.network'));
-      resetCaptcha();
+    if (!trimmedEmail) {
+      const message = t('errors.emailRequired');
+      errors.email = message;
+      messages.push(message);
+    } else if (!isValidEmail(trimmedEmail)) {
+      const message = t('errors.emailInvalid');
+      errors.email = message;
+      messages.push(message);
     }
-  }
 
-  const successTitle = t('success.title');
-  const consentLabel = t('labels.consent');
+    if (!consent) {
+      const message = t('errors.consent');
+      errors.consent = message;
+      messages.push(message);
+    }
+
+    if (captchaRequired && !captchaToken) {
+      const message = t('errors.captchaRequired');
+      errors.captcha = message;
+      messages.push(message);
+    }
+
+    setFieldErrors(errors);
+    setSummaryErrors(messages);
+    return messages.length === 0;
+  }, [captchaRequired, captchaToken, consent, email, t]);
+
+  const handleSubmit = useCallback(
+    async (event: FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      if (disabled) return;
+
+      clearErrors();
+
+      if (!validate()) {
+        setStatus('error');
+        return;
+      }
+
+      const trimmedEmail = email.trim();
+
+      setStatus('loading');
+      setServerHint(null);
+
+      void track({
+        name: 'waitlist_signup_submitted',
+        locale,
+        hasUtm: Boolean(normalizedSource),
+        hasRef: Boolean(normalizedSource),
+      });
+
+      try {
+        const response = await fetch('/api/waitlist', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            email: trimmedEmail,
+          consent: true,
+          locale,
+          ref: normalizedSource ?? undefined,
+          hcaptchaToken: captchaToken ?? (captchaEnabled ? '' : 'dev-bypass'),
+          }),
+        });
+        const payload = await response.json().catch(() => ({}));
+        const code = typeof payload?.code === 'string' ? payload.code : null;
+        const details = Array.isArray(payload?.details) ? (payload.details as string[]) : [];
+
+        track({
+          name: 'waitlist_signup_result',
+          ok: response.ok,
+          code,
+          source: normalizedSource,
+          locale,
+          status: response.status,
+        });
+
+        if (response.ok) {
+          setStatus('success');
+          setLastSubmittedEmail(trimmedEmail);
+          setSummaryErrors([]);
+          setFieldErrors({});
+          setConsent(true);
+          setServerHint(null);
+          onSuccess?.({ email: trimmedEmail });
+          resetCaptcha();
+          return;
+        }
+
+        const nextFieldErrors: FieldErrors = {};
+        if (details.includes('email')) {
+          nextFieldErrors.email = t('errors.emailInvalid');
+        }
+        if (details.includes('consent')) {
+          nextFieldErrors.consent = t('errors.consent');
+        }
+        if (details.includes('hcaptchaToken')) {
+          nextFieldErrors.captcha = t('errors.captchaRequired');
+        }
+
+        let topLevelMessage: string | null = null;
+        if (response.status === 429 || code === 'rate_limited') {
+          topLevelMessage = t('errors.rateLimited');
+        } else if (code === 'captcha_invalid') {
+          topLevelMessage = t('errors.captchaFailed');
+          nextFieldErrors.captcha = t('errors.captchaFailed');
+        } else if (response.status === 400) {
+          topLevelMessage = t('errors.invalid');
+        } else if (response.status === 410 || code === 'token_expired') {
+          topLevelMessage = t('errors.expired');
+        } else {
+          topLevelMessage = t('errors.default');
+        }
+
+        const nextSummary = [
+          ...Object.values(nextFieldErrors).filter(Boolean),
+        ];
+        if (!nextSummary.includes(topLevelMessage) && topLevelMessage) {
+          nextSummary.push(topLevelMessage);
+        }
+
+        setFieldErrors(nextFieldErrors);
+        setSummaryErrors(nextSummary);
+        setServerHint(topLevelMessage);
+        setStatus('error');
+        resetCaptcha();
+      } catch (error) {
+        console.error('waitlist submit failed', error);
+        const fallback = t('errors.network');
+        setFieldErrors({});
+        setSummaryErrors([fallback]);
+        setServerHint(fallback);
+        setStatus('error');
+        resetCaptcha();
+      }
+    },
+    [
+      captchaToken,
+      clearErrors,
+      disabled,
+      email,
+      locale,
+      normalizedSource,
+      onSuccess,
+      resetCaptcha,
+      t,
+      validate,
+    ]
+  );
+
+  const handlePrepareResend = useCallback(() => {
+    setStatus('idle');
+    setSummaryErrors([]);
+    setFieldErrors({});
+    setServerHint(null);
+    setConsent(true);
+    if (lastSubmittedEmail) {
+      setEmail(lastSubmittedEmail);
+    }
+    resetCaptcha();
+    requestAnimationFrame(() => {
+      emailInputRef.current?.focus({ preventScroll: false });
+    });
+  }, [lastSubmittedEmail, resetCaptcha]);
 
   return (
     <section id="waitlist" aria-labelledby="waitlist-heading" className={cn(layout.section, 'bg-bg')}>
@@ -282,7 +449,165 @@ export function WaitlistForm({ defaultEmail = '', source }: WaitlistFormProps) {
             </form>
           )}
         </div>
-      </div>
-    </section>
+      ) : null}
+
+      <header className="flex flex-col gap-xs">
+        <h2 id={headingId} className={text.heading}>
+          {t('title')}
+        </h2>
+        <p className={text.body}>{t('lead')}</p>
+      </header>
+
+      {status === 'success' ? (
+        <div className="flex flex-col gap-md" role="status" aria-live="assertive">
+          <div className="flex flex-col gap-sm rounded-2xl border border-status-success bg-status-success/10 px-md py-sm text-status-success">
+            <h3 ref={successHeadingRef} tabIndex={-1} className="text-h3 text-status-success">
+              {t('success.title')}
+            </h3>
+            <p className="text-body text-text">{t('success.body')}</p>
+            <p className="text-body-sm text-text-muted">{t('success.followUp')}</p>
+          </div>
+          <div className="flex flex-col gap-xs">
+            <Button variant="secondary" size="sm" onClick={handlePrepareResend} className="w-fit">
+              {t('success.resend.cta')}
+            </Button>
+            <p className="text-body-sm text-text-muted">{t('success.resend.hint')}</p>
+          </div>
+        </div>
+      ) : (
+        <form
+          aria-busy={status === 'loading'}
+          aria-describedby={summaryErrors.length ? 'waitlist-error-summary' : undefined}
+          className="flex flex-col gap-lg"
+          noValidate
+          onSubmit={handleSubmit}
+        >
+          {summaryErrors.length > 0 ? (
+            <div
+              id="waitlist-error-summary"
+              ref={errorSummaryRef}
+              tabIndex={-1}
+              role="alert"
+              aria-live="assertive"
+              className="rounded-2xl border border-feedback-error bg-feedback-error-surface px-md py-sm shadow-card"
+            >
+              <p className="text-label text-feedback-error">{t('errors.summaryTitle')}</p>
+              <ul className="mt-xs list-disc space-y-1 pl-md text-body-sm text-feedback-error">
+                {summaryErrors.map((error) => (
+                  <li key={error}>{error}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          <div className="flex flex-col gap-xs">
+            <label htmlFor="waitlist-email" className={text.label}>
+              {t('labels.email')}
+            </label>
+            <Input
+              ref={emailInputRef}
+              id="waitlist-email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(event) => {
+                setEmail(event.target.value);
+                if (status === 'error') {
+                  setFieldErrors((prev) => ({ ...prev, email: undefined }));
+                }
+              }}
+              onBlur={() => setEmail((value) => value.trim())}
+              placeholder={t('placeholders.email')}
+              aria-invalid={Boolean(fieldErrors.email)}
+              aria-describedby={fieldErrors.email ? 'waitlist-email-error' : undefined}
+              required
+              invalid={Boolean(fieldErrors.email)}
+            />
+            {fieldErrors.email ? (
+              <p id="waitlist-email-error" className="text-body-sm text-feedback-error" role="alert">
+                {fieldErrors.email}
+              </p>
+            ) : null}
+          </div>
+
+          <div className="flex flex-col gap-xs">
+            <div className="flex items-start gap-sm rounded-2xl border border-border bg-bg px-md py-sm">
+              <Checkbox
+                ref={consentRef}
+                id="waitlist-consent"
+                name="consent"
+                checked={consent}
+                onChange={(event) => {
+                  setConsent(event.target.checked);
+                  if (status === 'error') {
+                    setFieldErrors((prev) => ({ ...prev, consent: undefined }));
+                  }
+                }}
+                aria-invalid={Boolean(fieldErrors.consent)}
+                aria-describedby={fieldErrors.consent ? 'waitlist-consent-error' : undefined}
+                invalid={Boolean(fieldErrors.consent)}
+              />
+              <label htmlFor="waitlist-consent" className="text-body text-text-muted">
+                {t('labels.consent')}{' '}
+                <Link prefetch={false} href={`/${locale}/privacy`} className="underline">
+                  {t('privacyLinkLabel')}
+                </Link>
+                .
+              </label>
+            </div>
+            {fieldErrors.consent ? (
+              <p id="waitlist-consent-error" className="text-body-sm text-feedback-error" role="alert">
+                {fieldErrors.consent}
+              </p>
+            ) : null}
+          </div>
+
+          {captchaEnabled ? (
+            <div className="flex flex-col gap-xs" role="group" aria-labelledby="waitlist-captcha-label">
+              <span id="waitlist-captcha-label" className="text-label text-text">
+                {t('labels.captcha')}
+              </span>
+              <div
+                ref={captchaContainerRef}
+                className="rounded-2xl border border-border bg-bg px-md py-md"
+                style={{ minHeight: '180px' }}
+              >
+                <HCaptcha
+                  ref={captchaRef}
+                  sitekey={captchaSiteKey}
+                  size="normal"
+                  theme={captchaTheme}
+                  onVerify={onCaptchaVerify}
+                  onExpire={onCaptchaExpire}
+                />
+              </div>
+              {fieldErrors.captcha ? (
+                <p className="text-body-sm text-feedback-error" id="waitlist-captcha-error" role="alert">
+                  {fieldErrors.captcha}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+
+          <div className="flex flex-col gap-sm sm:flex-row sm:items-center sm:justify-between">
+            <Button
+              type="submit"
+              className="w-full sm:w-auto"
+              disabled={disabled}
+              loading={status === 'loading'}
+              loadingLabel={t('inflight')}
+            >
+              {t('submit')}
+            </Button>
+            {serverHint ? (
+              <p className="text-body-sm text-feedback-error" role="alert">
+                {serverHint}
+              </p>
+            ) : null}
+          </div>
+        </form>
+      )}
+    </Card>
   );
 }

@@ -5,661 +5,303 @@
 module.exports = {
   color: {
     brand: {
-      teal: {
+      primary: {
         value: "#1A4E5F",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#1A4E5F",
         },
-        name: "color-brand-teal",
+        name: "color-brand-primary",
         attributes: {
           category: "color",
           type: "brand",
-          item: "teal",
+          item: "primary",
         },
-        path: ["color", "brand", "teal"],
+        path: ["color", "brand", "primary"],
       },
-      mint: {
+      secondary: {
+        value: "#147A8C",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "#147A8C",
+        },
+        name: "color-brand-secondary",
+        attributes: {
+          category: "color",
+          type: "brand",
+          item: "secondary",
+        },
+        path: ["color", "brand", "secondary"],
+      },
+      muted: {
         value: "#A8DADC",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#A8DADC",
         },
-        name: "color-brand-mint",
+        name: "color-brand-muted",
         attributes: {
           category: "color",
           type: "brand",
-          item: "mint",
+          item: "muted",
         },
-        path: ["color", "brand", "mint"],
+        path: ["color", "brand", "muted"],
       },
-      coral: {
+      accent: {
         value: "#FF6B6B",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#FF6B6B",
         },
-        name: "color-brand-coral",
+        name: "color-brand-accent",
         attributes: {
           category: "color",
           type: "brand",
-          item: "coral",
+          item: "accent",
         },
-        path: ["color", "brand", "coral"],
+        path: ["color", "brand", "accent"],
       },
-      peach: {
-        value: "#FFE8D6",
+      onPrimary: {
+        value: "#F2FAFA",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "#FFE8D6",
+          value: "#F2FAFA",
         },
-        name: "color-brand-peach",
+        name: "color-brand-on-primary",
         attributes: {
           category: "color",
           type: "brand",
-          item: "peach",
+          item: "onPrimary",
         },
-        path: ["color", "brand", "peach"],
+        path: ["color", "brand", "onPrimary"],
       },
-    },
-    neutral: {
-      ink: {
-        value: "#2B2D42",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "#2B2D42",
-        },
-        name: "color-neutral-ink",
-        attributes: {
-          category: "color",
-          type: "neutral",
-          item: "ink",
-        },
-        path: ["color", "neutral", "ink"],
-      },
-      paper: {
+      onAccent: {
         value: "#FFFFFF",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#FFFFFF",
         },
-        name: "color-neutral-paper",
+        name: "color-brand-on-accent",
+        attributes: {
+          category: "color",
+          type: "brand",
+          item: "onAccent",
+        },
+        path: ["color", "brand", "onAccent"],
+      },
+    },
+    season: {
+      spring: {
+        accent: {
+          value: "#FFE8D6",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "#FFE8D6",
+          },
+          name: "color-season-spring-accent",
+          attributes: {
+            category: "color",
+            type: "season",
+            item: "spring",
+            subitem: "accent",
+          },
+          path: ["color", "season", "spring", "accent"],
+        },
+      },
+      autumn: {
+        accent: {
+          value: "#FFBFA3",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "#FFBFA3",
+          },
+          name: "color-season-autumn-accent",
+          attributes: {
+            category: "color",
+            type: "season",
+            item: "autumn",
+            subitem: "accent",
+          },
+          path: ["color", "season", "autumn", "accent"],
+        },
+      },
+    },
+    neutral: {
+      0: {
+        value: "#FFFFFF",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "#FFFFFF",
+        },
+        name: "color-neutral-0",
         attributes: {
           category: "color",
           type: "neutral",
-          item: "paper",
+          item: "0",
         },
-        path: ["color", "neutral", "paper"],
+        path: ["color", "neutral", "0"],
       },
-      cloud: {
+      10: {
         value: "#F8F9FA",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#F8F9FA",
         },
-        name: "color-neutral-cloud",
+        name: "color-neutral-10",
         attributes: {
           category: "color",
           type: "neutral",
-          item: "cloud",
+          item: "10",
         },
-        path: ["color", "neutral", "cloud"],
+        path: ["color", "neutral", "10"],
       },
-      beige: {
-        value: "#EAE2B7",
+      20: {
+        value: "#EEF2F5",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "#EAE2B7",
+          value: "#EEF2F5",
         },
-        name: "color-neutral-beige",
+        name: "color-neutral-20",
         attributes: {
           category: "color",
           type: "neutral",
-          item: "beige",
+          item: "20",
         },
-        path: ["color", "neutral", "beige"],
+        path: ["color", "neutral", "20"],
+      },
+      30: {
+        value: "#E1E8EE",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "#E1E8EE",
+        },
+        name: "color-neutral-30",
+        attributes: {
+          category: "color",
+          type: "neutral",
+          item: "30",
+        },
+        path: ["color", "neutral", "30"],
+      },
+      40: {
+        value: "#CBD6E1",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "#CBD6E1",
+        },
+        name: "color-neutral-40",
+        attributes: {
+          category: "color",
+          type: "neutral",
+          item: "40",
+        },
+        path: ["color", "neutral", "40"],
+      },
+      50: {
+        value: "#94A3B8",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "#94A3B8",
+        },
+        name: "color-neutral-50",
+        attributes: {
+          category: "color",
+          type: "neutral",
+          item: "50",
+        },
+        path: ["color", "neutral", "50"],
+      },
+      60: {
+        value: "#64748B",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "#64748B",
+        },
+        name: "color-neutral-60",
+        attributes: {
+          category: "color",
+          type: "neutral",
+          item: "60",
+        },
+        path: ["color", "neutral", "60"],
+      },
+      70: {
+        value: "#475569",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "#475569",
+        },
+        name: "color-neutral-70",
+        attributes: {
+          category: "color",
+          type: "neutral",
+          item: "70",
+        },
+        path: ["color", "neutral", "70"],
+      },
+      80: {
+        value: "#334155",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "#334155",
+        },
+        name: "color-neutral-80",
+        attributes: {
+          category: "color",
+          type: "neutral",
+          item: "80",
+        },
+        path: ["color", "neutral", "80"],
+      },
+      90: {
+        value: "#1F2937",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "#1F2937",
+        },
+        name: "color-neutral-90",
+        attributes: {
+          category: "color",
+          type: "neutral",
+          item: "90",
+        },
+        path: ["color", "neutral", "90"],
+      },
+      100: {
+        value: "#0F172A",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "#0F172A",
+        },
+        name: "color-neutral-100",
+        attributes: {
+          category: "color",
+          type: "neutral",
+          item: "100",
+        },
+        path: ["color", "neutral", "100"],
       },
     },
-    accent: {
-      lime: {
-        value: "#C7F464",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "#C7F464",
-        },
-        name: "color-accent-lime",
-        attributes: {
-          category: "color",
-          type: "accent",
-          item: "lime",
-        },
-        path: ["color", "accent", "lime"],
-      },
-    },
-    light: {
-      primary: {
-        value: "#1A4E5F",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "{color.brand.teal.value}",
-        },
-        name: "color-light-primary",
-        attributes: {
-          category: "color",
-          type: "light",
-          item: "primary",
-        },
-        path: ["color", "light", "primary"],
-      },
-      onPrimary: {
-        value: "#F8F9FA",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "{color.neutral.cloud.value}",
-        },
-        name: "color-light-on-primary",
-        attributes: {
-          category: "color",
-          type: "light",
-          item: "onPrimary",
-        },
-        path: ["color", "light", "onPrimary"],
-      },
-      secondary: {
-        value: "#A8DADC",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "{color.brand.mint.value}",
-        },
-        name: "color-light-secondary",
-        attributes: {
-          category: "color",
-          type: "light",
-          item: "secondary",
-        },
-        path: ["color", "light", "secondary"],
-      },
-      onSecondary: {
-        value: "#FFFFFF",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "#FFFFFF",
-        },
-        name: "color-light-on-secondary",
-        attributes: {
-          category: "color",
-          type: "light",
-          item: "onSecondary",
-        },
-        path: ["color", "light", "onSecondary"],
-      },
-      tertiary: {
-        value: "#FFE8D6",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "{color.brand.peach.value}",
-        },
-        name: "color-light-tertiary",
-        attributes: {
-          category: "color",
-          type: "light",
-          item: "tertiary",
-        },
-        path: ["color", "light", "tertiary"],
-      },
-      onTertiary: {
-        value: "#2B2D42",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "{color.neutral.ink.value}",
-        },
-        name: "color-light-on-tertiary",
-        attributes: {
-          category: "color",
-          type: "light",
-          item: "onTertiary",
-        },
-        path: ["color", "light", "onTertiary"],
-      },
-      error: {
-        value: "#FF6B6B",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "{color.brand.coral.value}",
-        },
-        name: "color-light-error",
-        attributes: {
-          category: "color",
-          type: "light",
-          item: "error",
-        },
-        path: ["color", "light", "error"],
-      },
-      onError: {
-        value: "#F8F9FA",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "{color.neutral.cloud.value}",
-        },
-        name: "color-light-on-error",
-        attributes: {
-          category: "color",
-          type: "light",
-          item: "onError",
-        },
-        path: ["color", "light", "onError"],
-      },
-      surface: {
-        value: "#FFFFFF",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "{color.neutral.paper.value}",
-        },
-        name: "color-light-surface",
-        attributes: {
-          category: "color",
-          type: "light",
-          item: "surface",
-        },
-        path: ["color", "light", "surface"],
-      },
-      onSurface: {
-        value: "#2B2D42",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "{color.neutral.ink.value}",
-        },
-        name: "color-light-on-surface",
-        attributes: {
-          category: "color",
-          type: "light",
-          item: "onSurface",
-        },
-        path: ["color", "light", "onSurface"],
-      },
-      onSurfaceVar: {
-        value: "#2B2D42",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "{color.neutral.ink.value}",
-        },
-        name: "color-light-on-surface-var",
-        attributes: {
-          category: "color",
-          type: "light",
-          item: "onSurfaceVar",
-        },
-        path: ["color", "light", "onSurfaceVar"],
-      },
-      outline: {
-        value: "#B8BDC6",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "#B8BDC6",
-        },
-        name: "color-light-outline",
-        attributes: {
-          category: "color",
-          type: "light",
-          item: "outline",
-        },
-        path: ["color", "light", "outline"],
-      },
-      inverseSurface: {
-        value: "#2B2D42",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "{color.neutral.ink.value}",
-        },
-        name: "color-light-inverse-surface",
-        attributes: {
-          category: "color",
-          type: "light",
-          item: "inverseSurface",
-        },
-        path: ["color", "light", "inverseSurface"],
-      },
-      onInverseSurface: {
-        value: "#F8F9FA",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "{color.neutral.cloud.value}",
-        },
-        name: "color-light-on-inverse-surface",
-        attributes: {
-          category: "color",
-          type: "light",
-          item: "onInverseSurface",
-        },
-        path: ["color", "light", "onInverseSurface"],
-      },
-      inversePrimary: {
-        value: "#A8DADC",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "{color.brand.mint.value}",
-        },
-        name: "color-light-inverse-primary",
-        attributes: {
-          category: "color",
-          type: "light",
-          item: "inversePrimary",
-        },
-        path: ["color", "light", "inversePrimary"],
-      },
-      shadow: {
-        value: "rgba(0,0,0,0.54)",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "rgba(0,0,0,0.54)",
-        },
-        name: "color-light-shadow",
-        attributes: {
-          category: "color",
-          type: "light",
-          item: "shadow",
-        },
-        path: ["color", "light", "shadow"],
-      },
-      inputFill: {
-        value: "#F6F7F9",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "#F6F7F9",
-        },
-        name: "color-light-input-fill",
-        attributes: {
-          category: "color",
-          type: "light",
-          item: "inputFill",
-        },
-        path: ["color", "light", "inputFill"],
-      },
-      tooltipBg: {
-        value: "#1F2A33",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "#1F2A33",
-        },
-        name: "color-light-tooltip-bg",
-        attributes: {
-          category: "color",
-          type: "light",
-          item: "tooltipBg",
-        },
-        path: ["color", "light", "tooltipBg"],
-      },
-    },
-    dark: {
-      primary: {
-        value: "#93C6D0",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "#93C6D0",
-        },
-        name: "color-dark-primary",
-        attributes: {
-          category: "color",
-          type: "dark",
-          item: "primary",
-        },
-        path: ["color", "dark", "primary"],
-      },
-      onPrimary: {
-        value: "#2B2D42",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "{color.neutral.ink.value}",
-        },
-        name: "color-dark-on-primary",
-        attributes: {
-          category: "color",
-          type: "dark",
-          item: "onPrimary",
-        },
-        path: ["color", "dark", "onPrimary"],
-      },
-      secondary: {
-        value: "#84C3C9",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "#84C3C9",
-        },
-        name: "color-dark-secondary",
-        attributes: {
-          category: "color",
-          type: "dark",
-          item: "secondary",
-        },
-        path: ["color", "dark", "secondary"],
-      },
-      onSecondary: {
-        value: "#FFFFFF",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "#FFFFFF",
-        },
-        name: "color-dark-on-secondary",
-        attributes: {
-          category: "color",
-          type: "dark",
-          item: "onSecondary",
-        },
-        path: ["color", "dark", "onSecondary"],
-      },
-      tertiary: {
-        value: "#FFA6A6",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "#FFA6A6",
-        },
-        name: "color-dark-tertiary",
-        attributes: {
-          category: "color",
-          type: "dark",
-          item: "tertiary",
-        },
-        path: ["color", "dark", "tertiary"],
-      },
-      onTertiary: {
-        value: "#2B2D42",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "{color.neutral.ink.value}",
-        },
-        name: "color-dark-on-tertiary",
-        attributes: {
-          category: "color",
-          type: "dark",
-          item: "onTertiary",
-        },
-        path: ["color", "dark", "onTertiary"],
-      },
-      error: {
-        value: "#FF877F",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "#FF877F",
-        },
-        name: "color-dark-error",
-        attributes: {
-          category: "color",
-          type: "dark",
-          item: "error",
-        },
-        path: ["color", "dark", "error"],
-      },
-      onError: {
-        value: "#2B2D42",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "{color.neutral.ink.value}",
-        },
-        name: "color-dark-on-error",
-        attributes: {
-          category: "color",
-          type: "dark",
-          item: "onError",
-        },
-        path: ["color", "dark", "onError"],
-      },
-      surface: {
-        value: "#1B2130",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "#1B2130",
-        },
-        name: "color-dark-surface",
-        attributes: {
-          category: "color",
-          type: "dark",
-          item: "surface",
-        },
-        path: ["color", "dark", "surface"],
-      },
-      onSurface: {
-        value: "#FFFFFF",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "#FFFFFF",
-        },
-        name: "color-dark-on-surface",
-        attributes: {
-          category: "color",
-          type: "dark",
-          item: "onSurface",
-        },
-        path: ["color", "dark", "onSurface"],
-      },
-      onSurfaceVar: {
-        value: "#FFFFFF",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "#FFFFFF",
-        },
-        name: "color-dark-on-surface-var",
-        attributes: {
-          category: "color",
-          type: "dark",
-          item: "onSurfaceVar",
-        },
-        path: ["color", "dark", "onSurfaceVar"],
-      },
-      outline: {
-        value: "#3F485A",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "#3F485A",
-        },
-        name: "color-dark-outline",
-        attributes: {
-          category: "color",
-          type: "dark",
-          item: "outline",
-        },
-        path: ["color", "dark", "outline"],
-      },
-      inverseSurface: {
-        value: "#FFFFFF",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "#FFFFFF",
-        },
-        name: "color-dark-inverse-surface",
-        attributes: {
-          category: "color",
-          type: "dark",
-          item: "inverseSurface",
-        },
-        path: ["color", "dark", "inverseSurface"],
-      },
-      onInverseSurface: {
-        value: "#2B2D42",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "{color.neutral.ink.value}",
-        },
-        name: "color-dark-on-inverse-surface",
-        attributes: {
-          category: "color",
-          type: "dark",
-          item: "onInverseSurface",
-        },
-        path: ["color", "dark", "onInverseSurface"],
-      },
-      inversePrimary: {
-        value: "#1A4E5F",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "{color.brand.teal.value}",
-        },
-        name: "color-dark-inverse-primary",
-        attributes: {
-          category: "color",
-          type: "dark",
-          item: "inversePrimary",
-        },
-        path: ["color", "dark", "inversePrimary"],
-      },
-      shadow: {
-        value: "rgba(0,0,0,1)",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "rgba(0,0,0,1)",
-        },
-        name: "color-dark-shadow",
-        attributes: {
-          category: "color",
-          type: "dark",
-          item: "shadow",
-        },
-        path: ["color", "dark", "shadow"],
-      },
-    },
-    status: {
+    feedback: {
       success: {
         value: "#2BB673",
         filePath: "tokens/tokens.json",
@@ -667,28 +309,43 @@ module.exports = {
         original: {
           value: "#2BB673",
         },
-        name: "color-status-success",
+        name: "color-feedback-success",
         attributes: {
           category: "color",
-          type: "status",
+          type: "feedback",
           item: "success",
         },
-        path: ["color", "status", "success"],
+        path: ["color", "feedback", "success"],
       },
-      onSuccess: {
-        value: "#FFFFFF",
+      successSurface: {
+        value: "#E6F6F0",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "#FFFFFF",
+          value: "#E6F6F0",
         },
-        name: "color-status-on-success",
+        name: "color-feedback-success-surface",
         attributes: {
           category: "color",
-          type: "status",
-          item: "onSuccess",
+          type: "feedback",
+          item: "successSurface",
         },
-        path: ["color", "status", "onSuccess"],
+        path: ["color", "feedback", "successSurface"],
+      },
+      successBorder: {
+        value: "#B7E3D1",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "#B7E3D1",
+        },
+        name: "color-feedback-success-border",
+        attributes: {
+          category: "color",
+          type: "feedback",
+          item: "successBorder",
+        },
+        path: ["color", "feedback", "successBorder"],
       },
       warning: {
         value: "#F4B400",
@@ -697,28 +354,88 @@ module.exports = {
         original: {
           value: "#F4B400",
         },
-        name: "color-status-warning",
+        name: "color-feedback-warning",
         attributes: {
           category: "color",
-          type: "status",
+          type: "feedback",
           item: "warning",
         },
-        path: ["color", "status", "warning"],
+        path: ["color", "feedback", "warning"],
       },
-      onWarning: {
-        value: "#2B2D42",
+      warningSurface: {
+        value: "#FFF6D6",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.neutral.ink.value}",
+          value: "#FFF6D6",
         },
-        name: "color-status-on-warning",
+        name: "color-feedback-warning-surface",
         attributes: {
           category: "color",
-          type: "status",
-          item: "onWarning",
+          type: "feedback",
+          item: "warningSurface",
         },
-        path: ["color", "status", "onWarning"],
+        path: ["color", "feedback", "warningSurface"],
+      },
+      warningBorder: {
+        value: "#FBD38D",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "#FBD38D",
+        },
+        name: "color-feedback-warning-border",
+        attributes: {
+          category: "color",
+          type: "feedback",
+          item: "warningBorder",
+        },
+        path: ["color", "feedback", "warningBorder"],
+      },
+      error: {
+        value: "#FF6B6B",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "#FF6B6B",
+        },
+        name: "color-feedback-error",
+        attributes: {
+          category: "color",
+          type: "feedback",
+          item: "error",
+        },
+        path: ["color", "feedback", "error"],
+      },
+      errorSurface: {
+        value: "#FFE4E4",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "#FFE4E4",
+        },
+        name: "color-feedback-error-surface",
+        attributes: {
+          category: "color",
+          type: "feedback",
+          item: "errorSurface",
+        },
+        path: ["color", "feedback", "errorSurface"],
+      },
+      errorBorder: {
+        value: "#FFB3B3",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "#FFB3B3",
+        },
+        name: "color-feedback-error-border",
+        attributes: {
+          category: "color",
+          type: "feedback",
+          item: "errorBorder",
+        },
+        path: ["color", "feedback", "errorBorder"],
       },
       info: {
         value: "#4A90E2",
@@ -727,66 +444,297 @@ module.exports = {
         original: {
           value: "#4A90E2",
         },
-        name: "color-status-info",
+        name: "color-feedback-info",
         attributes: {
           category: "color",
-          type: "status",
+          type: "feedback",
           item: "info",
         },
-        path: ["color", "status", "info"],
+        path: ["color", "feedback", "info"],
       },
-      onInfo: {
+      infoSurface: {
+        value: "#E3F0FF",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "#E3F0FF",
+        },
+        name: "color-feedback-info-surface",
+        attributes: {
+          category: "color",
+          type: "feedback",
+          item: "infoSurface",
+        },
+        path: ["color", "feedback", "infoSurface"],
+      },
+      infoBorder: {
+        value: "#99C2FF",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "#99C2FF",
+        },
+        name: "color-feedback-info-border",
+        attributes: {
+          category: "color",
+          type: "feedback",
+          item: "infoBorder",
+        },
+        path: ["color", "feedback", "infoBorder"],
+      },
+    },
+    background: {
+      canvas: {
         value: "#FFFFFF",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "#FFFFFF",
+          value: "{color.neutral.0.value}",
         },
-        name: "color-status-on-info",
+        name: "color-background-canvas",
         attributes: {
           category: "color",
-          type: "status",
-          item: "onInfo",
+          type: "background",
+          item: "canvas",
         },
-        path: ["color", "status", "onInfo"],
+        path: ["color", "background", "canvas"],
       },
-      danger: {
-        value: "#FF6B6B",
+      surface: {
+        value: "#F8F9FA",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.brand.coral.value}",
+          value: "{color.neutral.10.value}",
         },
-        name: "color-status-danger",
+        name: "color-background-surface",
         attributes: {
           category: "color",
-          type: "status",
-          item: "danger",
+          type: "background",
+          item: "surface",
         },
-        path: ["color", "status", "danger"],
+        path: ["color", "background", "surface"],
       },
-      onDanger: {
+      raised: {
+        value: "#EEF2F5",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.neutral.20.value}",
+        },
+        name: "color-background-raised",
+        attributes: {
+          category: "color",
+          type: "background",
+          item: "raised",
+        },
+        path: ["color", "background", "raised"],
+      },
+      overlay: {
+        value: "rgba(11, 24, 34, 0.55)",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "rgba(11, 24, 34, 0.55)",
+        },
+        name: "color-background-overlay",
+        attributes: {
+          category: "color",
+          type: "background",
+          item: "overlay",
+        },
+        path: ["color", "background", "overlay"],
+      },
+      canvasDark: {
+        value: "#0F1822",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "#0F1822",
+        },
+        name: "color-background-canvas-dark",
+        attributes: {
+          category: "color",
+          type: "background",
+          item: "canvasDark",
+        },
+        path: ["color", "background", "canvasDark"],
+      },
+      surfaceDark: {
+        value: "#15202B",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "#15202B",
+        },
+        name: "color-background-surface-dark",
+        attributes: {
+          category: "color",
+          type: "background",
+          item: "surfaceDark",
+        },
+        path: ["color", "background", "surfaceDark"],
+      },
+      raisedDark: {
+        value: "#1D2B37",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "#1D2B37",
+        },
+        name: "color-background-raised-dark",
+        attributes: {
+          category: "color",
+          type: "background",
+          item: "raisedDark",
+        },
+        path: ["color", "background", "raisedDark"],
+      },
+      overlayDark: {
+        value: "rgba(4, 12, 24, 0.7)",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "rgba(4, 12, 24, 0.7)",
+        },
+        name: "color-background-overlay-dark",
+        attributes: {
+          category: "color",
+          type: "background",
+          item: "overlayDark",
+        },
+        path: ["color", "background", "overlayDark"],
+      },
+    },
+    text: {
+      default: {
+        value: "#1F2937",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.neutral.90.value}",
+        },
+        name: "color-text-default",
+        attributes: {
+          category: "color",
+          type: "text",
+          item: "default",
+        },
+        path: ["color", "text", "default"],
+      },
+      muted: {
+        value: "#475569",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.neutral.70.value}",
+        },
+        name: "color-text-muted",
+        attributes: {
+          category: "color",
+          type: "text",
+          item: "muted",
+        },
+        path: ["color", "text", "muted"],
+      },
+      inverse: {
         value: "#FFFFFF",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "#FFFFFF",
+          value: "{color.neutral.0.value}",
         },
-        name: "color-status-on-danger",
+        name: "color-text-inverse",
         attributes: {
           category: "color",
-          type: "status",
-          item: "onDanger",
+          type: "text",
+          item: "inverse",
         },
-        path: ["color", "status", "onDanger"],
+        path: ["color", "text", "inverse"],
+      },
+      link: {
+        value: "#1A4E5F",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.brand.primary.value}",
+        },
+        name: "color-text-link",
+        attributes: {
+          category: "color",
+          type: "text",
+          item: "link",
+        },
+        path: ["color", "text", "link"],
+      },
+      linkHover: {
+        value: "#0F8FA2",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "#0F8FA2",
+        },
+        name: "color-text-link-hover",
+        attributes: {
+          category: "color",
+          type: "text",
+          item: "linkHover",
+        },
+        path: ["color", "text", "linkHover"],
+      },
+    },
+    border: {
+      subtle: {
+        value: "#E1E8EE",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.neutral.30.value}",
+        },
+        name: "color-border-subtle",
+        attributes: {
+          category: "color",
+          type: "border",
+          item: "subtle",
+        },
+        path: ["color", "border", "subtle"],
+      },
+      strong: {
+        value: "#64748B",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.neutral.60.value}",
+        },
+        name: "color-border-strong",
+        attributes: {
+          category: "color",
+          type: "border",
+          item: "strong",
+        },
+        path: ["color", "border", "strong"],
+      },
+      focus: {
+        value: "#1A4E5F",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.brand.primary.value}",
+        },
+        name: "color-border-focus",
+        attributes: {
+          category: "color",
+          type: "border",
+          item: "focus",
+        },
+        path: ["color", "border", "focus"],
       },
     },
   },
   gradient: {
-    primary: {
+    brand: {
       value: {
         type: "linear",
-        angle: 45,
+        angle: 48,
         stops: [
           {
             color: "#1A4E5F",
@@ -803,30 +751,30 @@ module.exports = {
       original: {
         value: {
           type: "linear",
-          angle: 45,
+          angle: 48,
           stops: [
             {
-              color: "{color.brand.teal.value}",
+              color: "{color.brand.primary.value}",
               position: 0,
             },
             {
-              color: "{color.brand.mint.value}",
+              color: "{color.brand.muted.value}",
               position: 1,
             },
           ],
         },
       },
-      name: "gradient-primary",
+      name: "gradient-brand",
       attributes: {
         category: "gradient",
-        type: "primary",
+        type: "brand",
       },
-      path: ["gradient", "primary"],
+      path: ["gradient", "brand"],
     },
-    attention: {
+    accent: {
       value: {
         type: "linear",
-        angle: 45,
+        angle: 32,
         stops: [
           {
             color: "#FF6B6B",
@@ -843,106 +791,78 @@ module.exports = {
       original: {
         value: {
           type: "linear",
-          angle: 45,
+          angle: 32,
           stops: [
             {
-              color: "{color.brand.coral.value}",
+              color: "{color.brand.accent.value}",
               position: 0,
             },
             {
-              color: "{color.brand.peach.value}",
+              color: "{color.season.spring.accent.value}",
               position: 1,
             },
           ],
         },
       },
-      name: "gradient-attention",
+      name: "gradient-accent",
       attributes: {
         category: "gradient",
-        type: "attention",
+        type: "accent",
       },
-      path: ["gradient", "attention"],
+      path: ["gradient", "accent"],
     },
   },
-  elevation: {
-    level0: {
-      value: 0,
+  shadow: {
+    card: {
+      value: "0 18px 40px -20px rgba(15, 32, 48, 0.22)",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
-        value: 0,
+        value: "0 18px 40px -20px rgba(15, 32, 48, 0.22)",
       },
-      name: "elevation-level0",
+      name: "shadow-card",
       attributes: {
-        category: "elevation",
-        type: "level0",
+        category: "shadow",
+        type: "card",
       },
-      path: ["elevation", "level0"],
+      path: ["shadow", "card"],
     },
-    level1: {
-      value: 1,
+    elevated: {
+      value: "0 28px 60px -18px rgba(9, 22, 35, 0.28)",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
-        value: 1,
+        value: "0 28px 60px -18px rgba(9, 22, 35, 0.28)",
       },
-      name: "elevation-level1",
+      name: "shadow-elevated",
       attributes: {
-        category: "elevation",
-        type: "level1",
+        category: "shadow",
+        type: "elevated",
       },
-      path: ["elevation", "level1"],
+      path: ["shadow", "elevated"],
     },
-    level2: {
-      value: 3,
+    focus: {
+      value: "0 0 0 3px rgba(26, 78, 95, 0.35)",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
-        value: 3,
+        value: "0 0 0 3px rgba(26, 78, 95, 0.35)",
       },
-      name: "elevation-level2",
+      name: "shadow-focus",
       attributes: {
-        category: "elevation",
-        type: "level2",
+        category: "shadow",
+        type: "focus",
       },
-      path: ["elevation", "level2"],
-    },
-    level3: {
-      value: 6,
-      filePath: "tokens/tokens.json",
-      isSource: true,
-      original: {
-        value: 6,
-      },
-      name: "elevation-level3",
-      attributes: {
-        category: "elevation",
-        type: "level3",
-      },
-      path: ["elevation", "level3"],
-    },
-    level4: {
-      value: 8,
-      filePath: "tokens/tokens.json",
-      isSource: true,
-      original: {
-        value: 8,
-      },
-      name: "elevation-level4",
-      attributes: {
-        category: "elevation",
-        type: "level4",
-      },
-      path: ["elevation", "level4"],
+      path: ["shadow", "focus"],
     },
   },
   radii: {
     sm: {
-      value: 8,
+      value: "0.375rem",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
-        value: 8,
+        value: "0.375rem",
       },
       name: "radii-sm",
       attributes: {
@@ -952,11 +872,11 @@ module.exports = {
       path: ["radii", "sm"],
     },
     md: {
-      value: 10,
+      value: "0.5rem",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
-        value: 10,
+        value: "0.5rem",
       },
       name: "radii-md",
       attributes: {
@@ -966,11 +886,11 @@ module.exports = {
       path: ["radii", "md"],
     },
     lg: {
-      value: 14,
+      value: "0.75rem",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
-        value: 14,
+        value: "0.75rem",
       },
       name: "radii-lg",
       attributes: {
@@ -979,12 +899,40 @@ module.exports = {
       },
       path: ["radii", "lg"],
     },
-    pill: {
-      value: 999,
+    xl: {
+      value: "1rem",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
-        value: 999,
+        value: "1rem",
+      },
+      name: "radii-xl",
+      attributes: {
+        category: "radii",
+        type: "xl",
+      },
+      path: ["radii", "xl"],
+    },
+    "2xl": {
+      value: "1.5rem",
+      filePath: "tokens/tokens.json",
+      isSource: true,
+      original: {
+        value: "1.5rem",
+      },
+      name: "radii-2xl",
+      attributes: {
+        category: "radii",
+        type: "2xl",
+      },
+      path: ["radii", "2xl"],
+    },
+    pill: {
+      value: "9999px",
+      filePath: "tokens/tokens.json",
+      isSource: true,
+      original: {
+        value: "9999px",
       },
       name: "radii-pill",
       attributes: {
@@ -995,110 +943,110 @@ module.exports = {
     },
   },
   spacing: {
-    xs: {
-      value: 4,
+    4: {
+      value: "0.25rem",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
-        value: 4,
+        value: "0.25rem",
       },
-      name: "spacing-xs",
+      name: "spacing-4",
       attributes: {
         category: "spacing",
-        type: "xs",
+        type: "4",
       },
-      path: ["spacing", "xs"],
+      path: ["spacing", "4"],
     },
-    sm: {
-      value: 8,
+    8: {
+      value: "0.5rem",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
-        value: 8,
+        value: "0.5rem",
       },
-      name: "spacing-sm",
+      name: "spacing-8",
       attributes: {
         category: "spacing",
-        type: "sm",
+        type: "8",
       },
-      path: ["spacing", "sm"],
+      path: ["spacing", "8"],
     },
-    md: {
-      value: 12,
+    16: {
+      value: "1rem",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
-        value: 12,
+        value: "1rem",
       },
-      name: "spacing-md",
+      name: "spacing-16",
       attributes: {
         category: "spacing",
-        type: "md",
+        type: "16",
       },
-      path: ["spacing", "md"],
+      path: ["spacing", "16"],
     },
-    lg: {
-      value: 16,
+    24: {
+      value: "1.5rem",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
-        value: 16,
+        value: "1.5rem",
       },
-      name: "spacing-lg",
+      name: "spacing-24",
       attributes: {
         category: "spacing",
-        type: "lg",
+        type: "24",
       },
-      path: ["spacing", "lg"],
+      path: ["spacing", "24"],
     },
-    xl: {
-      value: 20,
+    32: {
+      value: "2rem",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
-        value: 20,
+        value: "2rem",
       },
-      name: "spacing-xl",
+      name: "spacing-32",
       attributes: {
         category: "spacing",
-        type: "xl",
+        type: "32",
       },
-      path: ["spacing", "xl"],
+      path: ["spacing", "32"],
     },
-    xxl: {
-      value: 24,
+    48: {
+      value: "3rem",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
-        value: 24,
+        value: "3rem",
       },
-      name: "spacing-xxl",
+      name: "spacing-48",
       attributes: {
         category: "spacing",
-        type: "xxl",
+        type: "48",
       },
-      path: ["spacing", "xxl"],
+      path: ["spacing", "48"],
     },
-    xxxl: {
-      value: 32,
+    64: {
+      value: "4rem",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
-        value: 32,
+        value: "4rem",
       },
-      name: "spacing-xxxl",
+      name: "spacing-64",
       attributes: {
         category: "spacing",
-        type: "xxxl",
+        type: "64",
       },
-      path: ["spacing", "xxxl"],
+      path: ["spacing", "64"],
     },
     gutter: {
-      value: 16,
+      value: "clamp(1.25rem, 4vw, 3rem)",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
-        value: 16,
+        value: "clamp(1.25rem, 4vw, 3rem)",
       },
       name: "spacing-gutter",
       attributes: {
@@ -1106,6 +1054,92 @@ module.exports = {
         type: "gutter",
       },
       path: ["spacing", "gutter"],
+    },
+  },
+  spacingAlias: {
+    xs: {
+      value: "0.5rem",
+      filePath: "tokens/tokens.json",
+      isSource: true,
+      original: {
+        value: "{spacing.8.value}",
+      },
+      name: "spacing-alias-xs",
+      attributes: {
+        category: "spacingAlias",
+        type: "xs",
+      },
+      path: ["spacingAlias", "xs"],
+    },
+    sm: {
+      value: "1rem",
+      filePath: "tokens/tokens.json",
+      isSource: true,
+      original: {
+        value: "{spacing.16.value}",
+      },
+      name: "spacing-alias-sm",
+      attributes: {
+        category: "spacingAlias",
+        type: "sm",
+      },
+      path: ["spacingAlias", "sm"],
+    },
+    md: {
+      value: "1.5rem",
+      filePath: "tokens/tokens.json",
+      isSource: true,
+      original: {
+        value: "{spacing.24.value}",
+      },
+      name: "spacing-alias-md",
+      attributes: {
+        category: "spacingAlias",
+        type: "md",
+      },
+      path: ["spacingAlias", "md"],
+    },
+    lg: {
+      value: "2rem",
+      filePath: "tokens/tokens.json",
+      isSource: true,
+      original: {
+        value: "{spacing.32.value}",
+      },
+      name: "spacing-alias-lg",
+      attributes: {
+        category: "spacingAlias",
+        type: "lg",
+      },
+      path: ["spacingAlias", "lg"],
+    },
+    xl: {
+      value: "3rem",
+      filePath: "tokens/tokens.json",
+      isSource: true,
+      original: {
+        value: "{spacing.48.value}",
+      },
+      name: "spacing-alias-xl",
+      attributes: {
+        category: "spacingAlias",
+        type: "xl",
+      },
+      path: ["spacingAlias", "xl"],
+    },
+    "2xl": {
+      value: "4rem",
+      filePath: "tokens/tokens.json",
+      isSource: true,
+      original: {
+        value: "{spacing.64.value}",
+      },
+      name: "spacing-alias-2xl",
+      attributes: {
+        category: "spacingAlias",
+        type: "2xl",
+      },
+      path: ["spacingAlias", "2xl"],
     },
   },
   overlay: {
@@ -1233,113 +1267,6 @@ module.exports = {
         path: ["typography", "weight", "bold"],
       },
     },
-    size: {
-      xs: {
-        value: 12,
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: 12,
-        },
-        name: "typography-size-xs",
-        attributes: {
-          category: "typography",
-          type: "size",
-          item: "xs",
-        },
-        path: ["typography", "size", "xs"],
-      },
-      sm: {
-        value: 14,
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: 14,
-        },
-        name: "typography-size-sm",
-        attributes: {
-          category: "typography",
-          type: "size",
-          item: "sm",
-        },
-        path: ["typography", "size", "sm"],
-      },
-      md: {
-        value: 16,
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: 16,
-        },
-        name: "typography-size-md",
-        attributes: {
-          category: "typography",
-          type: "size",
-          item: "md",
-        },
-        path: ["typography", "size", "md"],
-      },
-      lg: {
-        value: 18,
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: 18,
-        },
-        name: "typography-size-lg",
-        attributes: {
-          category: "typography",
-          type: "size",
-          item: "lg",
-        },
-        path: ["typography", "size", "lg"],
-      },
-      xl: {
-        value: 20,
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: 20,
-        },
-        name: "typography-size-xl",
-        attributes: {
-          category: "typography",
-          type: "size",
-          item: "xl",
-        },
-        path: ["typography", "size", "xl"],
-      },
-      "2xl": {
-        value: 24,
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: 24,
-        },
-        name: "typography-size-2xl",
-        attributes: {
-          category: "typography",
-          type: "size",
-          item: "2xl",
-        },
-        path: ["typography", "size", "2xl"],
-      },
-      "3xl": {
-        value: 32,
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: 32,
-        },
-        name: "typography-size-3xl",
-        attributes: {
-          category: "typography",
-          type: "size",
-          item: "3xl",
-        },
-        path: ["typography", "size", "3xl"],
-      },
-    },
     lineHeight: {
       tight: {
         value: 1.2,
@@ -1357,11 +1284,11 @@ module.exports = {
         path: ["typography", "lineHeight", "tight"],
       },
       snug: {
-        value: 1.3,
+        value: 1.34,
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: 1.3,
+          value: 1.34,
         },
         name: "typography-line-height-snug",
         attributes: {
@@ -1387,11 +1314,11 @@ module.exports = {
         path: ["typography", "lineHeight", "normal"],
       },
       relaxed: {
-        value: 1.65,
+        value: 1.64,
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: 1.65,
+          value: 1.64,
         },
         name: "typography-line-height-relaxed",
         attributes: {
@@ -1402,62 +1329,15 @@ module.exports = {
         path: ["typography", "lineHeight", "relaxed"],
       },
     },
-    letterSpacing: {
-      tight: {
-        value: -0.01,
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: -0.01,
-        },
-        name: "typography-letter-spacing-tight",
-        attributes: {
-          category: "typography",
-          type: "letterSpacing",
-          item: "tight",
-        },
-        path: ["typography", "letterSpacing", "tight"],
-      },
-      none: {
-        value: 0,
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: 0,
-        },
-        name: "typography-letter-spacing-none",
-        attributes: {
-          category: "typography",
-          type: "letterSpacing",
-          item: "none",
-        },
-        path: ["typography", "letterSpacing", "none"],
-      },
-      wide: {
-        value: 0.02,
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: 0.02,
-        },
-        name: "typography-letter-spacing-wide",
-        attributes: {
-          category: "typography",
-          type: "letterSpacing",
-          item: "wide",
-        },
-        path: ["typography", "letterSpacing", "wide"],
-      },
-    },
   },
   motion: {
     dur: {
       fast: {
-        value: 120,
+        value: 150,
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: 120,
+          value: 150,
         },
         name: "motion-dur-fast",
         attributes: {
@@ -1468,11 +1348,11 @@ module.exports = {
         path: ["motion", "dur", "fast"],
       },
       normal: {
-        value: 200,
+        value: 220,
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: 200,
+          value: 220,
         },
         name: "motion-dur-normal",
         attributes: {
@@ -1483,11 +1363,11 @@ module.exports = {
         path: ["motion", "dur", "normal"],
       },
       slow: {
-        value: 300,
+        value: 320,
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: 300,
+          value: 320,
         },
         name: "motion-dur-slow",
         attributes: {
@@ -1499,6 +1379,21 @@ module.exports = {
       },
     },
     easing: {
+      standard: {
+        value: "cubic-bezier(0.18, 0.55, 0.2, 0.95)",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "cubic-bezier(0.18, 0.55, 0.2, 0.95)",
+        },
+        name: "motion-easing-standard",
+        attributes: {
+          category: "motion",
+          type: "easing",
+          item: "standard",
+        },
+        path: ["motion", "easing", "standard"],
+      },
       emphasized: {
         value: "cubic-bezier(0.2, 0, 0, 1)",
         filePath: "tokens/tokens.json",
@@ -1513,21 +1408,6 @@ module.exports = {
           item: "emphasized",
         },
         path: ["motion", "easing", "emphasized"],
-      },
-      standard: {
-        value: "cubic-bezier(0.2, 0, 0, 1)",
-        filePath: "tokens/tokens.json",
-        isSource: true,
-        original: {
-          value: "cubic-bezier(0.2, 0, 0, 1)",
-        },
-        name: "motion-easing-standard",
-        attributes: {
-          category: "motion",
-          type: "easing",
-          item: "standard",
-        },
-        path: ["motion", "easing", "standard"],
       },
     },
   },
@@ -1611,7 +1491,7 @@ module.exports = {
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.light.surface.value}",
+            value: "{color.background.canvas.value}",
           },
           name: "semantic-color-bg-page",
           attributes: {
@@ -1623,11 +1503,11 @@ module.exports = {
           path: ["semantic", "color", "bg", "page"],
         },
         card: {
-          value: "#FFFFFF",
+          value: "#F8F9FA",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.light.surface.value}",
+            value: "{color.background.surface.value}",
           },
           name: "semantic-color-bg-card",
           attributes: {
@@ -1639,11 +1519,11 @@ module.exports = {
           path: ["semantic", "color", "bg", "card"],
         },
         raised: {
-          value: "#2B2D42",
+          value: "#EEF2F5",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.light.inverseSurface.value}",
+            value: "{color.background.raised.value}",
           },
           name: "semantic-color-bg-raised",
           attributes: {
@@ -1655,11 +1535,11 @@ module.exports = {
           path: ["semantic", "color", "bg", "raised"],
         },
         overlay: {
-          value: "rgba(0,0,0,0.5)",
+          value: "rgba(11, 24, 34, 0.55)",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "rgba(0,0,0,0.5)",
+            value: "{color.background.overlay.value}",
           },
           name: "semantic-color-bg-overlay",
           attributes: {
@@ -1673,11 +1553,11 @@ module.exports = {
       },
       text: {
         body: {
-          value: "#2B2D42",
+          value: "#1F2937",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.light.onSurface.value}",
+            value: "{color.text.default.value}",
           },
           name: "semantic-color-text-body",
           attributes: {
@@ -1689,11 +1569,11 @@ module.exports = {
           path: ["semantic", "color", "text", "body"],
         },
         muted: {
-          value: "#2B2D42",
+          value: "#475569",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.light.onSurfaceVar.value}",
+            value: "{color.text.muted.value}",
           },
           name: "semantic-color-text-muted",
           attributes: {
@@ -1705,11 +1585,11 @@ module.exports = {
           path: ["semantic", "color", "text", "muted"],
         },
         inverse: {
-          value: "#F8F9FA",
+          value: "#FFFFFF",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.light.onInverseSurface.value}",
+            value: "{color.text.inverse.value}",
           },
           name: "semantic-color-text-inverse",
           attributes: {
@@ -1721,11 +1601,11 @@ module.exports = {
           path: ["semantic", "color", "text", "inverse"],
         },
         link: {
-          value: "#4A90E2",
+          value: "#1A4E5F",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.status.info.value}",
+            value: "{color.text.link.value}",
           },
           name: "semantic-color-text-link",
           attributes: {
@@ -1739,11 +1619,11 @@ module.exports = {
       },
       border: {
         subtle: {
-          value: "#B8BDC6",
+          value: "#E1E8EE",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.light.outline.value}",
+            value: "{color.border.subtle.value}",
           },
           name: "semantic-color-border-subtle",
           attributes: {
@@ -1755,11 +1635,11 @@ module.exports = {
           path: ["semantic", "color", "border", "subtle"],
         },
         strong: {
-          value: "#2B2D42",
+          value: "#64748B",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.light.onSurfaceVar.value}",
+            value: "{color.border.strong.value}",
           },
           name: "semantic-color-border-strong",
           attributes: {
@@ -1775,7 +1655,7 @@ module.exports = {
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.light.primary.value}",
+            value: "{color.border.focus.value}",
           },
           name: "semantic-color-border-focus",
           attributes: {
@@ -1793,7 +1673,7 @@ module.exports = {
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.status.success.value}",
+            value: "{color.feedback.success.value}",
           },
           name: "semantic-color-status-success",
           attributes: {
@@ -1809,7 +1689,7 @@ module.exports = {
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.status.warning.value}",
+            value: "{color.feedback.warning.value}",
           },
           name: "semantic-color-status-warning",
           attributes: {
@@ -1820,12 +1700,28 @@ module.exports = {
           },
           path: ["semantic", "color", "status", "warning"],
         },
+        error: {
+          value: "#FF6B6B",
+          filePath: "tokens/tokens.json",
+          isSource: true,
+          original: {
+            value: "{color.feedback.error.value}",
+          },
+          name: "semantic-color-status-error",
+          attributes: {
+            category: "semantic",
+            type: "color",
+            item: "status",
+            subitem: "error",
+          },
+          path: ["semantic", "color", "status", "error"],
+        },
         info: {
           value: "#4A90E2",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.status.info.value}",
+            value: "{color.feedback.info.value}",
           },
           name: "semantic-color-status-info",
           attributes: {
@@ -1836,22 +1732,6 @@ module.exports = {
           },
           path: ["semantic", "color", "status", "info"],
         },
-        danger: {
-          value: "#FF6B6B",
-          filePath: "tokens/tokens.json",
-          isSource: true,
-          original: {
-            value: "{color.status.danger.value}",
-          },
-          name: "semantic-color-status-danger",
-          attributes: {
-            category: "semantic",
-            type: "color",
-            item: "status",
-            subitem: "danger",
-          },
-          path: ["semantic", "color", "status", "danger"],
-        },
       },
       button: {
         primary: {
@@ -1860,7 +1740,7 @@ module.exports = {
             filePath: "tokens/tokens.json",
             isSource: true,
             original: {
-              value: "{color.light.primary.value}",
+              value: "{color.brand.primary.value}",
             },
             name: "semantic-color-button-primary-bg",
             attributes: {
@@ -1873,11 +1753,11 @@ module.exports = {
             path: ["semantic", "color", "button", "primary", "bg"],
           },
           fg: {
-            value: "#F8F9FA",
+            value: "#F2FAFA",
             filePath: "tokens/tokens.json",
             isSource: true,
             original: {
-              value: "{color.light.onPrimary.value}",
+              value: "{color.brand.onPrimary.value}",
             },
             name: "semantic-color-button-primary-fg",
             attributes: {
@@ -1896,7 +1776,7 @@ module.exports = {
             filePath: "tokens/tokens.json",
             isSource: true,
             original: {
-              value: "{color.light.secondary.value}",
+              value: "{color.brand.muted.value}",
             },
             name: "semantic-color-button-secondary-bg",
             attributes: {
@@ -1909,11 +1789,11 @@ module.exports = {
             path: ["semantic", "color", "button", "secondary", "bg"],
           },
           fg: {
-            value: "#FFFFFF",
+            value: "#1A4E5F",
             filePath: "tokens/tokens.json",
             isSource: true,
             original: {
-              value: "{color.light.onSecondary.value}",
+              value: "{color.brand.primary.value}",
             },
             name: "semantic-color-button-secondary-fg",
             attributes: {
@@ -1933,11 +1813,11 @@ module.exports = {
     color: {
       bg: {
         page: {
-          value: "#1B2130",
+          value: "#0F1822",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.dark.surface.value}",
+            value: "{color.background.canvasDark.value}",
           },
           name: "semantic-dark-color-bg-page",
           attributes: {
@@ -1949,11 +1829,11 @@ module.exports = {
           path: ["semanticDark", "color", "bg", "page"],
         },
         card: {
-          value: "#1B2130",
+          value: "#15202B",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.dark.surface.value}",
+            value: "{color.background.surfaceDark.value}",
           },
           name: "semantic-dark-color-bg-card",
           attributes: {
@@ -1965,11 +1845,11 @@ module.exports = {
           path: ["semanticDark", "color", "bg", "card"],
         },
         raised: {
-          value: "#FFFFFF",
+          value: "#1D2B37",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.dark.inverseSurface.value}",
+            value: "{color.background.raisedDark.value}",
           },
           name: "semantic-dark-color-bg-raised",
           attributes: {
@@ -1981,11 +1861,11 @@ module.exports = {
           path: ["semanticDark", "color", "bg", "raised"],
         },
         overlay: {
-          value: "rgba(0,0,0,0.7)",
+          value: "rgba(4, 12, 24, 0.7)",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "rgba(0,0,0,0.7)",
+            value: "{color.background.overlayDark.value}",
           },
           name: "semantic-dark-color-bg-overlay",
           attributes: {
@@ -2003,7 +1883,7 @@ module.exports = {
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.dark.onSurface.value}",
+            value: "{color.text.inverse.value}",
           },
           name: "semantic-dark-color-text-body",
           attributes: {
@@ -2015,11 +1895,11 @@ module.exports = {
           path: ["semanticDark", "color", "text", "body"],
         },
         muted: {
-          value: "#FFFFFF",
+          value: "#CEDBE6",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.dark.onSurfaceVar.value}",
+            value: "#CEDBE6",
           },
           name: "semantic-dark-color-text-muted",
           attributes: {
@@ -2031,11 +1911,11 @@ module.exports = {
           path: ["semanticDark", "color", "text", "muted"],
         },
         inverse: {
-          value: "#2B2D42",
+          value: "#1F2937",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.dark.onInverseSurface.value}",
+            value: "{color.text.default.value}",
           },
           name: "semantic-dark-color-text-inverse",
           attributes: {
@@ -2047,11 +1927,11 @@ module.exports = {
           path: ["semanticDark", "color", "text", "inverse"],
         },
         link: {
-          value: "#4A90E2",
+          value: "#A8DADC",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.status.info.value}",
+            value: "{color.brand.muted.value}",
           },
           name: "semantic-dark-color-text-link",
           attributes: {
@@ -2065,11 +1945,11 @@ module.exports = {
       },
       border: {
         subtle: {
-          value: "#3F485A",
+          value: "#233445",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.dark.outline.value}",
+            value: "#233445",
           },
           name: "semantic-dark-color-border-subtle",
           attributes: {
@@ -2081,11 +1961,11 @@ module.exports = {
           path: ["semanticDark", "color", "border", "subtle"],
         },
         strong: {
-          value: "#FFFFFF",
+          value: "#3C4D5E",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.dark.onSurfaceVar.value}",
+            value: "#3C4D5E",
           },
           name: "semantic-dark-color-border-strong",
           attributes: {
@@ -2097,11 +1977,11 @@ module.exports = {
           path: ["semanticDark", "color", "border", "strong"],
         },
         focus: {
-          value: "#93C6D0",
+          value: "#A8DADC",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.dark.primary.value}",
+            value: "{color.brand.muted.value}",
           },
           name: "semantic-dark-color-border-focus",
           attributes: {
@@ -2119,7 +1999,7 @@ module.exports = {
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.status.success.value}",
+            value: "{color.feedback.success.value}",
           },
           name: "semantic-dark-color-status-success",
           attributes: {
@@ -2130,28 +2010,12 @@ module.exports = {
           },
           path: ["semanticDark", "color", "status", "success"],
         },
-        onSuccess: {
-          value: "#FFFFFF",
-          filePath: "tokens/tokens.json",
-          isSource: true,
-          original: {
-            value: "{color.status.onSuccess.value}",
-          },
-          name: "semantic-dark-color-status-on-success",
-          attributes: {
-            category: "semanticDark",
-            type: "color",
-            item: "status",
-            subitem: "onSuccess",
-          },
-          path: ["semanticDark", "color", "status", "onSuccess"],
-        },
         warning: {
           value: "#F4B400",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.status.warning.value}",
+            value: "{color.feedback.warning.value}",
           },
           name: "semantic-dark-color-status-warning",
           attributes: {
@@ -2162,28 +2026,28 @@ module.exports = {
           },
           path: ["semanticDark", "color", "status", "warning"],
         },
-        onWarning: {
-          value: "#2B2D42",
+        error: {
+          value: "#FF6B6B",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.status.onWarning.value}",
+            value: "{color.feedback.error.value}",
           },
-          name: "semantic-dark-color-status-on-warning",
+          name: "semantic-dark-color-status-error",
           attributes: {
             category: "semanticDark",
             type: "color",
             item: "status",
-            subitem: "onWarning",
+            subitem: "error",
           },
-          path: ["semanticDark", "color", "status", "onWarning"],
+          path: ["semanticDark", "color", "status", "error"],
         },
         info: {
           value: "#4A90E2",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.status.info.value}",
+            value: "{color.feedback.info.value}",
           },
           name: "semantic-dark-color-status-info",
           attributes: {
@@ -2194,47 +2058,15 @@ module.exports = {
           },
           path: ["semanticDark", "color", "status", "info"],
         },
-        onInfo: {
-          value: "#FFFFFF",
-          filePath: "tokens/tokens.json",
-          isSource: true,
-          original: {
-            value: "{color.status.onInfo.value}",
-          },
-          name: "semantic-dark-color-status-on-info",
-          attributes: {
-            category: "semanticDark",
-            type: "color",
-            item: "status",
-            subitem: "onInfo",
-          },
-          path: ["semanticDark", "color", "status", "onInfo"],
-        },
-        danger: {
-          value: "#FF6B6B",
-          filePath: "tokens/tokens.json",
-          isSource: true,
-          original: {
-            value: "{color.status.danger.value}",
-          },
-          name: "semantic-dark-color-status-danger",
-          attributes: {
-            category: "semanticDark",
-            type: "color",
-            item: "status",
-            subitem: "danger",
-          },
-          path: ["semanticDark", "color", "status", "danger"],
-        },
       },
       button: {
         primary: {
           bg: {
-            value: "#93C6D0",
+            value: "#A8DADC",
             filePath: "tokens/tokens.json",
             isSource: true,
             original: {
-              value: "{color.dark.primary.value}",
+              value: "{color.brand.muted.value}",
             },
             name: "semantic-dark-color-button-primary-bg",
             attributes: {
@@ -2247,11 +2079,11 @@ module.exports = {
             path: ["semanticDark", "color", "button", "primary", "bg"],
           },
           fg: {
-            value: "#2B2D42",
+            value: "#1A4E5F",
             filePath: "tokens/tokens.json",
             isSource: true,
             original: {
-              value: "{color.dark.onPrimary.value}",
+              value: "{color.brand.primary.value}",
             },
             name: "semantic-dark-color-button-primary-fg",
             attributes: {
@@ -2266,11 +2098,11 @@ module.exports = {
         },
         secondary: {
           bg: {
-            value: "#84C3C9",
+            value: "#15202B",
             filePath: "tokens/tokens.json",
             isSource: true,
             original: {
-              value: "{color.dark.secondary.value}",
+              value: "{color.background.surfaceDark.value}",
             },
             name: "semantic-dark-color-button-secondary-bg",
             attributes: {
@@ -2283,11 +2115,11 @@ module.exports = {
             path: ["semanticDark", "color", "button", "secondary", "bg"],
           },
           fg: {
-            value: "#FFFFFF",
+            value: "#A8DADC",
             filePath: "tokens/tokens.json",
             isSource: true,
             original: {
-              value: "{color.dark.onSecondary.value}",
+              value: "{color.brand.muted.value}",
             },
             name: "semantic-dark-color-button-secondary-fg",
             attributes: {
@@ -2311,7 +2143,7 @@ module.exports = {
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.light.surface.value}",
+            value: "{color.background.canvas.value}",
           },
           name: "semantic-hc-color-bg-page",
           attributes: {
@@ -2323,11 +2155,11 @@ module.exports = {
           path: ["semanticHc", "color", "bg", "page"],
         },
         card: {
-          value: "#FFFFFF",
+          value: "#F8F9FA",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.light.surface.value}",
+            value: "{color.background.surface.value}",
           },
           name: "semantic-hc-color-bg-card",
           attributes: {
@@ -2339,11 +2171,11 @@ module.exports = {
           path: ["semanticHc", "color", "bg", "card"],
         },
         raised: {
-          value: "#2B2D42",
+          value: "#EEF2F5",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.light.inverseSurface.value}",
+            value: "{color.background.raised.value}",
           },
           name: "semantic-hc-color-bg-raised",
           attributes: {
@@ -2355,11 +2187,11 @@ module.exports = {
           path: ["semanticHc", "color", "bg", "raised"],
         },
         overlay: {
-          value: "rgba(0,0,0,0.6)",
+          value: "rgba(0, 0, 0, 0.65)",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "rgba(0,0,0,0.6)",
+            value: "rgba(0, 0, 0, 0.65)",
           },
           name: "semantic-hc-color-bg-overlay",
           attributes: {
@@ -2373,11 +2205,11 @@ module.exports = {
       },
       text: {
         body: {
-          value: "#2B2D42",
+          value: "#1F2937",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.light.onSurface.value}",
+            value: "{color.text.default.value}",
           },
           name: "semantic-hc-color-text-body",
           attributes: {
@@ -2389,11 +2221,11 @@ module.exports = {
           path: ["semanticHc", "color", "text", "body"],
         },
         muted: {
-          value: "#2B2D42",
+          value: "#475569",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.light.onSurfaceVar.value}",
+            value: "{color.text.muted.value}",
           },
           name: "semantic-hc-color-text-muted",
           attributes: {
@@ -2405,11 +2237,11 @@ module.exports = {
           path: ["semanticHc", "color", "text", "muted"],
         },
         inverse: {
-          value: "#F8F9FA",
+          value: "#FFFFFF",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.light.onInverseSurface.value}",
+            value: "{color.text.inverse.value}",
           },
           name: "semantic-hc-color-text-inverse",
           attributes: {
@@ -2421,11 +2253,11 @@ module.exports = {
           path: ["semanticHc", "color", "text", "inverse"],
         },
         link: {
-          value: "#4A90E2",
+          value: "#FF6B6B",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.status.info.value}",
+            value: "{color.brand.accent.value}",
           },
           name: "semantic-hc-color-text-link",
           attributes: {
@@ -2439,11 +2271,11 @@ module.exports = {
       },
       border: {
         subtle: {
-          value: "#B8BDC6",
+          value: "#E1E8EE",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.light.outline.value}",
+            value: "{color.border.subtle.value}",
           },
           name: "semantic-hc-color-border-subtle",
           attributes: {
@@ -2455,11 +2287,11 @@ module.exports = {
           path: ["semanticHc", "color", "border", "subtle"],
         },
         strong: {
-          value: "#2B2D42",
+          value: "#64748B",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.light.onSurfaceVar.value}",
+            value: "{color.border.strong.value}",
           },
           name: "semantic-hc-color-border-strong",
           attributes: {
@@ -2471,11 +2303,11 @@ module.exports = {
           path: ["semanticHc", "color", "border", "strong"],
         },
         focus: {
-          value: "#1A4E5F",
+          value: "#FF6B6B",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.light.primary.value}",
+            value: "{color.brand.accent.value}",
           },
           name: "semantic-hc-color-border-focus",
           attributes: {
@@ -2493,7 +2325,7 @@ module.exports = {
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.status.success.value}",
+            value: "{color.feedback.success.value}",
           },
           name: "semantic-hc-color-status-success",
           attributes: {
@@ -2504,28 +2336,12 @@ module.exports = {
           },
           path: ["semanticHc", "color", "status", "success"],
         },
-        onSuccess: {
-          value: "#FFFFFF",
-          filePath: "tokens/tokens.json",
-          isSource: true,
-          original: {
-            value: "{color.status.onSuccess.value}",
-          },
-          name: "semantic-hc-color-status-on-success",
-          attributes: {
-            category: "semanticHc",
-            type: "color",
-            item: "status",
-            subitem: "onSuccess",
-          },
-          path: ["semanticHc", "color", "status", "onSuccess"],
-        },
         warning: {
           value: "#F4B400",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.status.warning.value}",
+            value: "{color.feedback.warning.value}",
           },
           name: "semantic-hc-color-status-warning",
           attributes: {
@@ -2536,28 +2352,28 @@ module.exports = {
           },
           path: ["semanticHc", "color", "status", "warning"],
         },
-        onWarning: {
-          value: "#2B2D42",
+        error: {
+          value: "#FF6B6B",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.status.onWarning.value}",
+            value: "{color.feedback.error.value}",
           },
-          name: "semantic-hc-color-status-on-warning",
+          name: "semantic-hc-color-status-error",
           attributes: {
             category: "semanticHc",
             type: "color",
             item: "status",
-            subitem: "onWarning",
+            subitem: "error",
           },
-          path: ["semanticHc", "color", "status", "onWarning"],
+          path: ["semanticHc", "color", "status", "error"],
         },
         info: {
           value: "#4A90E2",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.status.info.value}",
+            value: "{color.feedback.info.value}",
           },
           name: "semantic-hc-color-status-info",
           attributes: {
@@ -2568,38 +2384,6 @@ module.exports = {
           },
           path: ["semanticHc", "color", "status", "info"],
         },
-        onInfo: {
-          value: "#FFFFFF",
-          filePath: "tokens/tokens.json",
-          isSource: true,
-          original: {
-            value: "{color.status.onInfo.value}",
-          },
-          name: "semantic-hc-color-status-on-info",
-          attributes: {
-            category: "semanticHc",
-            type: "color",
-            item: "status",
-            subitem: "onInfo",
-          },
-          path: ["semanticHc", "color", "status", "onInfo"],
-        },
-        danger: {
-          value: "#FF6B6B",
-          filePath: "tokens/tokens.json",
-          isSource: true,
-          original: {
-            value: "{color.status.danger.value}",
-          },
-          name: "semantic-hc-color-status-danger",
-          attributes: {
-            category: "semanticHc",
-            type: "color",
-            item: "status",
-            subitem: "danger",
-          },
-          path: ["semanticHc", "color", "status", "danger"],
-        },
       },
       button: {
         primary: {
@@ -2608,7 +2392,7 @@ module.exports = {
             filePath: "tokens/tokens.json",
             isSource: true,
             original: {
-              value: "{color.light.primary.value}",
+              value: "{color.brand.primary.value}",
             },
             name: "semantic-hc-color-button-primary-bg",
             attributes: {
@@ -2621,11 +2405,11 @@ module.exports = {
             path: ["semanticHc", "color", "button", "primary", "bg"],
           },
           fg: {
-            value: "#F8F9FA",
+            value: "#F2FAFA",
             filePath: "tokens/tokens.json",
             isSource: true,
             original: {
-              value: "{color.light.onPrimary.value}",
+              value: "{color.brand.onPrimary.value}",
             },
             name: "semantic-hc-color-button-primary-fg",
             attributes: {
@@ -2644,7 +2428,7 @@ module.exports = {
             filePath: "tokens/tokens.json",
             isSource: true,
             original: {
-              value: "{color.light.secondary.value}",
+              value: "{color.brand.muted.value}",
             },
             name: "semantic-hc-color-button-secondary-bg",
             attributes: {
@@ -2657,11 +2441,11 @@ module.exports = {
             path: ["semanticHc", "color", "button", "secondary", "bg"],
           },
           fg: {
-            value: "#FFFFFF",
+            value: "#1A4E5F",
             filePath: "tokens/tokens.json",
             isSource: true,
             original: {
-              value: "{color.light.onSecondary.value}",
+              value: "{color.brand.primary.value}",
             },
             name: "semantic-hc-color-button-secondary-fg",
             attributes: {

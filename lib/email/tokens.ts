@@ -1,6 +1,7 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
 import { normalizeEmail } from '@/lib/email/suppress';
+import { DEFAULT_LOCALE } from '@/lib/i18n/locales';
 
 export type UnsubTokenPayload = {
   email: string;
@@ -80,5 +81,5 @@ export function verifyUnsubToken(token: string): UnsubTokenPayload | null {
 export function buildUnsubUrl(email: string, scope: UnsubTokenPayload['scope'] = 'all') {
   const token = signUnsubToken({ email, scope });
   const baseUrl = (process.env.APP_BASE_URL?.trim() || process.env.NEXT_PUBLIC_SITE_URL?.trim() || 'https://louhen.eu').replace(/\/$/, '');
-  return `${baseUrl}/unsubscribe?token=${encodeURIComponent(token)}`;
+  return `${baseUrl}/${DEFAULT_LOCALE.value}/unsubscribe?token=${encodeURIComponent(token)}`;
 }

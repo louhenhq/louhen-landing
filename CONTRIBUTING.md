@@ -43,11 +43,7 @@ Run dev
     npm run dev
 
 Run full checks before a PR
-    npm run lint
-    npm run build
-    npx playwright test
-    # optional if configured:
-    npm run lhci
+    npm run validate:local
 
 ---
 

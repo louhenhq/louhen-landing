@@ -19,7 +19,7 @@ function PrefsInner() {
         <WaitlistForm defaultEmail={defaultEmail} source={source} />
       ) : (
         <>
-          <h1 className="text-2xl font-bold tracking-tight">Email preferences</h1>
+          <h1 className={text.heading}>Email preferences</h1>
           <PrefsForm token={token} />
         </>
       )}
@@ -79,34 +79,60 @@ function PrefsForm({ token }: { token: string }) {
     }
   }
 
-  if (loading) return <p className="mt-4 text-slate-600">Loading…</p>;
-  if (error) return <p className="mt-4 text-rose-600" role="alert">{error}</p>;
+  if (loading) return <p className="mt-4 text-body text-text-muted">Loading…</p>;
+  if (error) return <p className="mt-4 text-feedback-error" role="alert">{error}</p>;
 
   return (
-    <form onSubmit={onSave} className="mt-6 grid gap-4 max-w-lg rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <label className="flex items-center gap-3">
-        <input type="checkbox" checked={!unsubscribed} onChange={(e)=>setUnsubscribed(!e.target.checked)} />
-        <span className="font-medium">Receive emails from Louhen</span>
+    <form onSubmit={onSave} className="mt-6 grid max-w-lg gap-sm rounded-2xl border border-border bg-bg-card p-md shadow-card">
+      <label className="flex items-center gap-sm">
+        <input
+          className="h-5 w-5 rounded border border-border accent-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
+          type="checkbox"
+          checked={!unsubscribed}
+          onChange={(e) => setUnsubscribed(!e.target.checked)}
+        />
+        <span className={text.label}>Receive emails from Louhen</span>
       </label>
 
-      <fieldset className="grid gap-2 pl-6">
-        <label className="flex items-center gap-3">
-          <input type="checkbox" checked={prefs.waitlistUpdates} onChange={(e)=>setPrefs(p=>({ ...p, waitlistUpdates: e.target.checked }))} />
-          <span>Waitlist updates</span>
+      <fieldset className="grid gap-xs pl-lg">
+        <label className="flex items-center gap-sm">
+          <input
+            className="h-5 w-5 rounded border border-border accent-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
+            type="checkbox"
+            checked={prefs.waitlistUpdates}
+            onChange={(e) => setPrefs((p) => ({ ...p, waitlistUpdates: e.target.checked }))}
+          />
+          <span className={text.body}>Waitlist updates</span>
         </label>
-        <label className="flex items-center gap-3">
-          <input type="checkbox" checked={prefs.referrals} onChange={(e)=>setPrefs(p=>({ ...p, referrals: e.target.checked }))} />
-          <span>Referrals & rewards</span>
+        <label className="flex items-center gap-sm">
+          <input
+            className="h-5 w-5 rounded border border-border accent-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
+            type="checkbox"
+            checked={prefs.referrals}
+            onChange={(e) => setPrefs((p) => ({ ...p, referrals: e.target.checked }))}
+          />
+          <span className={text.body}>Referrals & rewards</span>
         </label>
-        <label className="flex items-center gap-3">
-          <input type="checkbox" checked={prefs.launchNews} onChange={(e)=>setPrefs(p=>({ ...p, launchNews: e.target.checked }))} />
-          <span>Launch news</span>
+        <label className="flex items-center gap-sm">
+          <input
+            className="h-5 w-5 rounded border border-border accent-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
+            type="checkbox"
+            checked={prefs.launchNews}
+            onChange={(e) => setPrefs((p) => ({ ...p, launchNews: e.target.checked }))}
+          />
+          <span className={text.body}>Launch news</span>
         </label>
       </fieldset>
 
-      <div className="flex items-center gap-3">
-        <button className="rounded-xl bg-slate-900 text-white px-4 py-2 font-semibold hover:opacity-90">Save</button>
-        {msg && <span className="text-emerald-700 text-sm" aria-live="polite">{msg}</span>}
+      <div className="flex items-center gap-sm">
+        <button className={cn(buttons.primary, 'rounded-xl px-lg py-xs')}>
+          Save
+        </button>
+        {msg && (
+          <span className="text-body-sm text-feedback-success" aria-live="polite">
+            {msg}
+          </span>
+        )}
       </div>
     </form>
   );
@@ -114,7 +140,7 @@ function PrefsForm({ token }: { token: string }) {
 
 export default function PreferencesPage() {
   return (
-    <Suspense fallback={<main className="mx-auto max-w-3xl px-4 py-10"><p className="text-slate-600">Loading…</p></main>}>
+    <Suspense fallback={<main className="mx-auto max-w-3xl px-4 py-10"><p className="text-text-muted">Loading…</p></main>}>
       <PrefsInner />
     </Suspense>
   );

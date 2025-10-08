@@ -15,20 +15,20 @@ export default function FAQ() {
 
   return (
     <section id="faq" className={cn(layout.section, 'bg-bg')}>
-      <div className={cn(layout.container, 'flex flex-col gap-xl')}>
-        <div className="max-w-3xl">
+      <div className={cn(layout.container, layout.grid, 'gap-y-xl')}>
+        <div className="md:col-span-4 lg:col-span-4">
           <h2 className={text.heading}>{t('title')}</h2>
         </div>
-        <div className="flex flex-col gap-md">
+        <div className="md:col-span-8 lg:col-span-8 flex flex-col gap-md">
           {items.map((item: FAQItem) => (
-            <details key={item.q} className={cn(layout.card, 'group px-gutter py-lg')}>
+            <details key={item.q} className={cn(layout.card, 'group px-lg py-lg')}>
               <summary className="flex cursor-pointer list-none items-center justify-between gap-md">
-                <span className="text-base font-medium text-text">{item.q}</span>
-                <span className="text-xl text-text-muted transition-transform duration-base group-open:rotate-45" aria-hidden>
+                <span className="text-label text-text">{item.q}</span>
+                <span className="text-label text-text-muted transition-transform duration-base group-open:rotate-45" aria-hidden>
                   +
                 </span>
               </summary>
-              <p className="mt-sm text-sm text-text-muted leading-relaxed">{item.a}</p>
+              <p className="mt-sm text-body text-text-muted">{item.a}</p>
             </details>
           ))}
         </div>

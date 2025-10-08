@@ -37,8 +37,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
   if (!adminKey || keyFromUrl !== adminKey) {
     return (
       <main className="mx-auto max-w-2xl px-4 py-16">
-        <h1 className="text-2xl font-bold">Unauthorized</h1>
-        <p className="mt-2 text-slate-600">Missing or invalid key.</p>
+        <h1 className="text-display-lg text-text">Unauthorized</h1>
+        <p className="mt-2 text-body text-text-muted">Missing or invalid key.</p>
       </main>
     );
   }
@@ -77,9 +77,9 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
 
   return (
     <main className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-12">
-      <h1 className="text-3xl font-bold tracking-tight">Top Referrers</h1>
-      <p className="mt-2 text-slate-600 text-sm">Showing top 50 by referralCount. Use the secret ?key=… to access.</p>
-      <div className="mt-4 text-sm">
+      <h1 className="text-display-lg text-text">Top Referrers</h1>
+      <p className="mt-2 text-body text-text-muted">Showing top 50 by referralCount. Use the secret ?key=… to access.</p>
+      <div className="mt-4 text-body-sm text-text">
         <a
           href={`/api/admin/backfill-unsub?key=${encodeURIComponent(adminKey)}&dry=1&limit=50`}
           className="underline"
@@ -89,7 +89,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
         <span className="mx-2">•</span>
         <a
           href={`/api/admin/backfill-unsub?key=${encodeURIComponent(adminKey)}&dry=0&limit=50`}
-          className="underline text-rose-600"
+          className="underline text-feedback-error"
         >
           Execute backfill (50 per page)
         </a>
@@ -98,9 +98,9 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
         <span className="mx-2">•</span>
         <a href={`/admin/metrics?key=${encodeURIComponent(adminKey)}`} className="underline">Metrics dashboard</a>
       </div>
-      <div className="mt-6 overflow-x-auto rounded-xl border border-slate-200 bg-white">
-        <table className="min-w-full text-sm">
-          <thead className="bg-slate-50 text-slate-700">
+      <div className="mt-6 overflow-x-auto rounded-xl border border-border bg-bg-card">
+        <table className="min-w-full text-body-sm">
+          <thead className="bg-bg text-text">
             <tr>
               <th className="px-3 py-2 text-left">#</th>
               <th className="px-3 py-2 text-left">Email</th>
@@ -112,7 +112,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
           </thead>
           <tbody>
             {rows.map((r, i) => (
-              <tr key={r.id} className="border-t border-slate-100">
+              <tr key={r.id} className="border-t border-border">
                 <td className="px-3 py-2">{i + 1}</td>
                 <td className="px-3 py-2">{maskEmail(r.email)}</td>
                 <td className="px-3 py-2 font-mono">{r.code}</td>
@@ -128,7 +128,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
             ))}
             {rows.length === 0 && (
               <tr>
-                <td className="px-3 py-4 text-slate-500" colSpan={6}>
+                <td className="px-3 py-4 text-text-muted" colSpan={6}>
                   No data yet.
                 </td>
               </tr>

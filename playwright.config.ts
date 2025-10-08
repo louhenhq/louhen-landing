@@ -46,9 +46,25 @@ const httpCredentials =
 const cookieEnv = process.env.PROTECTION_COOKIE;
 const storageStatePath = cookieEnv ? '.playwright/auth-storage.json' : undefined;
 
+const statusUser = process.env.STATUS_USER ?? process.env.CI_STATUS_USER ?? 'status-ops';
+const statusPass = process.env.STATUS_PASS ?? process.env.CI_STATUS_PASS ?? 'status-secret';
+
+const sandboxOrigin = normalizeBase(sandboxBaseURL);
+if (isSandbox && !sandboxOrigin) {
+  throw new Error('SANDBOX_VALIDATION=1 requires PREVIEW_BASE_URL to be set.');
+}
+
+const baseOverride = normalizeBase(process.env.BASE_URL);
+const hasBaseOverride = baseOverride.length > 0;
+
+const defaultOrigin = sandboxOrigin || normalizeBase(process.env.APP_BASE_URL) || FALLBACK_ORIGIN;
+const targetOrigin = hasBaseOverride ? baseOverride : defaultOrigin;
+const canonicalBaseURL = withTrailingSlash(ensureLocaleBase(targetOrigin));
+const useExternalTarget = hasBaseOverride || isSandbox;
+
 const testEnv = {
-  BASE_URL: baseURL,
-  APP_BASE_URL: baseURL,
+  BASE_URL: targetOrigin,
+  APP_BASE_URL: targetOrigin,
   TEST_MODE: '1',
   TEST_E2E_SHORTCIRCUIT: 'true',
   TEST_E2E_BYPASS_TOKEN: 'e2e-mocked-token',
@@ -82,6 +98,8 @@ for (const [key, value] of Object.entries(testEnv)) {
   }
 }
 
+const httpCredentials = statusUser && statusPass ? { username: statusUser, password: statusPass } : undefined;
+
 const config: PlaywrightTestConfig = {
   testDir: 'tests',
   testMatch: ['**/*.e2e.ts', '**/*.axe.ts', '**/*.spec.ts'],
@@ -97,7 +115,7 @@ const config: PlaywrightTestConfig = {
     timeout: 5_000,
   },
   use: {
-    baseURL,
+    baseURL: canonicalBaseURL,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',

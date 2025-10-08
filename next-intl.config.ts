@@ -21,4 +21,5 @@ export default getRequestConfig(async ({ locale }) => {
 export const config = {
   locales,
   defaultLocale,
+  localePrefix: 'always',
 };

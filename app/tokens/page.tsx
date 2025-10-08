@@ -28,7 +28,7 @@ function Swatch({ name, cls, labelClass }: SwatchProps) {
   return (
     <Tile name={name}>
       <div className={`h-10 rounded-md ${cls}`} />
-      <code className={`mt-xs block text-sm ${labelClass ?? 'text-text'}`}>{cls}</code>
+      <code className={`mt-xs block text-body-sm ${labelClass ?? 'text-text'}`}>{cls}</code>
     </Tile>
   )
 }
@@ -102,12 +102,12 @@ export default function TokensPage() {
 
       {/* Spacing */}
       <section className="mt-lg">
-        <h2 className="mb-sm text-lg font-medium">Spacing</h2>
+        <h2 className="mb-sm text-h3 text-text">Spacing</h2>
         <div className="space-y-sm">
           {['xs', 'sm', 'md', 'lg', 'xl', 'xxl', 'xxxl', 'gutter'].map((k) => (
             <div key={k} className="flex items-center gap-sm">
               <div className="h-2 rounded-sm bg-brand-secondary" style={{ width: `var(--spacing-${k})` }} />
-              <code className="text-sm text-text">--spacing-{k}</code>
+              <code className="text-body-sm text-text">--spacing-{k}</code>
             </div>
           ))}
         </div>

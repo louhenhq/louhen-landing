@@ -5,12 +5,20 @@ import { useTranslations } from 'next-intl';
 import { cn, layout, text } from '@/app/(site)/_lib/ui';
 import { track } from '@lib/clientAnalytics';
 
-export default function MethodHero() {
+type MethodHeroProps = {
+  locale: SupportedLocale;
+  childName: string | null;
+};
+
+export default function MethodHero({ locale, childName }: MethodHeroProps) {
   const t = useTranslations('method.hero');
+  const { registerCtaInteraction, route } = useMethodExperience();
 
   useEffect(() => {
-    void track('page_view', { page: '/method' });
-  }, []);
+    void track('page_view', { page: route, path: route });
+  }, [locale, route]);
+
+  const subtitle = childName ? t('subtitle_personalized', { name: childName }) : t('subtitle_generic');
 
   return (
     <section
@@ -23,12 +31,23 @@ export default function MethodHero() {
           {t('eyebrow') ? (
             <span className={cn(text.eyebrow, 'text-brand-primary/80')}>{t('eyebrow')}</span>
           ) : null}
-          <h1 id="method-hero-title" className={cn(text.heading, 'text-balance')}>
+          <h1 id="method-hero-title" className={cn(text.hero, 'text-balance')}>
             {t('title')}
           </h1>
           <p className={cn(text.subheading, 'text-balance')}>
-            {t('subtitle')}
+            {subtitle}
           </p>
+        </div>
+        <div className="flex flex-col items-center gap-md">
+          <Button
+            as="a"
+            href={`/${locale}/waitlist`}
+            prefetch={false}
+            onClick={() => registerCtaInteraction('hero')}
+          >
+            {t('cta')}
+          </Button>
+          <p className="max-w-2xl text-body-sm text-text-muted">{t('trustLine')}</p>
         </div>
         <div
           className="relative h-44 w-full max-w-3xl overflow-hidden rounded-3xl border border-border bg-bg-card shadow-card"

@@ -58,6 +58,7 @@ jobs:
     timeout-minutes: 45
     env:
       CI: true
+      SKIP_LHCI: ${{ vars.SKIP_LHCI }}
       NEXT_PUBLIC_ANALYTICS_DISABLED: '1'
       NEXT_PUBLIC_ANALYTICS_DEBUG: '0'
       NEXT_PUBLIC_ENV: 'ci'
@@ -79,10 +80,30 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        env:
+          NODE_ENV: development
+        run: npm ci --include=dev
 
       - name: Build design tokens
         run: npm run -w @louhen/design-tokens build
+
+      - name: Color policy (fast scan)
+        env:
+          COLOR_POLICY_MODE: warn
+        run: npm run guard:hex
+
+      - name: Color policy (enforce)
+        env:
+          COLOR_POLICY_MODE: enforce
+        run: npm run ci:color-policy
+
+      - name: Upload color policy report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: color-policy-report
+          path: ci-artifacts/color-policy-report.txt
+          if-no-files-found: warn
 
       - name: Lint
         run: npm run lint
@@ -95,6 +116,63 @@ jobs:
       - name: Build
         run: npm run build
         continue-on-error: false
+
+
+  e2e-tests:
+    name: Playwright E2E
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: ${{ vars.SKIP_E2E != '1' }}
+    env:
+      CI: true
+      NODE_ENV: production
+      TEST_MODE: '1'
+      APP_BASE_URL: http://localhost:4311
+      NEXT_PUBLIC_SITE_URL: http://localhost:4311
+      NEXT_PUBLIC_ENV: 'ci'
+      NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
+      NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
+      NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
+      NEXT_PUBLIC_LOCALES: 'en-de,de-de'
+      NEXT_PUBLIC_DEFAULT_LOCALE: 'en-de'
+      NEXT_PUBLIC_ANALYTICS_DISABLED: '1'
+      NEXT_PUBLIC_ANALYTICS_DEBUG: '0'
+      NEXT_PUBLIC_METHOD_STICKY_CTA: 'true'
+      NEXT_PUBLIC_METHOD_EXIT_NUDGE: 'true'
+      NEXT_TELEMETRY_DISABLED: '1'
+      DEFAULT_LOCALE: 'en-de'
+      BASE_URL: http://localhost:4311
+      HCAPTCHA_SECRET: ci-hcaptcha-secret
+      WAITLIST_CONFIRM_TTL_DAYS: '7'
+      FIREBASE_PROJECT_ID: ci-firebase
+      FIREBASE_DB_REGION: eur3
+      FIREBASE_ADMIN_SA_B64: eyJwcm9qZWN0X2lkIjoiY2ktZmlyZWJhc2UifQ==
+      RESEND_API_KEY: ci-resend-key
+      RESEND_FROM: no-reply@ci.louhen.app
+      RESEND_REPLY_TO: hello@ci.louhen.app
+      STATUS_USER: ci-status
+      STATUS_PASS: ci-secret
+      SUPPRESSION_SALT: ci-suppression-salt
+      EMAIL_TRANSPORT: noop
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        env:
+          NODE_ENV: development
+        run: npm ci --include=dev
+
+      - name: Build
+        run: npm run build:test
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -289,8 +367,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: next-traces
-          path: .next/trace
+          name: lighthouse-server-log
+          path: server.log
           if-no-files-found: ignore
 
 

@@ -61,6 +61,11 @@ const config = {
       settings: MOBILE_SETTINGS,
       budgetsPath: './lighthouse-budgets.json',
     },
+    upload: {
+      target: 'filesystem',
+      outputDir: OUTPUT_DIR,
+      formats: ['json', 'html'],
+    },
     assert: {
       assertions: {
         'categories:performance': ['error', { minScore: 0.9 }],

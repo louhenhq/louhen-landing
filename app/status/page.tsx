@@ -140,10 +140,10 @@ export default async function StatusPage() {
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-6 px-6 py-12">
       <header className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs uppercase tracking-wide text-amber-600">ops only</p>
-          <h1 className="text-3xl font-semibold">Operational diagnostics</h1>
+          <p className="text-meta uppercase tracking-[0.24em] text-feedback-warning">ops only</p>
+          <h1 className="text-display-lg text-text">Operational diagnostics</h1>
         </div>
-        <span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-medium text-white">
+        <span className="rounded-full bg-neutral-90 px-sm py-4 text-body-sm font-medium text-neutral-0">
           Updated {new Date(snapshot.timestamp).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
         </span>
       </header>
@@ -212,25 +212,25 @@ export default async function StatusPage() {
             </dd>
           </div>
           <div>
-            <dt className="text-xs uppercase text-slate-500">Commit SHA</dt>
-            <dd className="font-mono text-xs">{formatCommit(snapshot.env.commitSha)}</dd>
+            <dt className="text-meta uppercase tracking-[0.2em] text-text-muted">Commit SHA</dt>
+            <dd className="font-mono text-body-sm">{formatCommit(snapshot.env.commitSha)}</dd>
           </div>
           <div>
-            <dt className="text-xs uppercase text-slate-500">Base URL</dt>
-            <dd className="text-xs">{snapshot.env.appBaseUrl ?? '—'}</dd>
+            <dt className="text-meta uppercase tracking-[0.2em] text-text-muted">Base URL</dt>
+            <dd className="text-body-sm">{snapshot.env.appBaseUrl ?? '—'}</dd>
           </div>
         </dl>
       </section>
 
-      <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-        <h2 className="text-sm font-semibold text-slate-700">Process uptime</h2>
-        <dl className="mt-3 grid grid-cols-1 gap-3 text-sm text-slate-600 md:grid-cols-2">
+      <section className="rounded-lg border border-border bg-bg-card p-4 shadow-sm">
+        <h2 className="text-h3 text-text">Process uptime</h2>
+        <dl className="mt-3 grid grid-cols-1 gap-3 text-body-sm text-text-muted md:grid-cols-2">
           <div>
-            <dt className="text-xs uppercase text-slate-500">Seconds</dt>
-            <dd className="font-medium text-slate-900">{snapshot.uptime.seconds}</dd>
+            <dt className="text-meta uppercase tracking-[0.2em] text-text-muted">Seconds</dt>
+            <dd className="font-medium text-text">{snapshot.uptime.seconds}</dd>
           </div>
           <div>
-            <dt className="text-xs uppercase text-slate-500">Started</dt>
+            <dt className="text-meta uppercase tracking-[0.2em] text-text-muted">Started</dt>
             <dd>{new Date(snapshot.uptime.startedAt).toLocaleString()}</dd>
           </div>
         </dl>

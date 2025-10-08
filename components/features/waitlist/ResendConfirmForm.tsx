@@ -23,8 +23,10 @@ type ResendConfirmFormProps = {
 };
 
 type Status = 'idle' | 'loading' | 'success' | 'error';
+type ResendOutcome = 'ok' | 'rate_limited' | 'error';
 
 export function ResendConfirmForm({ strings }: ResendConfirmFormProps) {
+  const locale = useLocale();
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<Status>('idle');
   const [message, setMessage] = useState('');
@@ -35,7 +37,7 @@ export function ResendConfirmForm({ strings }: ResendConfirmFormProps) {
 
     setStatus('loading');
     setMessage('');
-    track({ name: 'waitlist_resend_requested' });
+    let outcome: ResendOutcome = 'ok';
 
     try {
       const response = await fetch('/api/waitlist/resend', {
@@ -46,16 +48,19 @@ export function ResendConfirmForm({ strings }: ResendConfirmFormProps) {
       const payload = await response.json().catch(() => ({}));
 
       if (response.status === 429) {
+        outcome = 'rate_limited';
         setStatus('error');
         setMessage(strings.rateLimited);
         return;
       }
       if (response.status === 400) {
+        outcome = 'error';
         setStatus('error');
         setMessage(strings.invalid);
         return;
       }
       if (!response.ok || payload?.ok === false) {
+        outcome = 'error';
         setStatus('error');
         setMessage(strings.error);
         return;
@@ -64,14 +69,17 @@ export function ResendConfirmForm({ strings }: ResendConfirmFormProps) {
       setStatus('success');
       setMessage(strings.success);
     } catch {
+      outcome = 'error';
       setStatus('error');
       setMessage(strings.error);
+    } finally {
+      void track({ name: 'waitlist_resend_requested', locale, outcome });
     }
   }
 
   return (
-    <div className={cn(layout.card, 'mx-auto flex max-w-3xl flex-col gap-md px-gutter py-2xl sm:px-2xl')}>
-      <h2 className={cn(text.heading, 'text-2xl')}>{strings.title}</h2>
+    <Card className="mx-auto flex max-w-3xl flex-col gap-md px-gutter py-2xl sm:px-2xl">
+      <h2 className={text.heading}>{strings.title}</h2>
       <p className={cn(text.body)}>{strings.description}</p>
       <form
         onSubmit={handleSubmit}
@@ -87,19 +95,18 @@ export function ResendConfirmForm({ strings }: ResendConfirmFormProps) {
             required
             value={email}
             onChange={(event: ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
-            className="rounded-2xl border border-border bg-bg px-md py-sm text-base text-text shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
             placeholder={strings.email.placeholder}
           />
         </label>
         <div className="flex flex-col gap-sm sm:flex-row sm:items-center sm:gap-md">
-          <button
+          <Button
             type="submit"
-            className={cn(buttons.primary, 'sm:w-auto')}
+            className="sm:w-auto"
             disabled={status === 'loading' || email.trim() === ''}
             data-ll="wl-resend-submit"
           >
-            {status === 'loading' ? strings.submit + '…' : strings.submit}
-          </button>
+            {strings.submit}
+          </Button>
           {message ? (
             <p
               className={cn('text-sm', status === 'success' ? 'text-status-success' : 'text-status-danger')}
@@ -111,6 +118,6 @@ export function ResendConfirmForm({ strings }: ResendConfirmFormProps) {
           ) : null}
         </div>
       </form>
-    </div>
+    </Card>
   );
 }

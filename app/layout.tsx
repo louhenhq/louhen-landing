@@ -1,7 +1,8 @@
 import './globals.css'
 import './styles/tokens.css'
 import type { Metadata, Viewport } from 'next'
-import { headers } from 'next/headers'
+import { cookies, headers } from 'next/headers'
+import { fraunces, inter } from './(site)/fonts'
 import ThemeInit from '@/components/ThemeInit'
 import { ConsentProvider } from '@/components/ConsentProvider'
 import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/SeoJsonLd'
@@ -10,6 +11,13 @@ import { getServerConsent } from '@/lib/consent/state'
 import { NonceProvider } from '@/lib/csp/nonce-context'
 import { CONTRAST_COOKIE_NAME, THEME_COOKIE_NAME } from '@/lib/theme/constants'
 import tokens from '@louhen/design-tokens/build/web/tokens.json' assert { type: 'json' }
+import {
+  CONTRAST_COOKIE,
+  ContrastPreference,
+  THEME_COOKIE,
+  ThemePreference,
+} from '@/lib/theme/constants'
+import { DEFAULT_LOCALE } from '@/lib/i18n/locales'
 
 const tokenValues = tokens as Record<string, unknown> & {
   color?: {
@@ -59,6 +67,7 @@ export const metadata: Metadata = {
   applicationName: SITE_NAME,
   alternates: {
     canonical: '/',
+    languages: buildAlternateLanguageMap('/'),
   },
   icons: {
     icon: [
@@ -123,8 +132,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="theme-color" content={THEME_COLOR_LIGHT} media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content={THEME_COLOR_DARK} media="(prefers-color-scheme: dark)" />
+        <meta name="color-scheme" content="light dark" />
         <meta name="description" content={defaultDescription} key="global-description" />
         {shouldNoIndex ? <meta name="robots" content="noindex,nofollow" /> : null}
+        {!shouldNoIndex && allowIndexOverride ? <meta name="robots" content="index,follow" /> : null}
+        <script
+          id="theme-pref-init"
+          nonce={nonce}
+          dangerouslySetInnerHTML={{ __html: themeScript }}
+        />
         <OrganizationJsonLd
           name={SITE_NAME}
           url={baseUrl}
@@ -139,13 +155,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           nonce={nonce}
         />
       </head>
-      <body
-        className="min-h-screen antialiased font-sans"
-        style={{
-          background: 'var(--color-background-canvas, var(--semantic-color-bg-page))',
-          color: 'var(--color-text-default, var(--semantic-color-text-body))',
-        }}
-      >
+      <body className="min-h-screen antialiased font-sans">
         <NonceProvider nonce={nonce}>
           <ConsentProvider initialConsent={consent}>
             {/* Apply theme/contrast on first paint + react to system changes */}

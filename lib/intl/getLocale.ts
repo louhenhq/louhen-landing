@@ -1,7 +1,8 @@
 import type { SupportedLocale } from '@/next-intl.locales';
 import { locales } from '@/next-intl.locales';
+import { LOCALE_COOKIE } from '@/lib/theme/constants';
 
-const COOKIE_NAME = 'NEXT_LOCALE';
+const COOKIE_NAMES = [LOCALE_COOKIE, 'NEXT_LOCALE'];
 
 export function resolveLocale(value: string | undefined | null): SupportedLocale | undefined {
   if (!value) return undefined;
@@ -20,7 +21,8 @@ export function extractLocaleFromCookies(cookieHeader: string | null | undefined
   for (const entry of cookies) {
     const [rawKey, ...rest] = entry.split('=');
     if (!rawKey) continue;
-    if (rawKey.trim() === COOKIE_NAME) {
+    const key = rawKey.trim();
+    if (COOKIE_NAMES.includes(key)) {
       return getLocaleFromCookie(rest.join('='));
     }
   }
