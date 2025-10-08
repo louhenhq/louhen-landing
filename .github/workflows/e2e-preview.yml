@@ -1,0 +1,417 @@
+name: e2e:preview
+
+on:
+  workflow_dispatch:
+
+jobs:
+  e2e-preview:
+    name: Playwright (preview — ${{ matrix.suite }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: preview
+    permissions:
+      actions: read
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        suite:
+          - method
+          - header-nav
+          - footer
+          - waitlist
+    # Keep this workflow as a required status on staging/main; retries remain CI-only.
+    concurrency:
+      group: e2e-preview-${{ github.ref }}-${{ matrix.suite }}
+      cancel-in-progress: true
+    env:
+      NODE_ENV: test
+      CI: true
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 0
+      PREVIEW_BASE_URL: https://staging.louhen.app
+      # Secrets are masked by GitHub — never echo this token in logs.
+      PROTECTION_HEADER: X-Bypass-Token: ${{ secrets.PREVIEW_BYPASS_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Restore npm cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-
+
+      - name: Restore Playwright cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            pw-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: npm ci --include=dev
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Build application
+        run: npm run build
+
+      - name: Prepare summary directory
+        run: mkdir -p summary
+
+      - name: Run Playwright E2E (preview)
+        id: run_e2e
+        continue-on-error: true
+        run: PREVIEW_BASE_URL=$PREVIEW_BASE_URL npx playwright test tests/e2e/${{ matrix.suite }} tests/e2e/seo --project=chromium --workers=1 --retries=1
+        # Remote-only: connects to staging; do not spin up a local server or log secrets. Includes SEO add-ons under tests/e2e/seo.
+
+      - name: Collect E2E summary
+        if: always()
+        run: |
+          if [ -f playwright-report/report.json ]; then
+            cp playwright-report/report.json summary/${{ matrix.suite }}-e2e-report.json
+          fi
+
+      - name: Verify Playwright artifacts (E2E)
+        if: always()
+        run: |
+          test -d playwright-report
+          test -d test-results
+
+      - name: Upload Playwright HTML report (E2E)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.suite }}-e2e
+          path: playwright-report/
+          retention-days: 10
+          if-no-files-found: warn
+          compression-level: 6
+        # Reports must never contain secrets; GitHub masks known tokens automatically.
+
+      - name: Upload raw results (E2E)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.suite }}-e2e
+          path: test-results/
+          retention-days: 10
+          if-no-files-found: warn
+          compression-level: 6
+        # Artifacts are for debugging only; never surface secrets in logs or attachments.
+
+      - name: Reset Playwright artifacts directory
+        if: always()
+        run: rm -rf playwright-report test-results
+
+      - name: Run Playwright Axe (preview)
+        id: run_axe
+        continue-on-error: true
+        run: PREVIEW_BASE_URL=$PREVIEW_BASE_URL npx playwright test tests/axe/${{ matrix.suite }} --project=chromium --workers=1 --retries=1
+        # Remote-only: Axe scans the deployed preview; never echo secrets.
+
+      - name: Collect Axe summary
+        if: always()
+        run: |
+          if [ -f playwright-report/report.json ]; then
+            cp playwright-report/report.json summary/${{ matrix.suite }}-axe-report.json
+          fi
+
+      - name: Verify Playwright artifacts (Axe)
+        if: always()
+        run: |
+          test -d playwright-report
+          test -d test-results
+
+      - name: Upload Playwright HTML report (Axe)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.suite }}-axe
+          path: playwright-report/
+          retention-days: 10
+          if-no-files-found: warn
+          compression-level: 6
+
+      - name: Upload raw results (Axe)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.suite }}-axe
+          path: test-results/
+          retention-days: 10
+          if-no-files-found: warn
+          compression-level: 6
+        # Artifacts are for debugging only; never surface secrets in logs or attachments.
+
+      - name: Publish job summary
+        if: always()
+        env:
+          SUITE_NAME: ${{ matrix.suite }}
+          E2E_OUTCOME: ${{ steps.run_e2e.outcome }}
+          AXE_OUTCOME: ${{ steps.run_axe.outcome }}
+        run: |
+          node <<'NODE'
+          const { readFileSync, existsSync, appendFileSync } = require('node:fs');
+          const path = process.env.GITHUB_STEP_SUMMARY;
+          if (!path) process.exit(0);
+          const suite = process.env.SUITE_NAME ?? 'unknown';
+
+          function extractStats(label, filename) {
+            if (!existsSync(filename)) {
+              return { label, present: false };
+            }
+            const raw = JSON.parse(readFileSync(filename, 'utf8'));
+            const stats = raw.stats ?? raw.statistics ?? {};
+            const total = stats.total ?? ((stats.expected ?? 0) + (stats.unexpected ?? 0) + (stats.flaky ?? 0) + (stats.skipped ?? 0));
+            const passed = stats.expected ?? stats.passed ?? 0;
+            const failed = stats.unexpected ?? stats.failed ?? 0;
+            const flaky = stats.flaky ?? 0;
+            const skipped = stats.skipped ?? 0;
+            const duration = stats.duration ?? stats.duration_ms ?? stats.durationMs ?? 0;
+            return { label, present: true, total, passed, failed, flaky, skipped, duration };
+          }
+
+          const e2eStats = extractStats('E2E + SEO', `summary/${suite}-e2e-report.json`);
+          const axeStats = extractStats('Axe', `summary/${suite}-axe-report.json`);
+
+          function formatRow(stats, outcomeEnv) {
+            if (!stats.present) {
+              return `| ${stats.label} | not run | – | – | – | – | – |`;
+            }
+            const status = (outcomeEnv === 'success' || outcomeEnv === 'neutral') ? 'passed' : 'failed';
+            return `| ${stats.label} | ${status} | ${stats.total ?? 0} | ${stats.passed ?? 0} | ${stats.failed ?? 0} | ${stats.flaky ?? 0} | ${stats.skipped ?? 0} | ${Math.round((stats.duration ?? 0) / 1000)}s |`;
+          }
+
+          const lines = [
+            `## Preview Suite: ${suite}`,
+            '',
+            '| Run | Status | Total | Passed | Failed | Flaky | Skipped | Duration |',
+            '| --- | --- | --- | --- | --- | --- | --- | --- |',
+            formatRow(e2eStats, process.env.E2E_OUTCOME ?? ''),
+            formatRow(axeStats, process.env.AXE_OUTCOME ?? ''),
+            '',
+            '- HTML report artifacts: `playwright-report-' + suite + '-e2e` · `playwright-report-' + suite + '-axe`',
+            '- Raw results (JSON/traces): `test-results-' + suite + '-e2e` · `test-results-' + suite + '-axe`',
+            '- Reports do not contain secrets; GitHub masks known tokens automatically.',
+          ];
+
+          appendFileSync(path, lines.join('\n') + '\n');
+          NODE
+
+      - name: Ensure test failures bubble up
+        if: ${{ steps.run_e2e.outcome == 'failure' || steps.run_axe.outcome == 'failure' }}
+        run: exit 1
+
+  e2e-preview-quarantine:
+    name: Playwright (quarantine — ${{ matrix.suite }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    continue-on-error: true
+    environment: preview
+    permissions:
+      actions: read
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        suite:
+          - method
+          - header-nav
+          - footer
+          - waitlist
+    # Quarantine lane cancels superseded runs but does not gate merges.
+    concurrency:
+      group: e2e-preview-quarantine-${{ github.ref }}-${{ matrix.suite }}
+      cancel-in-progress: true
+    env:
+      NODE_ENV: test
+      CI: true
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 0
+      PREVIEW_BASE_URL: https://staging.louhen.app
+      PROTECTION_HEADER: X-Bypass-Token: ${{ secrets.PREVIEW_BYPASS_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Restore npm cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-
+
+      - name: Restore Playwright cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            pw-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: npm ci --include=dev
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Build application
+        run: npm run build
+
+      - name: Prepare summary directory
+        run: mkdir -p summary
+
+      - name: Run Playwright E2E (quarantine)
+        id: run_e2e_quarantine
+        continue-on-error: true
+        run: PREVIEW_BASE_URL=$PREVIEW_BASE_URL npx playwright test tests/e2e/${{ matrix.suite }} tests/e2e/seo --project=chromium --workers=1 --retries=2 --grep "@flaky"
+        # Runs only tests flagged with @flaky. Keeps retries CI-only (2) to aid diagnosis without blocking merges.
+
+      - name: Ensure artifact directories exist (E2E)
+        if: always()
+        run: |
+          mkdir -p playwright-report
+          mkdir -p test-results
+
+      - name: Collect E2E summary (quarantine)
+        if: always()
+        run: |
+          if [ -f playwright-report/report.json ]; then
+            cp playwright-report/report.json summary/${{ matrix.suite }}-e2e-quarantine.json
+          fi
+
+      - name: Upload Playwright HTML report (E2E quarantine)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.suite }}-e2e-quarantine
+          path: playwright-report/
+          retention-days: 7
+          if-no-files-found: warn
+          compression-level: 6
+
+      - name: Upload raw results (E2E quarantine)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.suite }}-e2e-quarantine
+          path: test-results/
+          retention-days: 7
+          if-no-files-found: warn
+          compression-level: 6
+
+      - name: Reset Playwright artifacts directory (quarantine)
+        if: always()
+        run: rm -rf playwright-report test-results
+
+      - name: Run Playwright Axe (quarantine)
+        id: run_axe_quarantine
+        continue-on-error: true
+        run: PREVIEW_BASE_URL=$PREVIEW_BASE_URL npx playwright test tests/axe/${{ matrix.suite }} --project=chromium --workers=1 --retries=2 --grep "@flaky"
+
+      - name: Ensure artifact directories exist (Axe)
+        if: always()
+        run: |
+          mkdir -p playwright-report
+          mkdir -p test-results
+
+      - name: Collect Axe summary (quarantine)
+        if: always()
+        run: |
+          if [ -f playwright-report/report.json ]; then
+            cp playwright-report/report.json summary/${{ matrix.suite }}-axe-quarantine.json
+          fi
+
+      - name: Upload Playwright HTML report (Axe quarantine)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.suite }}-axe-quarantine
+          path: playwright-report/
+          retention-days: 7
+          if-no-files-found: warn
+          compression-level: 6
+
+      - name: Upload raw results (Axe quarantine)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.suite }}-axe-quarantine
+          path: test-results/
+          retention-days: 7
+          if-no-files-found: warn
+          compression-level: 6
+
+      - name: Publish quarantine summary
+        if: always()
+        env:
+          SUITE_NAME: ${{ matrix.suite }}
+          E2E_OUTCOME: ${{ steps.run_e2e_quarantine.outcome }}
+          AXE_OUTCOME: ${{ steps.run_axe_quarantine.outcome }}
+        run: |
+          node <<'NODE'
+          const { readFileSync, existsSync, appendFileSync } = require('node:fs');
+          const path = process.env.GITHUB_STEP_SUMMARY;
+          if (!path) process.exit(0);
+          const suite = process.env.SUITE_NAME ?? 'unknown';
+
+          function extractStats(label, filename) {
+            if (!existsSync(filename)) {
+              return { label, present: false };
+            }
+            const raw = JSON.parse(readFileSync(filename, 'utf8'));
+            const stats = raw.stats ?? raw.statistics ?? {};
+            const total = stats.total ?? ((stats.expected ?? 0) + (stats.unexpected ?? 0) + (stats.flaky ?? 0) + (stats.skipped ?? 0));
+            const passed = stats.expected ?? stats.passed ?? 0;
+            const failed = stats.unexpected ?? stats.failed ?? 0;
+            const flaky = stats.flaky ?? 0;
+            const skipped = stats.skipped ?? 0;
+            const duration = stats.duration ?? stats.duration_ms ?? stats.durationMs ?? 0;
+            return { label, present: true, total, passed, failed, flaky, skipped, duration };
+          }
+
+          const e2eStats = extractStats('Quarantine E2E', `summary/${suite}-e2e-quarantine.json`);
+          const axeStats = extractStats('Quarantine Axe', `summary/${suite}-axe-quarantine.json`);
+
+          function formatRow(stats, outcomeEnv) {
+            if (!stats.present) {
+              return `| ${stats.label} | not run | – | – | – | – | – |`;
+            }
+            const status = (outcomeEnv === 'success' || outcomeEnv === 'neutral') ? 'passed' : 'failed';
+            return `| ${stats.label} | ${status} | ${stats.total ?? 0} | ${stats.passed ?? 0} | ${stats.failed ?? 0} | ${stats.flaky ?? 0} | ${stats.skipped ?? 0} | ${Math.round((stats.duration ?? 0) / 1000)}s |`;
+          }
+
+          const lines = [
+            `## Quarantine Suite: ${suite}`,
+            '',
+            '| Run | Status | Total | Passed | Failed | Flaky | Skipped | Duration |',
+            '| --- | --- | --- | --- | --- | --- | --- | --- |',
+            formatRow(e2eStats, process.env.E2E_OUTCOME ?? ''),
+            formatRow(axeStats, process.env.AXE_OUTCOME ?? ''),
+            '',
+            '- HTML report artifacts: `playwright-report-' + suite + '-e2e-quarantine` · `playwright-report-' + suite + '-axe-quarantine`',
+            '- Raw results: `test-results-' + suite + '-e2e-quarantine` · `test-results-' + suite + '-axe-quarantine`',
+            '- These runs capture flaky specs only (`@flaky`). Remove the tag once stabilized.',
+          ];
+
+          appendFileSync(path, lines.join('\n') + '\n');
+          NODE
+
+      - name: Bubble up quarantine failures (non-blocking)
+        if: ${{ steps.run_e2e_quarantine.outcome == 'failure' || steps.run_axe_quarantine.outcome == 'failure' }}
+        run: exit 1

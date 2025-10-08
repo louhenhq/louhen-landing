@@ -23,6 +23,7 @@ Budgets tighten post-launch; update this table as new routes ship. When a page i
 ## Performance Guardrails
 - **JavaScript:** incremental bundles for header/drawer/consent ≤12 KB gzip per feature slice.
 - **CSS:** prefer Tailwind utilities; avoid route-specific global CSS unless justified.
+- **Tokens CSS:** `app/styles/tokens.css` must be imported once at the root. Do not re-import or lazy-load token bundles from feature modules, and theme switches (`data-theme`, `data-contrast`) must reuse the already-loaded CSS variables.
 - **Images:** serve via Next Image or optimized static assets in `public/`. Preload hero images only when they are above the fold across locales.
 - **CSP & Nonce:** inline scripts (ThemeInit, JSON-LD) must stay <1 KB and reuse the SSR nonce (`/CONTEXT/security.md`).
 - **Analytics:** consent-gated scripts must lazy load when consent flips; no eager third-party fetches before consent.

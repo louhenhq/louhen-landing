@@ -1,3 +1,7 @@
+import type { Metadata } from 'next';
+import { imprintPath } from '@lib/shared/routing/imprint-path';
+import { isPrelaunch } from '@/lib/env/prelaunch';
+import { hreflangMapFor, makeCanonical, resolveBaseUrl } from '@/lib/seo/shared';
 import type { SupportedLocale } from '@/next-intl.locales';
 import { unstable_setRequestLocale } from 'next-intl/server';
 
@@ -15,4 +19,45 @@ export default function ImprintPage({ params }: ImprintPageProps) {
       <p className="mt-sm text-text-muted">This is a placeholder. Company details will be listed here.</p>
     </main>
   );
+}
+
+export function generateMetadata({ params }: ImprintPageProps): Metadata {
+  const { locale } = params;
+  const baseUrl = resolveBaseUrl();
+  const canonicalPath = imprintPath(locale);
+  const canonicalUrl = makeCanonical(canonicalPath, baseUrl);
+  const hreflang = hreflangMapFor(imprintPath, baseUrl);
+  const robots = isPrelaunch()
+    ? { index: false, follow: false }
+    : undefined;
+  const isGerman = locale.startsWith('de');
+  const title = isGerman ? 'Impressum – Louhen' : 'Imprint – Louhen';
+  const description = isGerman
+    ? 'Rechtliche Angaben, Kontaktinformationen und Verantwortlichkeiten von Louhen.'
+    : 'Legal disclosure, contact, and accountability details for Louhen.';
+  const imageUrl = `${baseUrl}/opengraph-image?locale=${locale}`;
+
+  return {
+    title,
+    description,
+    robots,
+    alternates: {
+      canonical: canonicalUrl,
+      languages: hreflang,
+    },
+    openGraph: {
+      title,
+      description,
+      url: canonicalUrl,
+      locale,
+      type: 'website',
+      images: [imageUrl],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [imageUrl],
+    },
+  };
 }

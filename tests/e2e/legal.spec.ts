@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { defaultLocale } from '@/next-intl.locales';
-import { legalPath, type LegalSlug } from '@/lib/routing/legalPath';
+import { legalPath } from '@lib/shared/routing/legal-path';
 import { getTestLocales, localeUrl } from './_utils/url';
 
 const TERMS_PATTERNS = [/terms/i, /allgemeine\s+geschäftsbedingungen/iu];
@@ -28,20 +28,6 @@ const allowedHosts = [
     }
   })(),
 ].filter(Boolean) as string[];
-
-const SPECIAL_REGEX_CHARS = new Set(['\\', '^', '$', '.', '|', '?', '*', '+', '(', ')', '[', ']', '{', '}']);
-
-function escapeForRegex(value: string): string {
-  return value
-    .split('')
-    .map((char) => (SPECIAL_REGEX_CHARS.has(char) ? `\\${char}` : char))
-    .join('');
-}
-
-function legalUrlMatcher(locale: string, slug: LegalSlug): RegExp {
-  const expectedPath = legalPath(locale, slug);
-  return new RegExp(`${escapeForRegex(expectedPath)}(?:/)?(?:[?#].*)?$`);
-}
 
 function getCanonicalParts(href: string | null) {
   if (!href) {
@@ -138,35 +124,4 @@ test.describe('Localized legal pages', () => {
       }
     });
   }
-
-  test('footer legal links route per locale', async ({ browser }) => {
-    const localesToTest = getTestLocales();
-    for (const locale of localesToTest) {
-      const context = await browser.newContext();
-      const page = await context.newPage();
-
-      const homeUrl = locale === defaultLocale ? localeUrl() : localeUrl(undefined, { locale });
-      await page.goto(homeUrl, { waitUntil: 'networkidle' });
-
-      const footer = page.locator('footer');
-      await expect(footer).toBeVisible();
-
-      const termsLink = footer.getByRole('link', { name: /terms|allgemeine/i });
-      const privacyLink = footer.getByRole('link', { name: /privacy|datenschutz/i });
-
-      await expect(termsLink).toBeVisible();
-      await termsLink.click();
-      await expect(page).toHaveURL(legalUrlMatcher(locale, 'terms'));
-      await expect(page.locator('h1')).toHaveCount(1);
-
-      await page.goBack();
-
-      await expect(privacyLink).toBeVisible();
-      await privacyLink.click();
-      await expect(page).toHaveURL(legalUrlMatcher(locale, 'privacy'));
-      await expect(page.locator('h1')).toHaveCount(1);
-
-      await context.close();
-    }
-  });
 });

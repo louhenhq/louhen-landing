@@ -26,7 +26,7 @@ _Tables sorted by `Current Path`; `Status=DECIDE` rows include the follow-up nee
 | app/(site)/components/FounderStory.tsx | feature-comp | components/features/home/HomeFounderStory.tsx | HomeFounderStory.tsx | yes (data-ll="home-founder") | OK | Rename to avoid clash with method story variants. |
 | app/(site)/components/Hero.tsx | feature-comp | components/features/home/HomeHero.tsx | HomeHero.tsx | yes (data-ll="home-hero") | OK | Add stable selector to replace class-based Playwright hooks. |
 | app/(site)/components/LandingExperience.tsx | feature-comp | components/features/home/HomeExperience.tsx | HomeExperience.tsx | no | OK | Keep CTA analytics wiring; update imports accordingly. |
-| app/(site)/components/PromoRibbon.tsx | block | components/blocks/HomePromoRibbon.tsx | HomePromoRibbon.tsx | yes (data-ll="home-ribbon") | OK | Ribbon anchors header tests; add selector for parity. |
+| app/(site)/components/PromoRibbon.tsx | feature-comp | components/features/header-nav/PromoRibbon.tsx | PromoRibbon.tsx | yes (focus fallback via nav-waitlist-cta) | MIGRATED | Ribbon now sits alongside header-nav components; shares nav CTA selector. |
 | app/(site)/components/ShareButtons.tsx | ui | components/ui/HomeShareButtons.tsx | HomeShareButtons.tsx | no | OK | Stays client component; ensure exports stay named. |
 | app/(site)/components/SharePanel.tsx | feature-comp | components/features/home/HomeSharePanel.tsx | HomeSharePanel.tsx | yes (data-ll="home-share-panel") | OK | Bundles share CTA; align analytics imports post-move. |
 | app/(site)/components/TrustModals.tsx | feature-comp | components/features/home/HomeTrustModals.tsx | HomeTrustModals.tsx | no | OK | Confirm modal lazy loading unaffected by relocation. |
@@ -69,68 +69,69 @@ _Tables sorted by `Current Path`; `Status=DECIDE` rows include the follow-up nee
 | app/(site)/_lib/referral.ts | util | lib/shared/waitlist/referral.client.ts | referral.client.ts | no | DECIDE | Can we adopt `.client.ts` naming for waitlist-only helpers with `use client`? |
 | app/(site)/waitlist/_lib/messages.ts | util | lib/shared/waitlist/messages.ts | messages.ts | no | OK | Keep locale loading centralised under shared waitlist namespace. |
 | components/marketing/TrackView.tsx | feature-comp | components/features/waitlist/WaitlistViewTracker.tsx | WaitlistViewTracker.tsx | no | OK | Rename to avoid collision with analytics tracker component. |
-| e2e/waitlist.spec.ts | test:e2e | tests/e2e/waitlist/waitlist.e2e.ts | waitlist.e2e.ts | yes (data-ll="waitlist-form") | OK | New selector replaces legacy `.waitlist__form` lookup. |
-| lib/firestore/waitlist.ts | server | lib/server/waitlist/firestore.ts | firestore.ts | no | OK | Move under `lib/server`; ensure exports stay named. |
+| e2e/waitlist.spec.ts | test:e2e | tests/e2e/waitlist/landing.e2e.ts | landing.e2e.ts | yes (data-ll="wl-form") | MIGRATED | Remote Playwright suite now targets waitlist page via wl-* selectors and mocks API responses. |
+| lib/firestore/waitlist.ts | server | lib/server/waitlist/firestore.server.ts | firestore.server.ts | no | MIGRATED | Server helper relocated with `.server.ts` suffix; imports updated to `@lib/server/waitlist`. |
 | lib/unsubTokens.ts | util | lib/shared/waitlist/unsub-token.ts | unsub-token.ts | no | OK | Provide single named export for unsub tokens. |
-| lib/waitlist.ts | util | lib/shared/waitlist/join.client.ts | join.client.ts | yes (data-ll="waitlist-form") | DECIDE | Should API POST helper expose data attr hook or stay in UI? |
-| lib/waitlist/confirm.ts | server | lib/server/waitlist/confirm.ts | same | no | OK | Server-only confirm flow lives beside firestore helpers. |
+| lib/waitlist.ts | util | lib/shared/api/waitlist.ts | waitlist.ts | no | MIGRATED | Lightweight client POST helper now lives under shared API namespace. |
+| lib/waitlist/confirm.ts | server | lib/server/waitlist/confirm.server.ts | confirm.server.ts | no | MIGRATED | Confirm token processor moved to `lib/server/waitlist`; tests mock new path. |
 | lib/waitlistConfirmTtl.ts | util | lib/shared/waitlist/confirm-ttl.ts | confirm-ttl.ts | no | OK | Update imports + unit tests to kebab-case filename. |
 | scripts/strip_ip_from_waitlist.ts | util | scripts/waitlist/strip-ip-from-waitlist.ts | strip-ip-from-waitlist.ts | no | OK | Keep script under namespaced folder for clarity. |
-| tests/e2e/waitlist.api.spec.ts | test:e2e | tests/e2e/waitlist/api.e2e.ts | api.e2e.ts | yes (data-ll="waitlist-form") | OK | Align with `.e2e.ts` suffix and new selector. |
-| tests/unit/firestore.waitlist.test.ts | test:unit | tests/unit/waitlist/firestore.spec.ts | firestore.spec.ts | no | OK | Convert to `.spec.ts` per docs. |
-| tests/unit/referral.unit.test.ts | test:unit | tests/unit/waitlist/referral.spec.ts | referral.spec.ts | no | OK | Keeps referral helper tests with waitlist domain. |
-| tests/unit/render-waitlist.test.ts | test:unit | tests/unit/waitlist/render.spec.ts | render.spec.ts | yes (data-ll="waitlist-form") | OK | Update component import path to match features move. |
-| tests/unit/validation.waitlist.test.ts | test:unit | tests/unit/waitlist/validation.spec.ts | validation.spec.ts | no | OK | Shares schema with forms table; keep alias updated. |
-| tests/unit/waitlist.confirm.test.ts | test:unit | tests/unit/waitlist/confirm.spec.ts | confirm.spec.ts | no | OK | Ensure server helpers imported from `lib/server/waitlist`. |
-| tests/unit/waitlistConfirmTtl.test.ts | test:unit | tests/unit/waitlist/confirm-ttl.spec.ts | confirm-ttl.spec.ts | no | OK | Update import to kebab-case util after move. |
+| tests/e2e/waitlist.api.spec.ts | test:e2e | tests/e2e/waitlist/api.e2e.ts | api.e2e.ts | no | MIGRATED | REST assertions now live under waitlist folder; remains header-only without DOM selectors. |
+| tests/unit/firestore.waitlist.test.ts | test:unit | tests/unit/waitlist/firestore.spec.ts | firestore.spec.ts | no | MIGRATED | Unit suite follows waitlist namespace; imports target server helpers. |
+| tests/unit/referral.unit.test.ts | test:unit | tests/unit/waitlist/referral.spec.ts | referral.spec.ts | no | MIGRATED | Referral helper tests co-located with waitlist suite. |
+| tests/unit/render-waitlist.test.ts | test:unit | tests/unit/waitlist/render.spec.ts | render.spec.ts | no | MIGRATED | Email renderer tests moved under waitlist namespace; import aliases updated. |
+| tests/unit/validation.waitlist.test.ts | test:unit | tests/unit/waitlist/validation.spec.ts | validation.spec.ts | no | MIGRATED | Schema tests reference `@lib/shared/validation/waitlist-schema`. |
+| tests/unit/waitlist.confirm.test.ts | test:unit | tests/unit/waitlist/confirm.spec.ts | confirm.spec.ts | no | MIGRATED | Server confirm mocks point at `@lib/server/waitlist/firestore.server`. |
+| tests/unit/waitlistConfirmTtl.test.ts | test:unit | tests/unit/waitlist/confirm-ttl.spec.ts | confirm-ttl.spec.ts | no | MIGRATED | TTL helper tests relocated under waitlist namespace. |
 | types/waitlist.ts | types | types/waitlist.types.ts | waitlist.types.ts | no | OK | Rename extension per naming spec; update exports. |
 
 ### Feature: forms
 
 | Current Path | Type | Target Path | New Name | Selectors Needed? | Status | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| app/(site)/components/ConfirmAnalytics.tsx | feature-comp | components/features/waitlist/ConfirmAnalytics.tsx | same | no | OK | Keep analytics wiring colocated with forms. |
-| app/(site)/components/ConfirmResendForm.tsx | feature-comp | components/features/waitlist/ConfirmResendForm.tsx | same | yes (data-ll="waitlist-resend-form") | OK | Provides confirm resend flow; ensure CTA selectors migrate. |
-| app/(site)/components/ReferralAttribution.tsx | feature-comp | components/features/waitlist/ReferralAttribution.tsx | same | yes (data-ll="waitlist-referral") | OK | Stable selector improves referral attribution E2E coverage. |
-| app/(site)/components/WaitlistForm.tsx | feature-comp | components/features/waitlist/WaitlistFormLegacy.tsx | WaitlistFormLegacy.tsx | yes (data-ll="waitlist-form") | DECIDE | Should we merge legacy + hCaptcha forms or keep both variants? |
-| components/waitlist/ResendConfirmForm.tsx | feature-comp | components/features/waitlist/ResendConfirmForm.tsx | same | yes (data-ll="waitlist-resend-form") | OK | Reuse data attr with page-level version; ensure exports dedupe. |
-| components/waitlist/WaitlistForm.tsx | feature-comp | components/features/waitlist/WaitlistForm.tsx | same | yes (data-ll="waitlist-form") | OK | Canonical hCaptcha form; update imports after move. |
-| lib/validation/waitlist.ts | util | lib/shared/waitlist/validation.ts | validation.ts | no | OK | Remains shared schema across forms + API. |
+| app/(site)/components/ConfirmAnalytics.tsx | feature-comp | components/features/waitlist/ConfirmAnalytics.tsx | same | no | MIGRATED | Analytics helper now exported from waitlist barrel. |
+| app/(site)/components/ConfirmResendForm.tsx | feature-comp | components/features/waitlist/ConfirmResendForm.tsx | same | yes (data-ll="wl-resend-form") | MIGRATED | Resend form exposes wl-resend-* selectors for Playwright coverage. |
+| app/(site)/components/ReferralAttribution.tsx | feature-comp | components/features/waitlist/ReferralAttribution.tsx | same | yes (data-ll="wl-referral") | MIGRATED | Referral toast now under waitlist features with stable selector. |
+| app/(site)/components/WaitlistForm.tsx | feature-comp | components/features/waitlist/WaitlistFormLegacy.tsx | WaitlistFormLegacy.tsx | yes (data-ll="wl-form") | REMOVED | 2025-10-07: Legacy form retired; canonical WaitlistForm now the sole implementation. |
+| components/waitlist/ResendConfirmForm.tsx | feature-comp | components/features/waitlist/ResendConfirmForm.tsx | same | yes (data-ll="wl-resend-form") | MIGRATED | Marketing resend card uses shared wl-resend-* selectors. |
+| components/waitlist/WaitlistForm.tsx | feature-comp | components/features/waitlist/WaitlistForm.tsx | same | yes (data-ll="wl-form") | MIGRATED | Canonical hCaptcha form with wl-* anchors; exported via feature barrel. |
+| lib/validation/waitlist.ts | util | lib/shared/validation/waitlist-schema.ts | waitlist-schema.ts | no | MIGRATED | Shared schema relocated under validation namespace. |
 
 ### Feature: header-nav
 
 | Current Path | Type | Target Path | New Name | Selectors Needed? | Status | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| app/(site)/components/Header.tsx | feature-comp | components/features/header/SiteHeader.tsx | SiteHeader.tsx | yes (data-ll="header-shell") | OK | Rename to clarify scope; update imports across app shell tests. |
-| app/(site)/components/HeaderConsentButton.tsx | feature-comp | components/features/header/HeaderConsentButton.tsx | same | yes (data-ll="header-consent") | OK | Ensure consent toggle integrates with new consent feature provider. |
-| app/(site)/components/HeaderDrawer.tsx | feature-comp | components/features/header/HeaderDrawer.tsx | same | yes (data-ll="header-drawer") | OK | Drawer tests rely on new selector. |
-| app/(site)/components/HeaderLocaleSwitcher.tsx | feature-comp | components/features/header/HeaderLocaleSwitcher.tsx | same | yes (data-ll="header-locale") | OK | Locale toggle selectors replace text matching in e2e. |
-| app/(site)/components/HeaderThemeToggle.tsx | feature-comp | components/features/header/HeaderThemeToggle.tsx | same | yes (data-ll="header-theme-toggle") | OK | Keep client boundary; update data attr for tests. |
+| app/(site)/components/Header.tsx | feature-comp | components/features/header-nav/Header.tsx | same | yes (data-ll="nav-root") | MIGRATED | Header lives under `components/features/header-nav`; barrel export enabled for alias imports. |
+| app/(site)/components/HeaderConsentButton.tsx | feature-comp | components/features/header-nav/HeaderConsentButton.tsx | same | no (test ids retained) | MIGRATED | Consent toggle stays feature-local; analytics wiring unchanged. |
+| app/(site)/components/HeaderDrawer.tsx | feature-comp | components/features/header-nav/HeaderDrawer.tsx | same | yes (data-ll="nav-menu-button") | MIGRATED | Drawer trigger now exposes `nav-menu-button`; other attrs unchanged. |
+| app/(site)/components/HeaderLocaleSwitcher.tsx | feature-comp | components/features/header-nav/HeaderLocaleSwitcher.tsx | same | yes (data-ll="nav-locale-switcher") | MIGRATED | Adds shared selector for desktop + mobile locale forms. |
+| app/(site)/components/HeaderThemeToggle.tsx | feature-comp | components/features/header-nav/HeaderThemeToggle.tsx | same | no | MIGRATED | Theme toggle moved with feature; existing test ids kept. |
+| app/(site)/components/PromoRibbon.tsx | feature-comp | components/features/header-nav/PromoRibbon.tsx | same | yes (focus fallback via nav-waitlist-cta) | MIGRATED | Ribbon co-located with header; CTA focus lookup uses new data-ll selector. |
 | components/ThemeInit.tsx | ui | components/ui/ThemeInit.tsx | same | no | OK | Shared atom across header + layout; path-only move. |
 | components/ThemeToggle.tsx | ui | components/ui/ThemeToggle.tsx | same | yes (data-ll="ui-theme-toggle") | OK | Provide selector for accessibility smoke tests. |
 | lib/header/ctaConfig.ts | util | lib/shared/header/cta-config.ts | cta-config.ts | no | OK | Convert to kebab-case util with named export. |
 | lib/header/ribbonConfig.ts | util | lib/shared/header/ribbon-config.ts | ribbon-config.ts | no | OK | Align with shared header namespace. |
 | lib/header/useScrollHeaderState.ts | hook | lib/shared/header/use-scroll-header-state.ts | use-scroll-header-state.ts | no | OK | Hook stays shared; update barrel if added later. |
 | lib/nav/config.ts | util | lib/shared/nav/config.ts | config.ts | no | OK | Keep named export; update header + footer imports. |
-| tests/e2e/header.consent.spec.ts | test:e2e | tests/e2e/header/consent.e2e.ts | consent.e2e.ts | yes (data-ll="header-consent") | OK | Align Playwright spec with new selector. |
-| tests/e2e/header.cta.spec.ts | test:e2e | tests/e2e/header/cta.e2e.ts | cta.e2e.ts | yes (data-ll="header-cta") | OK | Add CTA attr on header buttons. |
-| tests/e2e/header.drawer.spec.ts | test:e2e | tests/e2e/header/drawer.e2e.ts | drawer.e2e.ts | yes (data-ll="header-drawer") | OK | Drawer open/close assertions rely on attr. |
-| tests/e2e/header.ia.spec.ts | test:e2e | tests/e2e/header/ia.e2e.ts | ia.e2e.ts | yes (data-ll="header-shell") | OK | Navigation information architecture uses header shell attr. |
-| tests/e2e/header.i18n.spec.ts | test:e2e | tests/e2e/header/i18n.e2e.ts | i18n.e2e.ts | yes (data-ll="header-locale") | OK | Locale switcher attr ensures stable selection. |
-| tests/e2e/header.motion.spec.ts | test:e2e | tests/e2e/header/motion.e2e.ts | motion.e2e.ts | yes (data-ll="header-shell") | OK | Focus on motion pref toggles referencing theme attr. |
-| tests/e2e/header.regressions.spec.ts | test:e2e | tests/e2e/header/regressions.e2e.ts | regressions.e2e.ts | yes (data-ll="header-shell") | OK | Consolidate to new folder with alias-based imports. |
-| tests/e2e/header.ribbon.spec.ts | test:e2e | tests/e2e/header/ribbon.e2e.ts | ribbon.e2e.ts | yes (data-ll="home-ribbon") | OK | Shares ribbon attr with home table. |
-| tests/e2e/header.seo.spec.ts | test:e2e | tests/e2e/header/seo.e2e.ts | seo.e2e.ts | yes (data-ll="header-shell") | OK | Ensure meta assertions reference new import path. |
-| tests/e2e/header.shell.spec.ts | test:e2e | tests/e2e/header/shell.e2e.ts | shell.e2e.ts | yes (data-ll="header-shell") | OK | Primary header smoke spec uses new attr. |
-| tests/e2e/header.theme.spec.ts | test:e2e | tests/e2e/header/theme.e2e.ts | theme.e2e.ts | yes (data-ll="header-theme-toggle") | OK | Theme toggle attr ensures deterministic selection. |
-| tests/e2e/header.userstate.spec.ts | test:e2e | tests/e2e/header/userstate.e2e.ts | userstate.e2e.ts | yes (data-ll="header-shell") | OK | Works with new server mocks path update. |
-| tests/e2e/header.visual.spec.ts | test:e2e | tests/e2e/header/visual.e2e.ts | visual.e2e.ts | yes (data-ll="header-shell") | OK | Visual regression harness uses new attr. |
+| tests/e2e/header.consent.spec.ts | test:e2e | tests/e2e/header-nav/consent.e2e.ts | consent.e2e.ts | yes (data-ll="nav-waitlist-cta") | MIGRATED | CTA interactions now rely on nav data selectors. |
+| tests/e2e/header.cta.spec.ts | test:e2e | tests/e2e/header-nav/cta.e2e.ts | cta.e2e.ts | yes (data-ll="nav-waitlist-cta") | MIGRATED | Primary CTA assertions use new selector; locale utils path updated. |
+| tests/e2e/header.drawer.spec.ts | test:e2e | tests/e2e/header-nav/drawer.e2e.ts | drawer.e2e.ts | yes (data-ll="nav-menu-button") | MIGRATED | Drawer suite exercises new menu button selector. |
+| tests/e2e/header.ia.spec.ts | test:e2e | tests/e2e/header-nav/ia.e2e.ts | ia.e2e.ts | yes (data-ll="nav-locale-switcher") | MIGRATED | Locale switcher assertions leverage nav data attr. |
+| tests/e2e/header.i18n.spec.ts | test:e2e | tests/e2e/header-nav/i18n.e2e.ts | i18n.e2e.ts | yes (data-ll="nav-locale-switcher") | MIGRATED | Desktop/mobile locale forms selected via data-ll. |
+| tests/e2e/header.motion.spec.ts | test:e2e | tests/e2e/header-nav/motion.e2e.ts | motion.e2e.ts | yes (data-ll="nav-root") | MIGRATED | Motion suite references header shell via nav-root selector. |
+| tests/e2e/header.regressions.spec.ts | test:e2e | tests/e2e/header-nav/regressions.e2e.ts | regressions.e2e.ts | yes (data-ll="nav-waitlist-cta") | MIGRATED | CTA width + drawer analytics assertions leverage nav selectors. |
+| tests/e2e/header.ribbon.spec.ts | test:e2e | tests/e2e/header-nav/ribbon.e2e.ts | ribbon.e2e.ts | yes (data-ll="nav-waitlist-cta") | MIGRATED | Ribbon CTA/checks reuse nav CTA selector. |
+| tests/e2e/header.seo.spec.ts | test:e2e | tests/e2e/header-nav/seo.e2e.ts | seo.e2e.ts | yes (data-ll="nav-waitlist-cta") | MIGRATED | SEO UTM checks use nav CTA selector; imports updated. |
+| tests/e2e/header.shell.spec.ts | test:e2e | tests/e2e/header-nav/shell.e2e.ts | shell.e2e.ts | yes (data-ll="nav-root") | MIGRATED | Primary shell spec reads nav-root and menu button selectors. |
+| tests/e2e/header.theme.spec.ts | test:e2e | tests/e2e/header-nav/theme.e2e.ts | theme.e2e.ts | yes (data-ll="nav-menu-button") | MIGRATED | Mobile theme coverage exercises menu selector before toggling. |
+| tests/e2e/header.userstate.spec.ts | test:e2e | tests/e2e/header-nav/userstate.e2e.ts | userstate.e2e.ts | yes (data-ll="nav-waitlist-cta") | MIGRATED | CTA rewrites and analytics hooks rely on nav CTA selector. |
+| tests/e2e/header.visual.spec.ts | test:e2e | tests/e2e/header-nav/visual.e2e.ts | visual.e2e.ts | yes (data-ll="nav-root") | MIGRATED | Visual snapshots capture nav-root, remote auth scenario. |
 
 ### Feature: footer
 
 | Current Path | Type | Target Path | New Name | Selectors Needed? | Status | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| app/(site)/components/Footer.tsx | feature-comp | components/features/footer/SiteFooter.tsx | SiteFooter.tsx | yes (data-ll="footer-shell") | OK | Relocate footer shell; update nav + consent imports. |
+| app/(site)/components/Footer.tsx | feature-comp | components/features/footer/Footer.tsx | Footer.tsx | yes (data-ll="footer-root") | MIGRATED | Relocated footer shell, added feature barrel, updated consent + legal imports. |
 | components/PrivacyRibbon.tsx | feature-comp | components/features/footer/PrivacyRibbon.tsx | same | yes (data-ll="footer-privacy-ribbon") | OK | Works with consent feature; maintain SSR boundary. |
 | components/PrivacyRibbonLink.tsx | ui | components/ui/PrivacyRibbonLink.tsx | same | no | OK | Shared atom for footer + legal pages. |
 | components/TrustBar.tsx | block | components/blocks/TrustBar.tsx | same | yes (data-ll="footer-trust-bar") | OK | Data attr ensures Playwright trust coverage. |
@@ -276,7 +277,7 @@ _Tables sorted by `Current Path`; `Status=DECIDE` rows include the follow-up nee
 | app/opengraph-image/route.ts | route | app/opengraph-image/route.ts | same | no | SKIP | Next image route stays root-level; document alias updates only. |
 | app/locale/switch/route.ts | route | app/locale/switch/route.ts | same | no | SKIP | Locale switcher remains in place pending Slice E routing overhaul. |
 | lib/http/errors.ts | util | lib/shared/http/errors.ts | errors.ts | no | OK | Shared HTTP helper; update API handlers after move. |
-| lib/routing/legalPath.ts | util | lib/shared/routing/legal-path.ts | legal-path.ts | no | OK | Kebab-case util; update imports from legal features. |
+| lib/routing/legalPath.ts | util | lib/shared/routing/legal-path.ts | legal-path.ts | no | MIGRATED | Helper moved to shared routing; aliases updated across footer + legal flows. |
 | tests/e2e/legal.a11y.spec.ts | test:axe | tests/axe/legal/legal.axe.ts | legal.axe.ts | yes (data-ll="footer-privacy-ribbon") | OK | Accessibility spec leverages new footer selector. |
 | tests/e2e/legal.spec.ts | test:e2e | tests/e2e/legal/legal.e2e.ts | legal.e2e.ts | yes (data-ll="footer-shell") | OK | Legal nav assertions rely on footer shell attr. |
 | tests/e2e/unsubscribe.spec.ts | test:e2e | tests/e2e/unsubscribe/unsubscribe.e2e.ts | unsubscribe.e2e.ts | yes (data-ll="unsubscribe-form") | DECIDE | Need explicit selector on unsubscribe form—where to add `data-ll`? |

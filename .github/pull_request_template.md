@@ -13,7 +13,15 @@
 - [ ] **Email Compliance**: List-Unsubscribe (mailto + one-click), List-Unsubscribe-Post, Auto-Submitted, and Reply-To headers accounted for.  
 - [ ] **Status Endpoint**: `/api/status` still requires Basic Auth and returns the required keys.  
 - [ ] **i18n/SEO**: BCP-47 routes, hreflang, canonical host, and preview `noindex` remain correct.  
+- [ ] Canonical/hreflang present & correct for localized pages.  
+- [ ] Sitemap entries updated if this PR adds a new route.  
+- [ ] Preview workflow artifacts reviewed on failures (HTML report + traces).  
 - [ ] **Env Review**: No secrets slipped into git; Vercel envs updated for this change.
+
+## Design System
+- [ ] No raw hex/rgb/hsl values added in components.
+- [ ] No arbitrary Tailwind color/shadow utilities (`bg-[…]`, `text-[…]`, `shadow-[…]`).
+- [ ] Semantic utilities or token-mapped scales used for new styling.
 
 ## Validation
 - Commands run (lint/build/test/e2e/lighthouse) + brief results:

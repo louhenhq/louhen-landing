@@ -7,5 +7,19 @@
     "noUncheckedIndexedAccess": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": []
+  "include": [
+    "components/features/header-nav/**/*",
+    "components/features/footer/**/*",
+    "components/features/waitlist/**/*",
+    "lib/shared/routing/legal-path.ts",
+    "lib/shared/validation/waitlist-schema.ts",
+    "lib/shared/api/waitlist.ts",
+    "lib/server/waitlist/**/*",
+    "tests/e2e/footer/**/*",
+    "tests/e2e/waitlist/**/*",
+    "tests/axe/footer/**/*",
+    "tests/axe/waitlist/**/*",
+    "tests/unit/footer/**/*",
+    "tests/unit/waitlist/**/*"
+  ]
 }

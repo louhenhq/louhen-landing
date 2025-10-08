@@ -8,10 +8,10 @@ Locked decisions: canonical host `https://www.louhen.app`, preview `https://stag
 - Never emit canonical links to the apex or staging hosts; QA must verify `<link rel="canonical">` and `hreflang` entries point to `https://www.louhen.app/{locale}`.
 
 ## Pre-launch policy
-- Set `X-Robots-Tag: noindex` and serve `robots.txt` with `Disallow: /` on both preview and production domains until launch.
-- Keep sitemap disabled pre-launch to prevent accidental discovery.
-- Legal pages (`/[locale]/legal/terms`, `/[locale]/legal/privacy`) must also emit explicit `noindex, nofollow` directives even if other sections get temporary exceptions for QA.
-- Canonical URLs in metadata must still point to `https://www.louhen.app` even while `noindex` is active.
+- `isPrelaunch()` (see `lib/env/prelaunch.ts`) toggles `<meta name="robots" content="noindex, nofollow">` across marketing pages (home, method, waitlist, confirm flows, legal). Leave the flag enabled in preview and staging until GA.
+- `app/robots.ts` mirrors the flag: when prelaunch it serves `Disallow: /` and withholds the sitemap reference; once the flag is false it allows crawling and points to `https://www.louhen.app/sitemap.xml`.
+- Legal pages (`/[locale]/legal/terms`, `/[locale]/legal/privacy`) continue to emit explicit `noindex, nofollow` during pre-launch even if other surfaces get temporary relaxations for QA.
+- Canonical URLs must always resolve to `https://www.louhen.app`, regardless of the robots setting.
 
 ## Launch day checklist
 - Remove the `noindex` directives and update `robots.txt` to allow crawling with `Sitemap: https://www.louhen.app/sitemap.xml`.
@@ -19,11 +19,10 @@ Locked decisions: canonical host `https://www.louhen.app`, preview `https://stag
 - Revalidate caches/CDN entries after toggling crawl settings.
 - Ensure every `<link rel="canonical">`, `hreflang`, and `x-default` entry resolves to `https://www.louhen.app/{locale}`; never reference the apex domain.
 
-## Hreflang & Sitemap Strategy
-- Supported locales: `en`, `de`, `en-de`, `de-de`, `de-at` (see [/CONTEXT/i18n.md](i18n.md)). All sitemap entries must contain matching `hreflang` alternates, including `x-default`.
-- Generate locale-aware sitemaps (`/sitemap.{locale}.xml`) once sitemap automation lands; link each from the root `sitemap.xml`.
-- Shared metadata builders (`lib/seo/*Metadata.ts`) must call `hreflangMapFor` with the exact path so every locale produces a consistent map (waitlist uses `/waitlist` for all locales).
-- Default-locale pages (without locale prefix) must still set the locale on the server to keep `hreflang` consistent; cross-check with the guidance in `/CONTEXT/i18n.md`.
+- Supported locales: `en`, `de`, `en-de`, `de-de`, `de-at` (see [/CONTEXT/i18n.md](i18n.md)). All canonical pages expose a full hreflang set, including `x-default`.
+- `/sitemap.xml` now returns a sitemap index. It links to `/sitemaps/sitemap-<locale>.xml` files that list only the canonical URLs for that locale; the default-locale sitemap also includes `/waitlist`.
+- Shared metadata builders (`lib/seo/*Metadata.ts`) and page-level `generateMetadata()` helpers must call `hreflangMapFor` with the exact canonical path so alternates stay aligned (the waitlist page still uses `/waitlist` for every locale).
+- Default-locale routes (without a locale prefix) must call `unstable_setRequestLocale(defaultLocale)` so rendered metadata (canonical + hreflang) stays in sync with the locale-aware builders.
 
 ## Legal pages (Terms & Privacy)
 - Post-launch, keep canonical URLs aligned with `routing.md` (`https://www.louhen.app/{locale}/legal/<slug>`).
@@ -38,6 +37,7 @@ Locked decisions: canonical host `https://www.louhen.app`, preview `https://stag
 - Default-locale routes (e.g., `/method`) must call `unstable_setRequestLocale(defaultLocale)` before rendering so next-intl receives locale context identical to `/${defaultLocale}/…` routes and does not emit `MISSING_MESSAGE` errors.
 - Locale landing (`/[locale]`) and waitlist pages also rely on `makeCanonical` + `hreflangMapFor`; any new marketing surface exposed in the header must do the same before QA adds links.
 - Waitlist stays on a single `/waitlist` path; its metadata now calls `hreflangMapFor(() => '/waitlist')` so canonical + alternate entries remain consistent across locales and still emit `x-default`.
+- Waitlist confirmation surfaces (`/[locale]/confirm`, `/[locale]/confirm-pending`, `/[locale]/imprint`) now emit canonical + hreflang maps via inline metadata helpers that mirror the shared routing helpers; the default-locale routes reuse the canonical `/waitlist/confirm` and `/waitlist/confirm-pending` paths.
 
 ## Header Navigation & Campaigns
 - Header navigation links must never append marketing UTM parameters when pointing to internal anchors (`#how`, `#faq`) or internal routes; keep canonical URLs untouched to avoid diluting analytics and hreflang metrics.
@@ -61,6 +61,7 @@ Locked decisions: canonical host `https://www.louhen.app`, preview `https://stag
 ## Monitoring & Lighthouse Coverage
 - Include at least one legal route in periodic Lighthouse runs to ensure canonical tags, robots directives, and performance budgets remain within targets. CI audits every locale's privacy page and the default locale's terms page.
 - Track regressions in the Lighthouse artifact stored in CI; treat metadata drift as a launch blocker.
+- Playwright SEO add-ons (`tests/e2e/seo/`) enforce sitemap HTTP integrity and canonical uniqueness on every preview run. Adjust sampling thresholds via `SEO_SITEMAP_SAMPLE` if a temporary hotfix requires a smaller set.
 
 ## Social Preview Strategy
 - Social cards derive from shared builders in `components/SeoJsonLd.tsx` and `lib/seo/*`; ensure OG/Twitter images resolve to the canonical host with cache-busted filenames.

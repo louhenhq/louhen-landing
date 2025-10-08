@@ -12,7 +12,7 @@ Tracks upcoming slices for the marketing header. Update status as each slice lan
 ---
 
 ## Slice 1 — Header Scaffold & Desktop IA
-- Replace `app/(site)/components/Header.tsx` with the documented layout (brand, desktop nav, CTA, locale switcher).
+- Replace `components/features/header-nav/Header.tsx` with the documented layout (brand, desktop nav, CTA, locale switcher).
 - Implement sticky + shrink behavior on scroll using intersection observer sentinel.
 - Add skip link, ensure CTA scrolls to `#waitlist-form` and focuses first input.
 - Accessibility: tab order matches spec; axe checks pass.

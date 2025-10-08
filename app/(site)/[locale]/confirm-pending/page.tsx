@@ -1,10 +1,15 @@
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-import ConfirmResendForm from '@/app/(site)/components/ConfirmResendForm';
+import type { Metadata } from 'next';
+import { ConfirmResendForm } from '@components/features/waitlist';
 import { cn, layout, text } from '@/app/(site)/_lib/ui';
 import { loadMessages } from '@/lib/intl/loadMessages';
+import { isPrelaunch } from '@/lib/env/prelaunch';
+import { hreflangMapFor, makeCanonical, resolveBaseUrl } from '@/lib/seo/shared';
+import { waitlistConfirmPendingPath } from '@lib/shared/routing/waitlist-path';
 import type { SupportedLocale } from '@/next-intl.locales';
+import { unstable_setRequestLocale } from 'next-intl/server';
 
 type Props = {
   params: Promise<{ locale: SupportedLocale }>;
@@ -40,6 +45,7 @@ function ensureWaitlistErrorsCopy(input: unknown): WaitlistErrorsCopy {
 
 export default async function ConfirmPendingPage({ params, searchParams }: Props) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
+  unstable_setRequestLocale(locale);
   const rawMessages = await loadMessages(locale);
   const confirmPending = ensureConfirmPendingCopy((rawMessages as Record<string, unknown>).confirmPending);
   const waitlistErrors = ensureWaitlistErrorsCopy((((rawMessages as Record<string, unknown>).waitlist as Record<string, unknown> | undefined)?.form as Record<string, unknown> | undefined)?.errors);
@@ -65,4 +71,52 @@ export default async function ConfirmPendingPage({ params, searchParams }: Props
       </div>
     </main>
   );
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const baseUrl = resolveBaseUrl();
+  const canonicalPath = waitlistConfirmPendingPath(locale);
+  const canonicalUrl = makeCanonical(canonicalPath, baseUrl);
+  const hreflang = hreflangMapFor(waitlistConfirmPendingPath, baseUrl);
+  const robots = isPrelaunch()
+    ? { index: false, follow: false }
+    : undefined;
+  let title = 'Check your inbox';
+  let description = 'Open the confirmation email to secure your place.';
+
+  try {
+    const rawMessages = await loadMessages(locale);
+    const confirmPending = ensureConfirmPendingCopy((rawMessages as Record<string, unknown>).confirmPending);
+    title = confirmPending.title;
+    description = confirmPending.help;
+  } catch {
+    // fall back to defaults
+  }
+
+  const imageUrl = `${baseUrl}/opengraph-image?locale=${locale}`;
+
+  return {
+    title,
+    description,
+    robots,
+    alternates: {
+      canonical: canonicalUrl,
+      languages: hreflang,
+    },
+    openGraph: {
+      title,
+      description,
+      url: canonicalUrl,
+      locale,
+      type: 'website',
+      images: [imageUrl],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [imageUrl],
+    },
+  };
 }

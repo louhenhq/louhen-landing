@@ -12,6 +12,11 @@ High-level map of routes, data flow, environment setup, security, observability,
 - **Stack baseline:** Next.js 15 App Router, TypeScript strict mode, Tailwind + Style Dictionary tokens, consent-gated analytics, Firebase Admin, Resend, hCaptcha.
 - **TypeScript configs:** `tsconfig.json` (dev superset including tests, Playwright, scripts) and `tsconfig.build.json` (app build subset) share path aliases `@app/*`, `@components/*`, `@lib/*`, `@tests/*`.
 
+### Tokens in the build
+- Runtime CSS for tokens is imported once in `app/layout.tsx` via `./styles/tokens.css` (which in turn pulls the light/dark/high-contrast bundles emitted by `@louhen/design-tokens`). No other module should import these CSS files.
+- Tailwind maps token scales through `tailwind.config.ts` by reading the generated CSS variables. The config scans `./app`, `./components`, `./pages`, and `./lib` for class usage; add new directories here if token-aware classes appear elsewhere.
+- Compile-time consumers (e.g., metadata theme colors, `Sparkline`) read JSON from `@louhen/design-tokens/build/web/tokens.json`. Details on permissible usage live in [/CONTEXT/design_system.md](design_system.md).
+
 Use this overview with the decision log to validate architecture changes before implementation.
 
 ---
@@ -189,7 +194,7 @@ GitHub Actions:
 - Job: release (on push to `main`)
   - `npx semantic-release --debug` (updates GitHub Release + CHANGELOG)
 
-**CI / E2E note**: Remote runs use `E2E_BASE_URL=https://staging.louhen.app`. If the preview environment is protected, attach the `x-vercel-protection-bypass` header with the shared secret.
+**CI / E2E note**: Playwright resolves `BASE_URL` → `PREVIEW_BASE_URL` → `http://localhost:4311`. When either env var is present, the suite hits that remote host and skips starting the local Next.js server. Local runs fall back to auto-starting Next on `0.0.0.0:4311`. If the remote environment is protected, supply `PROTECTION_HEADER="x-vercel-protection-bypass: <token>"` so requests include the required header.
 
 Branching:
 - `main` (stable)  
@@ -263,5 +268,8 @@ We use a two-branch model:
 - Ensures production deployments are only promoted from a validated staging branch.
 - Prevents accidental direct merges from feature branches into production.
 - Keeps the release flow auditable and consistent.
+- Make the matrix-based `e2e:preview` workflow a required status on `staging` so remote Playwright coverage (method, header-nav, footer, waitlist) must pass before merge; leave local retries at the default (0) to expose flakes during development.
+- Preview CI jobs execute remotely (no local server) with explicit permissions (`actions:read`, `contents:read`), a 30-minute timeout, and concurrency group `e2e-preview-${ref}-${suite}` to cancel stale runs. Secrets arrive via masked env vars; never echo them in logs.
+- npm (`~/.npm`) and Playwright (`~/.cache/ms-playwright`) caches reduce cold-start times. Cache keys derive from `npm-${os}-${hash(package-lock)}` / `pw-${os}-${hash(package-lock)}` with OS restore keys so fallback hits remain fast.
 
 ---

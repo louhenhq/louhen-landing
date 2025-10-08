@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { expect, test } from '@playwright/test';
+import type { APIRequestContext } from '@playwright/test';
 
 import { buildUnsubUrl } from '@/lib/email/tokens';
 
@@ -10,7 +11,7 @@ function uniqueEmail() {
   return `playwright-unsubscribe-${randomUUID()}@example.com`;
 }
 
-async function expectSuppressed(request: import('@playwright/test').APIRequestContext, email: string) {
+async function expectSuppressed(request: APIRequestContext, email: string) {
   await expect
     .poll(async () => {
       const response = await request.get('/api/unsubscribe', {

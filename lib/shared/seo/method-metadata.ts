@@ -5,7 +5,7 @@ import { methodPath } from '@lib/shared/routing/method-path';
 import { hreflangMapFor, makeCanonical, resolveBaseUrl } from '@lib/seo/shared';
 import { type SupportedLocale } from '@/next-intl.locales';
 
-const OG_IMAGE_PATH = '/opengraph-image.png';
+const OG_IMAGE_PATH = '/opengraph-image';
 const DEFAULT_METHOD_TITLE = 'Method – Louhen';
 const DEFAULT_METHOD_DESCRIPTION = 'How Louhen works: fit-first guidance, trusted sizing, and effortless discovery.';
 
@@ -18,6 +18,7 @@ export async function buildMethodMetadata({ locale }: BuildMethodMetadataParams)
   const canonicalPath = methodPath(locale);
   const canonicalUrl = makeCanonical(canonicalPath, baseUrl);
   const hreflang = hreflangMapFor(methodPath, baseUrl);
+  const imageUrl = `${baseUrl}${OG_IMAGE_PATH}?locale=${locale}`;
 
   let title = DEFAULT_METHOD_TITLE;
   let description = DEFAULT_METHOD_DESCRIPTION;
@@ -56,13 +57,13 @@ export async function buildMethodMetadata({ locale }: BuildMethodMetadataParams)
       url: canonicalUrl,
       type: 'article',
       locale,
-      images: [`${baseUrl}${OG_IMAGE_PATH}`],
+      images: [imageUrl],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: [`${baseUrl}${OG_IMAGE_PATH}`],
+      images: [imageUrl],
     },
     robots,
   } satisfies Metadata;

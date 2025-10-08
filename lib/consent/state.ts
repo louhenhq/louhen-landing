@@ -67,7 +67,7 @@ export function clearClientConsent() {
   if (process.env.NODE_ENV === 'production') directives.push('Secure');
   document.cookie = `${COOKIE_NAME}=; ${directives.join('; ')}`;
   if (typeof window !== 'undefined') {
-    window.__LOUHEN_CONSENT__ = undefined;
+    delete window.__LOUHEN_CONSENT__;
     window.dispatchEvent(new CustomEvent('louhen:consent', { detail: { analytics: false } }));
   }
 }

@@ -46,9 +46,9 @@ export function resolvePromoRibbon(locale: SupportedLocale): PromoRibbonConfig |
     return {
       id: override.id,
       i18nKey: `header.ribbon.${override.id}`,
-      href,
-      analyticsTarget,
-      utm: override.utm,
+      ...(href ? { href } : {}),
+      ...(analyticsTarget ? { analyticsTarget } : {}),
+      ...(override.utm ? { utm: override.utm } : {}),
     };
   }
 
@@ -56,16 +56,18 @@ export function resolvePromoRibbon(locale: SupportedLocale): PromoRibbonConfig |
 
   const campaignKey = locale === defaultLocale ? RIBBON_ID : `${RIBBON_ID}-${locale}`;
   const analyticsTarget = RIBBON_HREF ? resolveAnalyticsTarget(RIBBON_HREF) : undefined;
-  const href = RIBBON_HREF ? appendUtmParams(RIBBON_HREF, {
-    source: 'header',
-    medium: 'promo-ribbon',
-    campaign: campaignKey,
-  }) : undefined;
+  const href = RIBBON_HREF
+    ? appendUtmParams(RIBBON_HREF, {
+        source: 'header',
+        medium: 'promo-ribbon',
+        campaign: campaignKey,
+      })
+    : undefined;
 
   return {
     id: RIBBON_ID,
     i18nKey: `header.ribbon.${RIBBON_ID}`,
-    href,
-    analyticsTarget,
+    ...(href ? { href } : {}),
+    ...(analyticsTarget ? { analyticsTarget } : {}),
   };
 }

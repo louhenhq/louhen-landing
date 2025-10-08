@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { isPrelaunch } from '@/lib/env/prelaunch';
-import { legalPath, type LegalSlug } from '@/lib/routing/legalPath';
+import { legalPath, type LegalSlug } from '@lib/shared/routing/legal-path';
 import { hreflangMapFor, makeCanonical, resolveBaseUrl } from '@/lib/seo/shared';
 import { type SupportedLocale } from '@/next-intl.locales';
 
-const OG_IMAGE_PATH = '/opengraph-image.png';
+const OG_IMAGE_PATH = '/opengraph-image';
 
 type LegalKind = Extract<LegalSlug, 'terms' | 'privacy'>;
 
@@ -38,6 +38,7 @@ export async function buildLegalMetadata({ locale, kind }: BuildLegalMetadataPar
   const path = legalPath(locale, kind);
   const canonicalUrl = makeCanonical(path, baseUrl);
   const hreflang = hreflangMapFor((supportedLocale) => legalPath(supportedLocale, kind), baseUrl);
+  const imageUrl = `${baseUrl}${OG_IMAGE_PATH}?locale=${locale}`;
 
   const t = await getTranslations({ locale, namespace: 'legal' });
   const title = kind === 'terms' ? t('terms.title') : t('privacy.title');
@@ -60,13 +61,13 @@ export async function buildLegalMetadata({ locale, kind }: BuildLegalMetadataPar
       url: canonicalUrl,
       locale,
       type: 'article',
-      images: [`${baseUrl}${OG_IMAGE_PATH}`],
+      images: [imageUrl],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: [`${baseUrl}${OG_IMAGE_PATH}`],
+      images: [imageUrl],
     },
     robots,
   } satisfies Metadata;

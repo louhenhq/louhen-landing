@@ -1,13 +1,16 @@
+import type { PlaywrightTestConfig } from '@playwright/test';
 import { Buffer } from 'node:buffer';
 import { mkdirSync } from 'node:fs';
 import { defineConfig, devices } from '@playwright/test';
-import type { PlaywrightTestConfig } from '@playwright/test';
 
 const HOST = process.env.HOST ?? '127.0.0.1';
 const parsedPort = Number.parseInt(process.env.PORT ?? '4311', 10);
 const PORT = Number.isFinite(parsedPort) ? parsedPort : 4311;
 const HEALTH_PATH = process.env.PW_HEALTH_PATH ?? '/icon.svg';
-const baseURL = process.env.BASE_URL ?? `http://${HOST}:${PORT}`;
+const fallbackLocalURL = `http://localhost:${PORT}`;
+const envBaseURL = process.env.BASE_URL ?? process.env.PREVIEW_BASE_URL ?? null;
+const baseURL = envBaseURL ?? fallbackLocalURL;
+const isRemote = envBaseURL !== null;
 const shouldSkipWebServer = process.env.PLAYWRIGHT_SKIP === '1';
 
 mkdirSync('playwright-report', { recursive: true });
@@ -15,6 +18,31 @@ mkdirSync('test-results', { recursive: true });
 
 const statusUser = process.env.STATUS_USER ?? process.env.CI_STATUS_USER ?? 'status-ops';
 const statusPass = process.env.STATUS_PASS ?? process.env.CI_STATUS_PASS ?? 'status-secret';
+
+const headerEnv = process.env.PROTECTION_HEADER;
+const extraHTTPHeaders = headerEnv
+  ? Object.fromEntries(
+      headerEnv
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) => {
+          const index = line.indexOf(':');
+          if (index === -1) throw new Error(`Invalid PROTECTION_HEADER entry: ${line}`);
+          const key = line.slice(0, index).trim();
+          const value = line.slice(index + 1).trim();
+          return [key, value];
+        })
+    )
+  : undefined;
+
+const httpCredentials =
+  process.env.BASIC_AUTH_USER && process.env.BASIC_AUTH_PASS
+    ? { username: process.env.BASIC_AUTH_USER, password: process.env.BASIC_AUTH_PASS }
+    : undefined;
+
+const cookieEnv = process.env.PROTECTION_COOKIE;
+const storageStatePath = cookieEnv ? '.playwright/auth-storage.json' : undefined;
 
 const testEnv = {
   BASE_URL: baseURL,
@@ -52,10 +80,9 @@ for (const [key, value] of Object.entries(testEnv)) {
   }
 }
 
-const httpCredentials = statusUser && statusPass ? { username: statusUser, password: statusPass } : undefined;
-
 const config: PlaywrightTestConfig = {
-  testDir: 'tests/e2e',
+  testDir: 'tests',
+  testMatch: ['**/*.e2e.ts', '**/*.axe.ts', '**/*.spec.ts'],
   retries: process.env.CI ? 1 : 0,
   workers: process.env.CI ? 1 : 2,
   reporter: [
@@ -68,16 +95,19 @@ const config: PlaywrightTestConfig = {
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
     httpCredentials,
+    extraHTTPHeaders,
+    storageState: storageStatePath,
   },
   projects: [],
   preserveOutput: 'never',
+  globalSetup: 'tests/setup/auth.setup.ts',
 };
 
 if (shouldSkipWebServer) {
   config.projects = [
     {
       name: 'chromium',
-      testMatch: /__skip__\.spec\.ts/,
+      testMatch: ['**/__skip__.spec.ts'],
       use: { ...devices['Desktop Chrome'] },
     },
   ];
@@ -88,15 +118,17 @@ if (shouldSkipWebServer) {
       use: { ...devices['Desktop Chrome'] },
     },
   ];
-  config.webServer = {
-    command: 'npm run start:test',
-    url: `http://${HOST}:${PORT}${HEALTH_PATH}`,
-    reuseExistingServer: Boolean(process.env.PW_REUSE) || !process.env.CI,
-    timeout: 180_000,
-    env: {
-      ...testEnv,
-    },
-  };
+  if (!isRemote) {
+    config.webServer = {
+      command: 'npm run start:test',
+      url: `${fallbackLocalURL}${HEALTH_PATH}`,
+      reuseExistingServer: Boolean(process.env.PW_REUSE) || !process.env.CI,
+      timeout: 120_000,
+      env: {
+        ...testEnv,
+      },
+    };
+  }
 }
 
 export default defineConfig(config);

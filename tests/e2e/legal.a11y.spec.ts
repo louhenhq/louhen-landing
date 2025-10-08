@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { legalPath } from '@/lib/routing/legalPath';
+import { legalPath } from '@lib/shared/routing/legal-path';
 import { getTestLocales, localeUrl } from './_utils/url';
 
 const SLUGS = ['terms', 'privacy'] as const;

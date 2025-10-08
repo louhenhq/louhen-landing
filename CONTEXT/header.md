@@ -13,7 +13,7 @@ Authoritative playbook for the marketing header across locales, devices, and lau
 
 ## Information Architecture
 - **Brand block:** wordmark linked to locale-aware home (`/` for default locale, `/{locale}` otherwise). Use semantic `<h1>` only on landing hero; header brand stays a `<span>` inside the link when the page already owns the `<h1>`.
-  - Implementation detail: `app/(site)/components/Header.tsx` calls `localeHomePath(locale)` for the wordmark link so locale switching keeps canonical paths intact.
+  - Implementation detail: `components/features/header-nav/Header.tsx` calls `localeHomePath(locale)` for the wordmark link so locale switching keeps canonical paths intact.
 - **Primary nav (desktop ≥1024px):** anchor jumps to `#how`, `#story`, `#faq` plus optional marketing destinations (Method, Press) when unlocked. Keep max 5 links to preserve spacing.
 - **Utility cluster (right side):** locale switcher, theme/contrast toggle (once consolidated), consent badge (opens manager), CTA button, optional status badges (preorder/live launch), hamburger trigger on mobile.
 - **Mobile drawer (<1024px):** full-screen sheet sliding from top. Contains nav links, CTA, locale/theme controls, consent badge, optional promo copy. Drawer must trap focus and restore to trigger on close.
@@ -27,14 +27,14 @@ Authoritative playbook for the marketing header across locales, devices, and lau
 - Resolver `buildHeaderNavigation(locale)` outputs locale-aware `href`s using helpers (`methodPath`, `legalPath`, `localeHomePath`) and preserves query slots for future UTM enrichment.
 - Primary defaults: `how-it-works`, `founder-story`, `faq`, `method`. Secondary defaults: `privacy`, `terms`. System controls: `locale` (available), `theme`, `consent` (planned).
 - Secondary links exist in the model but stay hidden until layout + copy are approved. System controls expose a `status` flag so upstream slices can flip availability without touching header markup.
-- All nav render logic in `app/(site)/components/Header.tsx` now consumes this model; the component reads `t(item.i18nKey)` for copy and adds `data-nav-id` / `data-analytics-event` hooks for testing and analytics.
+- All nav render logic in `components/features/header-nav/Header.tsx` now consumes this model; the component reads `t(item.i18nKey)` for copy and adds `data-nav-id` / `data-analytics-event` hooks for testing and analytics.
 
 ---
 
 ## Layout Shell (Slice 2)
 - Desktop shell: `header` landmark contains three regions — brand (left), primary nav (center, `aria-label="Primary navigation"`), system controls + CTA (right). Secondary links render in a slim bar beneath the primary row on large breakpoints (`lg` ≥ 1024px).
 - Mobile shell: primary row collapses to brand + hamburger trigger (with `aria-controls="header-mobile-drawer"`). CTA reflows beneath the header as a full-width button while the system controls move into the drawer.
-- Drawer skeleton lives in `app/(site)/components/HeaderDrawer.tsx`. It opens/closes via internal state, exposes `role="dialog"` + `aria-modal="true"`, includes heading + close button, and renders primary/secondary nav plus system controls. Focus trap is active (initial focus on heading, `Esc`/backdrop close) and returns focus to the trigger when appropriate.
+- Drawer skeleton lives in `components/features/header-nav/HeaderDrawer.tsx`. It opens/closes via internal state, exposes `role="dialog"` + `aria-modal="true"`, includes heading + close button, and renders primary/secondary nav plus system controls. Focus trap is active (initial focus on heading, `Esc`/backdrop close) and returns focus to the trigger when appropriate.
 - Skip link is rendered as the first child inside `Header`; it localizes `header.skipLink` and targets `#main-content`. All routes that surface the marketing header must expose a `<main id="main-content">` anchor.
 - Sticky behaviour remains `position: sticky; top: 0` with backdrop blur only; shrink animation hooks will land in the motion slice.
 - CTA slot now honours `IS_PRELAUNCH`: pre-launch renders active waitlist button; post-launch renders a disabled placeholder button with `data-cta-mode="postlaunch"` ready for future flows.

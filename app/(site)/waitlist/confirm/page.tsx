@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { processConfirmationToken } from '@/lib/waitlist/confirm';
+import { processConfirmationToken } from '@lib/server/waitlist/confirm.server';
 
 export const dynamic = 'force-dynamic';
 

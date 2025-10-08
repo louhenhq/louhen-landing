@@ -125,38 +125,13 @@ tests/{unit,e2e,axe}
 
 ## End-to-End Testing Modes
 
-- **Local mode**: Run `npx playwright test` without `E2E_BASE_URL`; Playwright binds to the local dev server on loopback.
-- **Remote mode**: Export `E2E_BASE_URL=https://staging.louhen.app` so tests hit the staging branch deployment. If Deployment Protection is enabled, also set `VERCEL_AUTOMATION_BYPASS_SECRET` and include the header below.
-
-### cURL sanity check
-
-```bash
-curl -H "x-vercel-protection-bypass: $VERCEL_AUTOMATION_BYPASS_SECRET" \
-  "$E2E_BASE_URL/status"
-```
-
-### Playwright auth header snippet
-
-```ts
-import { test as base } from '@playwright/test';
-
-const test = base.extend({
-  context: async ({ browser }, use) => {
-    const headers = process.env.VERCEL_AUTOMATION_BYPASS_SECRET
-      ? { 'x-vercel-protection-bypass': process.env.VERCEL_AUTOMATION_BYPASS_SECRET }
-      : {};
-
-    const context = await browser.newContext({
-      baseURL: process.env.E2E_BASE_URL || 'http://127.0.0.1:3000',
-      extraHTTPHeaders: headers,
-    });
-    await use(context);
-    await context.close();
-  },
-});
-
-export { test };
-```
+- **Remote mode (preview/staging)**: `PREVIEW_BASE_URL=https://staging.louhen.app npx playwright test`
+  - Playwright skips starting a local server and targets the supplied host.
+  - Optional protection header(s): `PROTECTION_HEADER="X-Bypass-Token: <token>" npx playwright test`
+  - Optional basic auth: `BASIC_AUTH_USER=user BASIC_AUTH_PASS=pass PREVIEW_BASE_URL=... npx playwright test`
+  - Optional cookie gate: `PROTECTION_COOKIE="cookie1=value; cookie2=value" PREVIEW_BASE_URL=... npx playwright test`
+- **Local mode (default)**: Run `npx playwright test` with no preview env vars; Playwright automatically boots Next on `0.0.0.0:4311` and uses `http://localhost:4311`.
+- `BASE_URL` is also honoured if you need a custom host; precedence is `BASE_URL` → `PREVIEW_BASE_URL` → local fallback.
 
 ## License
 

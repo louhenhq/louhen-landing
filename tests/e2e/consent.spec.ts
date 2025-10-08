@@ -1,7 +1,8 @@
 import { expect, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { localeUrl } from './_utils/url';
 
-function getBanner(page: import('@playwright/test').Page) {
+function getBanner(page: Page) {
   return page.getByRole('dialog', { name: /cookies/i });
 }
 

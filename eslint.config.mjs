@@ -10,6 +10,37 @@ const compat = new FlatCompat({
   baseDirectory: __dirname,
 });
 
+const restrictedSyntaxBase = [
+  {
+    selector: "Literal[value=/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/]",
+    message: 'Use design tokens (Tailwind classes or CSS variables) instead of hex colors.',
+  },
+  {
+    selector: "TemplateElement[value.raw=/#[0-9a-fA-F]{3,8}\\b/]",
+    message: 'Use design tokens (Tailwind classes or CSS variables) instead of hex colors.',
+  },
+  {
+    selector: "CallExpression[callee.name='fetch'] Literal[value='/api/track']",
+    message: "Use clientAnalytics.track instead of fetch('/api/track').",
+  },
+  {
+    selector:
+      "CallExpression[callee.name='fetch'] TemplateLiteral[quasis.length=1][quasis.0.value.raw='/api/track']",
+    message: "Use clientAnalytics.track instead of fetch('/api/track').",
+  },
+];
+
+const arbitraryTailwindUtilitySelectors = [
+  {
+    selector: "Literal[value=/(?:(?:bg|text|shadow)-\\[[^\\]]*(?:#|rgb|hsl))/]",
+    message: 'Avoid arbitrary Tailwind color/shadow utilities; use token-backed classes.',
+  },
+  {
+    selector: "TemplateElement[value.raw=/(?:(?:bg|text|shadow)-\\[[^\\]]*(?:#|rgb|hsl))/]",
+    message: 'Avoid arbitrary Tailwind color/shadow utilities; use token-backed classes.',
+  },
+];
+
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
@@ -33,30 +64,16 @@ const eslintConfig = [
   // Discourage raw hex colors in client TS/TSX; exclude server-only files
   {
     files: ["**/*.{ts,tsx}"],
-    ignores: ['lib/clientAnalytics.ts'],
+    ignores: ['lib/clientAnalytics.ts', 'emails/**', 'tests/**'],
     rules: {
-      'no-restricted-syntax': [
-        'error',
-        {
-          selector: "Literal[value=/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/]",
-          message:
-            'Use design tokens (Tailwind classes or CSS variables) instead of hex colors.',
-        },
-        {
-          selector: "TemplateElement[value.raw=/#[0-9a-fA-F]{3,8}\\b/]",
-          message:
-            'Use design tokens (Tailwind classes or CSS variables) instead of hex colors.',
-        },
-        {
-          selector: "CallExpression[callee.name='fetch'] Literal[value='/api/track']",
-          message: "Use clientAnalytics.track instead of fetch('/api/track').",
-        },
-        {
-          selector:
-            "CallExpression[callee.name='fetch'] TemplateLiteral[quasis.length=1][quasis.0.value.raw='/api/track']",
-          message: "Use clientAnalytics.track instead of fetch('/api/track').",
-        },
-      ],
+      'no-restricted-syntax': ['error', ...restrictedSyntaxBase],
+    },
+  },
+  {
+    files: ['app/**/*.{ts,tsx}', 'components/**/*.{ts,tsx}'],
+    ignores: ['emails/**', 'tests/**'],
+    rules: {
+      'no-restricted-syntax': ['error', ...restrictedSyntaxBase, ...arbitraryTailwindUtilitySelectors],
     },
   },
   {
@@ -95,6 +112,12 @@ const eslintConfig = [
     files: ['lib/email/colors.ts'],
     rules: {
       'no-restricted-syntax': 'off',
+    },
+  },
+  {
+    files: ['emails/**/*.tsx'],
+    rules: {
+      '@next/next/no-head-element': 'off',
     },
   },
   // API routes: allow explicit any (pragmatic typing at edges)

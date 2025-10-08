@@ -11,7 +11,7 @@
     "prepare": "husky",
     "build": "next build",
     "start": "next start",
-    "start:test": "mkdir -p .next && cross-env NODE_ENV=production PORT=${PORT:-4311} HOST=127.0.0.1 next start -p ${PORT:-4311} -H 127.0.0.1 | tee .next/test-server.log",
+    "start:test": "mkdir -p .next && cross-env NODE_ENV=production PORT=${PORT:-4311} HOST=0.0.0.0 next start -p ${PORT:-4311} -H 0.0.0.0 | tee .next/test-server.log",
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "guard:hex": "node scripts/guard-hex.mjs",

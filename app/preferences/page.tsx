@@ -2,7 +2,7 @@
 import * as React from 'react';
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import WaitlistForm from '@/components/waitlist/WaitlistForm';
+import { WaitlistForm } from '@components/features/waitlist';
 
 // Force dynamic rendering (no prerender) to avoid static export errors
 export const dynamic = 'force-dynamic';

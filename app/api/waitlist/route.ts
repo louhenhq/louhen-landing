@@ -2,12 +2,12 @@ import 'server-only';
 
 import { NextResponse } from 'next/server';
 import { BadRequestError, HttpError, InternalServerError } from '@/lib/http/errors';
-import { upsertPending } from '@/lib/firestore/waitlist';
+import { upsertPending } from '@lib/server/waitlist/firestore.server';
 import { sendWaitlistConfirmEmail } from '@/lib/email/sendWaitlistConfirm';
 import { verifyToken as verifyCaptchaToken } from '@/lib/security/hcaptcha';
 import { generateToken, hashToken } from '@/lib/security/tokens';
 import { getExpiryDate } from '@/lib/waitlistConfirmTtl';
-import { parseSignupDTO } from '@/lib/validation/waitlist';
+import { parseSignupDTO } from '@lib/shared/validation/waitlist-schema';
 import { ensureWaitlistServerEnv } from '@/lib/env/guard';
 
 export const runtime = 'nodejs';

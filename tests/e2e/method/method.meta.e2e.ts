@@ -3,6 +3,7 @@ import { loadMessages } from '@lib/intl/loadMessages';
 import { methodPath } from '@lib/shared/routing/method-path';
 import { hreflangMapFor, makeCanonical } from '@lib/seo/shared';
 import { defaultLocale, type SupportedLocale } from '@/next-intl.locales';
+import { sitemapSlugForLocale } from '@lib/shared/seo/sitemap';
 import { getTestLocales } from '../_utils/url';
 
 const PRELAUNCH_FLAG =
@@ -34,13 +35,15 @@ test.describe('Method page metadata', () => {
         locale === defaultLocale ? methodMessages : await defaultMethodMessagesPromise;
 
       const targetPath = methodPath(locale);
-      const response = await page.goto(targetPath, { waitUntil: 'networkidle' });
-      const status = response?.status();
+      const apiResponse = await page.request.get(targetPath);
+      const status = apiResponse.status();
       if (status !== 200) {
-        const snippet = response ? (await response.text()).slice(0, 400) : 'No response body';
+        const snippet = (await apiResponse.text()).slice(0, 400);
         console.error(`[method.meta] ${targetPath} returned ${status}. Body preview: ${snippet}`);
       }
       expect(status).toBe(200);
+
+      await page.goto(targetPath, { waitUntil: 'networkidle' });
 
       const expectedTitle =
         methodMessages.seo?.title ?? defaultMethodMessages.seo?.title ?? DEFAULT_METHOD_TITLE;
@@ -90,6 +93,26 @@ test.describe('Method page metadata', () => {
       for (const [hreflang, href] of Object.entries(expectedAlternates)) {
         expect(hreflangMap.get(hreflang)).toBe(href);
       }
+
+      expect(hreflangMap.get('x-default')).toBe(expectedAlternates['x-default']);
     });
   }
+
+  test('sitemap index and locale files expose canonical URLs', async ({ page }) => {
+    const indexResponse = await page.request.get('/sitemap.xml');
+    expect(indexResponse.status()).toBe(200);
+    const indexBody = await indexResponse.text();
+
+    for (const locale of localesToTest) {
+      const slug = sitemapSlugForLocale(locale);
+      const sitemapUrl = makeCanonical(`/sitemaps/${slug}.xml`);
+      expect(indexBody).toContain(`<loc>${sitemapUrl}</loc>`);
+
+      const localeResponse = await page.request.get(`/sitemaps/${slug}.xml`);
+      expect(localeResponse.status()).toBe(200);
+      const localeBody = await localeResponse.text();
+      const expectedMethod = makeCanonical(methodPath(locale));
+      expect(localeBody).toContain(`<loc>${expectedMethod}</loc>`);
+    }
+  });
 });

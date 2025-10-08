@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import { createTranslator } from 'next-intl';
-import WaitlistForm from '@/app/(site)/components/WaitlistForm';
+import { WaitlistForm } from '@components/features/waitlist';
 import { loadWaitlistMessages } from '@/app/(site)/waitlist/_lib/messages';
 import { WAITLIST_URGENCY_COPY_ENABLED } from '@/lib/flags';
 import { hreflangMapFor, makeCanonical, resolveBaseUrl } from '@/lib/seo/shared';
+import { isPrelaunch } from '@/lib/env/prelaunch';
 import type { SupportedLocale } from '@/next-intl.locales';
 
 export const dynamic = 'force-dynamic';
@@ -19,10 +20,15 @@ export async function generateMetadata(): Promise<Metadata> {
   const canonicalUrl = makeCanonical(canonicalPath, baseUrl);
   const waitlistPathForLocale: (locale: SupportedLocale) => string = () => canonicalPath;
   const hreflang = hreflangMapFor(waitlistPathForLocale, baseUrl);
+  const imageUrl = `${baseUrl}/opengraph-image?locale=${locale}`;
+  const robots = isPrelaunch()
+    ? { index: false, follow: false }
+    : undefined;
 
   return {
     title,
     description,
+    robots,
     alternates: {
       canonical: canonicalUrl,
       languages: hreflang,
@@ -31,11 +37,13 @@ export async function generateMetadata(): Promise<Metadata> {
       title,
       description,
       url: canonicalUrl,
+      images: [imageUrl],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
+      images: [imageUrl],
     },
   };
 }
@@ -45,6 +53,7 @@ export default async function WaitlistPage() {
   const t = createTranslator({ locale, messages, namespace: 'waitlist' });
   const trustPodiatrist = t('trust.podiatrist');
   const trustLouhenFit = t('trust.louhenfit');
+  const urgencyBadge = t('urgency.badge');
   const urgencyEnabled = WAITLIST_URGENCY_COPY_ENABLED;
 
   return (
@@ -55,6 +64,11 @@ export default async function WaitlistPage() {
         </span>
         <h1 className="text-3xl font-semibold tracking-tight text-slate-900 md:text-4xl">{t('title')}</h1>
         <p className="text-base leading-relaxed text-slate-700 md:text-lg">{t('subtitle')}</p>
+        {urgencyEnabled ? (
+          <p className="text-sm font-medium text-emerald-600" role="status">
+            {urgencyBadge}
+          </p>
+        ) : null}
         <dl className="grid gap-3 text-sm text-slate-600 md:grid-cols-2">
           <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
             <dt className="text-xs font-semibold uppercase tracking-wide text-emerald-600">LouhenFit</dt>
@@ -67,7 +81,7 @@ export default async function WaitlistPage() {
         </dl>
       </section>
 
-      <WaitlistForm showUrgencyBadge={urgencyEnabled} source={null} />
+      <WaitlistForm source={null} />
     </main>
   );
 }

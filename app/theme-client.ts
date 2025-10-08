@@ -30,7 +30,8 @@ function setCookie(name: string, value: string | null) {
 function readCookie(name: string): string | null {
   if (typeof document === 'undefined') return null;
   const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
-  return match ? decodeURIComponent(match[1]) : null;
+  const rawValue = match?.[1];
+  return typeof rawValue === 'string' ? decodeURIComponent(rawValue) : null;
 }
 
 function resolveThemePreference(value: string | null | undefined): ThemePref {

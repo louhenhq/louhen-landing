@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { headers } from 'next/headers';
 import { getTranslations, unstable_setRequestLocale } from 'next-intl/server';
 import { BreadcrumbJsonLd } from '@/components/SeoJsonLd';
-import { legalPath, localeHomePath } from '@/lib/routing/legalPath';
+import { legalPath, localeHomePath } from '@lib/shared/routing/legal-path';
 import { buildLegalMetadata } from '@/lib/seo/legalMetadata';
 import { makeCanonical, resolveBaseUrl } from '@/lib/seo/shared';
 import type { SupportedLocale } from '@/next-intl.locales';

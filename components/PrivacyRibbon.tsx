@@ -2,7 +2,7 @@
 
 import { cn, layout } from '@/app/(site)/_lib/ui';
 import PrivacyRibbonLink from '@/components/PrivacyRibbonLink';
-import { legalPath } from '@/lib/routing/legalPath';
+import { legalPath } from '@lib/shared/routing/legal-path';
 import { useLocale, useTranslations } from 'next-intl';
 
 export default function PrivacyRibbon() {

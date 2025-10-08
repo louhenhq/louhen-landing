@@ -1,4 +1,4 @@
-import { legalPath, localeHomePath, type LegalSlug } from '@lib/routing/legalPath';
+import { legalPath, localeHomePath, type LegalSlug } from '@lib/shared/routing/legal-path';
 import { methodPath } from '@lib/shared/routing/method-path';
 import { appendUtmParams, type UtmParams } from '@lib/url/appendUtmParams';
 import { defaultLocale, type SupportedLocale } from '@/next-intl.locales';
@@ -159,16 +159,16 @@ export function getSystemControls(): SystemControlConfig[] {
 
 function resolveNavItem(item: NavItemConfig, locale: SupportedLocale): NavItemResolved {
   const { href, isExternal, rel, target } = resolveTarget(item.target, locale);
-  const prefetch = item.target.kind === 'internal' ? item.target.prefetch : false;
+  const prefetch = item.target.kind === 'internal' ? item.target.prefetch : undefined;
   return {
     id: item.id,
     i18nKey: item.i18nKey,
     href,
-    analyticsEvent: item.analyticsEvent,
     isExternal,
-    rel,
-    target,
-    prefetch,
+    ...(item.analyticsEvent ? { analyticsEvent: item.analyticsEvent } : {}),
+    ...(rel ? { rel } : {}),
+    ...(target ? { target } : {}),
+    ...(prefetch !== undefined ? { prefetch } : {}),
   };
 }
 

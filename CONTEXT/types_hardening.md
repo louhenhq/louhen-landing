@@ -25,6 +25,11 @@
 - `npm run typecheck:strict:feature` — runs strict config after you populate the `include` array.
 - Feature-specific scripts (e.g., `npm run typecheck:strict:method`) provide ready-made entry points with curated include globs.
 
+## Active pilots
+- `components/features/header-nav/**/*`
+- `components/features/footer/**/*`
+- `components/features/waitlist/**/*` plus supporting shared/server libs and tests (see `tsconfig.strict.json`).
+
 ## Next steps
 - Track active pilots and budgets in `/CONTEXT/types_budget.md`.
 - Once every feature passes strict, we can discuss promoting the strict config to the global default in a dedicated slice.

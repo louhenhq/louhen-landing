@@ -1,13 +1,27 @@
 import type { MetadataRoute } from 'next';
+import { isPrelaunch } from '@/lib/env/prelaunch';
+import { resolveBaseUrl } from '@/lib/seo/shared';
 
 export default function robots(): MetadataRoute.Robots {
-  const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://louhen-landing.vercel.app';
+  const base = resolveBaseUrl();
+  if (isPrelaunch()) {
+    return {
+      rules: [
+        {
+          userAgent: '*',
+          disallow: '/',
+        },
+      ],
+    };
+  }
+
   return {
-    rules: {
-      userAgent: '*',
-      allow: '/',
-    },
+    rules: [
+      {
+        userAgent: '*',
+        allow: '/',
+      },
+    ],
     sitemap: `${base}/sitemap.xml`,
   };
 }
-

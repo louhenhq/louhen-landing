@@ -1,5 +1,6 @@
-import Header from '@app/(site)/components/Header';
-import Footer from '@app/(site)/components/Footer';
+import type { Metadata } from 'next';
+import { Footer } from '@components/features/footer';
+import { Header } from '@components/features/header-nav';
 import { layout } from '@app/(site)/_lib/ui';
 import { BreadcrumbJsonLd, TechArticleJsonLd } from '@components/SeoJsonLd';
 import MethodHero from '@components/features/method/MethodHero';
@@ -8,10 +9,11 @@ import MethodTrustLayer from '@components/features/method/MethodTrustLayer';
 import MethodHowItWorks from '@components/blocks/MethodHowItWorks';
 import MethodPillars from '@components/blocks/MethodPillars';
 import { getHeaderUserState } from '@lib/auth/userState.server';
-import { localeHomePath } from '@lib/routing/legalPath';
+import { localeHomePath } from '@lib/shared/routing/legal-path';
 import { methodPath } from '@lib/shared/routing/method-path';
 import { resolveBaseUrl } from '@lib/seo/shared';
 import { buildMethodTechArticleSchema } from '@lib/shared/method/article-schema';
+import { buildMethodMetadata } from '@lib/shared/seo/method-metadata';
 import type { SupportedLocale } from '@/next-intl.locales';
 import { headers } from 'next/headers';
 import { getTranslations, unstable_setRequestLocale } from 'next-intl/server';
@@ -21,6 +23,11 @@ export const runtime = 'nodejs';
 type MethodPageProps = {
   params: Promise<{ locale: SupportedLocale }>;
 };
+
+export async function generateMetadata({ params }: MethodPageProps): Promise<Metadata> {
+  const { locale } = await params;
+  return buildMethodMetadata({ locale });
+}
 
 export default async function MethodPage({ params }: MethodPageProps) {
   const { locale } = await params;

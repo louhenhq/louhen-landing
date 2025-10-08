@@ -29,9 +29,9 @@ export const badges = {
 };
 
 export const surfaces = {
-  subtle: 'bg-[var(--semantic-color-bg-surface-subtle, var(--color-light-surface, var(--semantic-color-bg-card)))]',
+  subtle: 'bg-bg-subtle',
 };
 
 export const shadows = {
-  soft: 'shadow-[0_24px_48px_-28px_rgba(15,23,42,0.35)]',
+  soft: 'shadow-card',
 };

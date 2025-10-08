@@ -5,6 +5,9 @@ import WaitlistConfirmEmail from '@/emails/WaitlistConfirmEmail';
 import WaitlistResendEmail from '@/emails/WaitlistResendEmail';
 
 const supportEmail = process.env.RESEND_REPLY_TO?.trim();
+const supportEmailProps: { supportEmail: string } | undefined = supportEmail
+  ? { supportEmail }
+  : undefined;
 
 type RenderOptions = {
   confirmUrl: string;
@@ -22,9 +25,13 @@ async function renderEmail(element: React.ReactElement): Promise<RenderResult> {
 }
 
 export async function renderWaitlistConfirm({ confirmUrl }: RenderOptions): Promise<RenderResult> {
-  return renderEmail(<WaitlistConfirmEmail confirmUrl={confirmUrl} supportEmail={supportEmail} />);
+  return renderEmail(
+    <WaitlistConfirmEmail confirmUrl={confirmUrl} {...(supportEmailProps ?? {})} />,
+  );
 }
 
 export async function renderWaitlistResend({ confirmUrl }: RenderOptions): Promise<RenderResult> {
-  return renderEmail(<WaitlistResendEmail confirmUrl={confirmUrl} supportEmail={supportEmail} />);
+  return renderEmail(
+    <WaitlistResendEmail confirmUrl={confirmUrl} {...(supportEmailProps ?? {})} />,
+  );
 }
