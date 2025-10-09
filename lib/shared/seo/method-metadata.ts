@@ -2,10 +2,10 @@ import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { isPrelaunch } from '@lib/env/prelaunch';
 import { methodPath } from '@lib/shared/routing/method-path';
-import { hreflangMapFor, makeCanonical, resolveBaseUrl } from '@lib/seo/shared';
+import { getSiteOrigin, hreflangMapFor, makeCanonical } from '@lib/seo/shared';
+import { buildOgImageEntry } from '@lib/shared/og/builder';
 import { type SupportedLocale } from '@/next-intl.locales';
 
-const OG_IMAGE_PATH = '/opengraph-image';
 const DEFAULT_METHOD_TITLE = 'Method – Louhen';
 const DEFAULT_METHOD_DESCRIPTION = 'How Louhen works: fit-first guidance, trusted sizing, and effortless discovery.';
 
@@ -14,11 +14,10 @@ type BuildMethodMetadataParams = {
 };
 
 export async function buildMethodMetadata({ locale }: BuildMethodMetadataParams): Promise<Metadata> {
-  const baseUrl = resolveBaseUrl();
+  const baseUrl = getSiteOrigin();
   const canonicalPath = methodPath(locale);
   const canonicalUrl = makeCanonical(canonicalPath, baseUrl);
   const hreflang = hreflangMapFor(methodPath, baseUrl);
-  const imageUrl = `${baseUrl}${OG_IMAGE_PATH}?locale=${locale}`;
 
   let title = DEFAULT_METHOD_TITLE;
   let description = DEFAULT_METHOD_DESCRIPTION;
@@ -43,6 +42,12 @@ export async function buildMethodMetadata({ locale }: BuildMethodMetadataParams)
   const robots = isPrelaunch()
     ? { index: false, follow: false }
     : undefined;
+  const ogImage = buildOgImageEntry({
+    locale,
+    surface: 'method',
+    title,
+    description,
+  });
 
   return {
     title,
@@ -57,13 +62,13 @@ export async function buildMethodMetadata({ locale }: BuildMethodMetadataParams)
       url: canonicalUrl,
       type: 'article',
       locale,
-      images: [imageUrl],
+      images: [ogImage],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: [imageUrl],
+      images: [ogImage.url],
     },
     robots,
   } satisfies Metadata;

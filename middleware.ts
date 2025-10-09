@@ -1,12 +1,26 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import createIntlMiddleware from 'next-intl/middleware';
 import { config as intlRoutingConfig } from './next-intl.config';
+import {
+  FULL_LOCALES,
+  SHORT_TO_FULL,
+  DEFAULT_LOCALE,
+  buildPathForLocale,
+  resolveLocaleFromAcceptLanguage,
+  type AppLocale,
+} from '@/lib/i18n/locales';
+import { extractLocaleFromCookies } from '@/lib/intl/getLocale';
+
+const intlMiddleware = createIntlMiddleware({
+  ...intlRoutingConfig,
+  localePrefix: 'as-needed',
+});
 
 const SUPPORTED_LOCALE_VALUES = new Set(FULL_LOCALES.map((value) => value.toLowerCase()));
-const ALREADY_LOCALIZED = /^\/(en-de|de-de)(?:\/|$)/;
+const ALREADY_LOCALIZED = /^\/([a-z]{2}-[a-z]{2})(?=\/|$)/i;
+const SHORT_LOCALE_SEGMENT = /^\/([a-z]{2})(?=\/|$)/i;
 const allowIndexOverride = process.env.LH_ALLOW_INDEX === 'true';
 
-const supportedLocales = new Set(intlRoutingConfig.locales);
 const HSTS_MAX_AGE_SECONDS = 60 * 60 * 24 * 730; // 2 years
 const REPORT_ONLY_ENV =
   process.env.NEXT_PUBLIC_CSP_REPORT_ONLY === '1' || process.env.CSP_REPORT_ONLY === '1';
@@ -46,21 +60,12 @@ function buildCsp({ nonce, isDev }: BuildCspOptions) {
     .join('; ');
 }
 
-function shouldRunIntl(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  if (!pathname || pathname === '') return true;
-  if (pathname === '/') return true;
-  if (pathname.startsWith('/_next')) return false;
-  if (pathname.startsWith('/api')) return false;
-  if (pathname.includes('.', 1)) return false;
-  const [firstSegment] = pathname.split('/').filter(Boolean);
-  if (!firstSegment) return true;
-  return supportedLocales.has(firstSegment as (typeof intlRoutingConfig.locales)[number]);
-}
-
 function shouldApplySecurityHeaders(request: NextRequest) {
   const { pathname } = request.nextUrl;
   if (pathname.startsWith('/_next/static') || pathname.startsWith('/_next/image')) {
+    return false;
+  }
+  if (pathname.startsWith('/api')) {
     return false;
   }
   if (pathname.endsWith('.ico') || pathname.endsWith('.png') || pathname.endsWith('.jpg') || pathname.endsWith('.jpeg')) {
@@ -113,28 +118,64 @@ function getHostname(request: NextRequest) {
   return request.nextUrl.hostname?.toLowerCase() ?? '';
 }
 
+function isLoopbackHost(hostname: string | null | undefined) {
+  if (!hostname) {
+    return false;
+  }
+  const normalized = hostname.toLowerCase();
+  return normalized === 'localhost' || normalized === '127.0.0.1' || normalized === '[::1]' || normalized === '::1';
+}
+
+function normalizeAppLocale(locale: string | null | undefined): AppLocale {
+  if (!locale) {
+    return DEFAULT_LOCALE.value;
+  }
+  const lower = locale.toLowerCase();
+  if (SUPPORTED_LOCALE_VALUES.has(lower)) {
+    return lower as AppLocale;
+  }
+  const mapped = SHORT_TO_FULL[lower];
+  if (mapped) {
+    return mapped;
+  }
+  return DEFAULT_LOCALE.value;
+}
+
+function resolvePreferredLocale(request: NextRequest): AppLocale {
+  const cookieHeader = request.headers.get('cookie');
+  const cookieLocale = extractLocaleFromCookies(cookieHeader);
+  if (cookieLocale) {
+    return normalizeAppLocale(cookieLocale);
+  }
+
+  const headerLocale = resolveLocaleFromAcceptLanguage(request.headers.get('accept-language'));
+  if (headerLocale) {
+    return headerLocale;
+  }
+
+  return DEFAULT_LOCALE.value;
+}
+
+function buildRedirectUrl(request: NextRequest, locale: AppLocale) {
+  const url = request.nextUrl.clone();
+  const pathname = request.nextUrl.pathname || '/';
+  url.pathname = buildPathForLocale(locale, pathname);
+  return url;
+}
+
+function applySecurityHeaders(request: NextRequest, response: NextResponse, nonce: string) {
+  if (!shouldApplySecurityHeaders(request)) {
+    return response;
+  }
+
   const isProdLike =
     process.env.VERCEL_ENV === 'production' ||
     (!process.env.VERCEL_ENV && process.env.NODE_ENV === 'production');
   const isDev = !isProdLike;
   const hostname = request.nextUrl.hostname;
-  const isLocalhost =
-    hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]' || hostname === '::1';
-
-  const response = shouldRunIntl(request)
-    ? intlMiddleware(request)
-    : NextResponse.next({
-        request: {
-          headers: request.headers,
-        },
-      });
-
-  if (!shouldApplySecurityHeaders(request)) {
-    return response;
-  }
+  const isLocalhost = isLoopbackHost(hostname);
 
   const shouldSetCsp = shouldAttachCsp(request, response);
-
   if (shouldSetCsp) {
     const csp = buildCsp({ nonce, isDev });
     const enforceCsp = isProdLike || !REPORT_ONLY_ENV;
@@ -168,38 +209,43 @@ export function middleware(request: NextRequest) {
   const nonce = generateNonce();
   request.headers.set('x-csp-nonce', nonce);
 
-  const pathname = request.nextUrl.pathname;
   const hostname = getHostname(request);
   const isLocalhost = isLoopbackHost(hostname);
   const shouldAllowIndex = allowIndexOverride || isLocalhost;
-
   if (shouldAllowIndex) {
     request.headers.set('x-allow-robots', 'true');
   }
 
-  if (ALREADY_LOCALIZED.test(pathname)) {
+  const { pathname } = request.nextUrl;
+
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/api') ||
+    pathname.includes('.', 1)
+  ) {
     const response = NextResponse.next();
-
-    if (shouldAllowIndex) {
-      response.headers.set('x-robots-tag', 'index, follow');
-    }
-
-    if (!shouldHandleHtml(request)) {
-      return response;
-    }
-
-    const csp = buildCsp(nonce);
-    response.headers.set('Content-Security-Policy', csp);
-    return applySecurityHeaders(response, nonce, isLocalhost);
+    return applySecurityHeaders(request, response, nonce);
   }
 
-  const shortLocaleMatch = pathname.match(/^\/([A-Za-z]{2})(?=\/|$)/);
-  if (shortLocaleMatch) {
-    const shortLocale = shortLocaleMatch[1].toLowerCase();
+  const localizedMatch = pathname.match(ALREADY_LOCALIZED);
+  if (localizedMatch) {
+    const locale = localizedMatch[1]?.toLowerCase() ?? '';
+    if (SUPPORTED_LOCALE_VALUES.has(locale)) {
+      const response = intlMiddleware(request);
+      if (shouldAllowIndex) {
+        response.headers.set('x-robots-tag', 'index, follow');
+      }
+      return applySecurityHeaders(request, response, nonce);
+    }
+  }
+
+  const shortMatch = pathname.match(SHORT_LOCALE_SEGMENT);
+  if (shortMatch) {
+    const shortLocale = shortMatch[1]?.toLowerCase() ?? '';
     const canonical = SHORT_TO_FULL[shortLocale];
     if (canonical) {
       const url = request.nextUrl.clone();
-      const remainder = pathname.slice(shortLocaleMatch[0].length) || '/';
+      const remainder = pathname.slice(shortMatch[0].length) || '/';
       url.pathname = `/${canonical}${remainder.startsWith('/') ? remainder : `/${remainder}`}`;
       const response = NextResponse.redirect(url, 308);
       if (shouldAllowIndex) {
@@ -210,8 +256,8 @@ export function middleware(request: NextRequest) {
   }
 
   const targetLocale = resolvePreferredLocale(request);
-  const url = buildRedirectUrl(request, targetLocale);
-  const response = NextResponse.redirect(url, 308);
+  const redirectUrl = buildRedirectUrl(request, targetLocale);
+  const response = NextResponse.redirect(redirectUrl, 308);
   if (shouldAllowIndex) {
     response.headers.set('x-robots-tag', 'index, follow');
   }

@@ -1,23 +1,17 @@
+import { getSiteOrigin } from '@/lib/env/site-origin';
 import { defaultLocale, locales, type SupportedLocale } from '@/next-intl.locales';
-
-const FALLBACK_SITE_URL = 'https://louhen-landing.vercel.app';
-
-export function resolveBaseUrl(): string {
-  const raw = process.env.APP_BASE_URL?.trim() || process.env.NEXT_PUBLIC_SITE_URL?.trim() || FALLBACK_SITE_URL;
-  return raw.replace(/\/$/, '');
-}
 
 function ensureLeadingSlash(path: string): string {
   return path.startsWith('/') ? path : `/${path}`;
 }
 
-export function makeCanonical(path: string, baseUrl: string = resolveBaseUrl()): string {
+export function makeCanonical(path: string, baseUrl: string = getSiteOrigin()): string {
   return `${baseUrl}${ensureLeadingSlash(path)}`;
 }
 
 export function hreflangMapFor(
   pathBuilder: (locale: SupportedLocale) => string,
-  baseUrl: string = resolveBaseUrl(),
+  baseUrl: string = getSiteOrigin(),
 ): Record<string, string> {
   const entries: Record<string, string> = {};
 
@@ -29,3 +23,5 @@ export function hreflangMapFor(
 
   return entries;
 }
+
+export { getSiteOrigin };

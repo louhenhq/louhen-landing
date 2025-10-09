@@ -12,6 +12,13 @@ High-level map of routes, data flow, environment setup, security, observability,
 - **Stack baseline:** Next.js 15 App Router, TypeScript strict mode, Tailwind + Style Dictionary tokens, consent-gated analytics, Firebase Admin, Resend, hCaptcha.
 - **TypeScript configs:** `tsconfig.json` (dev superset including tests, Playwright, scripts) and `tsconfig.build.json` (app build subset) share path aliases `@app/*`, `@components/*`, `@lib/*`, `@tests/*`.
 
+### Consent-First Analytics Modules
+- `lib/shared/analytics/client.ts` — client-side queue + flush abstraction; no vendor SDK code or network calls execute until consent is `granted`.
+- `lib/shared/consent/api.ts` — single source of truth for reading/updating consent state and subscribing to changes.
+- `components/ConsentBanner.tsx` — exclusive entry point for users to grant or deny analytics; other surfaces (header, footer, forms) listen only.
+- Data flow: `ConsentBanner` → `lib/shared/consent/api.ts` → lazy analytics bootstrap → buffered `page_view` flush.
+- Error handling: analytics bootstrap treats network failures as silent; retries stay capped (document limit per vendor) and must never block UI threads or surface fatal errors.
+
 ### Tokens in the build
 - Runtime CSS for tokens is imported once in `app/layout.tsx` via `./styles/tokens.css` (which in turn pulls the light/dark/high-contrast bundles emitted by `@louhen/design-tokens`). No other module should import these CSS files.
 - Tailwind maps token scales through `tailwind.config.ts` by reading the generated CSS variables. The config scans `./app`, `./components`, `./pages`, and `./lib` for class usage; add new directories here if token-aware classes appear elsewhere.

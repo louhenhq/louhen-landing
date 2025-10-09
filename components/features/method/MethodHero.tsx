@@ -2,34 +2,40 @@
 
 import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { cn, layout, text } from '@/app/(site)/_lib/ui';
+import { cn, text } from '@/app/(site)/_lib/ui';
+import { Button, Card } from '@/components/ui';
 import { track } from '@lib/clientAnalytics';
+import { useMethodExperience } from './MethodExperienceProvider';
 
 type MethodHeroProps = {
-  locale: SupportedLocale;
-  childName: string | null;
+  childName?: string | null;
 };
 
-export default function MethodHero({ locale, childName }: MethodHeroProps) {
+export default function MethodHero({ childName = null }: MethodHeroProps = {}) {
   const t = useTranslations('method.hero');
-  const { registerCtaInteraction, route } = useMethodExperience();
+  const { registerCtaInteraction, route, locale } = useMethodExperience();
 
   useEffect(() => {
     void track('page_view', { page: route, path: route });
   }, [locale, route]);
 
-  const subtitle = childName ? t('subtitle_personalized', { name: childName }) : t('subtitle_generic');
+  const subtitle = childName
+    ? t('subtitle_personalized', { name: childName })
+    : t('subtitle_generic');
 
   return (
     <section
+      data-testid="method-hero"
       data-ll="method-hero"
-      className={cn(layout.section, 'bg-bg')}
+      className="bg-bg"
       aria-labelledby="method-hero-title"
     >
-      <div className={cn(layout.container, 'flex flex-col items-center gap-xl text-center')}>
-        <div className="flex max-w-3xl flex-col gap-md">
+      <div className="mx-auto flex w-full max-w-[min(100%,var(--layout-max-width))] flex-col items-center gap-2xl px-gutter py-3xl text-center">
+        <div className="flex max-w-3xl flex-col items-center gap-md">
           {t('eyebrow') ? (
-            <span className={cn(text.eyebrow, 'text-brand-primary/80')}>{t('eyebrow')}</span>
+            <span className="inline-flex items-center gap-xs rounded-pill border border-border bg-bg px-sm py-xs text-meta font-medium uppercase tracking-[0.32em] text-brand-primary">
+              {t('eyebrow')}
+            </span>
           ) : null}
           <h1 id="method-hero-title" className={cn(text.hero, 'text-balance')}>
             {t('title')}
@@ -44,17 +50,25 @@ export default function MethodHero({ locale, childName }: MethodHeroProps) {
             href={`/${locale}/waitlist`}
             prefetch={false}
             onClick={() => registerCtaInteraction('hero')}
+            data-testid="method-hero-cta"
+            data-ll="method-hero-cta"
           >
             {t('cta')}
           </Button>
           <p className="max-w-2xl text-body-sm text-text-muted">{t('trustLine')}</p>
         </div>
-        <div
-          className="relative h-44 w-full max-w-3xl overflow-hidden rounded-3xl border border-border bg-bg-card shadow-card"
+        <Card
           aria-hidden="true"
+          className="relative h-48 w-full max-w-3xl overflow-hidden border border-border bg-bg-card px-0 py-0"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-brand-primary/20 via-brand-primary/10 to-transparent" />
-        </div>
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                'linear-gradient(140deg, color-mix(in srgb, var(--color-brand-primary) 20%, transparent) 0%, color-mix(in srgb, var(--color-brand-primary) 10%, transparent) 55%, transparent 100%)',
+            }}
+          />
+        </Card>
       </div>
     </section>
   );

@@ -5,9 +5,10 @@ import { cookies, headers } from 'next/headers'
 import { fraunces, inter } from './(site)/fonts'
 import ThemeInit from '@/components/ThemeInit'
 import { ConsentProvider } from '@/components/ConsentProvider'
+import AnalyticsInit from '@/components/AnalyticsInit'
 import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/SeoJsonLd'
 import { SITE_NAME } from '@/constants/site'
-import { getServerConsent } from '@/lib/consent/state'
+import { parseConsentFromCookie } from '@/lib/shared/consent/api'
 import { NonceProvider } from '@/lib/csp/nonce-context'
 import { CONTRAST_COOKIE_NAME, THEME_COOKIE_NAME } from '@/lib/theme/constants'
 import tokens from '@louhen/design-tokens/build/web/tokens.json' assert { type: 'json' }
@@ -18,6 +19,8 @@ import {
   ThemePreference,
 } from '@/lib/theme/constants'
 import { DEFAULT_LOCALE } from '@/lib/i18n/locales'
+import { buildAlternateLanguageMap } from '@/lib/i18n/metadata'
+import { buildOgImageEntry } from '@lib/shared/og/builder'
 
 const tokenValues = tokens as Record<string, unknown> & {
   color?: {
@@ -50,6 +53,13 @@ const baseUrl = rawBaseUrl.replace(/\/$/, '')
 const metadataBaseUrl = `${baseUrl}/`
 const defaultDescription =
   'Join the Louhen waitlist and get smarter sizing, curated looks, and fit feedback that improves with every try.'
+const defaultTitle = 'Louhen — Personal style. Effortless fit.'
+const ogImage = buildOgImageEntry({
+  locale: DEFAULT_LOCALE.value,
+  surface: 'home',
+  title: defaultTitle,
+  description: defaultDescription,
+})
 
 function getCookieValue(header: string | null | undefined, name: string): string | null {
   if (!header) return null;
@@ -60,7 +70,7 @@ function getCookieValue(header: string | null | undefined, name: string): string
 export const metadata: Metadata = {
   metadataBase: new URL(metadataBaseUrl),
   title: {
-    default: 'Louhen — Personal style. Effortless fit.',
+    default: defaultTitle,
     template: '%s — Louhen',
   },
   description: defaultDescription,
@@ -78,26 +88,19 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: 'website',
-    title: 'Louhen — Personal style. Effortless fit.',
+    title: defaultTitle,
     description: defaultDescription,
     url: '/',
     siteName: SITE_NAME,
-    images: [
-      {
-        url: '/opengraph-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'Louhen — Personal style. Effortless fit.',
-      },
-    ],
+    images: [ogImage],
   },
   twitter: {
     card: 'summary_large_image',
     site: '@louhenhq',
     creator: '@louhenhq',
-    title: 'Louhen — Personal style. Effortless fit.',
+    title: defaultTitle,
     description: defaultDescription,
-    images: ['/opengraph-image.png'],
+    images: [ogImage.url],
   },
 }
 
@@ -110,9 +113,9 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const consentHeaders = await headers();
-  const consent = getServerConsent(consentHeaders);
   const nonce = consentHeaders.get('x-csp-nonce') ?? undefined;
   const cookieHeader = consentHeaders.get('cookie');
+  const consent = parseConsentFromCookie(cookieHeader);
   const cookieTheme = getCookieValue(cookieHeader, THEME_COOKIE_NAME);
   const cookieContrast = getCookieValue(cookieHeader, CONTRAST_COOKIE_NAME);
   const initialThemeAttr = cookieTheme === 'light' || cookieTheme === 'dark' ? cookieTheme : undefined;
@@ -157,9 +160,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body className="min-h-screen antialiased font-sans">
         <NonceProvider nonce={nonce}>
-          <ConsentProvider initialConsent={consent}>
+          <ConsentProvider initialState={consent}>
             {/* Apply theme/contrast on first paint + react to system changes */}
             <ThemeInit />
+            <AnalyticsInit endpoint="/api/track" />
             {children}
           </ConsentProvider>
         </NonceProvider>

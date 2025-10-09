@@ -5,7 +5,7 @@ import { getTranslations, unstable_setRequestLocale } from 'next-intl/server';
 import { BreadcrumbJsonLd } from '@/components/SeoJsonLd';
 import { legalPath, localeHomePath } from '@lib/shared/routing/legal-path';
 import { buildLegalMetadata } from '@/lib/seo/legalMetadata';
-import { makeCanonical, resolveBaseUrl } from '@/lib/seo/shared';
+import { getSiteOrigin, makeCanonical } from '@/lib/seo/shared';
 import type { SupportedLocale } from '@/next-intl.locales';
 
 export const runtime = 'nodejs';
@@ -50,7 +50,7 @@ export default async function TermsPage({ params }: TermsPageProps) {
   ]);
   const headerStore = await headers();
   const nonce = headerStore.get('x-csp-nonce') ?? undefined;
-  const baseUrl = resolveBaseUrl();
+  const baseUrl = getSiteOrigin();
   let homeLabel = locale.startsWith('de') ? 'Startseite' : 'Home';
   if (common) {
     try {

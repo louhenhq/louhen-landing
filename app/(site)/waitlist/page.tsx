@@ -3,8 +3,9 @@ import { createTranslator } from 'next-intl';
 import { WaitlistForm } from '@components/features/waitlist';
 import { loadWaitlistMessages } from '@/app/(site)/waitlist/_lib/messages';
 import { WAITLIST_URGENCY_COPY_ENABLED } from '@/lib/flags';
-import { hreflangMapFor, makeCanonical, resolveBaseUrl } from '@/lib/seo/shared';
+import { getSiteOrigin, hreflangMapFor, makeCanonical } from '@/lib/seo/shared';
 import { isPrelaunch } from '@/lib/env/prelaunch';
+import { buildOgImageEntry } from '@lib/shared/og/builder';
 import type { SupportedLocale } from '@/next-intl.locales';
 
 export const dynamic = 'force-dynamic';
@@ -15,15 +16,20 @@ export async function generateMetadata(): Promise<Metadata> {
   const t = createTranslator({ locale, messages, namespace: 'waitlist' });
   const title = t('title');
   const description = t('subtitle');
-  const baseUrl = resolveBaseUrl();
+  const baseUrl = getSiteOrigin();
   const canonicalPath = '/waitlist';
   const canonicalUrl = makeCanonical(canonicalPath, baseUrl);
   const waitlistPathForLocale: (locale: SupportedLocale) => string = () => canonicalPath;
   const hreflang = hreflangMapFor(waitlistPathForLocale, baseUrl);
-  const imageUrl = `${baseUrl}/opengraph-image?locale=${locale}`;
   const robots = isPrelaunch()
     ? { index: false, follow: false }
     : undefined;
+  const ogImage = buildOgImageEntry({
+    locale,
+    surface: 'waitlist',
+    title,
+    description,
+  });
 
   return {
     title,
@@ -37,13 +43,13 @@ export async function generateMetadata(): Promise<Metadata> {
       title,
       description,
       url: canonicalUrl,
-      images: [imageUrl],
+      images: [ogImage],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: [imageUrl],
+      images: [ogImage.url],
     },
   };
 }

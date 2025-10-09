@@ -4,11 +4,13 @@ Defines how header interactions are tracked while honouring GDPR requirements. P
 
 ---
 
+> Global consent + analytics policy lives in [/CONTEXT/privacy_analytics.md](privacy_analytics.md). This page documents header-specific event contracts until the new bootstrap lands.
+
 ## Consent Gating
-- Header must read consent via `useConsent()` (preferred) or `track()` which already checks `louhen_consent` cookie. Do not bypass consent when emitting events.
+- Header must read consent via `useConsent()` (preferred) or `track()` which already checks the shared consent store (`ll_consent` cookie). Do not bypass consent when emitting events.
 - Until analytics consent is granted, queue events locally; flush automatically once the user accepts. Never send partial payloads without consent.
 - Consent badge reflects current state. Clicking it opens the manager rather than toggling analytics directly (for audit purposes).
-- Cookie contract: `louhen_consent` stores `{ analytics, marketing, timestamp }`, `SameSite=Lax`, `Secure` in production, 1-year max-age. Clearing consent removes the cookie and dispatches `louhen:consent` with `analytics=false` so gates reset immediately.
+- Cookie contract: `ll_consent` stores `v1:<state>` (`state` ∈ `granted` | `denied`), `SameSite=Lax`, `Secure` in production, 12-month max-age. Clearing consent removes the cookie and dispatches `louhen:consent` with `analytics=false` so gates reset immediately.
 - Client helpers (`lib/clientAnalytics.ts`) handle consent gating and queueing automatically (with `canTrack()` still available for manual guards); when consent flips to denied, pending queues are cleared and the dedupe cache is reset.
 
 ---
@@ -57,7 +59,7 @@ Include UTM snapshot (from `track()` helper) automatically; do not manually appe
 ---
 
 ## Storage & Cookies
-- Locale preference lives in `NEXT_LOCALE` cookie managed by `next-intl`. Consent cookie remains `louhen_consent`; header must not overwrite it.
+- Locale preference lives in `NEXT_LOCALE` cookie managed by `next-intl`. Consent cookie remains `ll_consent`; header must not overwrite it.
 - No new cookies may be introduced by the header without DPO approval. Document any additions here and in `CONTEXT/legal.md`.
 
 ---

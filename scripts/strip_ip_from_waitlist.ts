@@ -81,7 +81,7 @@ async function main() {
   const pageLimit = 1000; // read page size (separate from write batch size)
   let last: FirebaseFirestore.QueryDocumentSnapshot | null = null;
 
-  // eslint-disable-next-line no-console
+   
   console.log(`[strip_ip] Project: ${projectId} | DRY_RUN=${dryRun} | BATCH_SIZE=${batchSize}`);
 
   while (true) {
@@ -122,12 +122,12 @@ async function main() {
     if (snap.size < pageLimit) break;
   }
 
-  // eslint-disable-next-line no-console
+   
   console.log(`[strip_ip] Processed ${processed} docs; removed ip from ${updated} docs; committed ${committed} updates.`);
 }
 
 main().catch((e) => {
-  // eslint-disable-next-line no-console
+   
   console.error(e);
   process.exitCode = 1;
 });

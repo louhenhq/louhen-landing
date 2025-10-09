@@ -11,9 +11,12 @@ import MethodPillars from '@components/blocks/MethodPillars';
 import { getHeaderUserState } from '@lib/auth/userState.server';
 import { localeHomePath } from '@lib/shared/routing/legal-path';
 import { methodPath } from '@lib/shared/routing/method-path';
-import { resolveBaseUrl } from '@lib/seo/shared';
+import { getSiteOrigin } from '@lib/seo/shared';
+import { resolveOgImageUrl } from '@lib/shared/og/builder';
 import { buildMethodTechArticleSchema } from '@lib/shared/method/article-schema';
 import { buildMethodMetadata } from '@lib/shared/seo/method-metadata';
+import { getPreOnboardingDraft } from '@lib/firestore/waitlist';
+import { readWaitlistSession } from '@lib/waitlist/session';
 import type { SupportedLocale } from '@/next-intl.locales';
 import { headers } from 'next/headers';
 import { getTranslations, unstable_setRequestLocale } from 'next-intl/server';
@@ -23,6 +26,9 @@ export const runtime = 'nodejs';
 type MethodPageProps = {
   params: Promise<{ locale: SupportedLocale }>;
 };
+
+const FALLBACK_METHOD_TITLE = 'Method – Louhen';
+const FALLBACK_METHOD_DESCRIPTION = 'How Louhen works: fit-first guidance, trusted sizing, and effortless discovery.';
 
 export async function generateMetadata({ params }: MethodPageProps): Promise<Metadata> {
   const { locale } = await params;
@@ -46,7 +52,7 @@ export default async function MethodPage({ params }: MethodPageProps) {
     // fall back to locale heuristic defined above
   }
 
-  const baseUrl = resolveBaseUrl();
+  const baseUrl = getSiteOrigin();
   const localizedPath = methodPath(locale);
   const articleUrl = `${baseUrl}${localizedPath}`;
   const homeUrl = `${baseUrl}${localeHomePath(locale)}`;
@@ -67,15 +73,35 @@ export default async function MethodPage({ params }: MethodPageProps) {
       .filter((value): value is string => typeof value === 'string' && value.trim().length > 0);
   })();
 
+  let schemaTitle = FALLBACK_METHOD_TITLE;
+  let schemaDescription = FALLBACK_METHOD_DESCRIPTION;
+  try {
+    schemaTitle = t('seo.title');
+  } catch {
+    // fallback handled above
+  }
+  try {
+    schemaDescription = t('seo.description');
+  } catch {
+    // fallback handled above
+  }
+
+  const ogImageUrl = resolveOgImageUrl({
+    locale,
+    surface: 'method',
+    title: schemaTitle,
+    description: schemaDescription,
+  });
+
   const schema = buildMethodTechArticleSchema({
     url: articleUrl,
     headline: t('hero.title'),
-    description: t('seo.description'),
+    description: schemaDescription,
     locale,
     sections: [...pillarTitles, ...howTitles, t('trust.headline'), t('faqTeaser.title')],
     baseUrl,
     brandName: 'Louhen',
-    image: `${baseUrl}/opengraph-image.png`,
+    image: ogImageUrl,
     datePublished: '2025-01-15T00:00:00.000Z',
     dateModified: '2025-01-15T00:00:00.000Z',
   });
@@ -97,7 +123,7 @@ export default async function MethodPage({ params }: MethodPageProps) {
       />
       <TechArticleJsonLd schema={schema} nonce={nonce} />
       <Header userState={headerUserState} />
-      <main id="main-content">
+      <main id="main-content" role="main" aria-labelledby="method-hero-title">
         <MethodHero />
         <MethodPillars />
         <MethodHowItWorks />

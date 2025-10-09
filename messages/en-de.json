@@ -1,1 +1,12 @@
-{}
+{
+  "og": {
+    "default": {
+      "title": "Louhen Germany — Personal style. Effortless fit.",
+      "description": "Adaptive sizing tuned for German families with podiatrist-backed comfort in every pair."
+    },
+    "invited": {
+      "title": "A Louhen friend in Germany invited you",
+      "description": "Join through their link to unlock early rewards and precise German sizing guidance."
+    }
+  }
+}

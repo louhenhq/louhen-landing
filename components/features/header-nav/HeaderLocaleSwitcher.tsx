@@ -7,6 +7,7 @@ import { buildLocaleHref, resolveTargetLocale } from '@lib/intl/localePath';
 import { locales, type SupportedLocale } from '@/next-intl.locales';
 import { recordHeaderEvent, type HeaderEventContext } from '@lib/analytics/header';
 import type { HeaderSurface } from '@lib/analytics.schema';
+import { cn, focusRing } from '@app/(site)/_lib/ui';
 
 type HeaderLocaleSwitcherProps = {
   variant: 'desktop' | 'mobile';
@@ -79,8 +80,14 @@ export default function HeaderLocaleSwitcher({ variant, analyticsContext, surfac
     : 'text-sm font-medium text-text';
 
   const selectClass = variant === 'desktop'
-    ? 'min-w-[8rem] rounded-pill border border-border bg-bg px-sm py-xs text-sm text-text disabled:opacity-70'
-    : 'w-full rounded-pill border border-border bg-bg px-sm py-xs text-sm text-text disabled:opacity-70';
+    ? cn(
+        'min-w-[8rem] rounded-pill border border-border bg-bg px-sm py-xs text-sm text-text disabled:opacity-70',
+        focusRing
+      )
+    : cn(
+        'w-full rounded-pill border border-border bg-bg px-sm py-xs text-sm text-text disabled:opacity-70',
+        focusRing
+      );
 
   return (
     <form

@@ -14,7 +14,7 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
 | Tailwind + Style Dictionary tokens | Design tokens remain single source; Tailwind consumes generated variables to keep brand parity. | 2025-10-09 | [performance.md](performance.md) · [naming.md](naming.md) |
 | BCP-47 routing & default-locale rule | Every page lives under `app/(site)/[locale]/…`; default locale must call `unstable_setRequestLocale` to avoid flashes. | 2025-10-09 | [i18n.md](i18n.md) · [naming.md](naming.md) · [rename_map.md](rename_map.md) |
 | CSP nonce lifecycle | Single SSR nonce shared across scripts (ThemeInit, JSON-LD); dev-only relaxations documented. | 2025-10-09 | [security.md](security.md) · [seo.md](seo.md) |
-| Consent-gated analytics | No third-party CMP; custom consent store gates analytics/marketing payloads before firing. | 2025-10-09 | [analytics_privacy.md](analytics_privacy.md) · [security.md](security.md) |
+| Consent-gated analytics | No third-party CMP; custom consent store gates analytics/marketing payloads before firing. | 2025-10-09 | [privacy_analytics.md](privacy_analytics.md) · [security.md](security.md) |
 | Testing pyramid: unit / e2e / axe | Unit for logic, Playwright e2e for flows, axe for accessibility; selectors via `data-ll`. | 2025-10-09 | [testing.md](testing.md) |
 | Lighthouse budgets in CI | Keep `/` and key flows ≥90/95/95/95 (P/A/SEO/BP); CI uploads artifacts and blocks regressions. | 2025-10-09 | [performance.md](performance.md) · [architecture.md](architecture.md) |
 | semantic-release branches (staging/production) | Conventional commits drive prereleases on `staging` (channel `next`) and stable tags on `production`; only staging→production promotes releases. | 2025-10-09 | [release.md](release.md) |
@@ -154,5 +154,9 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
   - Adjust → `/CONTEXT/design_system.md`, `/CONTEXT/architecture.md`, `/CONTEXT/testing.md`, `/CONTEXT/performance.md`, and the PR template now codify that web styling must rely on token-backed utilities; arbitrary Tailwind color/shadow utilities and raw hex/rgb/hsl values are disallowed. Dark/high-contrast variants stay attribute-driven (`data-theme`, `data-contrast`).
   - Add → Future automation planned for linting arbitrary utilities; reviewers must tick the new design-system checklist before merge.
   - Notes → Implementation slices must extend Tailwind with token-backed entries when new surfaces appear; theme switching must never re-import token CSS.
+- **2025-10-09 — Analytics Consent Policy (Owner: Privacy & Analytics)**  
+  - Finalised consent storage: `ll_consent=v1:<state>` first-party cookie with 12-month max-age; revocation deletes storage immediately.  
+  - Default remains analytics-off: no network calls, cookies, or preconnect/preload to analytics domains before consent is `granted`.  
+  - Documented runtime `connect-src` opt-in and nonce requirements in `/CONTEXT/privacy_analytics.md`, `/CONTEXT/security.md`, `/CONTEXT/testing.md`, and the PR checklist to enforce validation coverage.
 
 ---

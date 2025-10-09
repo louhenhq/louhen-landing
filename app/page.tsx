@@ -17,6 +17,7 @@ import {
   buildCanonicalUrl,
   resolveSiteBaseUrl,
 } from '@/lib/i18n/metadata';
+import { buildOgImageEntry } from '@lib/shared/og/builder';
 import { LOCALE_COOKIE } from '@/lib/theme/constants';
 import { SITE_NAME } from '@/constants/site';
 const BOT_REGEX = /(bot|crawler|spider|bingpreview|facebookexternalhit|pinterest|embedly|quora link preview)/i;
@@ -47,8 +48,15 @@ export async function generateMetadata({ searchParams }: MetadataArgs): Promise<
   const canonicalUrl = buildCanonicalUrl(DEFAULT_LOCALE.value, '/');
   const languages = buildAlternateLanguageMap('/');
 
+  const baseOgImage = buildOgImageEntry({
+    locale: DEFAULT_LOCALE.value,
+    surface: 'home',
+    title: defaultTitle,
+    description: defaultDescription,
+  });
   const ref = firstParam(resolvedSearchParams.ref);
-  if (!ref) {
+  const sanitizedRef = ref ? ref.trim().slice(0, 64) : null;
+  if (!sanitizedRef) {
     return {
       title: defaultTitle,
       description: defaultDescription,
@@ -60,17 +68,26 @@ export async function generateMetadata({ searchParams }: MetadataArgs): Promise<
         title: defaultTitle,
         description: defaultDescription,
         url: canonicalUrl,
+        images: [baseOgImage],
       },
       twitter: {
+        card: 'summary_large_image',
         title: defaultTitle,
         description: defaultDescription,
+        images: [baseOgImage.url],
       },
     };
   }
 
-  const sharePath = `${canonicalPath}?ref=${encodeURIComponent(ref)}`;
+  const sharePath = `${canonicalPath}?ref=${encodeURIComponent(sanitizedRef)}`;
   const fullUrl = `${baseUrl}${sharePath}`;
-  const imageUrl = `${baseUrl}/opengraph-image?locale=${DEFAULT_LOCALE.value}&ref=${encodeURIComponent(ref)}`;
+  const invitedOgImage = buildOgImageEntry({
+    locale: DEFAULT_LOCALE.value,
+    surface: 'home-invited',
+    title: defaultTitle,
+    description: defaultDescription,
+    params: { ref: sanitizedRef },
+  });
 
   return {
     title: defaultTitle,
@@ -83,12 +100,13 @@ export async function generateMetadata({ searchParams }: MetadataArgs): Promise<
       title: defaultTitle,
       description: defaultDescription,
       url: fullUrl,
-      images: [imageUrl],
+      images: [invitedOgImage],
     },
     twitter: {
+      card: 'summary_large_image',
       title: defaultTitle,
       description: defaultDescription,
-      images: [imageUrl],
+      images: [invitedOgImage.url],
     },
   };
 }

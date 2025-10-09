@@ -35,7 +35,7 @@ const ROUTES: RouteConfig[] = [
     name: 'method',
     path: '/method',
     ready: async (page: Page) => {
-      await expect(page.locator('[data-ll="method-hero"]').first()).toBeVisible();
+      await expect(page.locator('[data-testid="method-hero"]').first()).toBeVisible();
     },
   },
 ];

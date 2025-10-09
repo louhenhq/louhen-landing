@@ -1,7 +1,7 @@
 import { expect, test } from '@tests/fixtures/playwright';
 import type { SupportedLocale } from '@/next-intl.locales';
 import { getTestLocales } from '../_utils/url';
-import { hreflangMapFor, makeCanonical, resolveBaseUrl } from '@lib/seo/shared';
+import { getSiteOrigin, hreflangMapFor, makeCanonical } from '@lib/seo/shared';
 import { methodPath } from '@lib/shared/routing/method-path';
 import {
   waitlistConfirmPath,
@@ -11,7 +11,7 @@ import {
 import { imprintPath } from '@lib/shared/routing/imprint-path';
 
 const testLocales = getTestLocales();
-const baseUrl = resolveBaseUrl();
+const baseUrl = getSiteOrigin();
 
 function normalizeCanonical(href: string | null) {
   if (!href) return null;
@@ -91,4 +91,3 @@ test.describe('Canonical self-consistency', () => {
     }
   }
 });
-

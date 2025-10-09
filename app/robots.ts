@@ -1,9 +1,9 @@
 import type { MetadataRoute } from 'next';
 import { isPrelaunch } from '@/lib/env/prelaunch';
-import { resolveBaseUrl } from '@/lib/seo/shared';
+import { getSiteOrigin } from '@/lib/seo/shared';
 
 export default function robots(): MetadataRoute.Robots {
-  const base = resolveBaseUrl();
+  const base = getSiteOrigin();
   if (isPrelaunch()) {
     return {
       rules: [

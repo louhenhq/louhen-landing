@@ -1,5 +1,5 @@
 import { test as base } from '@playwright/test';
-import type { Page } from '@playwright/test';
+import type { BrowserContext, Page } from '@playwright/test';
 
 const INTERCEPT_SYMBOL = Symbol('louhen-playwright-intercept');
 
@@ -72,13 +72,121 @@ async function enableInterceptors(page: Page): Promise<() => Promise<void>> {
   };
 }
 
-export const test = base.extend({
-  page: async ({ page }, use) => {
+type ConsentSetter = (page?: Page) => Promise<void>;
+
+const CONSENT_COOKIE_NAME = 'll_consent';
+const CONSENT_VERSION_PREFIX = 'v1:';
+const CONSENT_COOKIE_PATH = '/';
+
+type ConsentState = 'granted' | 'denied' | 'unknown';
+
+const consentValueMap: Record<Exclude<ConsentState, 'unknown'>, string> = {
+  granted: `${CONSENT_VERSION_PREFIX}granted`,
+  denied: `${CONSENT_VERSION_PREFIX}denied`,
+};
+
+type DomainTarget = {
+  domain: string;
+  secure: boolean;
+};
+
+const resolverCache: DomainTarget[] = [];
+
+function resolveConsentDomains(): DomainTarget[] {
+  if (resolverCache.length) {
+    return resolverCache;
+  }
+
+  const targets = new Map<string, DomainTarget>();
+  const baseUrl = process.env.PREVIEW_BASE_URL ?? process.env.BASE_URL ?? 'http://localhost';
+  try {
+    const parsed = new URL(baseUrl);
+    targets.set(parsed.hostname, {
+      domain: parsed.hostname,
+      secure: parsed.protocol === 'https:',
+    });
+  } catch {
+    targets.set('localhost', { domain: 'localhost', secure: false });
+  }
+
+  // Always support local development fallbacks.
+  targets.set('localhost', { domain: 'localhost', secure: false });
+  targets.set('127.0.0.1', { domain: '127.0.0.1', secure: false });
+
+  resolverCache.push(...targets.values());
+  return resolverCache;
+}
+
+async function applyConsentState(context: BrowserContext, state: ConsentState): Promise<void> {
+  const targets = resolveConsentDomains();
+  if (state === 'unknown') {
+    const expires = Math.floor(Date.now() / 1000) - 60;
+    await context.addCookies(
+      targets.map(({ domain, secure }) => ({
+        name: CONSENT_COOKIE_NAME,
+        value: '',
+        domain,
+        path: CONSENT_COOKIE_PATH,
+        secure,
+        sameSite: 'Lax' as const,
+        expires,
+      }))
+    );
+    return;
+  }
+
+  const value = consentValueMap[state];
+  const expires = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365;
+  await context.addCookies(
+    targets.map(({ domain, secure }) => ({
+      name: CONSENT_COOKIE_NAME,
+      value,
+      domain,
+      path: CONSENT_COOKIE_PATH,
+      secure,
+      sameSite: 'Lax' as const,
+      expires,
+    }))
+  );
+}
+
+async function verifyConsentCleared(context: BrowserContext): Promise<void> {
+  const cookies = await context.cookies();
+  const lingering = cookies.filter((cookie) => cookie.name === CONSENT_COOKIE_NAME);
+  if (lingering.length > 0) {
+    throw new Error(`Expected no ${CONSENT_COOKIE_NAME} cookie, found ${lingering.length}`);
+  }
+}
+
+const consentUnknownSetter: ConsentSetter = async (page) => {
+  if (!page) return;
+  await page.context().clearCookies();
+  await verifyConsentCleared(page.context());
+};
+
+const consentGrantedSetter: ConsentSetter = async (page) => {
+  if (!page) return;
+  await page.context().clearCookies();
+  await applyConsentState(page.context(), 'granted');
+};
+
+const consentDeniedSetter: ConsentSetter = async (page) => {
+  if (!page) return;
+  await page.context().clearCookies();
+  await applyConsentState(page.context(), 'denied');
+};
+
+export const test = base.extend<{
+  consentGranted: ConsentSetter;
+  consentDenied: ConsentSetter;
+  consentUnknown: ConsentSetter;
+}>({
+  page: async ({ page }, run) => {
     const detach = await enableInterceptors(page);
-    await use(page);
+    await run(page);
     await detach();
   },
-  context: async ({ context }, use) => {
+  context: async ({ context }, run) => {
     const cleanups = new Map<Page, () => Promise<void>>();
 
     const applyToPage = async (page: Page) => {
@@ -105,10 +213,25 @@ export const test = base.extend({
     };
     context.on('page', listener);
 
-    await use(context);
+    await run(context);
 
     context.off('page', listener);
     await Promise.all([...cleanups.values()].map((fn) => fn()));
+  },
+  consentGranted: async ({ page }, apply) => {
+    await apply(async (target = page) => {
+      await consentGrantedSetter(target);
+    });
+  },
+  consentDenied: async ({ page }, apply) => {
+    await apply(async (target = page) => {
+      await consentDeniedSetter(target);
+    });
+  },
+  consentUnknown: async ({ page }, apply) => {
+    await apply(async (target = page) => {
+      await consentUnknownSetter(target);
+    });
   },
 });
 

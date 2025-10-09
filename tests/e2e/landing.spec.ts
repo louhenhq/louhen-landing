@@ -38,4 +38,3 @@ test.describe('Landing analytics sentinel', () => {
     await page.unroute('**/api/track');
   });
 });
-}

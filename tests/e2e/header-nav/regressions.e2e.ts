@@ -2,16 +2,13 @@ import { expect, test } from '@tests/fixtures/playwright';
 import type { BrowserContext, Page } from '@playwright/test';
 import { localeUrl } from '../_utils/url';
 
-const CONSENT_COOKIE_VALUE = () => {
-  const payload = { analytics: true, marketing: false, timestamp: new Date().toISOString() };
-  return encodeURIComponent(JSON.stringify(payload));
-};
+const CONSENT_COOKIE_VALUE = () => encodeURIComponent('v1:granted');
 
 const COOKIE_DOMAIN = new URL(localeUrl()).hostname;
 
 async function seedConsent(context: BrowserContext) {
   await context.addCookies([
-    { name: 'louhen_consent', value: CONSENT_COOKIE_VALUE(), domain: COOKIE_DOMAIN, path: '/' },
+    { name: 'll_consent', value: CONSENT_COOKIE_VALUE(), domain: COOKIE_DOMAIN, path: '/' },
   ]);
 }
 
@@ -79,8 +76,8 @@ test.describe('Header regression pack', () => {
   });
 
   test('Mobile drawer retains analytics surface metadata and focus', async ({ page, context }) => {
-    await context.addCookies([
-      { name: 'louhen_consent', value: CONSENT_COOKIE_VALUE(), domain: 'localhost', path: '/' },
+  await context.addCookies([
+      { name: 'll_consent', value: CONSENT_COOKIE_VALUE(), domain: 'localhost', path: '/' },
     ]);
     await page.setViewportSize({ width: 414, height: 896 });
     await gotoReady(page, '?utm_source=header-drawer');

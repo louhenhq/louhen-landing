@@ -65,7 +65,7 @@ export function ConfirmResendForm() {
           data-ll="wl-resend-submit"
         >
           {t('cta')}
-        </Button>
+        </button>
         {status === 'success' && (
           <span className="text-sm text-status-success" aria-live="polite" data-ll="wl-resend-status">
             {t('sent')}

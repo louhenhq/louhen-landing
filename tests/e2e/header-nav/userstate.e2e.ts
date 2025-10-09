@@ -3,13 +3,12 @@ import type { Page } from '@playwright/test';
 import { localeUrl } from '../_utils/url';
 
 async function seedAuthHintCookies(page: Page) {
-  const timestamp = new Date().toISOString();
-  const consentValue = encodeURIComponent(JSON.stringify({ analytics: true, marketing: false, timestamp }));
+  const consentValue = encodeURIComponent(`v1:granted`);
   const hosts = ['localhost', '127.0.0.1'];
   await page.context().addCookies(
     hosts.flatMap((domain) => [
       { name: 'LH_AUTH', value: '1', domain, path: '/' },
-      { name: 'louhen_consent', value: consentValue, domain, path: '/' },
+      { name: 'll_consent', value: consentValue, domain, path: '/' },
     ])
   );
 }

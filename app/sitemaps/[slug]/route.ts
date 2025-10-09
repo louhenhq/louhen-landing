@@ -1,6 +1,6 @@
 import { canonicalPathsForLocale, getSitemapLocales, SITEMAP_SLUG_PREFIX } from '@lib/shared/seo/sitemap';
 import type { SupportedLocale } from '@/next-intl.locales';
-import { makeCanonical, resolveBaseUrl } from '@/lib/seo/shared';
+import { getSiteOrigin, makeCanonical } from '@/lib/seo/shared';
 
 export const runtime = 'nodejs';
 
@@ -44,7 +44,7 @@ export async function GET({ params }: RouteParams): Promise<Response> {
     return new Response('Not Found', { status: 404 });
   }
 
-  const baseUrl = resolveBaseUrl();
+  const baseUrl = getSiteOrigin();
   const body = buildLocaleSitemap(locale, baseUrl);
 
   return new Response(body, {

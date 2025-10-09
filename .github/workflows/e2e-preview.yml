@@ -20,6 +20,7 @@ jobs:
           - header-nav
           - footer
           - waitlist
+          - consent
     # Keep this workflow as a required status on staging/main; retries remain CI-only.
     concurrency:
       group: e2e-preview-${{ github.ref }}-${{ matrix.suite }}

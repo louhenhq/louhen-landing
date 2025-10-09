@@ -39,7 +39,7 @@ _Current status:_ structural drawer + responsive shell landed; future slices sti
 
 ## Slice 5 — Consent Controls ✅
 - Consent badge in header/drawer opens modal manager with Accept/Reject/Privacy link, focus trap, and ESC support.
-- Consent persisted via `louhen_consent` cookie; analytics queue cleared when consent withdrawn.
+- Consent persisted via `ll_consent` cookie (`v1:<state>`); analytics queue cleared when consent withdrawn.
 - Playwright coverage ensures no `/api/track` before grant, CTA events tracked after acceptance, and state returns to denied when revoked.
 - Follow-up: granular settings (analytics vs marketing) and consent audit log export.
 

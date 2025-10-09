@@ -29,12 +29,25 @@ Testing follows the locked pyramid in [/CONTEXT/decision_log.md](decision_log.md
 - Adding a new feature suite requires updating the canonical matrix in `tests/axe/canonical.axe.ts`; do not create standalone axe runners.
 - SEO add-on specs (`tests/e2e/seo/`) run alongside every matrix entry; they cover sitemap HTTP integrity and canonical uniqueness.
 
+### Analytics Consent Coverage
+- **No consent (default)**: assert zero requests to the analytics host and that the consent banner remains visible. Monitor `connect-src` violations to ensure CSP stays clean.
+- **Accept flow**: accepting the banner yields exactly one bootstrap request followed by queued events (e.g., `page_view`); no CSP errors should appear.
+- **Decline flow**: deny consent, reload, and confirm no analytics requests occur across the session; stored state persists across reloads.
+- **Accessibility**: axe coverage includes the consent banner (focus trap, ARIA roles/labels, Escape-to-dismiss). Treat failures here as blocking.
+- **Playwright fixtures**: `consentUnknown`, `consentGranted`, and `consentDenied` manage the `ll_consent` cookie (`v1:granted|denied`) before navigation. Cookie domains derive from `PREVIEW_BASE_URL` (falling back to localhost/127.0.0.1) so the suite runs unchanged in remote preview mode.
+
 ## SEO add-ons
 - `sitemap-http.e2e.ts` samples up to five URLs per locale sitemap (first, middle, last, plus newest additions when available). Override the sample via `SEO_SITEMAP_SAMPLE` if a hotfix needs tighter bounds.
 - HTTP expectations: prefer `200 OK`; allow `401`/`403` only when the preview environment legitimately enforces auth and the bypass header is unavailable (the test logs a warning annotation in that case).
 - OG image integrity: checks representative pages (`/method`, `/waitlist`, `/legal/privacy`) for live `og:image` / `twitter:image` assets returning `200`.
 - `canonical-uniqueness.e2e.ts` asserts a single `<link rel="canonical">` per page, normalising hosts to lowercase and trimming trailing slashes before comparison.
 - Hreflang validation uses `hreflangMapFor(...)`; every supported locale plus `x-default` must match the canonical map even when the canonical URL is locale-invariant (e.g., `/waitlist`).
+
+### OG & media tests
+- New specs under `tests/e2e/seo/` fetch OG/Twitter images directly from the rendered DOM, assert absolute URLs, `200` responses without redirects, content type starting with `image/`, and `Content-Length` ≤ 2 MB.
+- Sample at least two locales per surface (default + secondary) with pages covering method, waitlist, and imprint/legal.
+- A companion spec toggles the dynamic OG feature flag to ensure pages fall back to static assets while still satisfying the assertions above.
+- Budget failures must log the offending URL plus response headers for quick diagnosis; keep this behaviour when extending coverage.
 
 ## CI Hardening
 - Preview workflow jobs run with a 30-minute timeout and concurrency guard `e2e-preview-${ref}-${suite}` that cancels superseded entries per branch/suite.
@@ -64,7 +77,8 @@ Testing follows the locked pyramid in [/CONTEXT/decision_log.md](decision_log.md
 ## Adding or Changing Tests
 - Follow PLAN → DIFF → VALIDATE → REVERT (documented in [/CONTRIBUTING.md](../CONTRIBUTING.md)).
 - Include validation commands in the PR checklist (unit, build, Playwright, axe as needed).
-- For new journeys, ensure analytics assertions respect consent (see [/CONTEXT/analytics_privacy.md](analytics_privacy.md)).
+- Provide fixtures/knobs to simulate consent states (`granted`, `denied`, `unknown`) so e2e and unit suites can exercise transitions deterministically.
+- For new journeys, ensure analytics assertions respect consent (see [/CONTEXT/privacy_analytics.md](privacy_analytics.md)).
 
 ## CI Expectations
 - GitHub Actions runs `npm run lint`, `npm run build`, `npx playwright test`, and Lighthouse. Failing tests block merge.

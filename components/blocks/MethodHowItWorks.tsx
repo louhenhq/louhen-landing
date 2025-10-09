@@ -25,11 +25,11 @@ export default function MethodHowItWorks() {
         const value = item as Partial<Step>;
         if (typeof value.title !== 'string' || typeof value.body !== 'string') return null;
         const fallbackName = t('defaultChildName', { defaultValue: 'your child' });
-        const normalizedBody = value.body.replace(/\{\s*name\s*\}/g, childName ?? fallbackName);
+        const normalizedBody = value.body.replace(/\{\s*name\s*\}/g, fallbackName);
         return { title: value.title, body: normalizedBody };
       })
       .filter((step): step is Step => Boolean(step));
-  }, [childName, t]);
+  }, [t]);
 
   return (
     <section
@@ -45,7 +45,7 @@ export default function MethodHowItWorks() {
           </h2>
           {hasXpTeaser ? <p className="mt-sm text-body-sm text-text-muted">{xpTeaser}</p> : null}
         </div>
-        <div data-ll="method-steps" className="grid gap-lg md:grid-cols-2 xl:grid-cols-4">
+        <ol data-ll="method-steps" className="grid list-none gap-lg md:grid-cols-2 xl:grid-cols-4">
           {steps.map((step, index) => (
             <li key={step.title}>
               <Card

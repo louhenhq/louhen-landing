@@ -29,7 +29,7 @@ test.describe('Method page smoke test', () => {
         await expect(page).toHaveTitle(methodMessages.seo.title);
       }
 
-      const hero = page.locator('[data-ll="method-hero"]');
+      const hero = page.locator('[data-testid="method-hero"]');
       await expect(hero).toBeVisible();
       const heroHeading = hero.getByRole('heading', { level: 1 }).first();
       if (methodMessages.hero?.title) {
@@ -48,13 +48,13 @@ test.describe('Method page smoke test', () => {
         await expect(how.getByRole('heading', { level: 2 })).toHaveText(methodMessages.how.title);
       }
 
-      const trust = page.locator('[data-ll="method-trust"]');
+      const trust = page.locator('[data-testid="method-trust-layer"]');
       await expect(trust).toBeVisible();
       if (methodMessages.trust?.headline) {
         await expect(trust.getByRole('heading', { level: 2 })).toHaveText(methodMessages.trust.headline);
       }
 
-      const cta = page.locator('[data-ll="method-hero-cta"]');
+      const cta = page.locator('[data-testid="method-hero-cta"]');
       if (methodMessages.cta?.button) {
         await expect(cta).toBeVisible();
         await expect(cta).toHaveText(methodMessages.cta.button);
@@ -66,7 +66,7 @@ test.describe('Method page smoke test', () => {
 test.describe('@mobile method mobile smoke', () => {
   test('renders hero and CTA on mobile view', async ({ page }) => {
     await page.goto(localeUrl('/method', { locale: defaultLocale }), { waitUntil: 'networkidle' });
-    await expect(page.locator('[data-ll="method-hero"]').first()).toBeVisible();
-    await expect(page.locator('[data-ll="method-hero-cta"]').first()).toBeVisible();
+    await expect(page.locator('[data-testid="method-hero"]').first()).toBeVisible();
+    await expect(page.locator('[data-testid="method-hero-cta"]').first()).toBeVisible();
   });
 });

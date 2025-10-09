@@ -2,13 +2,16 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import ConsentBanner from '@/components/ConsentBanner';
-import { getClientConsent, setClientConsent, type ConsentValue } from '@/lib/consent/state';
-import { initAnalytics } from '@/lib/analytics/init';
+import { loadFromCookie, onConsentChange, setConsent, type ConsentState } from '@/lib/shared/consent/api';
 
-const DEFAULT_CONSENT: ConsentValue = { analytics: false, marketing: false };
+type ConsentValue = {
+  analytics: boolean;
+  marketing: boolean;
+};
 
 type ConsentContextValue = {
   consent: ConsentValue | null;
+  state: ConsentState;
   setConsent: (value: ConsentValue) => void;
   openManager: () => void;
 };
@@ -25,55 +28,82 @@ export function useConsent() {
 
 type ConsentProviderProps = {
   children: ReactNode;
-  initialConsent: ConsentValue;
+  initialState: ConsentState;
 };
 
-export function ConsentProvider({ children, initialConsent }: ConsentProviderProps) {
-  const [consent, setConsentState] = useState<ConsentValue | null>(initialConsent ?? DEFAULT_CONSENT);
-  const [managerOpen, setManagerOpen] = useState(() => !initialConsent.analytics && !initialConsent.marketing);
+export function ConsentProvider({ children, initialState }: ConsentProviderProps) {
+  const [state, setState] = useState<ConsentState>(initialState);
+  const [isManagerOpen, setManagerOpen] = useState(() => initialState === 'unknown');
+  const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const clientConsent = getClientConsent();
-    if (clientConsent) {
-      setConsentState(clientConsent);
-      setManagerOpen(false);
-      initAnalytics(clientConsent);
-      return;
+
+    const current = loadFromCookie();
+    setState(current);
+    if (current === 'unknown' && !dismissed) {
+      setManagerOpen(true);
     }
 
-    window.__LOUHEN_CONSENT__ = initialConsent;
-    initAnalytics(initialConsent);
-    if (initialConsent.analytics || initialConsent.marketing) {
-      setConsentState(initialConsent);
+    const unsubscribe = onConsentChange((next) => {
+      setState(next);
+      if (next === 'unknown') {
+        if (!dismissed) {
+          setManagerOpen(true);
+        }
+        return;
+      }
+      setDismissed(false);
       setManagerOpen(false);
+    });
+
+    return unsubscribe;
+  }, [dismissed]);
+
+  useEffect(() => {
+    if (state === 'unknown' && !dismissed) {
+      setManagerOpen(true);
     }
-  }, [initialConsent]);
+  }, [state, dismissed]);
 
   const persistConsent = useCallback((value: ConsentValue) => {
-    setClientConsent(value);
-    setConsentState(value);
+    const nextState: ConsentState = value.analytics ? 'granted' : 'denied';
+    setConsent(nextState);
+    setDismissed(false);
     setManagerOpen(false);
-    initAnalytics(value);
   }, []);
 
   const openManager = useCallback(() => {
+    setDismissed(false);
     setManagerOpen(true);
   }, []);
 
+  const consentValue = useMemo<ConsentValue | null>(() => {
+    if (state === 'unknown') return null;
+    return { analytics: state === 'granted', marketing: false };
+  }, [state]);
+
   const contextValue = useMemo<ConsentContextValue>(
-    () => ({ consent, setConsent: persistConsent, openManager }),
-    [consent, persistConsent, openManager]
+    () => ({
+      consent: consentValue,
+      state,
+      setConsent: persistConsent,
+      openManager,
+    }),
+    [consentValue, state, persistConsent, openManager]
   );
 
   return (
     <ConsentContext.Provider value={contextValue}>
       {children}
       <ConsentBanner
-        open={managerOpen}
-        onAccept={() => persistConsent({ analytics: true, marketing: false })}
-        onReject={() => persistConsent({ analytics: false, marketing: false })}
-        onClose={() => setManagerOpen(false)}
+        forceOpen={isManagerOpen}
+        onClose={() => {
+          setManagerOpen(false);
+          if (state === 'unknown') {
+            setDismissed(true);
+          }
+        }}
       />
     </ConsentContext.Provider>
   );

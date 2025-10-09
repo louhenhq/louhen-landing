@@ -23,3 +23,11 @@
 - ❌ **Don’t** introduce `bg-[<raw-hex>]`, `text-[rgb(0,0,0)]`, or `shadow-[0_0_10px_rgba(...)]` utilities in components.
 - ❌ **Don’t** import token CSS directly inside feature components or route modules.
 - ❌ **Don’t** add theme toggles that swap CSS files or mutate `<link>` tags—use the existing attribute/variable approach.
+
+## Feature Components — Audit Round
+
+| Component | Decision | Rationale | Required Tokens | Owner | Next Steps |
+| --- | --- | --- | --- | --- | --- |
+| `components/features/method/MethodHero.tsx` | New | Rebuilt hero with `components/ui` primitives, token-only styling, deterministic `data-testid`s, and refreshed analytics wiring; old layout relied on missing imports and non-token gradients. | `spacingAlias.md`, `spacingAlias.2xl`, `radii.2xl`, `radii.pill`, `color.brand.primary`, `semantic.color.bg.page`, `semantic.color.text.body`, `shadow.card` | Codex | 1. QA gradient fallback across supported browsers. 2. Regenerate screenshot baselines once visuals are approved. |
+| `components/features/method/MethodTrustLayer.tsx` | Adjust | Replaced legacy helpers with the shared `Card` primitive, standardized badge/typography with tokens, and added deterministic selectors while preserving TrustSchema output. | `spacingAlias.sm`, `spacingAlias.2xl`, `radii.pill`, `color.border.subtle`, `semantic.color.bg.page`, `semantic.color.text.body` | Codex | 1. Confirm badge token variants cover upcoming seasonal palette needs. |
+| `components/features/waitlist/ResendConfirmForm.tsx` | Adjust | Adopted `Card`, `Input`, and `Button` primitives, enforced tokenized spacing, and added deterministic selectors without disrupting analytics. | `spacingAlias.xs`, `spacingAlias.md`, `radii.2xl`, `semantic.color.bg.card`, `semantic.color.text.body`, `semantic.color.status.success`, `semantic.color.status.error`, `shadow.card` | Codex | 1. Exercise resend flow in staging to validate loading indicator and status messaging. |

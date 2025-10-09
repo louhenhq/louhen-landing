@@ -2,10 +2,9 @@ import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { isPrelaunch } from '@/lib/env/prelaunch';
 import { legalPath, type LegalSlug } from '@lib/shared/routing/legal-path';
-import { hreflangMapFor, makeCanonical, resolveBaseUrl } from '@/lib/seo/shared';
+import { getSiteOrigin, hreflangMapFor, makeCanonical } from '@/lib/seo/shared';
+import { buildOgImageEntry } from '@lib/shared/og/builder';
 import { type SupportedLocale } from '@/next-intl.locales';
-
-const OG_IMAGE_PATH = '/opengraph-image';
 
 type LegalKind = Extract<LegalSlug, 'terms' | 'privacy'>;
 
@@ -34,11 +33,10 @@ function extractDescription(
 }
 
 export async function buildLegalMetadata({ locale, kind }: BuildLegalMetadataParams): Promise<Metadata> {
-  const baseUrl = resolveBaseUrl();
+  const baseUrl = getSiteOrigin();
   const path = legalPath(locale, kind);
   const canonicalUrl = makeCanonical(path, baseUrl);
   const hreflang = hreflangMapFor((supportedLocale) => legalPath(supportedLocale, kind), baseUrl);
-  const imageUrl = `${baseUrl}${OG_IMAGE_PATH}?locale=${locale}`;
 
   const t = await getTranslations({ locale, namespace: 'legal' });
   const title = kind === 'terms' ? t('terms.title') : t('privacy.title');
@@ -47,6 +45,13 @@ export async function buildLegalMetadata({ locale, kind }: BuildLegalMetadataPar
   const robots = isPrelaunch()
     ? { index: false, follow: false }
     : undefined;
+  const surface = kind === 'terms' ? 'legal-terms' : 'legal-privacy';
+  const ogImage = buildOgImageEntry({
+    locale,
+    surface,
+    title,
+    description,
+  });
 
   return {
     title,
@@ -61,13 +66,13 @@ export async function buildLegalMetadata({ locale, kind }: BuildLegalMetadataPar
       url: canonicalUrl,
       locale,
       type: 'article',
-      images: [imageUrl],
+      images: [ogImage],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: [imageUrl],
+      images: [ogImage.url],
     },
     robots,
   } satisfies Metadata;

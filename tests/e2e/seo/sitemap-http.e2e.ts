@@ -1,12 +1,12 @@
 import { expect, test } from '@tests/fixtures/playwright';
 import type { SupportedLocale } from '@/next-intl.locales';
 import { getTestLocales, localeUrl } from '../_utils/url';
-import { makeCanonical, resolveBaseUrl } from '@lib/seo/shared';
+import { getSiteOrigin, makeCanonical } from '@lib/seo/shared';
 import { canonicalPathsForLocale, sitemapSlugForLocale } from '@lib/shared/seo/sitemap';
 
 const MAX_PAGES_PER_LOCALE = Number(process.env.SEO_SITEMAP_SAMPLE ?? '5');
 const testLocales = getTestLocales();
-const baseUrl = resolveBaseUrl();
+const baseUrl = getSiteOrigin();
 const ACCEPTABLE_STATUSES = new Set([200, 401, 403]);
 
 function pickSample<T>(items: T[], limit: number): T[] {
@@ -85,4 +85,3 @@ test.describe('SEO sitemap/OG integrity', () => {
     }
   });
 });
-

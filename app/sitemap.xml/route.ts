@@ -1,4 +1,4 @@
-import { resolveBaseUrl } from '@/lib/seo/shared';
+import { getSiteOrigin } from '@/lib/seo/shared';
 import { getSitemapLocales, sitemapSlugForLocale } from '@lib/shared/seo/sitemap';
 
 export const runtime = 'nodejs';
@@ -21,7 +21,7 @@ ${items}
 }
 
 export async function GET(): Promise<Response> {
-  const baseUrl = resolveBaseUrl();
+  const baseUrl = getSiteOrigin();
   const body = buildSitemapIndex(baseUrl);
   return new Response(body, {
     headers: {

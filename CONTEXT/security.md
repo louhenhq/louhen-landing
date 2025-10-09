@@ -20,7 +20,7 @@ This repo follows the locked decisions in [/CONTEXT/decision_log.md](decision_lo
   - `style-src 'self' 'unsafe-inline'` (Tailwind runtime injection; revisit once hashed styles are viable).
   - `img-src 'self' data:`.
   - `font-src 'self'`.
-  - `connect-src 'self'` (add domains only when servers are self-hosted or consented).
+- `connect-src 'self'` (add domains only when servers are self-hosted or consented).
   - `frame-ancestors 'none'`.
   - `base-uri 'self'`.
   - `form-action 'self'`.
@@ -30,11 +30,13 @@ This repo follows the locked decisions in [/CONTEXT/decision_log.md](decision_lo
   - No additional origins are permitted without updating this doc and the middleware.
 - **Report Only toggle**: set `CSP_REPORT_ONLY=1` (or `NEXT_PUBLIC_CSP_REPORT_ONLY=1`) in preview to serve `Content-Security-Policy-Report-Only`. Production always enforces.
 - Updating CSP allowances requires a `/CONTEXT/decision_log.md` entry and security/infra approval. Prefer adding a nonce or self-hosting assets over widening directives.
+- Analytics endpoints follow runtime opt-in: `connect-src` stays `'self'` until consent is `granted`, at which point a nonced helper widens the directive (e.g., appending `https://analytics.louhen.app`) for the active session only.
 
 ## Consent-First Analytics
-- `lib/consent/state.ts` gates all analytics; no third-party CMPs.
-- `lib/analytics/**` modules must check consent before dispatch. Extending analytics requires updating [/CONTEXT/analytics_privacy.md](analytics_privacy.md) and adding tests as described in [/CONTEXT/testing.md](testing.md).
-- CSP does **not** whitelist third-party analytics origins by default. When consented scripts are introduced, add them via a nonced `<script>` element and update the CSP/connect-src lists in middleware + this doc with the justification.
+- `lib/shared/consent/api.ts` is the single read/write surface for consent state; no third-party CMPs.
+- `lib/shared/analytics/client.ts` owns queueing and bootstrap. Extending analytics requires updating [/CONTEXT/privacy_analytics.md](privacy_analytics.md) and adding tests as described in [/CONTEXT/testing.md](testing.md).
+- Inline bootstrap snippets obtain `nonce` via `useNonce()` (provided by middleware through the `x-csp-nonce` header). Never inject analytics without passing that nonce down to the `<script>` element.
+- CSP does **not** whitelist third-party analytics origins by default. When consent transitions to `granted`, the analytics bootstrap widens `connect-src` at runtime using the same nonce and only for the approved endpoints.
 
 ## PR Checklist Hooks
 - Every PR touching headers, CSP, or analytics must tick the security block in `.github/pull_request_template.md` and list the commands/tests executed.

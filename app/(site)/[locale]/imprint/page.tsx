@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { imprintPath } from '@lib/shared/routing/imprint-path';
 import { isPrelaunch } from '@/lib/env/prelaunch';
-import { hreflangMapFor, makeCanonical, resolveBaseUrl } from '@/lib/seo/shared';
+import { getSiteOrigin, hreflangMapFor, makeCanonical } from '@/lib/seo/shared';
+import { buildOgImageEntry } from '@lib/shared/og/builder';
 import type { SupportedLocale } from '@/next-intl.locales';
 import { unstable_setRequestLocale } from 'next-intl/server';
 
@@ -23,7 +24,7 @@ export default function ImprintPage({ params }: ImprintPageProps) {
 
 export function generateMetadata({ params }: ImprintPageProps): Metadata {
   const { locale } = params;
-  const baseUrl = resolveBaseUrl();
+  const baseUrl = getSiteOrigin();
   const canonicalPath = imprintPath(locale);
   const canonicalUrl = makeCanonical(canonicalPath, baseUrl);
   const hreflang = hreflangMapFor(imprintPath, baseUrl);
@@ -35,7 +36,12 @@ export function generateMetadata({ params }: ImprintPageProps): Metadata {
   const description = isGerman
     ? 'Rechtliche Angaben, Kontaktinformationen und Verantwortlichkeiten von Louhen.'
     : 'Legal disclosure, contact, and accountability details for Louhen.';
-  const imageUrl = `${baseUrl}/opengraph-image?locale=${locale}`;
+  const ogImage = buildOgImageEntry({
+    locale,
+    surface: 'imprint',
+    title,
+    description,
+  });
 
   return {
     title,
@@ -51,13 +57,13 @@ export function generateMetadata({ params }: ImprintPageProps): Metadata {
       url: canonicalUrl,
       locale,
       type: 'website',
-      images: [imageUrl],
+      images: [ogImage],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: [imageUrl],
+      images: [ogImage.url],
     },
   };
 }

@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { getSavedTheme, setTheme } from '@app/theme-client';
 import { recordHeaderEvent, type HeaderEventContext } from '@lib/analytics/header';
 import type { HeaderSurface, HeaderThemePreference } from '@lib/analytics.schema';
+import { cn, focusRing } from '@app/(site)/_lib/ui';
 
 type ThemePref = HeaderThemePreference;
 
@@ -43,8 +44,14 @@ export default function HeaderThemeToggle({ variant, analyticsContext, surface, 
     : 'text-sm font-medium text-text';
 
   const selectClass = variant === 'desktop'
-    ? 'min-w-[8rem] rounded-pill border border-border bg-bg px-sm py-xs text-sm text-text disabled:opacity-70'
-    : 'w-full rounded-pill border border-border bg-bg px-sm py-xs text-sm text-text disabled:opacity-70';
+    ? cn(
+        'min-w-[8rem] rounded-pill border border-border bg-bg px-sm py-xs text-sm text-text disabled:opacity-70',
+        focusRing
+      )
+    : cn(
+        'w-full rounded-pill border border-border bg-bg px-sm py-xs text-sm text-text disabled:opacity-70',
+        focusRing
+      );
 
   const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const next = event.target.value as ThemePref;

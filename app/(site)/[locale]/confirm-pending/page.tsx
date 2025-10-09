@@ -6,7 +6,8 @@ import { ConfirmResendForm } from '@components/features/waitlist';
 import { cn, layout, text } from '@/app/(site)/_lib/ui';
 import { loadMessages } from '@/lib/intl/loadMessages';
 import { isPrelaunch } from '@/lib/env/prelaunch';
-import { hreflangMapFor, makeCanonical, resolveBaseUrl } from '@/lib/seo/shared';
+import { getSiteOrigin, hreflangMapFor, makeCanonical } from '@/lib/seo/shared';
+import { buildOgImageEntry } from '@lib/shared/og/builder';
 import { waitlistConfirmPendingPath } from '@lib/shared/routing/waitlist-path';
 import type { SupportedLocale } from '@/next-intl.locales';
 import { unstable_setRequestLocale } from 'next-intl/server';
@@ -75,7 +76,7 @@ export default async function ConfirmPendingPage({ params, searchParams }: Props
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  const baseUrl = resolveBaseUrl();
+  const baseUrl = getSiteOrigin();
   const canonicalPath = waitlistConfirmPendingPath(locale);
   const canonicalUrl = makeCanonical(canonicalPath, baseUrl);
   const hreflang = hreflangMapFor(waitlistConfirmPendingPath, baseUrl);
@@ -94,7 +95,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     // fall back to defaults
   }
 
-  const imageUrl = `${baseUrl}/opengraph-image?locale=${locale}`;
+  const ogImage = buildOgImageEntry({
+    locale,
+    surface: 'confirm-pending',
+    title,
+    description,
+  });
 
   return {
     title,
@@ -110,13 +116,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: canonicalUrl,
       locale,
       type: 'website',
-      images: [imageUrl],
+      images: [ogImage],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: [imageUrl],
+      images: [ogImage.url],
     },
   };
 }

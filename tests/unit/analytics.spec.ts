@@ -9,7 +9,7 @@ function setLocation(url: string) {
   window.history.replaceState({}, '', `${target.pathname}${target.search}${target.hash}`);
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   vi.resetModules();
   vi.useRealTimers();
   if (typeof window !== 'undefined') {
@@ -17,7 +17,6 @@ beforeEach(() => {
     window.localStorage.clear();
     setLocation('https://example.com/en?utm_source=test-source&utm_medium=test-medium&utm_campaign=test-campaign&utm_content=test-content&utm_term=test-term');
     Object.defineProperty(document, 'referrer', { configurable: true, value: 'https://referrer.example.com/article' });
-    (window as any).__LOUHEN_CONSENT__ = { analytics: true };
     Object.defineProperty(window.navigator, 'sendBeacon', { configurable: true, value: undefined });
   }
   document.cookie = '';
@@ -25,6 +24,9 @@ beforeEach(() => {
   process.env.NEXT_PUBLIC_ANALYTICS_DISABLED = '0';
   process.env.NEXT_PUBLIC_ANALYTICS_DEBUG = '0';
   globalThis.fetch = vi.fn(async () => ({ ok: true })) as unknown as typeof fetch;
+
+  const consentApi = await import('@/lib/shared/consent/api');
+  consentApi.clearConsent();
 });
 
 describe('client analytics', () => {
@@ -54,9 +56,8 @@ describe('client analytics', () => {
   });
 
   it('flushes buffered events when consent granted', async () => {
-    if (typeof window !== 'undefined') {
-      (window as any).__LOUHEN_CONSENT__ = { analytics: false };
-    }
+    const consentApi = await import('@/lib/shared/consent/api');
+    consentApi.setConsent('denied');
     const { track, getConsent } = await import('@/lib/clientAnalytics');
     const fetchMock: any = globalThis.fetch;
 
@@ -65,9 +66,7 @@ describe('client analytics', () => {
     expect(getConsent()).toBe(false);
     expect(fetchMock).not.toHaveBeenCalled();
 
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('louhen:consent', { detail: { analytics: true } }));
-    }
+    consentApi.setConsent('granted');
     await flush();
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { cn, focusRing } from '@app/(site)/_lib/ui';
 
 export type FooterLegalLinkId = 'privacy' | 'terms';
 
@@ -18,10 +19,13 @@ type FooterLegalProps = {
 };
 
 export function FooterLegal({ heading, links, onManageConsent, preferencesLabel }: FooterLegalProps) {
+  const headingId = 'footer-legal-heading';
   return (
-    <nav className="flex flex-wrap items-center gap-md" aria-label="Footer">
+    <nav className="flex flex-wrap items-center gap-md" aria-labelledby={headingId}>
       <div className="flex flex-col gap-1">
-        <span className="text-xs uppercase tracking-wide text-text-muted">{heading}</span>
+        <span id={headingId} className="text-xs uppercase tracking-wide text-text-muted">
+          {heading}
+        </span>
         <div className="flex flex-wrap items-center gap-md">
           {links.map((link) => (
             <Link
@@ -29,7 +33,10 @@ export function FooterLegal({ heading, links, onManageConsent, preferencesLabel 
               data-ll={`footer-${link.id}-link`}
               href={link.href}
               prefetch={false}
-              className="hover:text-text"
+              className={cn(
+                'inline-flex min-h-6 items-center text-text-muted transition-colors duration-base hover:text-text',
+                focusRing
+              )}
             >
               {link.label}
             </Link>
@@ -38,7 +45,10 @@ export function FooterLegal({ heading, links, onManageConsent, preferencesLabel 
       </div>
       <button
         type="button"
-        className="text-left text-text-muted hover:text-text underline"
+        className={cn(
+          'inline-flex min-h-6 items-center text-left text-text-muted underline transition-colors duration-base hover:text-text',
+          focusRing
+        )}
         onClick={onManageConsent}
       >
         {preferencesLabel}

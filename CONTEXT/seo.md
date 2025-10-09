@@ -64,6 +64,10 @@ Locked decisions: canonical host `https://www.louhen.app`, preview `https://stag
 - Playwright SEO add-ons (`tests/e2e/seo/`) enforce sitemap HTTP integrity and canonical uniqueness on every preview run. Adjust sampling thresholds via `SEO_SITEMAP_SAMPLE` if a temporary hotfix requires a smaller set.
 
 ## Social Preview Strategy
-- Social cards derive from shared builders in `components/SeoJsonLd.tsx` and `lib/seo/*`; ensure OG/Twitter images resolve to the canonical host with cache-busted filenames.
+- OG/Twitter metadata must emit absolute URLs (no relative paths). `twitter:card` remains locked to `summary_large_image`; prefer mirroring OG titles/descriptions for parity.
+- OG images must come from the canonical host (`https://www.louhen.app`) or preview origin when running remote tests. Append `?locale=<bcp47>` and additional params (`ref`, `slug`) when the surface requires localized copy.
+- Use the shared `getSiteOrigin()` helper when composing absolute URLs. Metadata builders should delegate to shared OG helpers (see `/CONTEXT/media.md`) instead of hand-concatenating hosts.
+- Dynamic OG rendering lives under `app/opengraph-image/route.ts` and must satisfy the cache headers/content-type rules documented in `/CONTEXT/media.md`. On failure, fall back to the per-locale static asset in `public/og/<locale>/…`.
+- Static fallbacks feed the same metadata helpers and must stay within the 1200×630 px, <2 MB budget (PNG/WebP preferred). Update the fallback whenever localized copy changes.
 - For campaign-specific previews, keep images under `public/social/<campaign>.png` and map them inside the relevant metadata builder; do not hardcode per-locale assets outside of translations.
 - When toggling `NEXT_USE_REMOTE_FONTS`, confirm OG/Twitter snapshots render correctly in the chosen environment (remote fonts off by default to guarantee legality/perf parity).

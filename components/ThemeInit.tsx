@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import tokens from '@/packages/design-tokens/build/web/tokens.json';
-import { applyThemeFromMedia, getSavedTheme, getSavedContrast, setTheme, setContrast } from '@/app/theme-client';
+import { applyThemeFromMedia, getSavedTheme, getSavedContrast } from '@/app/theme-client';
 import { useNonce } from '@/lib/csp/nonce-context';
 import {
   CONTRAST_COOKIE_NAME,
@@ -96,12 +96,33 @@ export default function ThemeInit() {
 
     updateMeta();
 
+    const mediaCleanup: Array<() => void> = [];
+
     const handle = () => {
       if (getSavedTheme() === 'system' || getSavedContrast() === 'system') {
         applyThemeFromMedia();
       }
       setMetaThemeFromTokens();
-    });
+      updateMeta();
+    };
+
+    const subscribe = (mql: MediaQueryList | undefined) => {
+      if (!mql) return;
+      const listener = () => handle();
+      if (typeof mql.addEventListener === 'function') {
+        mql.addEventListener('change', listener);
+        mediaCleanup.push(() => mql.removeEventListener('change', listener));
+        return;
+      }
+      if (typeof mql.addListener === 'function') {
+        mql.addListener(listener);
+        mediaCleanup.push(() => mql.removeListener(listener));
+      }
+    };
+
+    subscribe(mqlDark);
+    subscribe(mqlContrast);
+    subscribe(mqlForced);
 
     const observer = new MutationObserver((mutations) => {
       if (mutations.some((mutation) => mutation.attributeName === 'data-theme')) {
@@ -111,7 +132,7 @@ export default function ThemeInit() {
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
     return () => {
-      unsubscribe();
+      mediaCleanup.forEach((fn) => fn());
       observer.disconnect();
     };
   }, []);

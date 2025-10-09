@@ -51,8 +51,8 @@ test.describe('Header visual snapshots', () => {
       await context.clearCookies();
       await context.addCookies([
         {
-          name: 'louhen_consent',
-          value: encodeURIComponent(JSON.stringify({ analytics: true, marketing: false, timestamp: new Date().toISOString() })),
+          name: 'll_consent',
+          value: encodeURIComponent('v1:granted'),
           domain: 'localhost',
           path: '/',
         },

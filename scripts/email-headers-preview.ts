@@ -3,7 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 
 declare global {
-  // eslint-disable-next-line no-var
+   
   var __NONCE__: string;
 }
 

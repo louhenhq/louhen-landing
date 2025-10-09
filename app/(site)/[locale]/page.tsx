@@ -6,7 +6,8 @@ import { getHeaderUserState } from '@/lib/auth/userState.server';
 import { loadMessages } from '@/lib/intl/loadMessages';
 import { localeHomePath } from '@lib/shared/routing/legal-path';
 import { isPrelaunch } from '@/lib/env/prelaunch';
-import { hreflangMapFor, makeCanonical, resolveBaseUrl } from '@/lib/seo/shared';
+import { getSiteOrigin, hreflangMapFor, makeCanonical } from '@/lib/seo/shared';
+import { buildOgImageEntry } from '@lib/shared/og/builder';
 import type { SupportedLocale } from '@/next-intl.locales';
 import { unstable_setRequestLocale } from 'next-intl/server';
 
@@ -31,15 +32,21 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
       : 'Louhen pairs podiatrist-backed comfort with adaptive sizing to keep every step confident.';
   const defaultTitle = `${SITE_NAME} — Personal style. Effortless fit.`;
   const defaultDescription = heroSubtitle;
-  const baseUrl = resolveBaseUrl();
+  const baseUrl = getSiteOrigin();
   const canonicalPath = localeHomePath(locale);
   const canonicalUrl = makeCanonical(canonicalPath, baseUrl);
   const hreflang = hreflangMapFor(localeHomePath, baseUrl);
-  const imageUrl = `${baseUrl}/opengraph-image?locale=${locale}`;
   const ref = firstParam(resolvedSearchParams.ref);
+  const sanitizedRef = ref ? ref.trim().slice(0, 64) : null;
   const robots = isPrelaunch()
     ? { index: false, follow: false }
     : undefined;
+  const baseOgImage = buildOgImageEntry({
+    locale,
+    surface: 'home',
+    title: defaultTitle,
+    description: defaultDescription,
+  });
 
   const baseMetadata = {
     description: defaultDescription,
@@ -52,17 +59,17 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
       description: defaultDescription,
       url: canonicalUrl,
       locale,
-      images: [imageUrl],
+      images: [baseOgImage],
     },
     twitter: {
       card: 'summary_large_image' as const,
       title: defaultTitle,
       description: defaultDescription,
-      images: [imageUrl],
+      images: [baseOgImage.url],
     },
   };
 
-  if (!ref) {
+  if (!sanitizedRef) {
     return {
       title: defaultTitle,
       robots,
@@ -76,9 +83,15 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
     typeof og?.description === 'string'
       ? og.description
       : 'Join through their link to unlock early rewards and smarter sizing for every outfit.';
-  const sharePath = `/${locale}?ref=${encodeURIComponent(ref)}`;
+  const sharePath = sanitizedRef ? `/${locale}?ref=${encodeURIComponent(sanitizedRef)}` : canonicalPath;
   const fullUrl = `${baseUrl}${sharePath}`;
-  const invitedImageUrl = `${baseUrl}/opengraph-image?locale=${locale}&ref=${encodeURIComponent(ref)}`;
+  const invitedOgImage = buildOgImageEntry({
+    locale,
+    surface: 'home-invited',
+    title: invitedTitle,
+    description: invitedDescription,
+    params: sanitizedRef ? { ref: sanitizedRef } : undefined,
+  });
 
   return {
     title: invitedTitle,
@@ -90,13 +103,13 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
       title: invitedTitle,
       description: invitedDescription,
       url: fullUrl,
-      images: [invitedImageUrl],
+      images: [invitedOgImage],
     },
     twitter: {
       ...baseMetadata.twitter,
       title: invitedTitle,
       description: invitedDescription,
-      images: [invitedImageUrl],
+      images: [invitedOgImage.url],
     },
   };
 }

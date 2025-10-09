@@ -12,11 +12,17 @@
 - [ ] New interactive UI exposes stable `data-testid` selectors.
 - [ ] Lighthouse budgets unaffected or justified (attach before/after numbers if adjusted).
 - [ ] `.env.example` and `/CONTEXT/envs.md` updated when new environment variables are introduced.
-- [ ] **Consent**: Analytics initialise only after opt-in; no unexpected trackers added.
+- [ ] **Consent**: No analytics initialised before explicit opt-in; no unexpected trackers added.
+- [ ] No preconnect/preload to analytics domains before consent.
+- [ ] Inline analytics init (if present) uses the SSR nonce.
+- [ ] Analytics events use snake_case names with minimal payload fields.
 - [ ] **CSP / Security**: Inline scripts carry the SSR nonce, security headers remain intact.
 - [ ] **Email compliance**: List-Unsubscribe (mailto + one-click), Auto-Submitted, Reply-To headers confirmed.
 - [ ] **Status endpoint**: `/api/status` still requires Basic Auth and returns expected keys.
 - [ ] **SEO/i18n**: hreflang, canonicals, sitemap entries remain correct; preview stays `noindex`.
+- [ ] **Media/OG**: `og:*` + `twitter:card` present with absolute URLs.
+- [ ] **Media/OG**: OG image returns 200 (no redirect) on default + localized pages.
+- [ ] **Media/OG**: Dynamic OG route sets cache headers and correct `Content-Type`.
 - [ ] Preview workflow artifacts reviewed on failures (Playwright HTML, traces).
 - [ ] Secret scanner (`policy-guards`) passes or the block has been resolved.
 

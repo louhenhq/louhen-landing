@@ -10,7 +10,8 @@ import { ConfirmResendForm, ConfirmAnalytics } from '@components/features/waitli
 import { cn, layout, text } from '@/app/(site)/_lib/ui';
 import { loadMessages } from '@/lib/intl/loadMessages';
 import { isPrelaunch } from '@/lib/env/prelaunch';
-import { hreflangMapFor, makeCanonical, resolveBaseUrl } from '@/lib/seo/shared';
+import { getSiteOrigin, hreflangMapFor, makeCanonical } from '@/lib/seo/shared';
+import { buildOgImageEntry } from '@lib/shared/og/builder';
 import { waitlistConfirmPath } from '@lib/shared/routing/waitlist-path';
 import type { SupportedLocale } from '@/next-intl.locales';
 import { unstable_setRequestLocale } from 'next-intl/server';
@@ -99,7 +100,7 @@ function getShareCopy(localeMessages: Record<string, unknown>, locale: Supported
 
 export async function generateMetadata({ params }: ConfirmPageProps): Promise<Metadata> {
   const { locale } = params;
-  const baseUrl = resolveBaseUrl();
+  const baseUrl = getSiteOrigin();
   const canonicalPath = waitlistConfirmPath(locale);
   const canonicalUrl = makeCanonical(canonicalPath, baseUrl);
   const hreflang = hreflangMapFor(waitlistConfirmPath, baseUrl);
@@ -119,7 +120,12 @@ export async function generateMetadata({ params }: ConfirmPageProps): Promise<Me
     // fall back to defaults
   }
 
-  const imageUrl = `${baseUrl}/opengraph-image?locale=${locale}`;
+  const ogImage = buildOgImageEntry({
+    locale,
+    surface: 'confirm',
+    title,
+    description,
+  });
 
   return {
     title,
@@ -135,13 +141,13 @@ export async function generateMetadata({ params }: ConfirmPageProps): Promise<Me
       url: canonicalUrl,
       locale,
       type: 'website',
-      images: [imageUrl],
+      images: [ogImage],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: [imageUrl],
+      images: [ogImage.url],
     },
   };
 }

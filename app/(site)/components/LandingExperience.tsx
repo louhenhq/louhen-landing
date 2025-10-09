@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { Footer } from '@components/features/footer';
 import { Header } from '@components/features/header-nav';
+import { Button, Card } from '@/components/ui';
 import Hero from '@/app/(site)/components/Hero';
 import FAQ from '@/app/(site)/components/FAQ';
 import SectionViewTracker from '@/components/SectionViewTracker';
@@ -18,7 +19,9 @@ import TestimonialCards from '@/components/TestimonialCards';
 import PrivacyRibbon from '@/components/PrivacyRibbon';
 import TrustSchema from '@/components/TrustSchema';
 import { WaitlistForm } from '@components/features/waitlist';
-import { layout, surfaces } from '@/app/(site)/_lib/ui';
+import SiteShell from '@/app/(site)/components/SiteShell';
+import { cn, layout, surfaces } from '@/app/(site)/_lib/ui';
+import { usePrefersReducedMotion } from '@/app/(site)/_lib/usePrefersReducedMotion';
 import { track } from '@/lib/clientAnalytics';
 import type { HeaderUserState } from '@/lib/auth/userState';
 
@@ -71,36 +74,35 @@ export default function LandingExperience({ userState }: LandingExperienceProps)
   }, [prefersReducedMotion]);
 
   return (
-    <div className={layout.page}>
-      <Header onCta={scrollToForm} userState={userState} />
-      <main id="main-content">
-        <SectionViewTracker />
-        {showToast ? (
-          <div className="mx-auto mb-lg w-full max-w-3xl px-gutter" role="status" aria-live="polite">
-            <div className="rounded-2xl border border-status-success bg-status-success/10 px-md py-sm text-sm text-status-success shadow-card">
-              <div className="flex items-start gap-sm">
-                <div className="flex-1">
-                  <p className="font-semibold text-status-success">{toastT('title')}</p>
-                  <p className="mt-xs text-status-success/90">{toastT('body')}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowToast(false)}
-                  className="rounded-full border border-border px-sm py-xs text-xs text-text transition-colors duration-base hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
-                >
-                  {toastT('dismiss')}
-                </button>
-              </div>
+    <SiteShell
+      header={<Header onCta={scrollToForm} userState={userState} />}
+      footer={<Footer />}
+      skipToMainLabel={layoutT('skipToMain')}
+    >
+      <SectionViewTracker />
+      {showToast ? (
+        <div className="mx-auto mb-lg flex w-full max-w-3xl items-center justify-between gap-sm px-gutter" role="status" aria-live="polite">
+          <div className="flex flex-1 items-start gap-sm rounded-2xl border border-status-success bg-status-success/10 px-md py-sm text-sm text-status-success shadow-card">
+            <div className="flex-1">
+              <p className="font-semibold text-status-success">{toastT('title')}</p>
+              <p className="mt-xs text-status-success/90">{toastT('body')}</p>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
+            <button
+              type="button"
               onClick={() => setShowToast(false)}
-              className="shrink-0 px-sm"
+              className="rounded-full border border-border px-sm py-xs text-xs text-text transition-colors duration-base hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
             >
               {toastT('dismiss')}
-            </Button>
-          </Card>
+            </button>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowToast(false)}
+            className="shrink-0 px-sm"
+          >
+            {toastT('dismiss')}
+          </Button>
         </div>
       ) : null}
 
@@ -118,7 +120,7 @@ export default function LandingExperience({ userState }: LandingExperienceProps)
           <div className="md:col-span-7 lg:col-span-6">
             <WaitlistForm headingId="waitlist-heading-section" source={source ?? undefined} className="h-full" />
           </div>
-          <aside className="md:col-span-5 lg:col-span-5 flex flex-col gap-lg">
+          <aside className="flex flex-col gap-lg md:col-span-5 lg:col-span-5">
             <Card className="p-lg">
               <h3 className="text-h3 text-text">{waitlistAsideT('title')}</h3>
               <ul className="mt-sm list-disc space-y-sm pl-lg text-body-sm text-text-muted marker:text-border">

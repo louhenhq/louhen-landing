@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
-import { buttons, cn } from '@app/(site)/_lib/ui';
+import { buttons, cn, focusRing } from '@app/(site)/_lib/ui';
 import HeaderDrawer, { type HeaderDrawerCloseReason } from './HeaderDrawer';
 import HeaderLocaleSwitcher from './HeaderLocaleSwitcher';
 import HeaderThemeToggle from './HeaderThemeToggle';
@@ -202,6 +202,7 @@ export default function Header({ onCta, userState: userStateProp }: HeaderProps)
             'group-data-[header-state=shrink]/header:gap-md',
             'group-data-[motion=disabled]/header:transition-none'
           )}
+          role="navigation"
           aria-label={t('nav.primaryLabel')}
         >
           {primaryNavItems.map(({ item, label }) => (
@@ -254,7 +255,10 @@ export default function Header({ onCta, userState: userStateProp }: HeaderProps)
           ) : null}
           <button
             type="button"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-border text-sm font-medium text-text lg:hidden"
+            className={cn(
+              'inline-flex h-11 w-11 items-center justify-center rounded-full border border-border text-sm font-medium text-text lg:hidden',
+              focusRing
+            )}
             aria-expanded={drawerOpen}
             aria-controls={DRAWER_ID}
             aria-haspopup="dialog"
@@ -270,7 +274,11 @@ export default function Header({ onCta, userState: userStateProp }: HeaderProps)
       </div>
 
       {secondaryNavItems.length > 0 ? (
-        <nav className="hidden border-t border-border/60 bg-bg px-gutter py-xs lg:block" aria-label={t('nav.secondaryLabel')}>
+        <nav
+          className="hidden border-t border-border/60 bg-bg px-gutter py-xs lg:block"
+          role="navigation"
+          aria-label={t('nav.secondaryLabel')}
+        >
           <ul className="mx-auto flex max-w-6xl items-center gap-md text-xs text-text-muted">
             {secondaryNavItems.map(({ item, label }) => (
               <li key={item.id}>
