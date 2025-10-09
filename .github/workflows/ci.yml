@@ -120,8 +120,9 @@ jobs:
               console.error(`  ${line}`);
             }
             process.exit(1);
-          if (!suspicious.length) {
+          } else {
             console.log('Secret hygiene guard passed - no high-risk patterns found.');
+            process.exit(0);
           }
           NODE
 
