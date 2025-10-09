@@ -2,6 +2,13 @@ name: e2e:preview
 
 on:
   workflow_dispatch:
+    inputs:
+      suite:
+        description: 'Optional subset to run (method, header-nav, footer, waitlist, consent)'
+        required: false
+      ref:
+        description: 'Git ref to checkout (defaults to workflow ref)'
+        required: false
 
 jobs:
   e2e-preview:
