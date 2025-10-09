@@ -4,6 +4,17 @@ High-level map of routes, data flow, environment setup, security, observability,
 
 ---
 
+## Environment Mapping (Locked)
+
+| Branch       | Vercel Env | Domain                       | Robots                                                       | Consent / Analytics                               |
+| ------------ | ---------- | ---------------------------- | ------------------------------------------------------------ | ------------------------------------------------- |
+| `staging`    | Preview    | `https://staging.louhen.app` | `X-Robots-Tag: noindex`, `robots.txt` → `Disallow: /`        | Consent banner hidden; analytics disabled         |
+| `production` | Production | `https://www.louhen.app`     | Indexable (`X-Robots-Tag` absent), `robots.txt` allows crawl | Consent banner shown; analytics load after opt-in |
+
+Status: (Locked) — Last updated: 2025-10-09, Owner: Martin
+
+---
+
 ## 1) Routes & Pages (App Router)
 
 - `/`  
@@ -22,6 +33,7 @@ High-level map of routes, data flow, environment setup, security, observability,
   POST endpoint to re-send confirmation email if token expired or lost (guarded by rate limit).
 
 ### Method Page — Personalisation & Flags
+
 - Personalised copy derives from session user context; prefer SSR-safe read of child profiles (id, firstName) from the existing auth/session provider. Do not block render; if missing, fall back to generic strings.
 - Feature flags: `method.stickyCta`, `method.exitNudge`. Default: enabled on staging, disabled on production until QA sign-off.
 - Performance budget: do not add new client libraries beyond the already-approved Framer Motion; gate animations behind the reduced-motion media query.
@@ -35,16 +47,17 @@ UI (client)
 → Zod validate (email, locale, utm, captcha token)  
 → Verify hCaptcha using `HCAPTCHA_SECRET`  
 → Create doc in Firestore (collection: `waitlist`) with fields:
-  - email (string, lowercased, trimmed)
-  - locale (string, e.g., `de`, `en`)
-  - utm: { source, medium, campaign, term, content } (strings, optional)
-  - createdAt (server timestamp)
-  - confirmToken (opaque, random or signed)
-  - confirmExpiresAt (timestamp; NOW + TTL days)
-  - confirmedAt (nullable timestamp)
-  - ipHash (optional, salted hash for abuse monitoring)
-→ (Optional) Send confirmation email via Resend (once domain is verified)
-→ UI shows success; on email click, user hits `/confirm?token=...`
+
+- email (string, lowercased, trimmed)
+- locale (string, e.g., `de`, `en`)
+- utm: { source, medium, campaign, term, content } (strings, optional)
+- createdAt (server timestamp)
+- confirmToken (opaque, random or signed)
+- confirmExpiresAt (timestamp; NOW + TTL days)
+- confirmedAt (nullable timestamp)
+- ipHash (optional, salted hash for abuse monitoring)
+  → (Optional) Send confirmation email via Resend (once domain is verified)
+  → UI shows success; on email click, user hits `/confirm?token=...`
 
 Confirm flow (`/confirm`)  
 → Validate token (signature/random lookup), check TTL  
@@ -56,7 +69,8 @@ Confirm flow (`/confirm`)
 
 ## 3) API Contracts
 
-POST `app/api/waitlist/route.ts`  
+POST `app/api/waitlist/route.ts`
+
 - Request JSON:
   - email: string (required)
   - locale: string (optional, defaults from headers)
@@ -70,13 +84,15 @@ POST `app/api/waitlist/route.ts`
   - 409 `{ status: "error", code: "ALREADY_EXISTS" }` (optional if dedup by email)
   - 500 `{ status: "error", code: "INTERNAL_ERROR" }`
 
-GET `/confirm?token=...` (Server Component)  
-- Success: marks confirmed and renders success UX  
+GET `/confirm?token=...` (Server Component)
+
+- Success: marks confirmed and renders success UX
 - Failure: shows expired/invalid copy with CTA to re-send
 
-(If implemented) POST `app/api/resend-confirm/route.ts`  
-- Request JSON: `{ email: string }`  
-- Success: `{ status: "ok", code: "RESENT" }`  
+(If implemented) POST `app/api/resend-confirm/route.ts`
+
+- Request JSON: `{ email: string }`
+- Success: `{ status: "ok", code: "RESENT" }`
 - Errors: 400 `INPUT_INVALID`, 404 `NOT_FOUND`, 429 `RATE_LIMITED`
 
 ---
@@ -87,6 +103,7 @@ Project: `louhen-mvp`
 Collection: `waitlist` (document ID may be random or email-hash)
 
 Document fields:
+
 - email: string
 - locale: string
 - utm: { source?, medium?, campaign?, term?, content? }
@@ -106,6 +123,7 @@ Security rules: not applicable here (Admin SDK only), but keep the project’s r
 ## 5) Environment & Configuration (Vercel)
 
 Required env vars (all set in Vercel):
+
 - FIREBASE_ADMIN_SA_B64 (base64 of Service Account JSON)
 - FIREBASE_PROJECT_ID
 - FIREBASE_DB_REGION
@@ -189,6 +207,7 @@ Fail fast on missing envs with clear server-side error logs (no secrets echoed).
 ## 10) CI/CD
 
 GitHub Actions:
+
 - Job: build & verify
   - `npm ci`
   - `npm run lint`
@@ -201,7 +220,8 @@ GitHub Actions:
 **CI / E2E note**: Remote runs use `E2E_BASE_URL=https://staging.louhen.app`. If the preview environment is protected, attach the `x-vercel-protection-bypass` header with the shared secret.
 
 Branching:
-- `main` (stable)  
+
+- `main` (stable)
 - `next` / `beta` if needed for pre-releases (already configured in `.releaserc.json`)
 
 ---
@@ -237,6 +257,7 @@ UI should map these to friendly messages; server logs should include the code fo
 - Add Sentry with PII scrubbing and environment tagging.
 - Hook Resend templates for branded confirmation emails (DKIM/SPF complete).
 - Add basic analytics events (privacy-safe) for conversion funnels.
+- Evaluate Cloudflare WAF once traffic patterns stabilize post-launch.
 
 ---
 
@@ -259,6 +280,7 @@ We use a two-branch model:
 - **production** is the release branch. The production site (`www.louhen.app`) deploys from this branch.
 
 ### How to release
+
 1. Merge feature branches into `staging` via pull requests.
 2. Once `staging` is validated (QA, e2e, approvals), open a pull request from `staging` into `production`.
 3. The CI job **`enforce-release-source`** is a required status check: it blocks PRs into `production` unless the head branch is `staging`.
@@ -268,6 +290,7 @@ We use a two-branch model:
 7. The **Enforce Release PR Checklist** workflow status check must stay marked Required in the `production` branch ruleset.
 
 ### Why this guard exists
+
 - Ensures production deployments are only promoted from a validated staging branch.
 - Prevents accidental direct merges from feature branches into production.
 - Keeps the release flow auditable and consistent.

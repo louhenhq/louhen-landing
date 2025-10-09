@@ -22,6 +22,12 @@ Louhen Landing is the official marketing site for Louhen, designed to provide a 
 - Honor accessibility, dark-mode, i18n, and reduced-motion guardrails outlined in Slice plans and the PR checklist.
 - Run existing validation commands—`npm run lint`, `npm run validate:local`, `npm run lighthouse`, etc.—to confirm design integrity before merging.
 
+## Governance & Launch Readiness
+
+- Decisions and guardrails live in `CONTEXT/*`; review relevant docs (architecture, privacy, security, i18n) before making changes.
+- Promotion to production requires every item in [`PRELAUNCH_CHECKLIST.md`](PRELAUNCH_CHECKLIST.md) marked complete with artifacts attached to the release PR.
+- No direct pushes to staging/production; open PRs from feature branches and follow the enforced review workflow.
+
 ## Adding a locale
 
 > Current production locales: `/en-de/*` (default, English content for the German market) and `/de-de/*` (German copy). Short segments (`/en`, `/de`) are auto-redirected to the canonical variant, and loopback hosts bypass HTTPS/HSTS to keep automation green.
@@ -50,6 +56,7 @@ Louhen Landing is the official marketing site for Louhen, designed to provide a 
 - Coverage messaging should call out whether a profile is covered by LouhenFit (use named variants when a child name is available).
 
 ### Using the type scale
+
 - `text-display-xl` powers hero H1s (Fraunces 700, clamp with `opsz` 48); keep hero wrappers around `max-w-3xl` so EN/DE copy sits on 1–2 lines.
 - `text-display-lg` is the section H2 / method hero size; `text-h3` covers card and inline headings.
 - `text-body` is default paragraph copy; `text-body-sm` is for helper text, secondary labels, and captions.
@@ -57,6 +64,7 @@ Louhen Landing is the official marketing site for Louhen, designed to provide a 
 - All typography must use these utilities—no `text-[N]`, inline `font-family`, or font-weight/size animations.
 
 ### UI primitives quick-start
+
 - Import Button/Input/Card from `@/components/ui` and lean on their variants instead of bespoke classes; the primitives already handle tokenized colors, elevation, and focus rings.
 - **Button** variants: `primary` (brand fill), `secondary` (outline), `ghost` (chromeless), `destructive` (error). Sizes: `sm` (labels at `text-body-sm`), `md` (default CTA), `lg` (hero CTAs). Pass `loading` to lock interactions and expose `aria-busy`.
 - **Input** accepts `invalid` to swap into feedback styling and pipes `aria-invalid` automatically. Always pair with a `<label>` and point `aria-describedby` at helper/error copy.
@@ -64,11 +72,13 @@ Louhen Landing is the official marketing site for Louhen, designed to provide a 
 - **Card** variants: `surface`, `outline`, `ghost`; set `interactive` (or render as `button`/`a`) for subtle hover lift that respects `prefers-reduced-motion`.
 
 ### Theme & toggle
+
 - The `<html>` element owns `data-theme` / `data-theme-mode`; dark theme activates through `[data-theme="dark"]` with semantic tokens swapped in `globals.css`.
 - Preferences persist via the `lh_theme` cookie (180d TTL) and initialise pre-hydration to avoid flashes; “System” defers to `prefers-color-scheme` on every load.
 - `ThemeToggle` (in the header) cycles System → Light → Dark; call `setTheme` in client code for bespoke flows.
 
 ### Using the layout shell
+
 - Wrap landing pages in the `SiteShell` component; pass the sticky `Header`, `Footer`, and `layout.skipToMain` copy so skip links always work.
 - Containers come from `layout.container`/`layout.grid`; never hand-roll `max-w` or gutter spacing. Section padding comes from `layout.section` (80–120px clamp).
 - Keep hero, story, trust, and waitlist blocks on the 12-column grid—use column spans like `md:col-span-7` instead of bespoke margins.
@@ -76,18 +86,22 @@ Louhen Landing is the official marketing site for Louhen, designed to provide a 
 - Anchor targets (`#how`, `#story`, `#waitlist`, `#faq`) should land on elements with our shell helpers so the sticky nav never obscures content.
 
 ### Hero usage
+
 - `Hero.tsx` locks the text/media split, CTA stack, and LouhenFit micro-trust line—follow [`CONTEXT/design_system.md#hero`](CONTEXT/design_system.md#hero) before adjusting layout or copy.
 - Keep the media container’s aspect ratio and reduced-motion guardrails intact so LCP/CLS stay stable; swap in the Lottie once it meets the <=150KB budget.
 
 ### Trust Bar usage
+
 - `components/TrustBar.tsx` anchors reassurance directly under the hero using the 12-col shell—do not duplicate it elsewhere on the landing route.
 - Tiles stay neutral (`bg-bg-card`, `border-border`, monochrome line icons) and map to the four locked claims; extend copy/modals via [`CONTEXT/design_system.md#trust-bar`](CONTEXT/design_system.md#trust-bar).
 
 ### How-it-Works usage
+
 - `components/HowItWorks.tsx` delivers the three-step scan → match → happy feet story with illustration placeholders. Follow [`CONTEXT/design_system.md#how-it-works`](CONTEXT/design_system.md#how-it-works) for card anatomy, motion, and copy limits.
 - Deep links inside each step should route to the Method page anchors using locale-aware paths (e.g., `/${locale}/method#engine`).
 
 ### Waitlist CTA usage
+
 - `components/waitlist/WaitlistForm.tsx` powers the landing CTA and adapts to embedded contexts—wrap it in a 12-col grid with reassurance cards per [`CONTEXT/design_system.md#waitlist-cta`](CONTEXT/design_system.md#waitlist-cta).
 - Keep the email → consent → hCaptcha → submit order intact, surface error summaries on submit, and let the success panel focus itself while offering resend guidance.
 
@@ -121,38 +135,39 @@ To get started locally:
 ## Quickstart: Waitlist + Env
 
 **TL;DR**
-1. `cp .env.example .env.local` and fill in dev-safe placeholders.  
-2. Convert your Firebase dev service account JSON to Base64 and set `FIREBASE_ADMIN_SA_B64`.  
-3. Drop in the Resend dev API key and keep `RESEND_FROM` / `RESEND_REPLY_TO` on louhen.app.  
-4. Use hCaptcha universal test keys (`10000000-ffff-ffff-ffff-000000000001` / `0x000…000`).  
-5. `npm run lint && npm run build && npm run dev` to boot the stack.  
+
+1. `cp .env.example .env.local` and fill in dev-safe placeholders.
+2. Convert your Firebase dev service account JSON to Base64 and set `FIREBASE_ADMIN_SA_B64`.
+3. Drop in the Resend dev API key and keep `RESEND_FROM` / `RESEND_REPLY_TO` on louhen.app.
+4. Use hCaptcha universal test keys (`10000000-ffff-ffff-ffff-000000000001` / `0x000…000`).
+5. `npm run lint && npm run build && npm run dev` to boot the stack.
 6. Visit `/status`, authenticate with `STATUS_USER` / `STATUS_PASS` from `.env.local`, and expect `emailTransport=false` in dev while noop mode is active.
-<<<<<<< HEAD
+   <<<<<<< HEAD
 7. Rate limiting defaults to 10 submissions/hour/IP and 3 resends/30m/email; override with `WAITLIST_RATE_SUBMITS_PER_HOUR_PER_IP` and `WAITLIST_RATE_RESENDS_PER_30M_PER_EMAIL` if you need different local caps.
-8. After confirming an email, `/waitlist/pre-onboarding` is available for the optional family profile step. The confirmation flow drops a short-lived session cookie so drafts persist without exposing the email address.
-=======
->>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
+8. # After confirming an email, `/waitlist/pre-onboarding` is available for the optional family profile step. The confirmation flow drops a short-lived session cookie so drafts persist without exposing the email address.
+   > > > > > > > f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
 
 **Waitlist slice plan:** Slice 1 delivers UI scaffolding, Slice 2 adds API + validation, Slice 3 wires email + confirmation, Slice 5 layers pre-onboarding incentives, and Slice 6 locks in automated tests and quality gates.
 
 **Preview vs Production:** Preview lives on `https://staging.louhen.app`, runs `WAITLIST_CONFIRM_TTL_DAYS=1`, and ships with `noindex`. Production promotes to `https://www.louhen.app` with the canonical TTL of 7 days; the apex `https://louhen.app` permanently redirects to the www host.
 
 **Docs to bookmark:**
-- [`/CONTEXT/email.md`](CONTEXT/email.md) — Resend runbook and DNS requirements.  
-- [`/CONTEXT/envs.md`](CONTEXT/envs.md) — up-to-date environment matrix.  
-- [`/CONTEXT/status-monitoring.md`](CONTEXT/status-monitoring.md) — /api/status protection + monitor.  
+
+- [`/CONTEXT/email.md`](CONTEXT/email.md) — Resend runbook and DNS requirements.
+- [`/CONTEXT/envs.md`](CONTEXT/envs.md) — up-to-date environment matrix.
+- [`/CONTEXT/status-monitoring.md`](CONTEXT/status-monitoring.md) — /api/status protection + monitor.
 
 ## Waitlist: env & local testing
 
-1. Copy `.env.example` to `.env.local` and replace placeholders with local credentials or sandbox values.  
-2. Run without a `RESEND_API_KEY` locally to stay in Resend sandbox mode (emails log to stdout via the noop transport).  
-3. Generate hCaptcha developer keys for local testing; production keys should only live in Vercel secrets.  
+1. Copy `.env.example` to `.env.local` and replace placeholders with local credentials or sandbox values.
+2. Run without a `RESEND_API_KEY` locally to stay in Resend sandbox mode (emails log to stdout via the noop transport).
+3. Generate hCaptcha developer keys for local testing; production keys should only live in Vercel secrets.
 4. `WAITLIST_CONFIRM_TTL_DAYS` defaults to 7 — shorten it in preview environments to exercise expiry flows faster.
 
 ### Status endpoint
 
-- `/api/status` returns JSON fields: `noncePresent`, `emailTransport`, `emailTransportMode`, `suppressionsCount`, and `env` (with deploy metadata).  
-- `emailTransport=false` is expected in development/preview when Resend credentials are not set, and `emailTransportMode` will read `noop`.  
+- `/api/status` returns JSON fields: `noncePresent`, `emailTransport`, `emailTransportMode`, `suppressionsCount`, and `env` (with deploy metadata).
+- `emailTransport=false` is expected in development/preview when Resend credentials are not set, and `emailTransportMode` will read `noop`.
 - In production the endpoint must report `emailTransport=true` once Resend is wired, otherwise the env guard will fail before deployment.
 
 ## QA Targets
@@ -162,6 +177,7 @@ To get started locally:
 - Confirm environment variables are correctly loaded and used.
 - Verify design tokens are up to date and applied consistently.
 - Test deployment pipelines and CI workflows for reliability.
+
 ### QA automation quickstart
 
 Run the automated checks locally before pushing changes:
@@ -193,6 +209,7 @@ headers (falling back to `BASE_URL` or `http://localhost:4311`), so Lighthouse s
 `http://localhost:4311/sitemap.xml` while remote environments produce the correct absolute origin.
 
 #### Playwright run modes
+
 - **Local webServer mode** (default): in one terminal run `npm run serve:prod` (the script first frees port 4311 via `kill -9 $(lsof -tiTCP:4311)` on macOS, then launches `next start`). With `BASE_URL` unset, run `npm run test:e2e` and Playwright will boot the local server for you when needed.
 - **External target mode**: when the environment cannot bind to port 4311, point Playwright at an already-running deployment with `BASE_URL=http://localhost:4311/en-de/ npm run test:e2e:external`. Any fully-qualified origin works (preview URLs, staging hosts, etc.) as long as it already serves the `/en-de/*` routes.
 
@@ -226,12 +243,13 @@ Use `validate:local` during normal development; reserve `validate:sandbox` for C
 Need to point at a different preview? Override the default with `PREVIEW_BASE_URL=https://my-preview.example`.
 
 ### Reviewer checklist
+
 - [ ] Playwright supports BASE_URL external mode (no webServer spawn when set).
 - [ ] Local mode passes: serve:prod + test:e2e green.
 - [ ] Lighthouse runs on /en-de/method (or LHCI_URL override), no interstitials.
 - [ ] Docs updated for the two modes and port-free one-liner.
 - [ ] E2E tests and SEO/unit specs assume full-locale prefixes only.
-- [ ] Fonts load from /fonts/** only; no Google Fonts requests.
+- [ ] Fonts load from /fonts/\*\* only; no Google Fonts requests.
 
 ### CI on demand
 
@@ -271,16 +289,19 @@ curl -H "x-vercel-protection-bypass: $VERCEL_AUTOMATION_BYPASS_SECRET" \
 ### Playwright auth header snippet
 
 ```ts
-import { test as base } from '@playwright/test';
+import { test as base } from "@playwright/test";
 
 const test = base.extend({
   context: async ({ browser }, use) => {
     const headers = process.env.VERCEL_AUTOMATION_BYPASS_SECRET
-      ? { 'x-vercel-protection-bypass': process.env.VERCEL_AUTOMATION_BYPASS_SECRET }
+      ? {
+          "x-vercel-protection-bypass":
+            process.env.VERCEL_AUTOMATION_BYPASS_SECRET,
+        }
       : {};
 
     const context = await browser.newContext({
-      baseURL: process.env.E2E_BASE_URL || 'http://127.0.0.1:3000',
+      baseURL: process.env.E2E_BASE_URL || "http://127.0.0.1:3000",
       extraHTTPHeaders: headers,
     });
     await use(context);
@@ -306,16 +327,19 @@ curl -H "x-vercel-protection-bypass: $VERCEL_AUTOMATION_BYPASS_SECRET" \
 ### Playwright auth header snippet
 
 ```ts
-import { test as base } from '@playwright/test';
+import { test as base } from "@playwright/test";
 
 const test = base.extend({
   context: async ({ browser }, use) => {
     const headers = process.env.VERCEL_AUTOMATION_BYPASS_SECRET
-      ? { 'x-vercel-protection-bypass': process.env.VERCEL_AUTOMATION_BYPASS_SECRET }
+      ? {
+          "x-vercel-protection-bypass":
+            process.env.VERCEL_AUTOMATION_BYPASS_SECRET,
+        }
       : {};
 
     const context = await browser.newContext({
-      baseURL: process.env.E2E_BASE_URL || 'http://127.0.0.1:3000',
+      baseURL: process.env.E2E_BASE_URL || "http://127.0.0.1:3000",
       extraHTTPHeaders: headers,
     });
     await use(context);

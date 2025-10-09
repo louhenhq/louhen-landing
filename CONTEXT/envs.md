@@ -1,59 +1,38 @@
-<<<<<<< HEAD
-# Environment Variables
+# Environment Matrix — Louhen Landing
 
-## Primary environments
+Canonical reference for configuration across local, preview, and production environments. Update this table via PR whenever variables change.
 
-| Environment | NEXT_PUBLIC_SITE_URL | NEXT_PUBLIC_ENV | WEB_ANALYTICS_DATASET | EMAIL_SUPPRESSION |
-|-------------|----------------------|-----------------|-----------------------|-------------------|
-| Production  | https://www.louhen.app | production       | louhen_web_prod        | _n/a_             |
-| Preview     | https://staging.louhen.app | staging         | louhen_web_staging     | on                |
+---
 
-- Update production secrets in Vercel before launch; preview stays isolated to the staging branch.
-- Any change to environment variables requires a redeploy to ensure functions and static prerenders pick up new values.
+## Core Variables (Locked)
 
-### Crawling toggle
+| Variable                  | Local (`.env.local`)    | Preview (`staging.louhen.app`) | Production (`www.louhen.app`) | Owner  | Rotation               | Notes                                                             |
+| ------------------------- | ----------------------- | ------------------------------ | ----------------------------- | ------ | ---------------------- | ----------------------------------------------------------------- |
+| **APP_BASE_URL**          | `http://localhost:3000` | `https://staging.louhen.app`   | `https://www.louhen.app`      | Martin | Quarterly or on signal | Must mirror deployment origin.                                    |
+| **FEATURE_PREVIEW_STRIP** | `false`                 | `true`                         | `false`                       | Martin | Quarterly or on signal | Preview flag hides consent, disables analytics, enforces noindex. |
+| **RESEND_API_KEY**        | Dev key (optional)      | Preview key                    | Production key                | Martin | Quarterly or on signal | Rotate via Resend; disable preview sends when not QAing email.    |
+| **RESEND_FROM**           | `no-reply@louhen.app`   | `no-reply@louhen.app`          | `no-reply@louhen.app`         | Martin | Quarterly or on signal | Aligns with locked transactional identity.                        |
+| **RESEND_REPLY_TO**       | `hello@louhen.app`      | `hello@louhen.app`             | `hello@louhen.app`            | Martin | Quarterly or on signal | Human support channel; keep consistent.                           |
 
-- `NEXT_PUBLIC_ALLOW_INDEXING` — set to `true` on production once launch is approved. When unset/false or in non-production environments, `robots.txt` returns `Disallow: /` and omits the sitemap.
+Status: (Locked) — Last updated: 2025-10-09, Owner: Martin
 
-## Waitlist rate limiting
+## Extended Variables
 
-- `WAITLIST_RATE_SUBMITS_PER_HOUR_PER_IP` — soft cap for `/api/waitlist` submissions per IP per hour (defaults to `10` when unset or invalid).
-- `WAITLIST_RATE_RESENDS_PER_30M_PER_EMAIL` — soft cap for `/api/waitlist/resend` per email per 30 minutes (defaults to `3`).
-
-## CI secrets
-
-- `VERCEL_AUTOMATION_BYPASS_SECRET` — used to send the `x-vercel-protection-bypass` header when Deployment Protection is active.
-
-Keep sensitive values in Vercel-managed secrets only; never commit `.env` files with production data.
-=======
-# Environment Matrix (Local / Preview / Production)
-
-Canonical reference for environment configuration across stages. Update this matrix whenever a variable is added, renamed, or its contract changes.
-
-| Variable | Local (`.env.local`) | Preview (`staging.louhen.app`) | Production (`www.louhen.app`) | Notes |
-|----------|----------------------|--------------------------------|---------------------------|-------|
-| **FIREBASE_ADMIN_SA_B64** | Base64-encoded dev service account JSON | Preview service account | Production service account | Server-only; rotate via Firebase if leaked. |
-| **FIREBASE_PROJECT_ID** | Dev project ID (e.g., `louhen-dev`) | `louhen-staging` | `louhen-prod` | Must align with Firestore instance in each stage. |
-| **FIREBASE_DB_REGION** | `eur3` | `eur3` | `eur3` | Region locked; do not change without migration plan. |
-| **RESEND_API_KEY** | `louhen-dev` key; optional (omit to use noop transport) | `louhen-preview` key | `louhen-prod` key | Manage in Resend; rotate quarterly. |
-| **RESEND_FROM** | `no-reply@louhen.app` | `no-reply@louhen.app` | `no-reply@louhen.app` | Locked sender identity. |
-| **RESEND_REPLY_TO** | `hello@louhen.app` | `hello@louhen.app` | `hello@louhen.app` | Locked reply channel. |
-| **NEXT_PUBLIC_HCAPTCHA_SITE_KEY** | `10000000-ffff-ffff-ffff-000000000001` (universal test key) | Staging key scoped to `staging.louhen.app` | Production key scoped to `louhen.app` | Test key always succeeds; never ship to preview/prod. |
-| **HCAPTCHA_SECRET** | `0x0000000000000000000000000000000000000000` (test secret) | Secret tied to staging key | Secret tied to production key | Keep server-side only. |
-| **WAITLIST_CONFIRM_TTL_DAYS** | `7` | `1` | `7` | Preview uses shorter TTL for expiry QA. |
-| **NEXT_PUBLIC_WAITLIST_URGENCY** | `true` (default) | toggle per experiment | toggle per experiment | Surface urgency copy flag; coordinate with growth. |
-| **APP_BASE_URL** | `http://localhost:3000` | `https://staging.louhen.app` | `https://www.louhen.app` | Always matches deployment origin (apex redirects to canonical www). |
-| **NEXT_PUBLIC_SITE_URL** | `http://localhost:3000` | `https://staging.louhen.app` | `https://www.louhen.app` | Must mirror `APP_BASE_URL` for link canonicalisation. |
-| **STATUS_USER** | Simple dev credential (e.g., `status-ops`) | Strong random secret (Vercel + GitHub) | Strong random secret (Vercel + GitHub) | Required for `/status` and status GitHub Action. |
-| **STATUS_PASS** | Simple dev credential (e.g., `status-secret`) | Strong random secret (Vercel + GitHub) | Strong random secret (Vercel + GitHub) | Rotate alongside STATUS_USER. |
+| Variable                          | Local                   | Preview                      | Production                 | Owner  | Rotation               | Notes                                    |
+| --------------------------------- | ----------------------- | ---------------------------- | -------------------------- | ------ | ---------------------- | ---------------------------------------- |
+| **FIREBASE_ADMIN_SA_B64**         | Dev service account     | Preview service account      | Production service account | Martin | Quarterly or on signal | Store only in Vercel/GitHub secrets.     |
+| **FIREBASE_PROJECT_ID**           | `louhen-dev`            | `louhen-staging`             | `louhen-prod`              | Martin | Quarterly or on signal | Must match Firestore instance per env.   |
+| **FIREBASE_DB_REGION**            | `eur3`                  | `eur3`                       | `eur3`                     | Martin | Quarterly or on signal | Region locked; migration requires plan.  |
+| **NEXT_PUBLIC_HCAPTCHA_SITE_KEY** | Universal test key      | Staging key                  | Production key             | Martin | Quarterly or on signal | Never ship test key beyond local.        |
+| **HCAPTCHA_SECRET**               | Test secret             | Staging secret               | Production secret          | Martin | Quarterly or on signal | Server-only; rotate on signal.           |
+| **WAITLIST_CONFIRM_TTL_DAYS**     | `7`                     | `1`                          | `7`                        | Martin | Quarterly or on signal | Short TTL on preview for expiry QA.      |
+| **NEXT_PUBLIC_SITE_URL**          | `http://localhost:3000` | `https://staging.louhen.app` | `https://www.louhen.app`   | Martin | Quarterly or on signal | Mirrors `APP_BASE_URL`.                  |
+| **STATUS_USER**                   | Dev credential          | Strong random secret         | Strong random secret       | Martin | Quarterly or on signal | Required for `/status` and uptime check. |
+| **STATUS_PASS**                   | Dev credential          | Strong random secret         | Strong random secret       | Martin | Quarterly or on signal | Rotate alongside `STATUS_USER`.          |
 
 ## Operational Notes
-- Maintain parity between `APP_BASE_URL` and `NEXT_PUBLIC_SITE_URL` within each environment to avoid mismatched redirects and metadata.
-- Any environment change requires a redeploy for Next.js serverless functions and static output to pick up new values.
-- The waitlist env guard caches public/server snapshots; restart `next dev` after editing `.env*` files so updates are recognised.
-- CI build job runs with public `NEXT_PUBLIC_*` vars only; the Playwright e2e job injects dummy analytics + server envs (never real secrets) so runtime guards and feature tests can execute (including a non-sensitive `HCAPTCHA_SECRET` so schema validation is exercised).
-- Manage preview/production secrets exclusively in Vercel + GitHub; never commit secrets to the repository.
-- Mirror the dummy `NEXT_PUBLIC_*` variables configured in CI within Vercel preview env settings to keep builds passing without server secrets.
-- When rotating STATUS_* credentials, update Vercel, GitHub Secrets, and re-run the status monitor workflow to confirm success.
-- Apex `https://louhen.app` must continue issuing a 301 redirect to `https://www.louhen.app`; never point application URLs to the bare domain.
->>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
+
+- Update Vercel and GitHub secrets before redeploying when rotations occur; never commit `.env` with production data.
+- CI uses sanitized values—ensure preview envs mirror required `NEXT_PUBLIC_*` variables so builds succeed without server secrets.
+- Any variable change requires a redeploy for serverless functions and static prerenders to pick up the update.
+- `FEATURE_PREVIEW_STRIP=true` enforces stripped previews: no analytics payloads, consent UI hidden, and `noindex` headers guaranteed.

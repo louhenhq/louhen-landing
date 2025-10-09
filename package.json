@@ -18,18 +18,12 @@
     "lint": "next lint",
     "postinstall:tokens": "npm run -w @louhen/design-tokens build",
     "guard:hex": "node scripts/guard-hex.mjs",
-<<<<<<< HEAD
     "ci:color-policy": "node scripts/guard-hex.mjs --ci --report ci-artifacts/color-policy-report.txt",
-=======
->>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
     "test": "npm run test:unit",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
     "test:e2e": "playwright test",
-<<<<<<< HEAD
     "test:e2e:external": "BASE_URL=${BASE_URL:-http://localhost:4311/en-de/} playwright test",
-=======
->>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
     "axe": "playwright test --grep @axe",
     "test:all": "npm run test:unit && npm run test:e2e",
     "i18n:check": "node scripts/check-i18n-placeholders.mjs",
@@ -46,12 +40,8 @@
     "validate:sandbox": "SANDBOX_VALIDATION=1 PREVIEW_BASE_URL=https://staging.louhen.app NEXT_PUBLIC_ANALYTICS_DISABLED=1 NEXT_PUBLIC_ANALYTICS_DEBUG=0 NEXT_PUBLIC_METHOD_STICKY_CTA=true NEXT_PUBLIC_METHOD_EXIT_NUDGE=true DEFAULT_LOCALE=en-de npm run validate:core",
     "e2e:local": "cross-env NODE_ENV=test APP_BASE_URL=http://localhost:4311 TEST_E2E_SHORTCIRCUIT=true TEST_E2E_BYPASS_TOKEN=e2e-mocked-token HCAPTCHA_SECRET=sk_dummy_for_e2e playwright test --reporter=html --workers=2",
     "e2e:open": "npx playwright show-report",
-<<<<<<< HEAD
     "pw:failures": "node scripts/summarize_playwright_failures.mjs",
     "validate:local": "bash scripts/validate-local.sh"
-=======
-    "pw:failures": "node scripts/summarize_playwright_failures.mjs"
->>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
   },
   "dependencies": {
     "firebase-admin": "^13.5.0",
@@ -87,7 +77,6 @@
     "@types/react-dom": "^19",
     "@vitest/coverage-v8": "^3.2.4",
     "@vitest/ui": "^3.2.4",
-    "patch-package": "^8.0.0",
     "autoprefixer": "^10.4.21",
     "cross-env": "^7",
     "eslint": "^9",
@@ -95,6 +84,7 @@
     "husky": "^9.1.7",
     "jsdom": "^24.0.0",
     "lint-staged": "^15.5.2",
+    "patch-package": "^8.0.0",
     "semantic-release": "^24",
     "start-server-and-test": "^2.1.2",
     "tailwindcss": "^4.1.13",
@@ -104,11 +94,6 @@
     "typescript": "^5",
     "undici": "^7.1.0",
     "vitest": "^3.2.4"
-  },
-  "lint-staged": {
-    "*.{ts,tsx,js,jsx,css,scss,md,mdx,html,json}": [
-      "node scripts/guard-hex.mjs --"
-    ]
   },
   "workspaces": [
     "packages/*"
