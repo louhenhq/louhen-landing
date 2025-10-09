@@ -1,42 +1,53 @@
+
 'use client';
 
 import {
-  COOKIE_PATH,
-  COOKIE_SAME_SITE,
-  CONTRAST_COOKIE,
-  ContrastPreference,
-  PREFERENCE_COOKIE_MAX_AGE,
-  THEME_COOKIE,
-  ThemePreference,
+  CONTRAST_COOKIE_NAME,
+  CONTRAST_STORAGE_KEY,
+  THEME_COOKIE_MAX_AGE,
+  THEME_COOKIE_NAME,
+  THEME_STORAGE_KEY,
+  type ContrastPreference,
+  type ThemePreference,
 } from '@/lib/theme/constants';
+
+export type { ThemePreference, ContrastPreference } from '@/lib/theme/constants';
 
 const PREFERS_DARK_QUERY = '(prefers-color-scheme: dark)';
 const PREFERS_CONTRAST_QUERY = '(prefers-contrast: more)';
 const FORCED_COLORS_QUERY = '(forced-colors: active)';
 
-function readCookie(name: string): string | undefined {
-  if (typeof document === 'undefined') return undefined;
-  const cookies = document.cookie ? document.cookie.split('; ') : [];
-  for (const cookie of cookies) {
-    if (!cookie) continue;
-    const [key, ...rest] = cookie.split('=');
-    if (key === name) {
-      return decodeURIComponent(rest.join('='));
-    }
-  }
-  return undefined;
-}
+const THEME_KEY = THEME_STORAGE_KEY;
+const CONTRAST_KEY = CONTRAST_STORAGE_KEY;
+const COOKIE_THEME_KEY = THEME_COOKIE_NAME;
+const COOKIE_CONTRAST_KEY = CONTRAST_COOKIE_NAME;
 
-function writeCookie(name: string, value: string | null) {
+function setCookie(name: string, value: string | null) {
   if (typeof document === 'undefined') return;
-  const secure = window.location.protocol === 'https:' ? '; Secure' : '';
-  if (!value) {
-    document.cookie = `${name}=; Path=${COOKIE_PATH}; Max-Age=0; SameSite=${COOKIE_SAME_SITE}${secure}`;
+  const directives = ['Path=/', 'SameSite=Lax'];
+  if (process.env.NODE_ENV === 'production') directives.push('Secure');
+  if (!value || value === 'system') {
+    document.cookie = `${name}=; ${directives.join('; ')}; Max-Age=0`;
     return;
   }
-  document.cookie =
-    `${name}=${encodeURIComponent(value)}; Path=${COOKIE_PATH}; Max-Age=${PREFERENCE_COOKIE_MAX_AGE}; SameSite=${COOKIE_SAME_SITE}` +
-    secure;
+  document.cookie = `${name}=${value}; ${directives.join('; ')}; Max-Age=${THEME_COOKIE_MAX_AGE}`;
+}
+
+function readCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+  const rawValue = match?.[1];
+  return typeof rawValue === 'string' ? decodeURIComponent(rawValue) : null;
+}
+
+function resolveThemePreference(value: string | null | undefined): ThemePreference {
+  if (value === 'light' || value === 'dark') return value;
+  return 'system';
+}
+
+function resolveContrastPreference(value: string | null | undefined): ContrastPreference {
+  if (value === 'normal' || value === 'more') return value;
+  return 'system';
 }
 
 function resolveSystemTheme(): 'light' | 'dark' {
@@ -44,94 +55,108 @@ function resolveSystemTheme(): 'light' | 'dark' {
   return window.matchMedia(PREFERS_DARK_QUERY).matches ? 'dark' : 'light';
 }
 
-function resolveSystemContrast(): 'normal' | 'more' {
-  if (typeof window === 'undefined' || !window.matchMedia) return 'normal';
-  if (window.matchMedia(FORCED_COLORS_QUERY).matches) return 'more';
-  return window.matchMedia(PREFERS_CONTRAST_QUERY).matches ? 'more' : 'normal';
-}
-
-function applyDataset(theme: ThemePreference, contrast: ContrastPreference) {
-  if (typeof document === 'undefined') return;
-  const root = document.documentElement;
-
-  root.setAttribute('data-theme-mode', theme);
-  root.setAttribute('data-contrast-mode', contrast);
-
-  const effectiveTheme = theme === 'system' ? resolveSystemTheme() : theme;
-  if (effectiveTheme === 'dark') {
-    root.setAttribute('data-theme', 'dark');
-  } else if (theme === 'light') {
-    root.setAttribute('data-theme', 'light');
-  } else {
-    root.removeAttribute('data-theme');
-  }
-
-  const effectiveContrast = contrast === 'system' ? resolveSystemContrast() : contrast;
-  if (effectiveContrast === 'more') {
-    root.setAttribute('data-contrast', 'more');
-  } else if (contrast === 'normal') {
-    root.setAttribute('data-contrast', 'normal');
-  } else {
-    root.removeAttribute('data-contrast');
-  }
-
-  const colorScheme = effectiveTheme === 'dark' ? 'dark' : 'light';
-  root.style.colorScheme = colorScheme;
-}
-
 export function getSavedTheme(): ThemePreference {
-  if (typeof document === 'undefined') return 'system';
-  const stored = readCookie(THEME_COOKIE);
-  if (stored === 'light' || stored === 'dark' || stored === 'system') return stored;
-  return 'system';
+  if (typeof window === 'undefined') return 'system';
+  const storageValue = localStorage.getItem(THEME_KEY) as ThemePreference | null;
+  if (storageValue) return resolveThemePreference(storageValue);
+  const cookieValue = readCookie(COOKIE_THEME_KEY);
+  return resolveThemePreference(cookieValue);
 }
 
 export function getSavedContrast(): ContrastPreference {
-  if (typeof document === 'undefined') return 'system';
-  const stored = readCookie(CONTRAST_COOKIE);
-  if (stored === 'normal' || stored === 'more' || stored === 'system') return stored;
-  return 'system';
+  if (typeof window === 'undefined') return 'system';
+  const storageValue = localStorage.getItem(CONTRAST_KEY) as ContrastPreference | null;
+  if (storageValue) return resolveContrastPreference(storageValue);
+  const cookieValue = readCookie(COOKIE_CONTRAST_KEY);
+  return resolveContrastPreference(cookieValue);
 }
 
 export function setTheme(pref: ThemePreference) {
   if (typeof document === 'undefined') return;
-  if (pref === 'system') writeCookie(THEME_COOKIE, null);
-  else writeCookie(THEME_COOKIE, pref);
-  applyDataset(pref, getSavedContrast());
+  const el = document.documentElement; // must be <html> for :root[...] selectors
+  if (pref === 'system') {
+    const prefersDark = typeof window !== 'undefined' && window.matchMedia(PREFERS_DARK_QUERY).matches;
+    if (prefersDark) el.setAttribute('data-theme', 'dark');
+    else el.removeAttribute('data-theme');
+    if (typeof localStorage !== 'undefined') localStorage.removeItem(THEME_KEY);
+    setCookie(COOKIE_THEME_KEY, null);
+  } else {
+    el.setAttribute('data-theme', pref);
+    if (typeof localStorage !== 'undefined') localStorage.setItem(THEME_KEY, pref);
+    setCookie(COOKIE_THEME_KEY, pref);
+  }
 }
 
 export function setContrast(pref: ContrastPreference) {
   if (typeof document === 'undefined') return;
-  if (pref === 'system') writeCookie(CONTRAST_COOKIE, null);
-  else writeCookie(CONTRAST_COOKIE, pref);
-  applyDataset(getSavedTheme(), pref);
+  const el = document.documentElement; // also on <html>
+  if (pref === 'system' || pref === 'normal') {
+    el.removeAttribute('data-contrast');
+    if (typeof localStorage !== 'undefined') {
+      if (pref === 'system') localStorage.removeItem(CONTRAST_KEY);
+      else localStorage.setItem(CONTRAST_KEY, pref);
+    }
+    setCookie(COOKIE_CONTRAST_KEY, pref === 'system' ? null : pref);
+  } else {
+    el.setAttribute('data-contrast', 'more');
+    if (typeof localStorage !== 'undefined') localStorage.setItem(CONTRAST_KEY, pref);
+    setCookie(COOKIE_CONTRAST_KEY, pref);
+  }
 }
 
 export function applyThemeFromMedia() {
-  if (typeof document === 'undefined') return;
-  applyDataset(getSavedTheme(), getSavedContrast());
+  if (typeof window === 'undefined') return;
+  const savedTheme = getSavedTheme();
+  const savedContrast = getSavedContrast();
+  if (savedTheme === 'system') {
+    const prefersDark = window.matchMedia(PREFERS_DARK_QUERY).matches;
+    if (prefersDark) document.documentElement.setAttribute('data-theme', 'dark');
+    else document.documentElement.removeAttribute('data-theme');
+    if (typeof localStorage !== 'undefined') localStorage.removeItem(THEME_KEY);
+    setCookie(COOKIE_THEME_KEY, null);
+  }
+  if (savedContrast === 'system') {
+    const prefersMore =
+      window.matchMedia(PREFERS_CONTRAST_QUERY).matches || window.matchMedia(FORCED_COLORS_QUERY).matches;
+    if (prefersMore) {
+      document.documentElement.setAttribute('data-contrast', 'more');
+    } else {
+      document.documentElement.removeAttribute('data-contrast');
+    }
+    if (typeof localStorage !== 'undefined') localStorage.removeItem(CONTRAST_KEY);
+    setCookie(COOKIE_CONTRAST_KEY, null);
+  }
 }
 
 export function subscribeToSystemPreferences(onChange: () => void) {
   if (typeof window === 'undefined') return () => {};
-  const dark = window.matchMedia(PREFERS_DARK_QUERY);
-  const contrast = window.matchMedia(PREFERS_CONTRAST_QUERY);
-  const forced = window.matchMedia(FORCED_COLORS_QUERY);
-  const handler = () => onChange();
-  dark.addEventListener('change', handler);
-  contrast.addEventListener('change', handler);
-  forced.addEventListener('change', handler);
+  const cleanup: Array<() => void> = [];
+
+  const attach = (query: string) => {
+    if (!window.matchMedia) return;
+    const mql = window.matchMedia(query);
+    const handler = () => onChange();
+    if (typeof mql.addEventListener === 'function') {
+      mql.addEventListener('change', handler);
+      cleanup.push(() => mql.removeEventListener('change', handler));
+    } else if (typeof mql.addListener === 'function') {
+      mql.addListener(handler);
+      cleanup.push(() => mql.removeListener(handler));
+    }
+  };
+
+  attach(PREFERS_DARK_QUERY);
+  attach(PREFERS_CONTRAST_QUERY);
+  attach(FORCED_COLORS_QUERY);
+
   return () => {
-    dark.removeEventListener('change', handler);
-    contrast.removeEventListener('change', handler);
-    forced.removeEventListener('change', handler);
+    cleanup.forEach((fn) => fn());
   };
 }
 
 export function currentColorScheme(): 'light' | 'dark' {
   if (typeof document === 'undefined') return 'light';
   const attr = document.documentElement.getAttribute('data-theme');
-  if (attr === 'dark') return 'dark';
-  if (attr === 'light') return 'light';
+  if (attr === 'dark' || attr === 'light') return attr;
   return resolveSystemTheme();
 }

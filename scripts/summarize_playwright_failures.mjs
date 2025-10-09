@@ -1,7 +1,12 @@
 import fs from 'fs';
 import path from 'path';
 
-const REPORT_JSON = process.env.PW_REPORT_JSON_PATH || './playwright-report/report.json';
+const candidatePaths = [
+  process.env.PW_REPORT_JSON_PATH,
+  './artifacts/playwright/e2e/report.json',
+  './artifacts/playwright/report.json',
+  './playwright-report/report.json',
+].filter(Boolean);
 const OUT = process.env.PW_FAILURES_MD || './playwright-failures.md';
 
 function safe(s){ return s==null ? '' : String(s); }
@@ -15,9 +20,17 @@ function pickAttachments(result){
   return atts.join('\n');
 }
 
-const jsonPath = path.resolve(REPORT_JSON);
-if (!fs.existsSync(jsonPath)) {
-  console.error(`[summarize] JSON report not found at: ${jsonPath}`);
+let jsonPath;
+for (const candidate of candidatePaths) {
+  const abs = path.resolve(candidate);
+  if (fs.existsSync(abs)) {
+    jsonPath = abs;
+    break;
+  }
+}
+
+if (!jsonPath) {
+  console.error('[summarize] JSON report not found in known paths.');
   process.exit(2);
 }
 

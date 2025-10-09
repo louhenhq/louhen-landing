@@ -22,7 +22,7 @@
 - Trust UI: `app/(site)/components/PodiatristBadge.tsx`, `app/(site)/components/TrustModals.tsx`
 - Landing shell + sections:
   - `app/(site)/components/LandingExperience.tsx`
-  - `app/(site)/components/Header.tsx`
+  - `components/features/header-nav/Header.tsx`
   - `app/(site)/components/Hero.tsx`
   - `app/(site)/components/WaitlistForm.tsx`
   - `app/(site)/components/HowItWorks.tsx`

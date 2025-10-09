@@ -1,6 +1,6 @@
 import { Buffer } from 'node:buffer';
 
-import { expect, test } from '@playwright/test';
+import { expect, test } from '@tests/fixtures/playwright';
 
 const STATUS_USER = process.env.STATUS_USER ?? '';
 const STATUS_PASS = process.env.STATUS_PASS ?? '';
@@ -27,9 +27,7 @@ test.describe('status diagnostics API', () => {
   });
 
   test('returns JSON payload when authorized', async ({ request }) => {
-    if (!HAS_CREDS) {
-      test.skip('STATUS credentials missing');
-    }
+    test.skip(!HAS_CREDS, 'STATUS credentials missing');
 
     const response = await request.get('/api/status', {
       headers: {
@@ -67,12 +65,12 @@ test.describe('status diagnostics page', () => {
 
     try {
       const authedPage = await context.newPage();
-      const response = await authedPage.goto('/en-de/status', { waitUntil: 'networkidle' });
+      const response = await authedPage.goto('/status', { waitUntil: 'networkidle' });
       expect(response?.status()).toBe(200);
       await expect(authedPage.getByRole('heading', { name: /Operational diagnostics/i })).toBeVisible();
-      await expect(authedPage.getByText(/CSP nonce/i)).toBeVisible();
-      await expect(authedPage.getByText(/Transport mode/i)).toBeVisible();
-      await expect(authedPage.getByText(/Vercel env/i)).toBeVisible();
+      await expect(authedPage.getByTestId('status-csp-nonce-value')).toBeVisible();
+      await expect(authedPage.getByTestId('status-transport-mode-value')).toBeVisible();
+      await expect(authedPage.getByTestId('status-env-vercel-value')).toBeVisible();
     } finally {
       await context.close();
     }

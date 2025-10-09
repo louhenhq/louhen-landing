@@ -129,11 +129,12 @@ export function ensureWaitlistPublicEnv(): WaitlistPublicEnvSummary {
     }
   }
 
-  const hasUrgencyFlag = hasEnv('NEXT_PUBLIC_WAITLIST_URGENCY');
+  const hasUrgencyFlag =
+    hasEnv('NEXT_PUBLIC_BANNER_WAITLIST_URGENCY') || hasEnv('NEXT_PUBLIC_WAITLIST_URGENCY');
   if (!hasUrgencyFlag) {
-    appendUnique(missingInProduction, 'NEXT_PUBLIC_WAITLIST_URGENCY');
+    appendUnique(missingInProduction, 'NEXT_PUBLIC_BANNER_WAITLIST_URGENCY');
     if (!runtime.isProduction && !runtime.isTest) {
-      warnings.push('NEXT_PUBLIC_WAITLIST_URGENCY missing; defaulting to enabled locally.');
+      warnings.push('NEXT_PUBLIC_BANNER_WAITLIST_URGENCY missing; defaulting to enabled locally.');
     }
   }
 
@@ -225,18 +226,6 @@ export function ensureWaitlistServerEnv(): WaitlistServerEnvSummary {
     appendUnique(missingInProduction, 'WAITLIST_CONFIRM_TTL_DAYS (must be a positive integer)');
     if (!runtime.isProduction && !runtime.isTest) {
       warnings.push('WAITLIST_CONFIRM_TTL_DAYS invalid; defaulting to 7 days locally.');
-    }
-  }
-
-  if (!parsePositiveInteger(process.env.WAITLIST_RATE_SUBMITS_PER_HOUR_PER_IP)) {
-    if (!runtime.isProduction && !runtime.isTest) {
-      warnings.push('WAITLIST_RATE_SUBMITS_PER_HOUR_PER_IP invalid; defaulting to 10 submissions/hour.');
-    }
-  }
-
-  if (!parsePositiveInteger(process.env.WAITLIST_RATE_RESENDS_PER_30M_PER_EMAIL)) {
-    if (!runtime.isProduction && !runtime.isTest) {
-      warnings.push('WAITLIST_RATE_RESENDS_PER_30M_PER_EMAIL invalid; defaulting to 3 resends/30m.');
     }
   }
 

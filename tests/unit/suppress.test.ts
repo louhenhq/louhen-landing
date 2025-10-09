@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 
-const store = new Map<string, any>();
+const store = new Map<string, Record<string, unknown>>();
 
 vi.mock('@/lib/firebaseAdmin', () => ({
   initAdmin: () => ({
@@ -13,7 +13,7 @@ vi.mock('@/lib/firebaseAdmin', () => ({
               data: () => store.get(id),
             };
           },
-          async set(data: any, options: { merge?: boolean }) {
+          async set(data: Record<string, unknown>, options: { merge?: boolean }) {
             const existing = store.get(id) ?? {};
             store.set(id, options?.merge ? { ...existing, ...data } : data);
           },

@@ -8,6 +8,10 @@ const SUPPORTED_LOCALES = locales;
 const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
 const nextConfig: NextConfig = {
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    remotePatterns: [],
+  },
   async redirects() {
     const legacyLocaleRedirects = ['en', 'de'].flatMap((legacy) => {
       const target = SUPPORTED_LOCALES.find((value) => value.startsWith(`${legacy}-`));

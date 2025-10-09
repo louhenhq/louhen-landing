@@ -2,6 +2,7 @@
 
 import { cn, layout } from '@/app/(site)/_lib/ui';
 import PrivacyRibbonLink from '@/components/PrivacyRibbonLink';
+import { legalPath } from '@lib/shared/routing/legal-path';
 import { useLocale, useTranslations } from 'next-intl';
 
 export default function PrivacyRibbon() {
@@ -21,7 +22,7 @@ export default function PrivacyRibbon() {
           </span>
           <p className="text-body text-text">{trustCopy('gdpr')}</p>
         </div>
-        <PrivacyRibbonLink href={`/${locale}/privacy`}>{t('cta')}</PrivacyRibbonLink>
+        <PrivacyRibbonLink href={legalPath(locale, 'privacy')}>{t('cta')}</PrivacyRibbonLink>
       </div>
     </section>
   );

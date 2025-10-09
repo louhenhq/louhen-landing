@@ -5,6 +5,10 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, '.'),
+      '@app': path.resolve(__dirname, 'app'),
+      '@components': path.resolve(__dirname, 'components'),
+      '@lib': path.resolve(__dirname, 'lib'),
+      '@tests': path.resolve(__dirname, 'tests'),
     },
   },
   test: {

@@ -1,4 +1,6 @@
 import { beforeAll, afterAll, beforeEach, describe, expect, test, vi } from 'vitest';
+import type { POST as WaitlistPostHandler } from '@/app/api/waitlist/route';
+import type { POST as ResendPostHandler } from '@/app/api/waitlist/resend/route';
 import { __testing } from '@/lib/rate/limiter';
 
 vi.stubGlobal('console', console);
@@ -36,8 +38,8 @@ vi.mock('@/lib/security/hcaptcha', () => ({
 }));
 
 describe('API waitlist rate limiting', () => {
-  let waitlistRoute: typeof import('@/app/api/waitlist/route');
-  let resendRoute: typeof import('@/app/api/waitlist/resend/route');
+  let waitlistPost: WaitlistPostHandler;
+  let resendPost: ResendPostHandler;
 
   beforeAll(async () => {
     process.env.TEST_MODE = '1';
@@ -50,8 +52,8 @@ describe('API waitlist rate limiting', () => {
     process.env.FIREBASE_PROJECT_ID = 'test';
     process.env.FIREBASE_DB_REGION = 'us-central1';
 
-    waitlistRoute = await import('@/app/api/waitlist/route');
-    resendRoute = await import('@/app/api/waitlist/resend/route');
+    ({ POST: waitlistPost } = await import('@/app/api/waitlist/route'));
+    ({ POST: resendPost } = await import('@/app/api/waitlist/resend/route'));
   });
 
   afterAll(() => {
@@ -71,8 +73,6 @@ describe('API waitlist rate limiting', () => {
   test('POST /api/waitlist returns 429 after limit reached', async () => {
     process.env.WAITLIST_RATE_SUBMITS_PER_HOUR_PER_IP = '1';
 
-    const { POST } = waitlistRoute;
-
     const makeRequest = () =>
       new Request('http://localhost/api/waitlist', {
         method: 'POST',
@@ -88,10 +88,10 @@ describe('API waitlist rate limiting', () => {
         }),
       });
 
-    const first = await POST(makeRequest());
+    const first = await waitlistPost(makeRequest());
     expect(first.status).toBe(200);
 
-    const second = await POST(makeRequest());
+    const second = await waitlistPost(makeRequest());
     expect(second.status).toBe(429);
     expect(second.headers.get('Retry-After')).not.toBeNull();
     const payload = await second.json();
@@ -100,8 +100,6 @@ describe('API waitlist rate limiting', () => {
 
   test('POST /api/waitlist/resend returns 429 after limit reached', async () => {
     process.env.WAITLIST_RATE_RESENDS_PER_30M_PER_EMAIL = '1';
-
-    const { POST } = resendRoute;
 
     const makeRequest = () =>
       new Request('http://localhost/api/waitlist/resend', {
@@ -115,10 +113,10 @@ describe('API waitlist rate limiting', () => {
         }),
       });
 
-    const first = await POST(makeRequest());
+    const first = await resendPost(makeRequest());
     expect(first.status).toBe(200);
 
-    const second = await POST(makeRequest());
+    const second = await resendPost(makeRequest());
     expect(second.status).toBe(429);
     expect(second.headers.get('Retry-After')).not.toBeNull();
     const payload = await second.json();

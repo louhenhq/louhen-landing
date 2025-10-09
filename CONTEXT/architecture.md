@@ -4,6 +4,30 @@ High-level map of routes, data flow, environment setup, security, observability,
 
 ---
 
+## 0) System Overview (Start Here)
+
+- **Structure:** `app/` (routes), `components/{ui,blocks,features/…}`, `lib/shared/` (isomorphic), `lib/server/` (server-only), `tests/{unit,e2e,axe}/`, `scripts/`, `content/`, `public/`, `CONTEXT/`, `.github/`. See [/CONTEXT/naming.md](naming.md) for enforced conventions and [/CONTEXT/rename_map.md](rename_map.md) for the migration roadmap.
+- **Route groups:** Marketing surfaces live under `app/(site)/[locale]/…` using lowercase BCP-47 segments; API handlers stay in `app/api/`. Default-locale pages must call `unstable_setRequestLocale` before rendering.
+- **Runtime split:** Place anything with secrets, Firestore, or Node-only APIs in `lib/server/`. Keep universal utilities, hooks, and analytics helpers in `lib/shared/` so they can execute on both client and server.
+- **Stack baseline:** Next.js 15 App Router, TypeScript strict mode, Tailwind + Style Dictionary tokens, consent-gated analytics, Firebase Admin, Resend, hCaptcha.
+- **TypeScript configs:** `tsconfig.json` (dev superset including tests, Playwright, scripts) and `tsconfig.build.json` (app build subset) share path aliases `@app/*`, `@components/*`, `@lib/*`, `@tests/*`.
+
+### Consent-First Analytics Modules
+- `lib/shared/analytics/client.ts` — client-side queue + flush abstraction; no vendor SDK code or network calls execute until consent is `granted`.
+- `lib/shared/consent/api.ts` — single source of truth for reading/updating consent state and subscribing to changes.
+- `components/ConsentBanner.tsx` — exclusive entry point for users to grant or deny analytics; other surfaces (header, footer, forms) listen only.
+- Data flow: `ConsentBanner` → `lib/shared/consent/api.ts` → lazy analytics bootstrap → buffered `page_view` flush.
+- Error handling: analytics bootstrap treats network failures as silent; retries stay capped (document limit per vendor) and must never block UI threads or surface fatal errors.
+
+### Tokens in the build
+- Runtime CSS for tokens is imported once in `app/layout.tsx` via `./styles/tokens.css` (which in turn pulls the light/dark/high-contrast bundles emitted by `@louhen/design-tokens`). No other module should import these CSS files.
+- Tailwind maps token scales through `tailwind.config.ts` by reading the generated CSS variables. The config scans `./app`, `./components`, `./pages`, and `./lib` for class usage; add new directories here if token-aware classes appear elsewhere.
+- Compile-time consumers (e.g., metadata theme colors, `Sparkline`) read JSON from `@louhen/design-tokens/build/web/tokens.json`. Details on permissible usage live in [/CONTEXT/design_system.md](design_system.md).
+
+Use this overview with the decision log to validate architecture changes before implementation.
+
+---
+
 ## 1) Routes & Pages (App Router)
 
 - `/`  
@@ -119,6 +143,32 @@ Required env vars (all set in Vercel):
 
 Fail fast on missing envs with clear server-side error logs (no secrets echoed).
 
+### DNS / Environment Addendum
+
+- Apex `louhen.app` must point to `76.76.21.21` (A record, DNS only) once production goes live.
+- `www.louhen.app` stays a CNAME to `cname.vercel-dns.com` (DNS only).
+- Wildcard previews `*.staging.louhen.app` stay CNAME records to `cname.vercel-dns.com` (DNS only).
+- If Vercel validator lags, provision explicit subdomains (e.g., `tmp.staging.louhen.app`) as fallbacks.
+- Keep production DNS dark prior to launch; only preview domains remain exposed.
+
+### Feature Flags & Environment Helpers
+
+- `lib/shared/flags.ts` owns `getFlags()`, `isPreview()`, `isProduction()`, and `getSiteOrigin()`. Read flags through these helpers instead of `process.env` to keep behaviour auditable and type-safe.
+- Serverside modules pull a fresh `getFlags()` per request (or during build for static paths); client components receive flags via props or the public `NEXT_PUBLIC_*` surface.
+- Example:
+
+```ts
+import { getFlags } from '@/lib/shared/flags';
+
+export function OgRoute() {
+  const { OG_DYNAMIC_ENABLED } = getFlags();
+  return OG_DYNAMIC_ENABLED ? renderDynamicOg() : renderStaticOg();
+}
+```
+
+- When introducing a new flag: update `/CONTEXT/envs.md`, add an owner entry in `/CONTEXT/decision_log.md`, and ensure tests exercise both flag states.
+- **Environment Mapping:** Preview and Production deployments load different defaults for analytics, CSP, and OG behaviour (see `/CONTEXT/envs.md`). These values live in Vercel Project → Settings → Environment Variables and are mirrored in documentation to keep parity. Preview builds default to analytics-off, CSP report-only, and dynamic OG enabled; Production enables analytics and full CSP enforcement.
+
 ---
 
 ## 6) CSP & Inline Scripts
@@ -190,7 +240,7 @@ GitHub Actions:
 - Job: release (on push to `main`)
   - `npx semantic-release --debug` (updates GitHub Release + CHANGELOG)
 
-**CI / E2E note**: Remote runs use `E2E_BASE_URL=https://staging.louhen.app`. If the preview environment is protected, attach the `x-vercel-protection-bypass` header with the shared secret.
+**CI / E2E note**: Playwright resolves `BASE_URL` → `PREVIEW_BASE_URL` → `http://localhost:4311`. When either env var is present, the suite hits that remote host and skips starting the local Next.js server. Local runs fall back to auto-starting Next on `0.0.0.0:4311`. If the remote environment is protected, supply `PROTECTION_HEADER="x-vercel-protection-bypass: <token>"` so requests include the required header.
 
 Branching:
 - `main` (stable)  
@@ -208,6 +258,7 @@ Branching:
   - CI: `npm run ci:color-policy` scans the entire repo, enforces email palette imports, and writes `ci-artifacts/color-policy-report.txt` for PR visibility.
 - Exceptions (allowlist): generated outputs only — `packages/design-tokens/**`, `public/tokens/**`, and the single `lib/email/colors.ts` module. Any new exception requires design-engineering approval and an update to the guard script.
 - Governance: new colours come via the design weekly. Designers propose token additions/changes, engineering reviews build impact, and the change ships with screenshots + changelog. Tokens are versioned by semver tags on the design-tokens package for traceability.
+- Playground route: `/tokens` renders the playground dynamically (`dynamic = 'force-dynamic'`, `runtime = 'nodejs'`) because the root layout reads request headers/cookies. The page never ships to production marketing traffic (robots noindex) and serves as an internal QA surface only.
 
 ## 12) Error Codes (canonical)
 
@@ -263,5 +314,8 @@ We use a two-branch model:
 - Ensures production deployments are only promoted from a validated staging branch.
 - Prevents accidental direct merges from feature branches into production.
 - Keeps the release flow auditable and consistent.
+- Make the matrix-based `e2e:preview` workflow a required status on `staging` so remote Playwright coverage (method, header-nav, footer, waitlist) must pass before merge; leave local retries at the default (0) to expose flakes during development.
+- Preview CI jobs execute remotely (no local server) with explicit permissions (`actions:read`, `contents:read`), a 30-minute timeout, and concurrency group `e2e-preview-${ref}-${suite}` to cancel stale runs. Secrets arrive via masked env vars; never echo them in logs.
+- npm (`~/.npm`) and Playwright (`~/.cache/ms-playwright`) caches reduce cold-start times. Cache keys derive from `npm-${os}-${hash(package-lock)}` / `pw-${os}-${hash(package-lock)}` with OS restore keys so fallback hits remain fast.
 
 ---

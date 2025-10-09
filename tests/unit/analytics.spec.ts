@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+type ViMock = ReturnType<typeof vi.fn>;
+
 const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 function setLocation(url: string) {
@@ -9,7 +11,7 @@ function setLocation(url: string) {
   window.history.replaceState({}, '', `${target.pathname}${target.search}${target.hash}`);
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   vi.resetModules();
   vi.useRealTimers();
   if (typeof window !== 'undefined') {
@@ -17,7 +19,6 @@ beforeEach(() => {
     window.localStorage.clear();
     setLocation('https://example.com/en?utm_source=test-source&utm_medium=test-medium&utm_campaign=test-campaign&utm_content=test-content&utm_term=test-term');
     Object.defineProperty(document, 'referrer', { configurable: true, value: 'https://referrer.example.com/article' });
-    (window as any).__LOUHEN_CONSENT__ = { analytics: true };
     Object.defineProperty(window.navigator, 'sendBeacon', { configurable: true, value: undefined });
   }
   document.cookie = '';
@@ -25,6 +26,9 @@ beforeEach(() => {
   process.env.NEXT_PUBLIC_ANALYTICS_DISABLED = '0';
   process.env.NEXT_PUBLIC_ANALYTICS_DEBUG = '0';
   globalThis.fetch = vi.fn(async () => ({ ok: true })) as unknown as typeof fetch;
+
+  const consentApi = await import('@/lib/shared/consent/api');
+  consentApi.clearConsent();
 });
 
 describe('client analytics', () => {
@@ -33,7 +37,7 @@ describe('client analytics', () => {
     await track({ name: 'hero_twin_badge_click' });
     await flush();
 
-    const fetchMock: any = globalThis.fetch;
+    const fetchMock = globalThis.fetch as unknown as ViMock;
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const body = JSON.parse(fetchMock.mock.calls[0][1].body as string);
     expect(body.name).toBe('hero_twin_badge_click');
@@ -46,7 +50,7 @@ describe('client analytics', () => {
 
   it('dedupes identical events within one second', async () => {
     const { track } = await import('@/lib/clientAnalytics');
-    const fetchMock: any = globalThis.fetch;
+    const fetchMock = globalThis.fetch as unknown as ViMock;
     await track({ name: 'hero_twin_badge_click' });
     await track({ name: 'hero_twin_badge_click' });
     await flush();
@@ -54,20 +58,17 @@ describe('client analytics', () => {
   });
 
   it('flushes buffered events when consent granted', async () => {
-    if (typeof window !== 'undefined') {
-      (window as any).__LOUHEN_CONSENT__ = { analytics: false };
-    }
+    const consentApi = await import('@/lib/shared/consent/api');
+    consentApi.setConsent('denied');
     const { track, getConsent } = await import('@/lib/clientAnalytics');
-    const fetchMock: any = globalThis.fetch;
+    const fetchMock = globalThis.fetch as unknown as ViMock;
 
     await track({ name: 'hero_twin_badge_click' });
     await flush();
     expect(getConsent()).toBe(false);
     expect(fetchMock).not.toHaveBeenCalled();
 
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('louhen:consent', { detail: { analytics: true } }));
-    }
+    consentApi.setConsent('granted');
     await flush();
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
@@ -94,7 +95,7 @@ describe('client analytics', () => {
 
   it('no-ops when analytics disabled', async () => {
     process.env.NEXT_PUBLIC_ANALYTICS_DISABLED = '1';
-    const fetchMock: any = globalThis.fetch;
+    const fetchMock = globalThis.fetch as unknown as ViMock;
     const { track } = await import('@/lib/clientAnalytics');
     await track({ name: 'hero_twin_badge_click' });
     await flush();
@@ -102,11 +103,11 @@ describe('client analytics', () => {
   });
 
   it('observeOnce only fires handler once and cleans up', async () => {
-    const callbacks: Array<(entries: any[]) => void> = [];
+    const callbacks: Array<(entries: unknown[]) => void> = [];
     const observers: MockIntersectionObserver[] = [];
     class MockIntersectionObserver {
-      callback: (entries: any[]) => void;
-      constructor(cb: (entries: any[]) => void) {
+      callback: (entries: unknown[]) => void;
+      constructor(cb: (entries: unknown[]) => void) {
         this.callback = cb;
         callbacks.push(cb);
         observers.push(this);
@@ -115,7 +116,8 @@ describe('client analytics', () => {
       unobserve = vi.fn();
       disconnect = vi.fn();
     }
-    (globalThis as any).IntersectionObserver = MockIntersectionObserver as unknown as typeof IntersectionObserver;
+    (globalThis as typeof globalThis & { IntersectionObserver: typeof IntersectionObserver }).IntersectionObserver =
+      MockIntersectionObserver as unknown as typeof IntersectionObserver;
 
     const { observeOnce } = await import('@/lib/clientAnalytics');
     const el = document.createElement('div');

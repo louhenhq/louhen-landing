@@ -1,32 +1,64 @@
-import { Buffer } from 'node:buffer';
-import { defineConfig, devices } from '@playwright/test';
 import type { PlaywrightTestConfig } from '@playwright/test';
+import { Buffer } from 'node:buffer';
+import { mkdirSync } from 'node:fs';
+import path from 'node:path';
+import { defineConfig, devices } from '@playwright/test';
 
-const FALLBACK_ORIGIN = 'http://localhost:4311';
-const LOCALE_SEGMENT_PATTERN = /(\/en-de|\/de-de)$/;
+const HOST = process.env.HOST ?? '127.0.0.1';
+const parsedPort = Number.parseInt(process.env.PORT ?? '4311', 10);
+const PORT = Number.isFinite(parsedPort) ? parsedPort : 4311;
+const HEALTH_PATH = process.env.PW_HEALTH_PATH ?? '/icon.svg';
+const fallbackLocalURL = `http://localhost:${PORT}`;
+const envBaseURL = process.env.BASE_URL ?? process.env.PREVIEW_BASE_URL ?? null;
+const baseURL = envBaseURL ?? fallbackLocalURL;
+const isRemote = envBaseURL !== null;
+const shouldSkipWebServer = process.env.PLAYWRIGHT_SKIP === '1';
+const artifactsRoot = process.env.PLAYWRIGHT_ARTIFACTS_DIR ?? 'artifacts/playwright';
+const playwrightResultsDir = path.join(artifactsRoot, 'results');
+const FALLBACK_ORIGIN = 'https://staging.louhen.app';
+const sandboxBaseURL = process.env.PREVIEW_BASE_URL ?? '';
+const isSandbox = process.env.SANDBOX_VALIDATION === '1';
 
-function normalizeBase(value?: string | null) {
-  return value?.trim().replace(/\/+$/, '') ?? '';
+function normalizeBase(raw?: string | null): string {
+  if (!raw) return '';
+  return raw.trim().replace(/\/+$/, '');
 }
 
-function ensureLocaleBase(value: string) {
-  const normalized = normalizeBase(value) || FALLBACK_ORIGIN;
-  if (LOCALE_SEGMENT_PATTERN.test(normalized)) {
-    return normalized;
-  }
-  return `${normalized}/en-de`;
+function ensureLocaleBase(origin: string): string {
+  if (!origin) return '';
+  if (origin.endsWith('/en-de') || origin.endsWith('/de-de')) return origin;
+  return `${origin}/en-de`;
 }
 
-function withTrailingSlash(value: string) {
+function withTrailingSlash(value: string): string {
+  if (!value) return value;
   return value.endsWith('/') ? value : `${value}/`;
 }
 
-const isSandbox = process.env.SANDBOX_VALIDATION === '1';
-const sandboxBaseURL = process.env.PREVIEW_BASE_URL;
-const shouldSkipWebServer = process.env.PLAYWRIGHT_SKIP === '1';
+mkdirSync(playwrightResultsDir, { recursive: true });
 
 const statusUser = process.env.STATUS_USER ?? process.env.CI_STATUS_USER ?? 'status-ops';
 const statusPass = process.env.STATUS_PASS ?? process.env.CI_STATUS_PASS ?? 'status-secret';
+
+const headerEnv = process.env.PROTECTION_HEADER;
+const extraHTTPHeaders = headerEnv
+  ? Object.fromEntries(
+      headerEnv
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) => {
+          const index = line.indexOf(':');
+          if (index === -1) throw new Error(`Invalid PROTECTION_HEADER entry: ${line}`);
+          const key = line.slice(0, index).trim();
+          const value = line.slice(index + 1).trim();
+          return [key, value];
+        })
+    )
+  : undefined;
+
+const cookieEnv = process.env.PROTECTION_COOKIE;
+const storageStatePath = cookieEnv ? '.playwright/auth-storage.json' : undefined;
 
 const sandboxOrigin = normalizeBase(sandboxBaseURL);
 if (isSandbox && !sandboxOrigin) {
@@ -39,7 +71,6 @@ const hasBaseOverride = baseOverride.length > 0;
 const defaultOrigin = sandboxOrigin || normalizeBase(process.env.APP_BASE_URL) || FALLBACK_ORIGIN;
 const targetOrigin = hasBaseOverride ? baseOverride : defaultOrigin;
 const canonicalBaseURL = withTrailingSlash(ensureLocaleBase(targetOrigin));
-const useExternalTarget = hasBaseOverride || isSandbox;
 
 const testEnv = {
   BASE_URL: targetOrigin,
@@ -48,17 +79,14 @@ const testEnv = {
   TEST_E2E_SHORTCIRCUIT: 'true',
   TEST_E2E_BYPASS_TOKEN: 'e2e-mocked-token',
   NEXT_PUBLIC_ENV: process.env.NEXT_PUBLIC_ENV ?? 'ci',
-  NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? targetOrigin,
+  NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? baseURL,
   NEXT_PUBLIC_HCAPTCHA_SITE_KEY: process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY ?? 'test_site_key',
   NEXT_PUBLIC_WAITLIST_URGENCY: process.env.NEXT_PUBLIC_WAITLIST_URGENCY ?? 'true',
-  NEXT_PUBLIC_ANALYTICS_DISABLED: process.env.NEXT_PUBLIC_ANALYTICS_DISABLED ?? '1',
-  NEXT_PUBLIC_ANALYTICS_DEBUG: process.env.NEXT_PUBLIC_ANALYTICS_DEBUG ?? '0',
+  NEXT_PUBLIC_BANNER_WAITLIST_URGENCY: process.env.NEXT_PUBLIC_BANNER_WAITLIST_URGENCY ?? 'true',
+  NEXT_PUBLIC_ANALYTICS_ENABLED: process.env.NEXT_PUBLIC_ANALYTICS_ENABLED ?? '0',
+  NEXT_PUBLIC_ANALYTICS_DISABLED: process.env.NEXT_PUBLIC_ANALYTICS_DISABLED ?? '0',
+  NEXT_PUBLIC_ANALYTICS_DEBUG: process.env.NEXT_PUBLIC_ANALYTICS_DEBUG ?? '1',
   NEXT_PUBLIC_COMMIT_SHA: process.env.NEXT_PUBLIC_COMMIT_SHA ?? 'playwright-ci',
-  NEXT_PUBLIC_LOCALES: process.env.NEXT_PUBLIC_LOCALES ?? 'en-de,de-de',
-  NEXT_PUBLIC_DEFAULT_LOCALE: process.env.NEXT_PUBLIC_DEFAULT_LOCALE ?? 'en-de',
-  DEFAULT_LOCALE: process.env.DEFAULT_LOCALE ?? 'en-de',
-  NEXT_PUBLIC_METHOD_STICKY_CTA: process.env.NEXT_PUBLIC_METHOD_STICKY_CTA ?? 'true',
-  NEXT_PUBLIC_METHOD_EXIT_NUDGE: process.env.NEXT_PUBLIC_METHOD_EXIT_NUDGE ?? 'true',
   HCAPTCHA_SECRET: process.env.HCAPTCHA_SECRET ?? 'test_secret',
   WAITLIST_CONFIRM_TTL_DAYS: process.env.WAITLIST_CONFIRM_TTL_DAYS ?? '7',
   FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID ?? 'ci-firebase',
@@ -68,7 +96,8 @@ const testEnv = {
   RESEND_FROM: process.env.RESEND_FROM ?? 'no-reply@ci.louhen.app',
   RESEND_REPLY_TO: process.env.RESEND_REPLY_TO ?? 'hello@ci.louhen.app',
   NODE_ENV: 'production',
-  NEXT_TELEMETRY_DISABLED: process.env.NEXT_TELEMETRY_DISABLED ?? '1',
+  HOST,
+  PORT: String(PORT),
   SUPPRESSION_SALT: process.env.SUPPRESSION_SALT ?? 'test-salt',
   EMAIL_TRANSPORT: process.env.EMAIL_TRANSPORT ?? 'noop',
   STATUS_USER: statusUser,
@@ -84,58 +113,62 @@ for (const [key, value] of Object.entries(testEnv)) {
 const httpCredentials = statusUser && statusPass ? { username: statusUser, password: statusPass } : undefined;
 
 const config: PlaywrightTestConfig = {
-  testDir: 'tests/e2e',
+  testDir: 'tests',
+  testMatch: ['**/*.e2e.ts', '**/*.axe.ts', '**/*.spec.ts'],
+  timeout: process.env.CI ? 90_000 : 60_000,
   retries: process.env.CI ? 1 : 0,
+  workers: process.env.CI ? 1 : 2,
   reporter: [
-    ['html'],
-    ['json'],
+    ['html', { outputFolder: path.join(artifactsRoot, 'html'), open: 'never' }],
+    ['json', { outputFile: path.join(artifactsRoot, 'report.json') }],
   ],
+  outputDir: playwrightResultsDir,
+  expect: {
+    timeout: 5_000,
+  },
   use: {
     baseURL: canonicalBaseURL,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
     httpCredentials,
+    extraHTTPHeaders,
+    storageState: storageStatePath,
   },
   projects: [],
   preserveOutput: 'never',
+  globalSetup: 'tests/setup/auth.setup.ts',
 };
 
 if (shouldSkipWebServer) {
   config.projects = [
     {
-      name: 'chromium',
-      testDir: 'tests/e2e',
-      testMatch: /__skip__\.spec\.ts/,
+      name: 'desktop-chromium',
+      testMatch: ['**/__skip__.spec.ts'],
       use: { ...devices['Desktop Chrome'] },
     },
   ];
 } else {
   config.projects = [
     {
-      name: 'chromium',
-      testDir: 'tests/e2e',
+      name: 'desktop-chromium',
       use: { ...devices['Desktop Chrome'] },
     },
     {
-      name: 'accessibility',
-      testDir: 'tests/accessibility',
-      use: { ...devices['Desktop Chrome'] },
+      name: 'mobile-chromium',
+      use: { ...devices['Pixel 5'] },
+      grep: /@mobile/,
+      grepInvert: /@desktop-only/,
     },
   ];
-
-  if (!useExternalTarget) {
+  if (!isRemote) {
     config.webServer = {
       command: 'npm run start:test',
-      url: canonicalBaseURL,
-      reuseExistingServer: true,
-      timeout: 180_000,
+      url: `${fallbackLocalURL}${HEALTH_PATH}`,
+      reuseExistingServer: Boolean(process.env.PW_REUSE) || !process.env.CI,
+      timeout: 120_000,
       env: {
         ...testEnv,
-        BASE_URL: targetOrigin,
-        APP_BASE_URL: targetOrigin,
-        NEXT_PUBLIC_SITE_URL: targetOrigin,
-        NODE_ENV: 'production',
       },
     };
   }

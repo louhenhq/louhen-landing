@@ -1,19 +1,30 @@
 # Contributing to Louhen Landing
 
-Thanks for helping build Louhen 👟  
+Thanks for helping build Louhen!  
 This guide explains the workflow, standards, and guardrails for contributing to **louhen-landing**.
+
+## Quicklinks
+- Locked decisions: [/CONTEXT/decision_log.md](CONTEXT/decision_log.md)
+- Naming & structure: [/CONTEXT/naming.md](CONTEXT/naming.md)
+- Migration map: [/CONTEXT/rename_map.md](CONTEXT/rename_map.md)
+- Testing strategy: [/CONTEXT/testing.md](CONTEXT/testing.md)
+- Performance budgets: [/CONTEXT/performance.md](CONTEXT/performance.md)
+- Release process: [/CONTEXT/release.md](CONTEXT/release.md)
 
 ---
 
 ## 1) Read This First: /CONTEXT
 
 Before any change, skim:
-- /CONTEXT/agents.md — how Codex should work (PLAN → DIFF → VALIDATE → REVERT)
-- /CONTEXT/coding_conventions.md — style, structure, commits
-- /CONTEXT/decision_log.md — locked decisions (don’t break these)
-- /CONTEXT/architecture.md — routes, data flow, envs, CI/CD
+- /CONTEXT/agents.md - how Codex should work (PLAN -> DIFF -> VALIDATE -> REVERT)
+- /CONTEXT/coding_conventions.md - style, structure, commits
+- /CONTEXT/decision_log.md - locked decisions (don't break these)
+- /CONTEXT/architecture.md - routes, data flow, envs, CI/CD
+- /CONTEXT/naming.md - repo-wide naming, folders, routing, and selector spec
 
 VS Code users: a pre-prompt in `.vscode/settings.json` already points Codex to these files.
+
+Before you code, reaffirm the PLAN -> DIFF -> VALIDATE -> REVERT ritual and follow the one-feature-per-PR rule when renaming or moving files (see `/CONTEXT/rename_map.md` for planned moves).
 
 ---
 
@@ -40,7 +51,11 @@ Run full checks before a PR
 
 - Create a feature/fix branch from `main` (e.g., `feat/waitlist-i18n`).
 - Keep changes small and surgical (minimal diff).
-- Every PR must include the **QA — Validation Steps** block (auto-added by `.github/pull_request_template.md`).
+- Every PR must include the **QA - Validation Steps** block (auto-added by `.github/pull_request_template.md`).
+- When moving files, use `git mv`, keep scope to one feature per PR, and update `/CONTEXT/rename_map.md` if the destination diverges from the plan.
+- Run `npm run typecheck:build` before opening or updating a PR to ensure the production build config remains green.
+- Prefer path aliases (`@components/...`, `@lib/...`, etc.) over deep relative imports as files migrate.
+- When moving files, use `git mv`, keep scope to one feature per PR, and update `/CONTEXT/rename_map.md` if the destination diverges from the plan.
 
 PR size & scope
 - One logical change per PR.
@@ -48,6 +63,15 @@ PR size & scope
 
 Screenshots
 - For UI changes, add before/after screenshots or a short recording.
+
+### PR Checklist (add to description)
+- [ ] Updated/added tests align with the canonical matrix in `/CONTEXT/tests.md` (routes, locales, devices).  
+- [ ] No external network traffic in automated tests (fixtures/mocks intercept new calls).  
+- [ ] New interactive elements expose a stable `data-testid` and Playwright selectors use it.  
+- [ ] Lighthouse budgets unchanged or justified with before/after numbers (see `lighthouserc.cjs`).  
+- [ ] `.env.example` and `/CONTEXT/envs.md` updated if new environment variables were introduced.
+- [ ] Flakes triaged: specs marked `@quarantine` include a tracking issue (use the QA gap template).
+- [ ] Secret scanner/CI guards pass; if blocked, follow the remediation steps in the "Secret scanner & blocks" section below.
 
 ---
 
@@ -74,7 +98,7 @@ Examples
 Use the ritual below. It makes reviews faster and safer.
 
 PLAN
-    ≤8 steps, list files to touch, and rationale.
+    <=8 steps, list files to touch, and rationale.
 
 DIFF
     Unified diffs only for changed files. No unrelated formatting/import churn.
@@ -85,8 +109,10 @@ VALIDATE
 REVERT
     Git commands to roll back if validation fails.
 
+Renames must reference `/CONTEXT/rename_map.md`; update the table in the PR if plan deviates.
+
 Guardrails
-- Do not introduce new dependencies without a 1–2 bullet justification (why, footprint, alternatives).
+- Do not introduce new dependencies without a 1-2 bullet justification (why, footprint, alternatives).
 - Do not change locked decisions (see /CONTEXT/decision_log.md).
 - Never log secrets or PII. Redact emails in server logs (ma***@example.com).
 
@@ -108,23 +134,16 @@ Add guard clauses for missing envs (fail fast with clear, friendly errors).
 
 ## 7) Testing
 
-Test matrix
-    npm run test:unit
-    npm run test:e2e
-    npm run test:axe
-    npm run lighthouse
-
-Need a fresh CI run without pushing? Use the **Run Tests** workflow (Actions tab) or comment
-`/test <suite>` on your PR. Suites: `unit`, `e2e`, `axe`, `lhci`, or `all`.
-
-Accessibility & Perf budgets (Lighthouse `/waitlist`)
-    Performance ≥ 90
-    Accessibility ≥ 95
-    Best Practices ≥ 95
-    SEO ≥ 95
-
-Negative paths
-- For forms/APIs, include at least one failing test (e.g., invalid email, captcha failure).
+- **Single entry point:** `npm run validate:local` mirrors CI (lint -> typecheck -> build -> production server -> unit -> Playwright e2e + axe -> Lighthouse) and writes reports to `artifacts/playwright/` and `artifacts/lighthouse/`. Run it before requesting review.
+- **Playwright projects:** `desktop-chromium` runs everything by default; add `@mobile` to suites that must run on the `mobile-chromium` project, and use `@desktop-only` to opt out when behaviour diverges.
+- **Targeted commands:**
+  - `npm run test:e2e` - full Playwright suite (desktop + tagged mobile).
+  - `npm run test:axe` - axe scans on the canonical desktop viewport.
+  - `npm run lhci` - Lighthouse CI thresholds (`/`, `/waitlist`, `/method`).
+- Accessibility checks live in `tests/axe/canonical.axe.ts`; update the canonical matrix instead of creating new axe suites.
+- **Negative paths:** Always cover at least one failing case for forms/APIs (invalid email, captcha failure, etc.).
+- **Budgets:** Lighthouse thresholds stay Performance >= 90, Accessibility >= 95, SEO >= 95, Best Practices >= 95.
+- **Guardrails:** Import `test`/`expect` from `@tests/fixtures/playwright`, prefer `data-testid` selectors, avoid `page.waitForTimeout`, intercept new third-party calls in the fixture, and mark unstable specs with `@quarantine` + a tracking issue. Lighthouse budgets live in `lighthouse-budgets.json`; raise limits only after sustained headroom (>=5 green runs).
 
 ---
 
@@ -140,7 +159,7 @@ Negative paths
 ## 9) Dependencies
 
 Before adding a dependency, include in the PR:
-- Why it’s needed (1–2 bullets)
+- Why it's needed (1-2 bullets)
 - Size/maintenance considerations
 - Alternatives considered
 
@@ -151,8 +170,8 @@ Remove unused deps when discovered.
 ## 10) Issue Templates
 
 Use the GitHub templates:
-- 🐞 Bug report
-- ✨ Feature request
+- Bug report
+- Feature request
 
 Blank issues are disabled; for questions, use Discussions (link in issue config).
 
@@ -160,9 +179,18 @@ Blank issues are disabled; for questions, use Discussions (link in issue config)
 
 ## 11) Release & CI
 
-- Every PR runs: lint → build → tests (Playwright) → Lighthouse (artifacts uploaded).
-- Merges to `main` trigger `semantic-release` to tag and update CHANGELOG.
+- Every PR and push to `staging` runs the unified pipeline (policy guards -> build/test job mirroring `npm run validate:local`).
+- Releases happen by promoting `staging` -> `production`; pushes to `production` run `semantic-release` to tag and update the changelog.
 - Keep CI logs clean; fail fast on critical errors.
+
+### Secret scanner & blocks
+- The `policy-guards` job runs an in-repo scanner that flags credential-looking strings and guardrail failures (`EMAIL_TRANSPORT` not `noop`, `NEXT_PUBLIC_ALLOW_INDEXING` set to `true`, etc.).
+- If the job fails:
+  1. Inspect the log for the offending file/line.
+  2. Remove the secret or replace it with a documented placeholder (`dummy`, `test`, etc.).
+  3. For guardrails, update the workflow env or documentation so `validate:local`/CI stay deterministic.
+  4. Re-run the job locally with the Node script in `.github/workflows/ci.yml` if needed.
+- Do **not** suppress the guard; if it is a false positive, open an issue so the allowlist can be tightened.
 
 ---
 
@@ -172,18 +200,14 @@ Copy into your PR (already pre-filled by template):
 
 VALIDATE
     npm ci
-    npm run lint
-    npm run build
-    npx playwright test
-    # optional if configured
-    npm run lhci
+    npm run validate:local
 
 Manual QA
-- [ ] Load `/` → no console errors
-- [ ] Submit waitlist with valid email + captcha → success UI, 200 response
-- [ ] Invalid email → inline error
-- [ ] Missing/invalid captcha → friendly error, no write
-- [ ] Lighthouse targets met on `/`
+- [ ] Load `/` -> no console errors
+- [ ] Submit waitlist with valid email + captcha -> success UI, 200 response
+- [ ] Invalid email -> inline error
+- [ ] Missing/invalid captcha -> friendly error, no write
+- [ ] Check `artifacts/lighthouse/summary.md` (scores & budgets) or rerun `npm run lhci` locally if needed
 
 REVERT
     git revert <commit>

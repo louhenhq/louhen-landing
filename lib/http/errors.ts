@@ -1,13 +1,13 @@
 export class HttpError extends Error {
   readonly status: number;
   readonly code: string;
-  readonly details?: string[];
+  readonly details: string[] | undefined;
 
   constructor(status: number, code: string, message: string, options?: { details?: string[] }) {
     super(message);
     this.status = status;
     this.code = code;
-    this.details = options?.details;
+    this.details = options?.details ?? undefined;
   }
 }
 

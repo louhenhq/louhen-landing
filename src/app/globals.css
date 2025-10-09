@@ -2,42 +2,15 @@
 
 
 :root {
-  --typography-font-family-sans: var(
-    --font-sans,
-    'Inter',
-    'Segoe UI',
-    'Helvetica Neue',
-    'Arial',
-    'system-ui',
-    'sans-serif'
-  );
-  --typography-font-family-display: var(
-    --font-display,
-    'Fraunces',
-    'Iowan Old Style',
-    'Palatino Linotype',
-    'Palatino',
-    'Times New Roman',
-    'serif'
-  );
   --background: var(--semantic-color-bg-page);
   --foreground: var(--semantic-color-text-body);
-  --layout-max-width: 90rem;
-  --layout-header-height: 4.5rem;
-  --layout-section-padding-min: calc(var(--spacing-64) * 1.25);
-  --layout-section-padding-max: calc(var(--spacing-64) * 1.875);
-  --layout-section-padding-clamp: clamp(
-    var(--layout-section-padding-min),
-    calc(var(--spacing-32) + 6vw),
-    var(--layout-section-padding-max)
-  );
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--typography-font-family-sans);
-  --font-serif: var(--typography-font-family-display);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
 }
 
 body {
