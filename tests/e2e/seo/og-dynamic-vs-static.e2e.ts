@@ -10,6 +10,10 @@ test.describe('OG dynamic vs static fallback', () => {
       const dynamicOg = await page.getAttribute('meta[property="og:image"]', 'content');
       expect(dynamicOg).toBeTruthy();
       expect(dynamicOg).toContain('/opengraph-image');
+      if (dynamicOg) {
+        const dynamicUrl = new URL(dynamicOg);
+        expect(dynamicUrl.searchParams.get('key')).toBe('waitlist');
+      }
 
       if (dynamicOg) {
         const response = await page.request.get(dynamicOg);

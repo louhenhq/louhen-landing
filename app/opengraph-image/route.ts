@@ -2,7 +2,8 @@ import { createElement } from 'react';
 import { ImageResponse } from 'next/og';
 import { SITE_NAME, LEGAL_ENTITY } from '@/constants/site';
 import { loadMessages } from '@/lib/intl/loadMessages';
-import { getStaticOg, OG_IMAGE_HEIGHT, OG_IMAGE_WIDTH } from '@/lib/shared/og/builder';
+import { OG_IMAGE_HEIGHT, OG_IMAGE_WIDTH } from '@/lib/shared/og/builder';
+import { getStaticOg } from '@/lib/shared/og/fallback';
 import { defaultLocale, locales, type SupportedLocale } from '@/next-intl.locales';
 import tokens from '@louhen/design-tokens/build/web/tokens.json' assert { type: 'json' };
 
@@ -11,7 +12,7 @@ export const size = { width: OG_IMAGE_WIDTH, height: OG_IMAGE_HEIGHT } as const;
 export const contentType = 'image/png';
 
 const DEFAULT_LOCALE: SupportedLocale = defaultLocale;
-const VALID_SURFACES = new Set([
+const VALID_KEYS = new Set([
   'home',
   'home-invited',
   'method',
@@ -22,7 +23,7 @@ const VALID_SURFACES = new Set([
   'legal-terms',
   'imprint',
 ]);
-const FALLBACK_SURFACE = 'home';
+const FALLBACK_KEY = 'home';
 const FALLBACK_TITLE = 'Louhen';
 const FALLBACK_DESCRIPTION = 'Tailored comfort backed by podiatrists.';
 const MAX_TEXT_LENGTH = 220;
@@ -53,12 +54,12 @@ function sanitizeParam(value: string | null, maxLength: number): string | null {
   return trimmed.slice(0, maxLength);
 }
 
-function resolveSurface(raw: string | null, variant: OgVariant): string {
+function resolveKey(raw: string | null, variant: OgVariant): string {
   const candidate = raw?.toLowerCase() ?? '';
-  if (candidate && VALID_SURFACES.has(candidate)) {
+  if (candidate && VALID_KEYS.has(candidate)) {
     return candidate;
   }
-  return variant === 'invited' ? 'home-invited' : FALLBACK_SURFACE;
+  return variant === 'invited' ? 'home-invited' : FALLBACK_KEY;
 }
 
 function safeToken(name: string): string {
@@ -103,11 +104,11 @@ async function resolveCopy(
 
 async function serveStaticFallback(
   locale: SupportedLocale,
-  surface: string,
+  key: string,
   request: Request,
   triedDefault = false,
 ): Promise<Response> {
-  const fallbackPath = getStaticOg(locale, surface);
+  const fallbackPath = getStaticOg(locale, key);
   const fallbackUrl = new URL(fallbackPath, request.url);
   try {
     const response = await fetch(fallbackUrl);
@@ -120,8 +121,8 @@ async function serveStaticFallback(
     headers.set('Content-Type', response.headers.get('Content-Type') ?? contentType);
     return new Response(buffer, { status: 200, headers });
   } catch {
-    if (!triedDefault && (locale !== DEFAULT_LOCALE || surface !== FALLBACK_SURFACE)) {
-      return serveStaticFallback(DEFAULT_LOCALE, FALLBACK_SURFACE, request, true);
+    if (!triedDefault && (locale !== DEFAULT_LOCALE || key !== FALLBACK_KEY)) {
+      return serveStaticFallback(DEFAULT_LOCALE, FALLBACK_KEY, request, true);
     }
     return new Response(EMPTY_PIXEL.slice(), {
       status: 200,
@@ -254,7 +255,7 @@ export async function GET(request: Request) {
   const locale = resolveLocale(url.searchParams.get('locale'));
   const ref = sanitizeParam(url.searchParams.get('ref'), MAX_REF_LENGTH);
   const variant: OgVariant = ref ? 'invited' : 'default';
-  const surface = resolveSurface(url.searchParams.get('surface'), variant);
+  const key = resolveKey(url.searchParams.get('key') ?? url.searchParams.get('surface'), variant);
   const fallbackTitle = sanitizeParam(url.searchParams.get('title'), MAX_TEXT_LENGTH) ?? FALLBACK_TITLE;
   const fallbackDescription =
     sanitizeParam(url.searchParams.get('description'), MAX_TEXT_LENGTH) ?? FALLBACK_DESCRIPTION;
@@ -270,6 +271,6 @@ export async function GET(request: Request) {
       },
     });
   } catch {
-    return serveStaticFallback(locale, surface, request);
+    return serveStaticFallback(locale, key, request);
   }
 }

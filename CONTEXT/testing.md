@@ -44,7 +44,7 @@ Testing follows the locked pyramid in [/CONTEXT/decision_log.md](decision_log.md
 - Hreflang validation uses `hreflangMapFor(...)`; every supported locale plus `x-default` must match the canonical map even when the canonical URL is locale-invariant (e.g., `/waitlist`).
 
 ### OG & media tests
-- New specs under `tests/e2e/seo/` fetch OG/Twitter images directly from the rendered DOM, assert absolute URLs, `200` responses without redirects, content type starting with `image/`, and `Content-Length` ≤ 2 MB.
+- New specs under `tests/e2e/seo/` fetch OG/Twitter images directly from the rendered DOM, assert absolute URLs (including `locale` + `key` params), `200` responses without redirects, content type starting with `image/`, and `Content-Length` ≤ 2 MB.
 - Sample at least two locales per surface (default + secondary) with pages covering method, waitlist, and imprint/legal.
 - A companion spec toggles the dynamic OG feature flag to ensure pages fall back to static assets while still satisfying the assertions above.
 - Budget failures must log the offending URL plus response headers for quick diagnosis; keep this behaviour when extending coverage.
@@ -55,6 +55,7 @@ Testing follows the locked pyramid in [/CONTEXT/decision_log.md](decision_log.md
 - CI forces `--retries=1`; local runs stay flake-free (no retries). Playwright keeps `trace: on-first-retry`, `screenshot: only-on-failure`, and `video: retain-on-failure` so artifacts surface only when needed.
 - Expected artifacts per suite: `playwright-<suite>-{e2e,axe}` (retained 10 days). Missing folders fail the job.
 - Each job writes a summary (`GITHUB_STEP_SUMMARY`) with totals, pass/fail counts, and quick references to the artifact names; reports never contain secrets.
+- Staging branch protection requires the OG Playwright specs (`tests/e2e/seo/og-images.e2e.ts`, `og-dynamic-vs-static.e2e.ts`, `twitter-card.e2e.ts`) to pass before merge.
 
 ## Flaky Quarantine Lane
 - Tag flaky specs by including `@quarantine` in the test title (e.g., `test('@quarantine waitlist social share', ...)`). Keep the tag until the spec produces two green preview runs, then remove it.

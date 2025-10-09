@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { isPrelaunch } from '@lib/env/prelaunch';
 import { methodPath } from '@lib/shared/routing/method-path';
 import { getSiteOrigin, hreflangMapFor, makeCanonical } from '@lib/seo/shared';
-import { buildOgImageEntry } from '@lib/shared/og/builder';
+import { getOgImageEntry } from '@lib/shared/og/builder';
 import { type SupportedLocale } from '@/next-intl.locales';
 
 const DEFAULT_METHOD_TITLE = 'Method – Louhen';
@@ -42,9 +42,9 @@ export async function buildMethodMetadata({ locale }: BuildMethodMetadataParams)
   const robots = isPrelaunch()
     ? { index: false, follow: false }
     : undefined;
-  const ogImage = buildOgImageEntry({
+  const ogImage = getOgImageEntry({
     locale,
-    surface: 'method',
+    key: 'method',
     title,
     description,
   });

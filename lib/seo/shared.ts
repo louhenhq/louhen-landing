@@ -1,4 +1,4 @@
-import { getSiteOrigin } from '@/lib/env/site-origin';
+import { getSiteOrigin } from '@/lib/shared/url/get-site-origin';
 import { defaultLocale, locales, type SupportedLocale } from '@/next-intl.locales';
 
 function ensureLeadingSlash(path: string): string {

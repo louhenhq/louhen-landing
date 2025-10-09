@@ -65,8 +65,8 @@ Locked decisions: canonical host `https://www.louhen.app`, preview `https://stag
 
 ## Social Preview Strategy
 - OG/Twitter metadata must emit absolute URLs (no relative paths). `twitter:card` remains locked to `summary_large_image`; prefer mirroring OG titles/descriptions for parity.
-- OG images must come from the canonical host (`https://www.louhen.app`) or preview origin when running remote tests. Append `?locale=<bcp47>` and additional params (`ref`, `slug`) when the surface requires localized copy.
-- Use the shared `getSiteOrigin()` helper when composing absolute URLs. Metadata builders should delegate to shared OG helpers (see `/CONTEXT/media.md`) instead of hand-concatenating hosts.
+- OG images must come from the canonical host (`https://www.louhen.app`) or preview origin when running remote tests. Helpers append `?locale=<bcp47>&key=<surface>` with optional params (`ref`, `slug`) when the surface requires localized copy.
+- Use the shared `getSiteOrigin()` helper when composing absolute URLs. It resolves to `NEXT_PUBLIC_CANONICAL_HOST` in production or `PREVIEW_BASE_URL` during preview, so metadata builders should delegate to shared OG helpers (see `/CONTEXT/media.md`) instead of hand-concatenating hosts.
 - Dynamic OG rendering lives under `app/opengraph-image/route.ts` and must satisfy the cache headers/content-type rules documented in `/CONTEXT/media.md`. On failure, fall back to the per-locale static asset in `public/og/<locale>/…`.
 - Static fallbacks feed the same metadata helpers and must stay within the 1200×630 px, <2 MB budget (PNG/WebP preferred). Update the fallback whenever localized copy changes.
 - For campaign-specific previews, keep images under `public/social/<campaign>.png` and map them inside the relevant metadata builder; do not hardcode per-locale assets outside of translations.

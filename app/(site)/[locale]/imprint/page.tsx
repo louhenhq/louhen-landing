@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { imprintPath } from '@lib/shared/routing/imprint-path';
 import { isPrelaunch } from '@/lib/env/prelaunch';
 import { getSiteOrigin, hreflangMapFor, makeCanonical } from '@/lib/seo/shared';
-import { buildOgImageEntry } from '@lib/shared/og/builder';
+import { getOgImageEntry } from '@lib/shared/og/builder';
 import type { SupportedLocale } from '@/next-intl.locales';
 import { unstable_setRequestLocale } from 'next-intl/server';
 
@@ -36,9 +36,9 @@ export function generateMetadata({ params }: ImprintPageProps): Metadata {
   const description = isGerman
     ? 'Rechtliche Angaben, Kontaktinformationen und Verantwortlichkeiten von Louhen.'
     : 'Legal disclosure, contact, and accountability details for Louhen.';
-  const ogImage = buildOgImageEntry({
+  const ogImage = getOgImageEntry({
     locale,
-    surface: 'imprint',
+    key: 'imprint',
     title,
     description,
   });

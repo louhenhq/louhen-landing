@@ -29,6 +29,9 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
 
 ## History
 
+- **2025-10-09 — Environment Controls & Branch Protection (OG Pipeline)**  
+  Introduced `NEXT_PUBLIC_CANONICAL_HOST`, `OG_DYNAMIC_ENABLED`, `OG_CACHE_MAX_AGE`, `OG_S_MAXAGE`, and `OG_SIZE_BUDGET_BYTES` (2 MB) to coordinate canonical host resolution, dynamic OG feature gating, cache tuning, and CI size enforcement across Vercel/GitHub Actions. OG Playwright specs (og-images, og-dynamic-vs-static, twitter-card) are now required status checks on the staging branch.
+
 - **2025-10-07 — Waitlist Legacy Form Retirement**  
   Removed `components/features/waitlist/WaitlistFormLegacy.tsx`; waitlist page now renders `WaitlistForm` with existing selectors. Updated `/CONTEXT/rename_map.md` and `/CONTEXT/testing.md` to reflect the single waitlist implementation.
 

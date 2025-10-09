@@ -17,7 +17,7 @@ import {
   buildCanonicalUrl,
   resolveSiteBaseUrl,
 } from '@/lib/i18n/metadata';
-import { buildOgImageEntry } from '@lib/shared/og/builder';
+import { getOgImageEntry } from '@lib/shared/og/builder';
 import { LOCALE_COOKIE } from '@/lib/theme/constants';
 import { SITE_NAME } from '@/constants/site';
 const BOT_REGEX = /(bot|crawler|spider|bingpreview|facebookexternalhit|pinterest|embedly|quora link preview)/i;
@@ -48,9 +48,9 @@ export async function generateMetadata({ searchParams }: MetadataArgs): Promise<
   const canonicalUrl = buildCanonicalUrl(DEFAULT_LOCALE.value, '/');
   const languages = buildAlternateLanguageMap('/');
 
-  const baseOgImage = buildOgImageEntry({
+  const baseOgImage = getOgImageEntry({
     locale: DEFAULT_LOCALE.value,
-    surface: 'home',
+    key: 'home',
     title: defaultTitle,
     description: defaultDescription,
   });
@@ -81,9 +81,9 @@ export async function generateMetadata({ searchParams }: MetadataArgs): Promise<
 
   const sharePath = `${canonicalPath}?ref=${encodeURIComponent(sanitizedRef)}`;
   const fullUrl = `${baseUrl}${sharePath}`;
-  const invitedOgImage = buildOgImageEntry({
+  const invitedOgImage = getOgImageEntry({
     locale: DEFAULT_LOCALE.value,
-    surface: 'home-invited',
+    key: 'home-invited',
     title: defaultTitle,
     description: defaultDescription,
     params: { ref: sanitizedRef },

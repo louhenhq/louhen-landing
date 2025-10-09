@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { isPrelaunch } from '@/lib/env/prelaunch';
 import { legalPath, type LegalSlug } from '@lib/shared/routing/legal-path';
 import { getSiteOrigin, hreflangMapFor, makeCanonical } from '@/lib/seo/shared';
-import { buildOgImageEntry } from '@lib/shared/og/builder';
+import { getOgImageEntry } from '@lib/shared/og/builder';
 import { type SupportedLocale } from '@/next-intl.locales';
 
 type LegalKind = Extract<LegalSlug, 'terms' | 'privacy'>;
@@ -45,10 +45,10 @@ export async function buildLegalMetadata({ locale, kind }: BuildLegalMetadataPar
   const robots = isPrelaunch()
     ? { index: false, follow: false }
     : undefined;
-  const surface = kind === 'terms' ? 'legal-terms' : 'legal-privacy';
-  const ogImage = buildOgImageEntry({
+  const key = kind === 'terms' ? 'legal-terms' : 'legal-privacy';
+  const ogImage = getOgImageEntry({
     locale,
-    surface,
+    key,
     title,
     description,
   });

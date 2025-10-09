@@ -174,6 +174,7 @@ _Tables sorted by `Current Path`; `Status=DECIDE` rows include the follow-up nee
 | lib/csp/nonce-context.tsx | feature-comp | lib/shared/csp/nonce-context.tsx | same | no | OK | Keep provider under shared namespace; update barrel if needed. |
 | lib/env/guard.ts | server | lib/server/env/guard.ts | guard.ts | no | OK | Server-only env snapshot; ensure tests updated to new path. |
 | lib/env/prelaunch.ts | util | lib/shared/env/prelaunch.ts | prelaunch.ts | no | OK | Provide alias-based import for shared prelaunch checks. |
+| lib/env/site-origin.ts | util | lib/shared/url/get-site-origin.ts | get-site-origin.ts | no | OK | Centralises site origin helper for OG builders and metadata. |
 | middleware.ts | server | middleware.ts | same | no | SKIP | Middleware must remain at repo root per Next. |
 | tests/e2e/security/headers.e2e.ts | test:e2e | tests/e2e/csp/security-headers.e2e.ts | security-headers.e2e.ts | no | OK | Uses response header assertions; no selectors required. |
 

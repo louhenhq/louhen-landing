@@ -1,6 +1,6 @@
 import { buildStandardHeaders } from '@/lib/email/headers';
 import { getEmailTransport } from '@/lib/email/transport';
-import { getSiteOrigin } from '@/lib/env/site-origin';
+import { getSiteOrigin } from '@/lib/shared/url/get-site-origin';
 
 const SUBJECTS: Record<'en' | 'de', string> = {
   en: 'Confirm your spot on the Louhen waitlist ✨',

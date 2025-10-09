@@ -6,9 +6,10 @@ Use this cheat sheet when reviewing performance for OG and other raster assets.
 - Dynamic OG route (`/opengraph-image`) must serve with `Cache-Control: public, max-age=300, s-maxage=86400`.
 - Edge/CDN caches can extend beyond 24 h, but browsers should revalidate after 5 minutes to pick up localized copy changes.
 - Static fallbacks under `public/og/**` inherit standard asset caching; ensure any CDN configs respect the same 1-day TTL.
+- `OG_CACHE_MAX_AGE` and `OG_S_MAXAGE` allow tuning cache durations without shipping new code; adjust per environment as needed.
 
 ## Asset Budgets
-- OG images: 1200×630 px, ≤2 MB after compression. PNG/WebP preferred; keep PNG for email compatibility.
+- OG images: 1200×630 px, ≤2 MB (OG_SIZE_BUDGET_BYTES=2000000) after compression. PNG/WebP preferred; keep PNG for email compatibility.
 - Inline preview assets (hero, cards) should prioritise AVIF/WebP via `next/image` with PNG fallbacks only when necessary.
 - Document optimisations in PRs when adding media >1 MB.
 

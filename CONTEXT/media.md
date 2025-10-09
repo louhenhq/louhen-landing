@@ -6,10 +6,10 @@ This slice hardens Louhen’s social preview and media delivery pipeline. Follow
 - Required tags: `og:title`, `og:description`, `og:url`, `og:image`, `og:locale`, and `twitter:card=summary_large_image`. Prefer populating `twitter:image` with the same asset.
 - All URLs must be absolute, pointing at the canonical host (`https://www.louhen.app`) or preview origin when running remotely. Never ship relative paths.
 - OG images are 1200×630 px (1.91:1 aspect ratio), ≤2 MB. Prefer PNG or WebP; fall back to PNG if WebP can’t satisfy the size budget.
-- Metadata builders must compute localized titles/descriptions via translations and append `?locale=<bcp47>` to dynamic OG URLs so crawlers receive the correct locale snapshot.
+- Metadata builders must compute localized titles/descriptions via translations and use `getOgImageEntry()` / `getOgUrl()` so crawlers receive absolute URLs with `?locale=<bcp47>&key=<surface>` (and any additional params like `ref`).
 
 ## Dynamic OG Route Requirements
-- The dynamic renderer (`app/opengraph-image/route.ts`) validates incoming params (`locale`, `slug`/`ref` etc.) before rendering.
+- The dynamic renderer (`app/opengraph-image/route.ts`) validates incoming params (`locale`, `key`, optional `ref`, etc.) before rendering.
 - Responses include headers:
   - `Cache-Control: public, max-age=300, s-maxage=86400`
   - `Content-Type: image/png` (or `image/webp` when the renderer outputs WebP)
@@ -33,3 +33,6 @@ This slice hardens Louhen’s social preview and media delivery pipeline. Follow
   - `Content-Length` below the 2 MB budget
 - Quarantined tests must cover the static fallback path when dynamic OG is feature-flagged off.
 
+### Environment Controls
+- Runtime configuration comes from `NEXT_PUBLIC_CANONICAL_HOST`, `OG_DYNAMIC_ENABLED`, `OG_CACHE_MAX_AGE`, and `OG_S_MAXAGE`.
+- CI size checks honour `OG_SIZE_BUDGET_BYTES` (2 MB limit) when Playwright SEO specs run in GitHub Actions.

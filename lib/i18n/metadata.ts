@@ -1,4 +1,4 @@
-import { getSiteOrigin } from '@/lib/env/site-origin';
+import { getSiteOrigin } from '@/lib/shared/url/get-site-origin';
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES, buildPathForLocale, buildUrlForLocale, type AppLocale } from './locales';
 
 export function resolveSiteBaseUrl(): string {

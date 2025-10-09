@@ -20,7 +20,7 @@ import {
 } from '@/lib/theme/constants'
 import { DEFAULT_LOCALE } from '@/lib/i18n/locales'
 import { buildAlternateLanguageMap } from '@/lib/i18n/metadata'
-import { buildOgImageEntry } from '@lib/shared/og/builder'
+import { getOgImageEntry } from '@lib/shared/og/builder'
 
 const tokenValues = tokens as Record<string, unknown> & {
   color?: {
@@ -54,9 +54,9 @@ const metadataBaseUrl = `${baseUrl}/`
 const defaultDescription =
   'Join the Louhen waitlist and get smarter sizing, curated looks, and fit feedback that improves with every try.'
 const defaultTitle = 'Louhen — Personal style. Effortless fit.'
-const ogImage = buildOgImageEntry({
+const ogImage = getOgImageEntry({
   locale: DEFAULT_LOCALE.value,
-  surface: 'home',
+  key: 'home',
   title: defaultTitle,
   description: defaultDescription,
 })

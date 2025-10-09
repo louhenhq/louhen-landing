@@ -7,7 +7,7 @@ import { cn, layout, text } from '@/app/(site)/_lib/ui';
 import { loadMessages } from '@/lib/intl/loadMessages';
 import { isPrelaunch } from '@/lib/env/prelaunch';
 import { getSiteOrigin, hreflangMapFor, makeCanonical } from '@/lib/seo/shared';
-import { buildOgImageEntry } from '@lib/shared/og/builder';
+import { getOgImageEntry } from '@lib/shared/og/builder';
 import { waitlistConfirmPendingPath } from '@lib/shared/routing/waitlist-path';
 import type { SupportedLocale } from '@/next-intl.locales';
 import { unstable_setRequestLocale } from 'next-intl/server';
@@ -95,9 +95,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     // fall back to defaults
   }
 
-  const ogImage = buildOgImageEntry({
+  const ogImage = getOgImageEntry({
     locale,
-    surface: 'confirm-pending',
+    key: 'confirm-pending',
     title,
     description,
   });

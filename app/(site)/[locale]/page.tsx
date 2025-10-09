@@ -7,7 +7,7 @@ import { loadMessages } from '@/lib/intl/loadMessages';
 import { localeHomePath } from '@lib/shared/routing/legal-path';
 import { isPrelaunch } from '@/lib/env/prelaunch';
 import { getSiteOrigin, hreflangMapFor, makeCanonical } from '@/lib/seo/shared';
-import { buildOgImageEntry } from '@lib/shared/og/builder';
+import { getOgImageEntry } from '@lib/shared/og/builder';
 import type { SupportedLocale } from '@/next-intl.locales';
 import { unstable_setRequestLocale } from 'next-intl/server';
 
@@ -41,9 +41,9 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   const robots = isPrelaunch()
     ? { index: false, follow: false }
     : undefined;
-  const baseOgImage = buildOgImageEntry({
+  const baseOgImage = getOgImageEntry({
     locale,
-    surface: 'home',
+    key: 'home',
     title: defaultTitle,
     description: defaultDescription,
   });
@@ -85,9 +85,9 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
       : 'Join through their link to unlock early rewards and smarter sizing for every outfit.';
   const sharePath = sanitizedRef ? `/${locale}?ref=${encodeURIComponent(sanitizedRef)}` : canonicalPath;
   const fullUrl = `${baseUrl}${sharePath}`;
-  const invitedOgImage = buildOgImageEntry({
+  const invitedOgImage = getOgImageEntry({
     locale,
-    surface: 'home-invited',
+    key: 'home-invited',
     title: invitedTitle,
     description: invitedDescription,
     params: sanitizedRef ? { ref: sanitizedRef } : undefined,

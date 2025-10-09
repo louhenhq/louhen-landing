@@ -5,7 +5,7 @@ import { loadWaitlistMessages } from '@/app/(site)/waitlist/_lib/messages';
 import { WAITLIST_URGENCY_COPY_ENABLED } from '@/lib/flags';
 import { getSiteOrigin, hreflangMapFor, makeCanonical } from '@/lib/seo/shared';
 import { isPrelaunch } from '@/lib/env/prelaunch';
-import { buildOgImageEntry } from '@lib/shared/og/builder';
+import { getOgImageEntry } from '@lib/shared/og/builder';
 import type { SupportedLocale } from '@/next-intl.locales';
 
 export const dynamic = 'force-dynamic';
@@ -24,9 +24,9 @@ export async function generateMetadata(): Promise<Metadata> {
   const robots = isPrelaunch()
     ? { index: false, follow: false }
     : undefined;
-  const ogImage = buildOgImageEntry({
+  const ogImage = getOgImageEntry({
     locale,
-    surface: 'waitlist',
+    key: 'waitlist',
     title,
     description,
   });

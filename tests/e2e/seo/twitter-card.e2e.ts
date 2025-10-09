@@ -16,6 +16,15 @@ test.describe('Twitter card metadata', () => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     const { hostname } = new URL(page.url());
 
+    await page.context().addCookies([
+      {
+        name: 'NEXT_LOCALE',
+        value: testLocales[0] ?? 'en-de',
+        domain: hostname,
+        path: '/',
+      },
+    ]);
+
     const targets: Array<{ name: string; path: string; locale?: SupportedLocale }> = [
       { name: 'home', path: '/' },
       { name: 'waitlist', path: waitlistLandingPath() },
@@ -34,6 +43,15 @@ test.describe('Twitter card metadata', () => {
           {
             name: 'NEXT_LOCALE',
             value: target.locale,
+            domain: hostname,
+            path: '/',
+          },
+        ]);
+      } else {
+        await page.context().addCookies([
+          {
+            name: 'NEXT_LOCALE',
+            value: testLocales[0] ?? 'en-de',
             domain: hostname,
             path: '/',
           },

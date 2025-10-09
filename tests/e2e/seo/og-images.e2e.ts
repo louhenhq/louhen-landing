@@ -8,6 +8,7 @@ import { getTestLocales } from '../_utils/url';
 
 type Surface = {
   name: string;
+  key: string;
   pathForLocale: (locale: SupportedLocale) => string;
   requiresLocaleCookie?: boolean;
 };
@@ -15,15 +16,18 @@ type Surface = {
 const surfaces: Surface[] = [
   {
     name: 'method',
+    key: 'method',
     pathForLocale: (locale) => methodPath(locale),
   },
   {
     name: 'waitlist',
+    key: 'waitlist',
     pathForLocale: () => waitlistLandingPath(),
     requiresLocaleCookie: true,
   },
   {
     name: 'imprint',
+    key: 'imprint',
     pathForLocale: (locale) => imprintPath(locale),
   },
 ];
@@ -84,6 +88,7 @@ test.describe('OG images – dynamic mode', () => {
           expect(parsed.protocol).toMatch(/^https?:$/);
           expect(parsed.pathname).toContain('/opengraph-image');
           expect(parsed.searchParams.get('locale')).toBe(locale);
+          expect(parsed.searchParams.get('key')).toBe(surface.key);
 
           const response = await page.request.get(parsed.toString());
           expect(response.status(), `${urlValue} should return 200`).toBe(200);

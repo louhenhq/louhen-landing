@@ -12,7 +12,7 @@ import { getHeaderUserState } from '@lib/auth/userState.server';
 import { localeHomePath } from '@lib/shared/routing/legal-path';
 import { methodPath } from '@lib/shared/routing/method-path';
 import { getSiteOrigin } from '@lib/seo/shared';
-import { resolveOgImageUrl } from '@lib/shared/og/builder';
+import { getOgImageUrl } from '@lib/shared/og/builder';
 import { buildMethodTechArticleSchema } from '@lib/shared/method/article-schema';
 import { buildMethodMetadata } from '@lib/shared/seo/method-metadata';
 import { getPreOnboardingDraft } from '@lib/firestore/waitlist';
@@ -86,9 +86,9 @@ export default async function MethodPage({ params }: MethodPageProps) {
     // fallback handled above
   }
 
-  const ogImageUrl = resolveOgImageUrl({
+  const ogImageUrl = getOgImageUrl({
     locale,
-    surface: 'method',
+    key: 'method',
     title: schemaTitle,
     description: schemaDescription,
   });

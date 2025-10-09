@@ -31,7 +31,6 @@ Canonical reference for environment configuration across stages. Update this mat
 | **TEST_MODE** | `0` (set manually for local unit tests) | Preview: `0` | workflow env (`ci.yml` -> `1`) | Platform | CI forces `1` to stub external integrations. |
 | **TEST_E2E_SHORTCIRCUIT** | `true` | Preview: `true` | workflow env (`ci.yml`) | Platform | Ensures Playwright bypasses third-party services. |
 | **NEXT_PUBLIC_ALLOW_INDEXING** | `false` | Preview: `false` | workflow env (`ci.yml`) | Platform | Production toggles to `true`; CI guard prevents accidental enablement. |
-| **NEXT_PUBLIC_CANONICAL_HOST** | (optional) `www.louhen.app` | Preview: `staging.louhen.app` | - | Platform | Only set if overriding default host metadata. |
 
 ## Operational Notes
 - CI enforces secret hygiene (`jobs.policy-guards`) via a regex scanner and fails any run that finds suspicious secret-like literals outside `.env.example`.
@@ -40,6 +39,21 @@ Canonical reference for environment configuration across stages. Update this mat
 - Preview workflows (`e2e-preview.yml`) run against staging with `TEST_MODE=1`, `IS_PRELAUNCH=true`, `EMAIL_TRANSPORT=noop`, and must source bypass headers from `secrets.PREVIEW_BYPASS_TOKEN`.
 - Never commit real credentials. `.env.example` documents placeholders only and mirrors the values required in Vercel / GitHub Actions.
 - When adjusting environment variables, update this matrix, `.env.example`, and README simultaneously to avoid drift.
+
+## Media & Open Graph Environment Variables
+
+| Name | Scope | Example Value | Purpose / Effect | Default Behavior |
+| --- | --- | --- | --- | --- |
+| `NEXT_PUBLIC_CANONICAL_HOST` | Production only (Vercel) | `www.louhen.app` | Defines the canonical production host consumed by `getSiteOrigin()` when constructing absolute OG/Twitter URLs. | Required in Production; left unset in Preview/local. |
+| `OG_DYNAMIC_ENABLED` | Preview + Production (Vercel) | `true` | Feature flag gating dynamic OG image generation. When `false`, metadata falls back to static assets and SEO tests expect static URLs. | Defaults to `true`. |
+| `OG_CACHE_MAX_AGE` | Preview + Production (Vercel) | `300` | Overrides browser-facing `Cache-Control: max-age` for dynamic OG responses. | 300 s when unset. |
+| `OG_S_MAXAGE` | Preview + Production (Vercel) | `86400` | Controls CDN/Edge `s-maxage` for dynamic OG responses. | 86 400 s (1 day) when unset. |
+| `OG_SIZE_BUDGET_BYTES` | GitHub Actions (testing only) | `2000000` | Playwright SEO specs read this to enforce an OG image size ceiling in CI (≈ 2 MB). Not used at runtime. | 2 MB ceiling. |
+
+**Notes**
+- Variables without the `NEXT_PUBLIC_` prefix remain server-only.
+- Updating Vercel values requires redeploying the affected environment.
+- Preview inherits the `OG_*` cache and feature flags; Production normally overrides only the canonical host.
 
 ## Rotation Playbook
 1. **Resend**: create new API key in Resend, update Vercel (Preview + Production) secrets, rotate GitHub secret `CI_RESEND_API_KEY`, then remove the old key. Validate by running `/status` and sending a waitlist confirmation from staging.
