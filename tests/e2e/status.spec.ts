@@ -67,7 +67,11 @@ test.describe('status diagnostics page', () => {
 
     try {
       const authedPage = await context.newPage();
+<<<<<<< HEAD
       const response = await authedPage.goto('/en-de/status', { waitUntil: 'networkidle' });
+=======
+      const response = await authedPage.goto('/status', { waitUntil: 'networkidle' });
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
       expect(response?.status()).toBe(200);
       await expect(authedPage.getByRole('heading', { name: /Operational diagnostics/i })).toBeVisible();
       await expect(authedPage.getByText(/CSP nonce/i)).toBeVisible();

@@ -72,7 +72,7 @@ const eslintConfig = [
   {
     files: [
       'app/manifest.ts',
-      'app/opengraph-image.tsx',
+      'app/opengraph-image/route.ts',
       'components/ThemeInit.tsx',
       'app/api/**/*.{ts,tsx}',
       'app/layout.tsx',

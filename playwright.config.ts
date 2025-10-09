@@ -28,6 +28,7 @@ const shouldSkipWebServer = process.env.PLAYWRIGHT_SKIP === '1';
 const statusUser = process.env.STATUS_USER ?? process.env.CI_STATUS_USER ?? 'status-ops';
 const statusPass = process.env.STATUS_PASS ?? process.env.CI_STATUS_PASS ?? 'status-secret';
 
+<<<<<<< HEAD
 const sandboxOrigin = normalizeBase(sandboxBaseURL);
 if (isSandbox && !sandboxOrigin) {
   throw new Error('SANDBOX_VALIDATION=1 requires PREVIEW_BASE_URL to be set.');
@@ -41,6 +42,8 @@ const targetOrigin = hasBaseOverride ? baseOverride : defaultOrigin;
 const canonicalBaseURL = withTrailingSlash(ensureLocaleBase(targetOrigin));
 const useExternalTarget = hasBaseOverride || isSandbox;
 
+=======
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
 const testEnv = {
   BASE_URL: targetOrigin,
   APP_BASE_URL: targetOrigin,
@@ -48,6 +51,7 @@ const testEnv = {
   TEST_E2E_SHORTCIRCUIT: 'true',
   TEST_E2E_BYPASS_TOKEN: 'e2e-mocked-token',
   NEXT_PUBLIC_ENV: process.env.NEXT_PUBLIC_ENV ?? 'ci',
+<<<<<<< HEAD
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? targetOrigin,
   NEXT_PUBLIC_HCAPTCHA_SITE_KEY: process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY ?? 'test_site_key',
   NEXT_PUBLIC_WAITLIST_URGENCY: process.env.NEXT_PUBLIC_WAITLIST_URGENCY ?? 'true',
@@ -59,6 +63,16 @@ const testEnv = {
   DEFAULT_LOCALE: process.env.DEFAULT_LOCALE ?? 'en-de',
   NEXT_PUBLIC_METHOD_STICKY_CTA: process.env.NEXT_PUBLIC_METHOD_STICKY_CTA ?? 'true',
   NEXT_PUBLIC_METHOD_EXIT_NUDGE: process.env.NEXT_PUBLIC_METHOD_EXIT_NUDGE ?? 'true',
+=======
+  NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? baseURL,
+  NEXT_PUBLIC_HCAPTCHA_SITE_KEY: process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY ?? 'test_site_key',
+  NEXT_PUBLIC_WAITLIST_URGENCY: process.env.NEXT_PUBLIC_WAITLIST_URGENCY ?? 'true',
+  NEXT_PUBLIC_ANALYTICS_DISABLED: process.env.NEXT_PUBLIC_ANALYTICS_DISABLED ?? '0',
+  NEXT_PUBLIC_ANALYTICS_DEBUG: process.env.NEXT_PUBLIC_ANALYTICS_DEBUG ?? '1',
+  NEXT_PUBLIC_COMMIT_SHA: process.env.NEXT_PUBLIC_COMMIT_SHA ?? 'playwright-ci',
+  NEXT_PUBLIC_LOCALES: process.env.NEXT_PUBLIC_LOCALES ?? 'en,de',
+  NEXT_PUBLIC_DEFAULT_LOCALE: process.env.NEXT_PUBLIC_DEFAULT_LOCALE ?? 'en',
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
   HCAPTCHA_SECRET: process.env.HCAPTCHA_SECRET ?? 'test_secret',
   WAITLIST_CONFIRM_TTL_DAYS: process.env.WAITLIST_CONFIRM_TTL_DAYS ?? '7',
   FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID ?? 'ci-firebase',
@@ -67,8 +81,12 @@ const testEnv = {
   RESEND_API_KEY: process.env.RESEND_API_KEY ?? 'ci-resend-key',
   RESEND_FROM: process.env.RESEND_FROM ?? 'no-reply@ci.louhen.app',
   RESEND_REPLY_TO: process.env.RESEND_REPLY_TO ?? 'hello@ci.louhen.app',
+<<<<<<< HEAD
   NODE_ENV: 'production',
   NEXT_TELEMETRY_DISABLED: process.env.NEXT_TELEMETRY_DISABLED ?? '1',
+=======
+  NODE_ENV: 'test',
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
   SUPPRESSION_SALT: process.env.SUPPRESSION_SALT ?? 'test-salt',
   EMAIL_TRANSPORT: process.env.EMAIL_TRANSPORT ?? 'noop',
   STATUS_USER: statusUser,

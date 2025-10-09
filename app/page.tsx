@@ -70,7 +70,7 @@ export async function generateMetadata({ searchParams }: MetadataArgs): Promise<
 
   const sharePath = `${canonicalPath}?ref=${encodeURIComponent(ref)}`;
   const fullUrl = `${baseUrl}${sharePath}`;
-  const imageUrl = `${baseUrl}/opengraph-image?locale=${DEFAULT_LOCALE.value}&ref=${encodeURIComponent(ref)}`;
+  const imageUrl = `${baseUrl}/api/og?locale=${DEFAULT_LOCALE.value}&ref=${encodeURIComponent(ref)}`;
 
   return {
     title: defaultTitle,

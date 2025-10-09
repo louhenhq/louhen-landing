@@ -68,7 +68,7 @@ export default async function MethodPage({ params }: MethodPageProps) {
     sections: [...pillarTitles, ...howTitles, t('trust.headline'), t('faqTeaser.title')],
     baseUrl,
     brandName: 'Louhen',
-    image: `${baseUrl}/opengraph-image.png`,
+    image: `${baseUrl}/api/og?locale=${locale}`,
     datePublished: '2025-01-15T00:00:00.000Z',
     dateModified: '2025-01-15T00:00:00.000Z',
   });

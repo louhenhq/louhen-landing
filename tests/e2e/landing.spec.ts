@@ -204,7 +204,11 @@ test.describe('Landing Page – DE', () => {
   test('localized copy and voucher analytics', async ({ page }) => {
     const events = await interceptAnalytics(page);
     await allowAnalytics(page, events);
+<<<<<<< HEAD
     await page.goto('/de-de/', { waitUntil: 'networkidle' });
+=======
+    await page.goto('/de', { waitUntil: 'networkidle' });
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
     const { origin } = new URL(page.url());
     await page.context().grantPermissions(['clipboard-read', 'clipboard-write'], { origin });
 
@@ -222,7 +226,11 @@ test.describe('Trust & Social Proof', () => {
   test('testimonials, podiatrist, trust logos, privacy analytics', async ({ page }) => {
     const events = await interceptAnalytics(page);
     await allowAnalytics(page, events);
+<<<<<<< HEAD
     await page.goto('/en-de/', { waitUntil: 'networkidle' });
+=======
+    await page.goto('/en', { waitUntil: 'networkidle' });
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
 
     const testimonials = page.getByTestId('testimonial-card');
     const testimonialCount = await testimonials.count();

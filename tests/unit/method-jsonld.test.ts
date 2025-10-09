@@ -10,7 +10,7 @@ const baseInput = {
   sections: ['Kid-safe scanning', 'Verified fit science', 'Adaptive personalization'],
   baseUrl: 'https://example.com',
   brandName: 'Louhen',
-  image: 'https://example.com/opengraph-image.png',
+  image: 'https://example.com/api/og?locale=en-de',
   datePublished: '2025-01-15T00:00:00.000Z',
   dateModified: '2025-01-15T00:00:00.000Z',
 } as const;

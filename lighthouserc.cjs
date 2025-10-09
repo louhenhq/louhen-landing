@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 const BASE = (process.env.PREVIEW_BASE_URL || process.env.BASE_URL || 'http://localhost:4311').replace(/\/$/, '');
 const OUTPUT_DIR = process.env.LIGHTHOUSE_OUTPUT_DIR || 'lighthouse-report';
 const DEFAULT_TARGET = `${BASE}/en-de/method`;
@@ -11,6 +12,19 @@ module.exports = {
         formFactor: 'desktop',
         screenEmulation: { mobile: false, width: 1366, height: 768, deviceScaleRatio: 1, disabled: false },
         throttlingMethod: 'provided',
+=======
+const BASE = process.env.BASE_URL || 'http://localhost:4311';
+module.exports = {
+  ci: {
+    collect: {
+      url: [`${BASE}/`, `${BASE}/method`],
+      numberOfRuns: 1,
+      settings: {
+        formFactor: 'mobile',
+        screenEmulation: { mobile: true, width: 360, height: 640, deviceScaleRatio: 2, disabled: false },
+        throttleMethod: 'devtools',
+        throttlingMethod: 'devtools',
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
         onlyCategories: ['performance', 'accessibility', 'seo', 'best-practices']
       },
       chromeFlags: ['--disable-dev-shm-usage', '--allow-insecure-localhost'],
@@ -23,10 +37,15 @@ module.exports = {
     },
     assert: {
       assertions: {
+<<<<<<< HEAD
         'categories:performance': ['error', { minScore: 0.9 }],
         'categories:accessibility': ['warn', { minScore: 0.98 }],
         'categories:seo': ['error', { minScore: 0.9 }],
         'categories:best-practices': ['warn', { minScore: 0.9 }],
+=======
+        'categories:accessibility': ['error', { minScore: 0.9 }],
+        'categories:seo': ['error', { minScore: 0.9 }],
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
         'cumulative-layout-shift': ['error', { maxNumericValue: 0.01 }],
         'largest-contentful-paint': ['warn', { maxNumericValue: 2500 }],
       },

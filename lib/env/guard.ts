@@ -228,6 +228,7 @@ export function ensureWaitlistServerEnv(): WaitlistServerEnvSummary {
     }
   }
 
+<<<<<<< HEAD
   if (!parsePositiveInteger(process.env.WAITLIST_RATE_SUBMITS_PER_HOUR_PER_IP)) {
     if (!runtime.isProduction && !runtime.isTest) {
       warnings.push('WAITLIST_RATE_SUBMITS_PER_HOUR_PER_IP invalid; defaulting to 10 submissions/hour.');
@@ -240,6 +241,8 @@ export function ensureWaitlistServerEnv(): WaitlistServerEnvSummary {
     }
   }
 
+=======
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
   assertProductionReady(WAITLIST_SERVER_ENV_PREFIX, runtime, missingInProduction);
   emitWarnings(WAITLIST_SERVER_ENV_PREFIX, runtime, warnings);
 

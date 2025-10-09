@@ -119,6 +119,14 @@ Required env vars (all set in Vercel):
 
 Fail fast on missing envs with clear server-side error logs (no secrets echoed).
 
+### DNS / Environment Addendum
+
+- Apex `louhen.app` must point to `76.76.21.21` (A record, DNS only) once production goes live.
+- `www.louhen.app` stays a CNAME to `cname.vercel-dns.com` (DNS only).
+- Wildcard previews `*.staging.louhen.app` stay CNAME records to `cname.vercel-dns.com` (DNS only).
+- If Vercel validator lags, provision explicit subdomains (e.g., `tmp.staging.louhen.app`) as fallbacks.
+- Keep production DNS dark prior to launch; only preview domains remain exposed.
+
 ---
 
 ## 6) CSP & Inline Scripts

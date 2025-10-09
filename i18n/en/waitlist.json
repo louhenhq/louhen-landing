@@ -26,8 +26,12 @@
       "title": "You're in!",
       "subtitle": "We saved your spot. Watch your inbox for early access and fit guidance.",
       "preOnboarding": {
+<<<<<<< HEAD
         "cta": "Continue to pre-onboarding",
         "completed": "Thanks! Your family's details are already saved."
+=======
+        "cta": "Continue to pre-onboarding"
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
       },
       "privacy": "We respect your inbox and only email with consent.",
       "share": {
@@ -35,16 +39,24 @@
         "copy": "Copy link",
         "whatsapp": "Share on WhatsApp",
         "email": "Invite via email"
+<<<<<<< HEAD
       },
       "return": "Back to success overview"
+=======
+      }
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
     },
     "expired": {
       "title": "Confirmation link expired",
       "subtitle": "Request a fresh link to finish your signup.",
       "resend": {
+<<<<<<< HEAD
         "cta": "Send a new confirmation email",
         "success": "Check your inbox for a fresh confirmation link.",
         "rateLimited": "Too many requests right now. Please try again soon."
+=======
+        "cta": "Send a new confirmation email"
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
       }
     },
     "already": {
@@ -60,19 +72,29 @@
     }
   },
   "preonboarding": {
+<<<<<<< HEAD
     "badge": "Founding Parent preview",
+=======
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
     "title": "Tell us more (optional)",
     "subtitle": "Share a few details so we can tailor early access drops to your family.",
     "parent": {
       "firstName": {
+<<<<<<< HEAD
         "label": "Parent first name",
         "placeholder": "e.g. Alex"
+=======
+        "label": "Parent first name"
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
       }
     },
     "child": {
       "section": "Children",
+<<<<<<< HEAD
       "add": "Add another child",
       "legend": "Child {index}",
+=======
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
       "name": {
         "label": "Child name"
       },
@@ -80,6 +102,7 @@
         "label": "Birthday"
       },
       "weight": {
+<<<<<<< HEAD
         "label": "Weight (kg)",
         "placeholder": "kg"
       },
@@ -117,15 +140,31 @@
       "label": "Privacy note",
       "body": "These details stay private and only shape Louhen recommendations. You can update or delete them anytime."
     }
+=======
+        "label": "Weight"
+      },
+      "shoeSize": {
+        "label": "Shoe size"
+      }
+    },
+    "save": {
+      "cta": "Save and continue"
+    },
+    "comingSoon": "Coming next — we’ll unlock this step soon."
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
   },
   "errors": {
     "required": "This field is required.",
     "email": {
       "invalid": "Enter a valid email address."
     },
+<<<<<<< HEAD
     "generic": "Something went wrong. Please try again.",
     "rateLimited": "Too many requests right now. Please try again soon.",
     "invalid": "Please check the form and try again.",
     "network": "Network error. Please try again."
+=======
+    "generic": "Something went wrong. Please try again."
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
   }
 }

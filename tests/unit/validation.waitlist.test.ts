@@ -49,6 +49,7 @@ describe('waitlist validation DTOs', () => {
       ],
     });
     expect(dto.parentFirstName).toBe('Alex');
+<<<<<<< HEAD
     expect(dto.children[0]?.name).toBe('Sam');
     expect(dto.children[0]?.weight).toBe(18);
   });
@@ -87,5 +88,8 @@ describe('waitlist validation DTOs', () => {
         ],
       })
     ).toThrow(BadRequestError);
+=======
+    expect(dto.children?.[0]?.name).toBe('Sam');
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
   });
 });

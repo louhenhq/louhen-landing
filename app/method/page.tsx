@@ -40,6 +40,7 @@ const dimensionHighlights = [
 const baseUrl = resolveSiteBaseUrl()
 const methodPath = buildCanonicalPath(DEFAULT_LOCALE.value, '/method')
 const methodUrl = buildCanonicalUrl(DEFAULT_LOCALE.value, '/method')
+const previewImage = `${baseUrl}/api/og?locale=${DEFAULT_LOCALE.value}`
 const methodTitle = 'Our Method'
 const methodDescription = 'See how Louhen captures precise shoe dimensions and builds trust into every recommendation.'
 
@@ -59,7 +60,7 @@ export function generateMetadata(): Metadata {
       url: methodUrl,
       images: [
         {
-          url: `${baseUrl}/opengraph-image.png`,
+          url: previewImage,
           width: 1200,
           height: 630,
           alt: methodTitle,
@@ -69,7 +70,7 @@ export function generateMetadata(): Metadata {
     twitter: {
       title: `${methodTitle} — Louhen`,
       description: methodDescription,
-      images: [`${baseUrl}/opengraph-image.png`],
+      images: [previewImage],
     },
   }
 }

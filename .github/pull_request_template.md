@@ -6,6 +6,7 @@
 ## Summary
 - What changed & why (1–2 lines):
 
+<<<<<<< HEAD
 ## Method Page Checklist (mark if this PR touches `/[locale]/method/`)
 - [ ] i18n parity: EN/DE keys for `method.*` are complete and updated.
 - [ ] Links resolve: FAQ teaser links, privacy disclosure link, and final CTA anchor (`#join-waitlist`).
@@ -79,6 +80,8 @@
 
 > If any item cannot be satisfied, include rationale and a follow-up issue link.
 
+=======
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
 ## Checklist (trust, privacy, governance)
 - [ ] **Consent**: Analytics initialize only after opt-in; no surprise trackers added.  
 - [ ] **CSP Nonce**: No inline scripts without a nonce; JSON-LD keeps nonce parity.  

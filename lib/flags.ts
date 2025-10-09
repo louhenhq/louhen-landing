@@ -26,6 +26,7 @@ const resolvedUrgencyFlag = (() => {
   return defaultForRuntime();
 })();
 
+<<<<<<< HEAD
 const resolvedMethodStickyCtaFlag = (() => {
   const parsed = parseBooleanFlag(process.env.NEXT_PUBLIC_METHOD_STICKY_CTA);
   if (parsed !== null) {
@@ -51,3 +52,6 @@ const resolvedMethodExitNudgeFlag = (() => {
 export const WAITLIST_URGENCY_COPY_ENABLED = resolvedUrgencyFlag;
 export const METHOD_STICKY_CTA_ENABLED = resolvedMethodStickyCtaFlag;
 export const METHOD_EXIT_NUDGE_ENABLED = resolvedMethodExitNudgeFlag;
+=======
+export const WAITLIST_URGENCY_COPY_ENABLED = resolvedUrgencyFlag;
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))

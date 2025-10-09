@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: MethodPageProps): Promise<Met
   const baseUrl = resolveSiteBaseUrl();
   const localizedPath = buildCanonicalPath(locale, '/method');
   const canonicalUrl = buildCanonicalUrl(locale, '/method');
-  const imageUrl = `${baseUrl}/opengraph-image.png`;
+  const imageUrl = `${baseUrl}/api/og?locale=${locale}`;
   const languages = buildAlternateLanguageMap('/method');
 
   return {

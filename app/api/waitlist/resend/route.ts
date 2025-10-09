@@ -4,8 +4,11 @@ import { NextResponse } from 'next/server';
 import { BadRequestError, HttpError, InternalServerError } from '@/lib/http/errors';
 import { findByEmail, upsertPending } from '@/lib/firestore/waitlist';
 import { sendWaitlistConfirmEmail } from '@/lib/email/sendWaitlistConfirm';
+<<<<<<< HEAD
 import { enforceRateLimit } from '@/lib/rate/limiter';
 import { getWaitlistResendRule } from '@/lib/rate/rules';
+=======
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
 import { verifyToken as verifyCaptchaToken } from '@/lib/security/hcaptcha';
 import { generateToken, hashToken } from '@/lib/security/tokens';
 import { getExpiryDate } from '@/lib/waitlistConfirmTtl';
@@ -47,6 +50,7 @@ export async function POST(request: Request) {
   try {
     const payload = parseResendDTO(await readJson(request));
 
+<<<<<<< HEAD
     const rateDecision = await enforceRateLimit(getWaitlistResendRule(), payload.email);
     if (!rateDecision.allowed) {
       return NextResponse.json(
@@ -93,6 +97,8 @@ export async function POST(request: Request) {
       );
     }
 
+=======
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
     const { captcha } = ensureWaitlistServerEnv();
     const secret = process.env.HCAPTCHA_SECRET?.trim();
     if (!secret || !captcha.hasSecret) {

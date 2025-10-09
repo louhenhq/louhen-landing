@@ -43,6 +43,7 @@ const resendSchema = z.object({
 const childSchema = z
   .object({
     name: z.string().trim().min(1).max(120),
+<<<<<<< HEAD
     birthday: z
       .string()
       .trim()
@@ -52,16 +53,27 @@ const childSchema = z
       .min(0.1, 'invalid_weight')
       .max(100, 'invalid_weight')
       .optional(),
+=======
+    birthday: z.string().trim().min(4).max(32),
+    weight: z.number().positive().max(500).optional(),
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
     shoeSize: z.string().trim().max(32).optional(),
   })
   .strict();
 
+<<<<<<< HEAD
 const preOnboardingSchema = z
   .object({
     parentFirstName: z.string().trim().min(1).max(120).optional(),
     children: z.array(childSchema).min(1).max(5),
   })
   .strict();
+=======
+const preOnboardingSchema = z.object({
+  parentFirstName: z.string().trim().min(1).max(120).optional(),
+  children: z.array(childSchema).max(5).optional(),
+});
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
 
 export type SignupDTO = z.infer<typeof signupSchema>;
 export type ResendDTO = z.infer<typeof resendSchema>;

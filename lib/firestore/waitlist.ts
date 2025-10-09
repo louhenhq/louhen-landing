@@ -1,7 +1,10 @@
 import { randomUUID } from 'node:crypto';
 import { getDb } from '@/lib/firebaseAdmin';
+<<<<<<< HEAD
 import { isTestMode } from '@/lib/testMode';
 import { createTokenLookupHash } from '@/lib/security/tokens';
+=======
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
 
 export type WaitlistUtm = {
   source?: string;
@@ -11,6 +14,7 @@ export type WaitlistUtm = {
   content?: string;
 };
 
+<<<<<<< HEAD
 export type PreOnboardingChildDraft = {
   name: string;
   birthday: string;
@@ -47,6 +51,8 @@ type TestDocRecord = {
   profileDraftUpdatedAt?: Date | null;
 };
 
+=======
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
 export type WaitlistDoc = {
   id: string;
   email: string;
@@ -65,9 +71,12 @@ export type WaitlistDoc = {
   createdAt?: Date | null;
   updatedAt?: Date | null;
   confirmedAt?: Date | null;
+<<<<<<< HEAD
   preOnboarded?: boolean;
   profileDraft?: PreOnboardingDraft | null;
   profileDraftUpdatedAt?: Date | null;
+=======
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
 };
 
 export type WaitlistUpsertInput = {
@@ -94,6 +103,7 @@ function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
+<<<<<<< HEAD
 function getTestStore(): Map<string, TestDocRecord> | null {
   if (!isTestMode()) return null;
   const globalRef = globalThis as typeof globalThis & { __WAITLIST_TEST_STORE__?: Map<string, TestDocRecord> };
@@ -168,6 +178,8 @@ function mapTestDoc(doc: TestDocRecord): WaitlistDoc {
   };
 }
 
+=======
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
 function toDate(value: unknown): Date | null {
   if (!value) return null;
   if (value instanceof Date) return value;
@@ -199,7 +211,10 @@ function mapDoc(doc: FirebaseFirestore.QueryDocumentSnapshot | FirebaseFirestore
   const data = doc.data() as Record<string, unknown> | undefined;
   const consentObj = (data?.consent as Record<string, unknown> | undefined) ?? {};
   const consentAt = consentObj.at ?? data?.consentAt ?? data?.gdprConsentAt;
+<<<<<<< HEAD
   const profileDraft = mapProfileDraft(data?.profileDraft);
+=======
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
 
   return {
     id: doc.id,
@@ -219,6 +234,7 @@ function mapDoc(doc: FirebaseFirestore.QueryDocumentSnapshot | FirebaseFirestore
     createdAt: toDate(data?.createdAt),
     updatedAt: toDate(data?.updatedAt),
     confirmedAt: toDate(data?.confirmedAt),
+<<<<<<< HEAD
     preOnboarded: Boolean(data?.preOnboarded),
     profileDraft,
     profileDraftUpdatedAt: toDate(data?.profileDraftUpdatedAt),
@@ -248,10 +264,13 @@ function mapProfileDraft(value: unknown): PreOnboardingDraft | null {
   return {
     parentFirstName,
     children,
+=======
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
   };
 }
 
 async function findDocByField(field: string, value: string): Promise<FirebaseFirestore.QueryDocumentSnapshot | null> {
+<<<<<<< HEAD
   const store = getTestStore();
   if (store) {
     if (field === 'emailNormalized') {
@@ -319,12 +338,15 @@ async function findDocByField(field: string, value: string): Promise<FirebaseFir
       } as unknown as FirebaseFirestore.QueryDocumentSnapshot;
     }
   }
+=======
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
   const db = getDb();
   const snapshot = await db.collection(COLLECTION).where(field, '==', value).limit(1).get();
   if (snapshot.empty) return null;
   return snapshot.docs[0];
 }
 
+<<<<<<< HEAD
 async function findDocById(docId: string): Promise<FirebaseFirestore.DocumentSnapshot | null> {
   const store = getTestStore();
   if (store) {
@@ -456,6 +478,9 @@ export async function upsertPending(email: string, input: WaitlistUpsertInput): 
     };
   }
 
+=======
+export async function upsertPending(email: string, input: WaitlistUpsertInput): Promise<UpsertPendingResult> {
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
   const db = getDb();
   const collection = db.collection(COLLECTION);
   const normalizedEmail = normalizeEmail(email);
@@ -533,11 +558,14 @@ export async function upsertPending(email: string, input: WaitlistUpsertInput): 
 }
 
 export async function findByEmail(email: string): Promise<WaitlistDoc | null> {
+<<<<<<< HEAD
   const testStore = getTestStore();
   if (testStore) {
     const doc = findTestDocByEmail(normalizeEmail(email));
     return doc ? mapTestDoc(doc) : null;
   }
+=======
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
   const normalizedEmail = normalizeEmail(email);
   const doc = await findDocByField('emailNormalized', normalizedEmail);
   if (!doc) return null;
@@ -545,16 +573,20 @@ export async function findByEmail(email: string): Promise<WaitlistDoc | null> {
 }
 
 export async function findByTokenHash(tokenHash: string): Promise<WaitlistDoc | null> {
+<<<<<<< HEAD
   const testStore = getTestStore();
   if (testStore) {
     const doc = findTestDocByLookupHash(tokenHash);
     return doc ? mapTestDoc(doc) : null;
   }
+=======
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
   const doc = await findDocByField('confirmTokenLookupHash', tokenHash);
   if (!doc) return null;
   return mapDoc(doc);
 }
 
+<<<<<<< HEAD
 function sanitizePreOnboardingDraft(input: PreOnboardingDraft): PreOnboardingDraft | null {
   if (!input || !Array.isArray(input.children)) {
     return null;
@@ -721,6 +753,9 @@ export async function markConfirmedByTokenHash(tokenHash: string): Promise<'conf
     saveTestDoc(doc);
     return 'confirmed';
   }
+=======
+export async function markConfirmedByTokenHash(tokenHash: string): Promise<'confirmed' | 'already' | 'expired' | 'missing'> {
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
   const doc = await findDocByField('confirmTokenLookupHash', tokenHash);
   if (!doc) {
     return 'missing';
@@ -755,6 +790,7 @@ export async function markConfirmedByTokenHash(tokenHash: string): Promise<'conf
 }
 
 export async function markExpiredByTokenHash(tokenHash: string): Promise<'expired' | 'missing' | 'already'> {
+<<<<<<< HEAD
   const testStore = getTestStore();
   if (testStore) {
     const doc = findTestDocByLookupHash(tokenHash);
@@ -774,6 +810,8 @@ export async function markExpiredByTokenHash(tokenHash: string): Promise<'expire
     saveTestDoc(doc);
     return 'expired';
   }
+=======
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
   const doc = await findDocByField('confirmTokenLookupHash', tokenHash);
   if (!doc) {
     return 'missing';

@@ -175,8 +175,18 @@ export default async function StatusPage() {
               </dd>
             </div>
             <div className="flex items-center justify-between">
+              <dt>Live transport</dt>
+              <dd className={snapshot.emailTransport ? 'text-emerald-600' : 'text-amber-600'}>
+                {formatBoolean(snapshot.emailTransport)}
+              </dd>
+            </div>
+            <div className="flex items-center justify-between">
               <dt>Transport mode</dt>
+<<<<<<< HEAD
               <dd className="font-mono text-body-sm uppercase text-text">{snapshot.emailTransportMode}</dd>
+=======
+              <dd className="font-mono text-xs uppercase text-slate-800">{snapshot.emailTransportMode}</dd>
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
             </div>
             <div className="flex items-center justify-between">
               <dt>Suppressions (last {snapshot.suppressionsSampleLimit})</dt>

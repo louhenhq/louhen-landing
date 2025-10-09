@@ -80,7 +80,7 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     images: [
       {
-        url: '/opengraph-image.png',
+        url: '/api/og',
         width: 1200,
         height: 630,
         alt: 'Louhen — Personal style. Effortless fit.',
@@ -93,7 +93,7 @@ export const metadata: Metadata = {
     creator: '@louhenhq',
     title: 'Louhen — Personal style. Effortless fit.',
     description: defaultDescription,
-    images: ['/opengraph-image.png'],
+    images: ['/api/og'],
   },
 }
 

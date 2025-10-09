@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 name: Status Monitor
 
 on:
@@ -77,3 +78,63 @@ jobs:
         run: |
           echo "Requesting ${{ steps.select.outputs.URL }}"
           curl -sS --fail -b jar.txt -H "Authorization: $AUTH_HEADER" "${{ steps.select.outputs.URL }}"
+=======
+name: Status Endpoint Monitor
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping-status:
+    name: Check ${{ matrix.env_name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        env_name: [preview, production]
+    steps:
+      - name: Resolve endpoint and credentials
+        run: |
+          if [ "${{ matrix.env_name }}" = "preview" ]; then
+            echo "STATUS_URL=https://staging.louhen.app/api/status" >> "$GITHUB_ENV"
+            echo "STATUS_USER=${{ secrets.STATUS_USER_PREVIEW }}" >> "$GITHUB_ENV"
+            echo "STATUS_PASS=${{ secrets.STATUS_PASS_PREVIEW }}" >> "$GITHUB_ENV"
+          else
+            echo "STATUS_URL=https://www.louhen.app/api/status" >> "$GITHUB_ENV"
+            echo "STATUS_USER=${{ secrets.STATUS_USER_PROD }}" >> "$GITHUB_ENV"
+            echo "STATUS_PASS=${{ secrets.STATUS_PASS_PROD }}" >> "$GITHUB_ENV"
+          fi
+      - name: Fetch status payload
+        id: fetch
+        run: |
+          if [ -z "$STATUS_USER" ] || [ -z "$STATUS_PASS" ]; then
+            echo "Missing STATUS_USER/STATUS_PASS for ${{ matrix.env_name }}" >&2
+            exit 1
+          fi
+          echo "Requesting $STATUS_URL"
+          RESP=$(curl --silent --show-error --fail --location \
+            --user "$STATUS_USER:$STATUS_PASS" \
+            --header 'Accept: application/json' \
+            "$STATUS_URL")
+          {
+            echo 'payload<<EOF'
+            echo "$RESP"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+      - name: Validate status payload
+        env:
+          PAYLOAD: ${{ steps.fetch.outputs.payload }}
+        run: |
+          echo "$PAYLOAD" | jq -e '
+            select(.noncePresent | type == "boolean")
+            | select(.emailTransport | type == "boolean")
+            | select(
+                (.env | type == "string")
+                or
+                (.env | type == "object" and (.vercelEnv? | type == "string" or .vercelEnv? == null))
+              )
+          ' > /dev/null
+          echo "Status payload for ${{ matrix.env_name }} looks healthy."
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))

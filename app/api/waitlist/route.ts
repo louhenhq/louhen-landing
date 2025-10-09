@@ -5,8 +5,11 @@ import { NextResponse } from 'next/server';
 import { BadRequestError, HttpError, InternalServerError } from '@/lib/http/errors';
 import { upsertPending } from '@/lib/firestore/waitlist';
 import { sendWaitlistConfirmEmail } from '@/lib/email/sendWaitlistConfirm';
+<<<<<<< HEAD
 import { enforceRateLimit } from '@/lib/rate/limiter';
 import { getWaitlistSubmitRule } from '@/lib/rate/rules';
+=======
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
 import { verifyToken as verifyCaptchaToken } from '@/lib/security/hcaptcha';
 import { generateToken, hashToken } from '@/lib/security/tokens';
 import { getExpiryDate } from '@/lib/waitlistConfirmTtl';
@@ -32,6 +35,7 @@ function resolveRemoteIp(request: Request): string | undefined {
   return realIp?.trim() || undefined;
 }
 
+<<<<<<< HEAD
 function resolveRateIdentifier(request: Request): string {
   const remoteIp = resolveRemoteIp(request);
   if (remoteIp) {
@@ -104,6 +108,27 @@ export async function POST(request: Request) {
         },
         { status: 200 }
       );
+=======
+function errorResponse(error: HttpError) {
+  return NextResponse.json(
+    {
+      ok: false,
+      code: error.code,
+      message: 'Unable to process request',
+      details: error.details,
+    },
+    { status: error.status }
+  );
+}
+
+export async function POST(request: Request) {
+  try {
+    // TODO: integrate IP/email rate limiting (Slice 3).
+    const payload = parseSignupDTO(await readJson(request));
+
+    if (process.env.TEST_E2E_SHORTCIRCUIT === 'true') {
+      return NextResponse.json({ ok: true, shortCircuit: true }, { status: 200 });
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
     }
 
     const { captcha } = ensureWaitlistServerEnv();

@@ -69,7 +69,7 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
     : 'Join through their link to unlock early rewards and smarter sizing for every outfit.'
   const sharePath = `${canonicalPath}?ref=${encodeURIComponent(ref)}`
   const fullUrl = `${baseUrl}${sharePath}`
-  const imageUrl = `${baseUrl}/opengraph-image?locale=${supported}&ref=${encodeURIComponent(ref)}`
+  const imageUrl = `${baseUrl}/api/og?locale=${supported}&ref=${encodeURIComponent(ref)}`
 
   return {
     title: invitedTitle,

@@ -32,6 +32,7 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
 - **2025-09-22**  
   Added `/CONTEXT` bundle with agents.md, project_overview.md, decision_log.md, etc. Codex workflow formalized.  
 
+<<<<<<< HEAD
 ---
 
 ## 2025-10-01 — Method Page Scope & Rules (LOCKED)
@@ -96,3 +97,9 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
  
 - **2025-10-07**  
   Middleware locks `localePrefix = 'always'`, passes through already-localised `/en-de/*` and `/de-de/*` requests without rewrites, and upgrades `/en`, `/de`, and bare routes to their canonical `/en-de/*` counterparts. Loopback hosts continue to bypass HTTPS/HSTS so automation never encounters Chrome interstitials. Lighthouse defaults to `http://localhost:4311/en-de/method`, waits for a `200`, and can still be overridden with `LHCI_URL` when targeting other locales.
+=======
+- **2025-09-24**  
+  Locked transactional email identity to louhen.app (`no-reply@` sender, `hello@` reply-to). Ratified `https://www.louhen.app` as the canonical production host (apex `louhen.app` 301s to `https://www.louhen.app`) and confirmed preview at `https://staging.louhen.app`. Documented hCaptcha policy (universal test keys locally; environment-specific keys in preview/prod), enforced Basic Auth on `/api/status` with hourly GitHub Action monitoring, and ratified the waitlist funnel as a 2-step flow with optional pre-onboarding.
+
+---
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))

@@ -15,6 +15,7 @@ Reference for the locked waitlist experience. Align copy, analytics, and enginee
 
 ## Acceptance Criteria Snapshot
 - **Accessibility:** AA colour contrast, focus management, semantic labels, and keyboard-only completion.
+<<<<<<< HEAD
 - **Reliability:** Duplicate submissions safe (idempotent); hashed tokens single-use; TTL observed in confirm + resend flows; rate limiting on form + resend endpoints; pre-onboarding drafts persist against a session cookie rather than raw email.
 - **Privacy:** No PII beyond scoped fields; analytics events gated by consent; logs redact emails and IPs; maintain consent ledger for audits.
 - **Email:** Confirmation templates include compliance headers and unsubscribe metadata.
@@ -25,6 +26,12 @@ Reference for the locked waitlist experience. Align copy, analytics, and enginee
 - Client form supports up to five children (name, ISO birthday, optional weight + shoe size), inline validation, and idempotent messaging when a draft already exists.
 - Analytics: the client emits `preonboarding_completed { hadChildData, locale }` after a successful save, gated by consent.
 
+=======
+- **Reliability:** Duplicate submissions safe (idempotent); hashed tokens single-use; TTL observed in confirm + resend flows; rate limiting on form + resend endpoints.
+- **Privacy:** No PII beyond scoped fields; analytics events gated by consent; logs redact emails and IPs; maintain consent ledger for audits.
+- **Email:** Confirmation templates include compliance headers and unsubscribe metadata.
+
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
 ## Related Backlog Slices
 - Slice 1 — UI scaffold + hCaptcha wiring
 - Slice 2 — API + validation + Firestore write

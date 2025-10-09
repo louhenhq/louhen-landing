@@ -127,8 +127,11 @@ To get started locally:
 4. Use hCaptcha universal test keys (`10000000-ffff-ffff-ffff-000000000001` / `0x000…000`).  
 5. `npm run lint && npm run build && npm run dev` to boot the stack.  
 6. Visit `/status`, authenticate with `STATUS_USER` / `STATUS_PASS` from `.env.local`, and expect `emailTransport=false` in dev while noop mode is active.
+<<<<<<< HEAD
 7. Rate limiting defaults to 10 submissions/hour/IP and 3 resends/30m/email; override with `WAITLIST_RATE_SUBMITS_PER_HOUR_PER_IP` and `WAITLIST_RATE_RESENDS_PER_30M_PER_EMAIL` if you need different local caps.
 8. After confirming an email, `/waitlist/pre-onboarding` is available for the optional family profile step. The confirmation flow drops a short-lived session cookie so drafts persist without exposing the email address.
+=======
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
 
 **Waitlist slice plan:** Slice 1 delivers UI scaffolding, Slice 2 adds API + validation, Slice 3 wires email + confirmation, Slice 5 layers pre-onboarding incentives, and Slice 6 locks in automated tests and quality gates.
 
@@ -252,6 +255,41 @@ Maintainers and organization members can trigger suites directly from a pull-req
 ```
 
 The bot dispatches the same workflow_dispatch run and posts results back to the PR once complete.
+
+## End-to-End Testing Modes
+
+- **Local mode**: Run `npx playwright test` without `E2E_BASE_URL`; Playwright binds to the local dev server on loopback.
+- **Remote mode**: Export `E2E_BASE_URL=https://staging.louhen.app` so tests hit the staging branch deployment. If Deployment Protection is enabled, also set `VERCEL_AUTOMATION_BYPASS_SECRET` and include the header below.
+
+### cURL sanity check
+
+```bash
+curl -H "x-vercel-protection-bypass: $VERCEL_AUTOMATION_BYPASS_SECRET" \
+  "$E2E_BASE_URL/status"
+```
+
+### Playwright auth header snippet
+
+```ts
+import { test as base } from '@playwright/test';
+
+const test = base.extend({
+  context: async ({ browser }, use) => {
+    const headers = process.env.VERCEL_AUTOMATION_BYPASS_SECRET
+      ? { 'x-vercel-protection-bypass': process.env.VERCEL_AUTOMATION_BYPASS_SECRET }
+      : {};
+
+    const context = await browser.newContext({
+      baseURL: process.env.E2E_BASE_URL || 'http://127.0.0.1:3000',
+      extraHTTPHeaders: headers,
+    });
+    await use(context);
+    await context.close();
+  },
+});
+
+export { test };
+```
 
 ## End-to-End Testing Modes
 

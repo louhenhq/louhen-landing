@@ -76,11 +76,15 @@ class FakeQuery {
 }
 
 class FakeDocSnapshot {
+<<<<<<< HEAD
   public readonly exists: boolean;
 
   constructor(private bucket: Map<string, Record<string, unknown>>, public readonly id: string, private readonly snapshotData: Record<string, unknown> | null) {
     this.exists = this.snapshotData !== null;
   }
+=======
+  constructor(private bucket: Map<string, Record<string, unknown>>, public readonly id: string, private readonly snapshotData: Record<string, unknown> | null) {}
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
 
   data() {
     if (!this.snapshotData) return undefined;
@@ -96,6 +100,7 @@ vi.mock('@/lib/firebaseAdmin', () => ({
   getDb: () => store,
 }));
 
+<<<<<<< HEAD
 import {
   findByEmail,
   getPreOnboardingDraft,
@@ -105,6 +110,9 @@ import {
   savePreOnboardingDraft,
   upsertPending,
 } from '@/lib/firestore/waitlist';
+=======
+import { findByEmail, findByTokenHash, markConfirmedByTokenHash, markExpiredByTokenHash, upsertPending } from '@/lib/firestore/waitlist';
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
 
 function buildInput(overrides: Partial<WaitlistUpsertInput> = {}): WaitlistUpsertInput {
   return {
@@ -175,6 +183,7 @@ describe('waitlist Firestore helpers', () => {
     expect(record?.status).toBe('expired');
     expect(record?.confirmTokenLookupHash).toBeNull();
   });
+<<<<<<< HEAD
 
   it('saves pre-onboarding draft and marks record', async () => {
     const { docId } = await upsertPending('family@example.com', buildInput());
@@ -226,4 +235,6 @@ describe('waitlist Firestore helpers', () => {
     expect(draft?.children[0]?.name).toBe('Leo');
     expect(draft?.children[0]?.weight).toBe(28);
   });
+=======
+>>>>>>> f7d7592 (Waitlist env split: build uses NEXT_PUBLIC only (#2))
 });
