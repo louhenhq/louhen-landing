@@ -39,7 +39,8 @@
     "validate:local": "node scripts/validate-local.mjs",
     "typecheck:build": "tsc -p tsconfig.build.json --noEmit",
     "typecheck:strict:feature": "tsc -p tsconfig.strict.json --noEmit",
-    "typecheck:strict:method": "tsc -p tsconfig.strict.method.json --noEmit"
+    "typecheck:strict:method": "tsc -p tsconfig.strict.method.json --noEmit",
+    "typecheck:tests": "tsc -p tsconfig.tests.json"
   },
   "engines": {
     "node": "22.x",

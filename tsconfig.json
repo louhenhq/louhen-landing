@@ -59,6 +59,11 @@
   ],
   "exclude": [
     "node_modules",
-    ".next"
+    ".next",
+    "tests",
+    "tests/**/*",
+    "playwright.config.*",
+    "playwright-report",
+    "lighthouse-report"
   ]
 }
