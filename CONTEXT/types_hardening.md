@@ -25,6 +25,9 @@
 - `npm run typecheck:strict:feature` — runs strict config after you populate the `include` array.
 - Feature-specific scripts (e.g., `npm run typecheck:strict:method`) provide ready-made entry points with curated include globs.
 
+## Notes
+- Zustand stores use generics on `persist()` or the `StateCreator`, not `create()`, per v5 typings.
+
 ## Active pilots
 - `components/features/header-nav/**/*`
 - `components/features/footer/**/*`

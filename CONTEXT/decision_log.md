@@ -29,6 +29,10 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
 
 ## History
 
+- **2025-10-09 — Zustand onboarding store typing alignment**  
+  - Adjusted `app/onboarding/[step]/page.tsx` to type the onboarding store via `persist()`/`StateCreator` (no generics on `create`) and bind it through a vanilla store hook that uses `useSyncExternalStore`.  
+  - Rationale → Zustand v5 typing no longer accepts generics on `create()`, so the onboarding slice now follows the new middleware-first pattern while retaining the existing hook surface.
+
 - **2025-10-09 — Environment Controls & Branch Protection (OG Pipeline)**  
   Introduced `NEXT_PUBLIC_CANONICAL_HOST`, `OG_DYNAMIC_ENABLED`, `OG_CACHE_MAX_AGE`, `OG_S_MAXAGE`, and `OG_SIZE_BUDGET_BYTES` (2 MB) to coordinate canonical host resolution, dynamic OG feature gating, cache tuning, and CI size enforcement across Vercel/GitHub Actions. OG Playwright specs (og-images, og-dynamic-vs-static, twitter-card) are now required status checks on the staging branch.
 
