@@ -124,7 +124,7 @@ function verifyGeneratedHeader(absPath) {
     if (firstLine !== GENERATED_HEADER) {
       generatedHeaderViolations.push({ file: absPath, expected: GENERATED_HEADER, actual: firstLine || '' });
     }
-  } catch (error) {
+  } catch {
     generatedHeaderViolations.push({ file: absPath, expected: GENERATED_HEADER, actual: '<<unable to read file>>' });
   }
 }

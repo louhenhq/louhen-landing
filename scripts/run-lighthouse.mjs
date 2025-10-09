@@ -9,7 +9,7 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const config = require('../lighthouserc.cjs');
-const { defaultLocale, targetLocales, ROUTES } = config;
+const { defaultLocale, targetLocales } = config;
 
 const BASE_URL = process.env.BASE_URL ?? 'http://127.0.0.1:4311';
 const READINESS_PATH = process.env.LHCI_READINESS_PATH ?? '/';
@@ -47,7 +47,7 @@ async function waitForServerReady(url) {
     try {
       const response = await fetch(url, { method: 'GET', redirect: 'manual' });
       if (response.ok) return;
-    } catch (error) {
+    } catch {
       // ignore ECONNREFUSED etc
     }
     await delay(500);
@@ -85,7 +85,7 @@ async function ensureServer() {
     if (response.ok) {
       return false;
     }
-  } catch (error) {
+  } catch {
     // ignore
   }
   await startServer();

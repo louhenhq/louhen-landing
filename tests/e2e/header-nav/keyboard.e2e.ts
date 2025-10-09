@@ -5,7 +5,8 @@ import { localeUrl } from '../_utils/url';
 async function focusMenuTrigger(page: Page): Promise<void> {
   const trigger = page.locator('[data-ll="nav-menu-button"]');
   for (let i = 0; i < 10; i += 1) {
-    if (await trigger.isFocused()) return;
+    const focused = await trigger.evaluate((el) => el === document.activeElement);
+    if (focused) return;
     await page.keyboard.press('Tab');
   }
   await expect(trigger).toBeFocused();

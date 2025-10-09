@@ -1,4 +1,4 @@
-import type { NextRequest} from 'next/server';
+import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { processConfirmationToken } from '@/lib/waitlist/confirm';
 import { setWaitlistSessionCookie, clearWaitlistSessionCookie } from '@/lib/waitlist/session';

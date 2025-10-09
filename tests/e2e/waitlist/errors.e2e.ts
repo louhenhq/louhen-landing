@@ -4,7 +4,8 @@ import { localeUrl } from '../_utils/url';
 
 async function focusWithTab(page: Page, target: Locator): Promise<void> {
   for (let i = 0; i < 15; i += 1) {
-    if (await target.isFocused()) {
+    const focused = await target.evaluate((el) => el === document.activeElement);
+    if (focused) {
       await expect(target).toBeFocused();
       return;
     }

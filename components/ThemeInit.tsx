@@ -4,56 +4,11 @@ import { useEffect } from 'react';
 import tokens from '@/packages/design-tokens/build/web/tokens.json';
 import { applyThemeFromMedia, getSavedTheme, getSavedContrast } from '@/app/theme-client';
 import { useNonce } from '@/lib/csp/nonce-context';
-import {
-  CONTRAST_COOKIE_NAME,
-  CONTRAST_STORAGE_KEY,
-  THEME_COOKIE_NAME,
-  THEME_STORAGE_KEY,
-} from '@/lib/theme/constants';
+import { THEME_INIT_SNIPPET } from '@/lib/theme/init-snippet';
 
 const bgToken = tokens['--semantic-color-bg-page'];
 
 const FALLBACK_BG = typeof bgToken === 'string' && bgToken.trim().length > 0 ? bgToken : 'rgb(255, 255, 255)';
-
-const INIT_THEME_SNIPPET = `(() => {
-  try {
-    const doc = document.documentElement;
-    const themeKey = '${THEME_STORAGE_KEY}';
-    const themeCookie = '${THEME_COOKIE_NAME}';
-    const contrastKey = '${CONTRAST_STORAGE_KEY}';
-    const contrastCookie = '${CONTRAST_COOKIE_NAME}';
-
-    const getCookie = (name) => {
-      const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
-      return match ? decodeURIComponent(match[1]) : null;
-    };
-
-    const storedTheme = localStorage.getItem(themeKey) || getCookie(themeCookie);
-    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
-    const applyTheme = (mode) => {
-      if (mode === 'dark') {
-        doc.setAttribute('data-theme', 'dark');
-      } else if (mode === 'light') {
-        doc.setAttribute('data-theme', 'light');
-      } else {
-        if (prefersDark && prefersDark.matches) doc.setAttribute('data-theme', 'dark');
-        else doc.removeAttribute('data-theme');
-      }
-    };
-
-    const themePref = storedTheme === 'light' || storedTheme === 'dark' ? storedTheme : 'system';
-    applyTheme(themePref);
-
-    const storedContrast = localStorage.getItem(contrastKey) || getCookie(contrastCookie);
-    if (storedContrast === 'more') {
-      doc.setAttribute('data-contrast', 'more');
-    } else {
-      doc.removeAttribute('data-contrast');
-    }
-  } catch (error) {
-    // ignore
-  }
-})();`;
 
 function setMetaThemeFromTokens() {
   const root = document.documentElement;
@@ -141,7 +96,7 @@ export default function ThemeInit() {
       suppressHydrationWarning
       nonce={nonce ?? undefined}
       dangerouslySetInnerHTML={{
-        __html: INIT_THEME_SNIPPET,
+        __html: THEME_INIT_SNIPPET,
       }}
     />
   );

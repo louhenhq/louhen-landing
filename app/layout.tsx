@@ -1,8 +1,7 @@
 import './globals.css'
 import './styles/tokens.css'
 import type { Metadata, Viewport } from 'next'
-import { cookies, headers } from 'next/headers'
-import { fraunces, inter } from './(site)/fonts'
+import { headers } from 'next/headers'
 import ThemeInit from '@/components/ThemeInit'
 import { ConsentProvider } from '@/components/ConsentProvider'
 import AnalyticsInit from '@/components/AnalyticsInit'
@@ -12,12 +11,7 @@ import { parseConsentFromCookie } from '@/lib/shared/consent/api'
 import { NonceProvider } from '@/lib/csp/nonce-context'
 import { CONTRAST_COOKIE_NAME, THEME_COOKIE_NAME } from '@/lib/theme/constants'
 import tokens from '@louhen/design-tokens/build/web/tokens.json' assert { type: 'json' }
-import {
-  CONTRAST_COOKIE,
-  ContrastPreference,
-  THEME_COOKIE,
-  ThemePreference,
-} from '@/lib/theme/constants'
+import { THEME_INIT_SNIPPET } from '@/lib/theme/init-snippet'
 import { DEFAULT_LOCALE } from '@/lib/i18n/locales'
 import { buildAlternateLanguageMap } from '@/lib/i18n/metadata'
 import { getOgImageEntry } from '@lib/shared/og/builder'
@@ -60,6 +54,7 @@ const ogImage = getOgImageEntry({
   title: defaultTitle,
   description: defaultDescription,
 })
+const themeScript = THEME_INIT_SNIPPET
 
 function getCookieValue(header: string | null | undefined, name: string): string | null {
   if (!header) return null;
@@ -121,6 +116,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const initialThemeAttr = cookieTheme === 'light' || cookieTheme === 'dark' ? cookieTheme : undefined;
   const initialContrastAttr = cookieContrast === 'more' ? 'more' : undefined;
   const shouldNoIndex = typeof process.env.VERCEL_ENV === 'string' && process.env.VERCEL_ENV !== 'production'
+  const allowIndexOverride = process.env.LH_ALLOW_INDEX === 'true'
   const sameAsProfiles = [
     'https://www.linkedin.com/company/louhen',
     'https://www.instagram.com/louhen',

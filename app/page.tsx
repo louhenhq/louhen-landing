@@ -3,7 +3,7 @@ import { cookies, headers } from 'next/headers';
 import { NextIntlClientProvider, type AbstractIntlMessages } from 'next-intl';
 import LandingExperience from '@/app/(site)/components/LandingExperience';
 import LocaleSuggestion from '@/app/(site)/components/LocaleSuggestion';
-import ReferralAttribution from '@/app/(site)/components/ReferralAttribution';
+import { ReferralAttribution } from '@components/features/waitlist';
 import { loadMessages } from '@/lib/intl/loadMessages';
 import {
   DEFAULT_LOCALE,
@@ -20,6 +20,7 @@ import {
 import { getOgImageEntry } from '@lib/shared/og/builder';
 import { LOCALE_COOKIE } from '@/lib/theme/constants';
 import { SITE_NAME } from '@/constants/site';
+import { getHeaderUserState } from '@/lib/auth/userState.server';
 const BOT_REGEX = /(bot|crawler|spider|bingpreview|facebookexternalhit|pinterest|embedly|quora link preview)/i;
 
 type RootSearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -147,6 +148,7 @@ export default async function RootLandingPage({ searchParams }: RootPageProps) {
   const resolvedSearchParams = await searchParams;
   const referralToast = ((messagesRecord.referral ?? {}) as Record<string, unknown>).appliedToast;
   const toastMessage = typeof referralToast === 'string' ? referralToast : null;
+  const headerUserState = await getHeaderUserState();
 
   return (
     <NextIntlClientProvider
@@ -156,7 +158,7 @@ export default async function RootLandingPage({ searchParams }: RootPageProps) {
     >
       <ReferralAttribution searchParams={resolvedSearchParams} message={toastMessage} />
       {suggestion ? <LocaleSuggestion targetLocale={suggestion.locale} reason={suggestion.reason} /> : null}
-      <LandingExperience />
+      <LandingExperience userState={headerUserState} />
     </NextIntlClientProvider>
   );
 }

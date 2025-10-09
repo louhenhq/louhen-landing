@@ -1,9 +1,9 @@
 import type { MetadataRoute } from 'next';
-import { locales } from '@/next-intl.locales';
 import {
   buildAlternateLanguageUrlMap,
   buildCanonicalUrl,
 } from '@/lib/i18n/metadata';
+import { SUPPORTED_LOCALES } from '@/lib/i18n/locales';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date().toISOString();
@@ -12,7 +12,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return localizedPaths.flatMap((path) => {
     const languages = buildAlternateLanguageUrlMap(path);
 
-    return locales.map((locale) => {
+    return SUPPORTED_LOCALES.map(({ value: locale }) => {
       return {
         url: buildCanonicalUrl(locale, path),
         lastModified: now,

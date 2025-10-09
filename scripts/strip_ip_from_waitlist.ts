@@ -26,16 +26,23 @@ import * as path from "node:path";
 import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getFirestore, FieldValue, FieldPath } from "firebase-admin/firestore";
 
-function loadCreds(): Record<string, any> {
+type ServiceAccount = {
+  project_id: string;
+  client_email: string;
+  private_key?: string;
+  [key: string]: unknown;
+};
+
+function loadCreds(): ServiceAccount {
   const raw = process.env.FIREBASE_SERVICE_ACCOUNT?.trim();
   if (raw) {
     // Try base64 first
     try {
       const decoded = Buffer.from(raw, "base64").toString("utf8");
-      return JSON.parse(decoded);
+      return JSON.parse(decoded) as ServiceAccount;
     } catch {
       // Fallback: treat as raw JSON
-      return JSON.parse(raw);
+      return JSON.parse(raw) as ServiceAccount;
     }
   }
   const gpath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
@@ -44,7 +51,7 @@ function loadCreds(): Record<string, any> {
     if (!fs.existsSync(p)) {
       throw new Error(`GOOGLE_APPLICATION_CREDENTIALS file not found at: ${p}`);
     }
-    return JSON.parse(fs.readFileSync(p, "utf8"));
+    return JSON.parse(fs.readFileSync(p, "utf8")) as ServiceAccount;
   }
   throw new Error("Missing FIREBASE_SERVICE_ACCOUNT (base64 or raw JSON) or GOOGLE_APPLICATION_CREDENTIALS path");
 }

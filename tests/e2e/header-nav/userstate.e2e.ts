@@ -2,6 +2,12 @@ import { expect, test } from '@tests/fixtures/playwright';
 import type { Page } from '@playwright/test';
 import { localeUrl } from '../_utils/url';
 
+type CapturedEvent = {
+  name?: unknown;
+  mode?: unknown;
+  [key: string]: unknown;
+};
+
 async function seedAuthHintCookies(page: Page) {
   const consentValue = encodeURIComponent(`v1:granted`);
   const hosts = ['localhost', '127.0.0.1'];
@@ -24,12 +30,12 @@ test.describe('Header user state awareness', () => {
   test('hinted state swaps CTA, shows logout, and annotates analytics with user_state', async ({ page }) => {
     await seedAuthHintCookies(page);
 
-    const captured: any[] = [];
+    const captured: CapturedEvent[] = [];
     await page.route('**/api/track', async (route) => {
       const body = route.request().postData();
       try {
         if (body) {
-          captured.push(JSON.parse(body));
+          captured.push(JSON.parse(body) as CapturedEvent);
         } else {
           captured.push({});
         }
@@ -61,13 +67,14 @@ test.describe('Header user state awareness', () => {
     await dashboardCta.click({ noWaitAfter: true });
     await logoutLink.click({ noWaitAfter: true });
 
-    await expect
-      .poll(() => captured.filter((event) => event.name === 'header_cta_click').length)
-      .toBeGreaterThanOrEqual(2);
+    const headerCtaEvents = () =>
+      captured.filter((event): event is CapturedEvent & { name: string } => event.name === 'header_cta_click');
 
-    const userStates = captured
-      .filter((event) => event.name === 'header_cta_click')
-      .map((event) => event['user_state']);
+    await expect.poll(() => headerCtaEvents().length).toBeGreaterThanOrEqual(2);
+
+    const userStates = headerCtaEvents()
+      .map((event) => event['user_state'])
+      .filter((value): value is string => typeof value === 'string');
 
     expect(userStates).toContain('hinted');
     expect(captured.some((event) => event.mode === 'authenticated')).toBe(true);

@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+type ViMock = ReturnType<typeof vi.fn>;
+
 const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 function setLocation(url: string) {
@@ -35,7 +37,7 @@ describe('client analytics', () => {
     await track({ name: 'hero_twin_badge_click' });
     await flush();
 
-    const fetchMock: any = globalThis.fetch;
+    const fetchMock = globalThis.fetch as unknown as ViMock;
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const body = JSON.parse(fetchMock.mock.calls[0][1].body as string);
     expect(body.name).toBe('hero_twin_badge_click');
@@ -48,7 +50,7 @@ describe('client analytics', () => {
 
   it('dedupes identical events within one second', async () => {
     const { track } = await import('@/lib/clientAnalytics');
-    const fetchMock: any = globalThis.fetch;
+    const fetchMock = globalThis.fetch as unknown as ViMock;
     await track({ name: 'hero_twin_badge_click' });
     await track({ name: 'hero_twin_badge_click' });
     await flush();
@@ -59,7 +61,7 @@ describe('client analytics', () => {
     const consentApi = await import('@/lib/shared/consent/api');
     consentApi.setConsent('denied');
     const { track, getConsent } = await import('@/lib/clientAnalytics');
-    const fetchMock: any = globalThis.fetch;
+    const fetchMock = globalThis.fetch as unknown as ViMock;
 
     await track({ name: 'hero_twin_badge_click' });
     await flush();
@@ -93,7 +95,7 @@ describe('client analytics', () => {
 
   it('no-ops when analytics disabled', async () => {
     process.env.NEXT_PUBLIC_ANALYTICS_DISABLED = '1';
-    const fetchMock: any = globalThis.fetch;
+    const fetchMock = globalThis.fetch as unknown as ViMock;
     const { track } = await import('@/lib/clientAnalytics');
     await track({ name: 'hero_twin_badge_click' });
     await flush();
@@ -101,11 +103,11 @@ describe('client analytics', () => {
   });
 
   it('observeOnce only fires handler once and cleans up', async () => {
-    const callbacks: Array<(entries: any[]) => void> = [];
+    const callbacks: Array<(entries: unknown[]) => void> = [];
     const observers: MockIntersectionObserver[] = [];
     class MockIntersectionObserver {
-      callback: (entries: any[]) => void;
-      constructor(cb: (entries: any[]) => void) {
+      callback: (entries: unknown[]) => void;
+      constructor(cb: (entries: unknown[]) => void) {
         this.callback = cb;
         callbacks.push(cb);
         observers.push(this);
@@ -114,7 +116,8 @@ describe('client analytics', () => {
       unobserve = vi.fn();
       disconnect = vi.fn();
     }
-    (globalThis as any).IntersectionObserver = MockIntersectionObserver as unknown as typeof IntersectionObserver;
+    (globalThis as typeof globalThis & { IntersectionObserver: typeof IntersectionObserver }).IntersectionObserver =
+      MockIntersectionObserver as unknown as typeof IntersectionObserver;
 
     const { observeOnce } = await import('@/lib/clientAnalytics');
     const el = document.createElement('div');

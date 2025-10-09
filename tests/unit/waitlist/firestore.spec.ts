@@ -92,7 +92,7 @@ vi.mock('@/lib/firebaseAdmin', () => ({
   getDb: () => store,
 }));
 
-import { findByEmail, findByTokenHash, markConfirmedByTokenHash, markExpiredByTokenHash, upsertPending } from '@lib/server/waitlist/firestore.server';
+import { findByEmail, markConfirmedByTokenHash, markExpiredByTokenHash, upsertPending } from '@lib/server/waitlist/firestore.server';
 
 function buildInput(overrides: Partial<WaitlistUpsertInput> = {}): WaitlistUpsertInput {
   return {

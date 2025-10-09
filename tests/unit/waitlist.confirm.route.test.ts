@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-import { GET } from '@/app/(site)/waitlist/confirm/route';
+import { GET } from '@/app/api/waitlist/confirm/route';
 import { WAITLIST_SESSION_COOKIE } from '@/lib/waitlist/session';
 
 const confirmMock = vi.hoisted(() => ({

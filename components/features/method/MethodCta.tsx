@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { cn, layout, text } from '@/app/(site)/_lib/ui';
 import { Button } from '@/components/ui';
 import type { SupportedLocale } from '@/next-intl.locales';
-import { track } from '@lib/clientAnalytics';
+import { useMethodExperience } from './MethodExperienceProvider';
 
 type MethodCtaProps = {
   locale: SupportedLocale;
@@ -13,6 +13,9 @@ type MethodCtaProps = {
 export default function MethodCta({ locale }: MethodCtaProps) {
   const t = useTranslations('method.cta');
   const { registerCtaInteraction } = useMethodExperience();
+  const handleClick = () => {
+    registerCtaInteraction();
+  };
 
   return (
     <section

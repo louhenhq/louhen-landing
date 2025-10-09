@@ -15,8 +15,6 @@ import { getSiteOrigin } from '@lib/seo/shared';
 import { getOgImageUrl } from '@lib/shared/og/builder';
 import { buildMethodTechArticleSchema } from '@lib/shared/method/article-schema';
 import { buildMethodMetadata } from '@lib/shared/seo/method-metadata';
-import { getPreOnboardingDraft } from '@lib/firestore/waitlist';
-import { readWaitlistSession } from '@lib/waitlist/session';
 import type { SupportedLocale } from '@/next-intl.locales';
 import { headers } from 'next/headers';
 import { getTranslations, unstable_setRequestLocale } from 'next-intl/server';
@@ -105,12 +103,6 @@ export default async function MethodPage({ params }: MethodPageProps) {
     datePublished: '2025-01-15T00:00:00.000Z',
     dateModified: '2025-01-15T00:00:00.000Z',
   });
-
-  const sessionId = await readWaitlistSession();
-  const profileDraft = sessionId ? await getPreOnboardingDraft(sessionId) : null;
-  const primaryChildName = profileDraft?.children?.[0]?.name?.trim() || null;
-  const variantPersonalized = Boolean(primaryChildName);
-  const route = localizedPath;
 
   return (
     <div className={layout.page}>

@@ -41,6 +41,10 @@ export type AnalyticsEventName =
   | 'trust_podiatrist_learn_more'
   | 'testimonial_view'
   | 'privacy_ribbon_click'
+  | 'method_hero_waitlist_click'
+  | 'method_faq_teaser_waitlist_click'
+  | 'method_sticky_waitlist_click'
+  | 'method_exit_nudge_shown'
   | 'header_brand_click'
   | 'header_nav_click'
   | 'header_cta_click'
@@ -69,6 +73,16 @@ export type HeaderNavId = 'how-it-works' | 'founder-story' | 'faq' | 'method' | 
 export type HeaderCtaId = 'waitlist' | 'access' | 'download' | 'dashboard' | 'logout';
 export type HeaderThemePreference = 'system' | 'light' | 'dark';
 export type HeaderConsentState = 'granted' | 'denied' | 'unset';
+
+export type MethodEventPosition = 'hero' | 'faq_teaser' | 'sticky' | 'nudge';
+
+type MethodAnalyticsPayload<P extends MethodEventPosition> = {
+  locale: string;
+  route: string;
+  variant_personalized: boolean;
+  timestamp: string;
+  position: P;
+};
 
 export interface AnalyticsEventPropsMap {
   header_brand_click: HeaderBrandEventProps;

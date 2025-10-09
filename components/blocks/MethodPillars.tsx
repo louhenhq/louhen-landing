@@ -16,6 +16,7 @@ type Pillar = {
 export default function MethodPillars() {
   const t = useTranslations('method.pillars');
   const disclosureT = useTranslations('method.scienceDisclosure');
+  const locale = useLocale();
   const badgeIdPrefix = useId();
   const disclosureId = useId();
   const [isDisclosureOpen, setIsDisclosureOpen] = useState(false);

@@ -15,6 +15,25 @@ const isRemote = envBaseURL !== null;
 const shouldSkipWebServer = process.env.PLAYWRIGHT_SKIP === '1';
 const artifactsRoot = process.env.PLAYWRIGHT_ARTIFACTS_DIR ?? 'artifacts/playwright';
 const playwrightResultsDir = path.join(artifactsRoot, 'results');
+const FALLBACK_ORIGIN = 'https://staging.louhen.app';
+const sandboxBaseURL = process.env.PREVIEW_BASE_URL ?? '';
+const isSandbox = process.env.SANDBOX_VALIDATION === '1';
+
+function normalizeBase(raw?: string | null): string {
+  if (!raw) return '';
+  return raw.trim().replace(/\/+$/, '');
+}
+
+function ensureLocaleBase(origin: string): string {
+  if (!origin) return '';
+  if (origin.endsWith('/en-de') || origin.endsWith('/de-de')) return origin;
+  return `${origin}/en-de`;
+}
+
+function withTrailingSlash(value: string): string {
+  if (!value) return value;
+  return value.endsWith('/') ? value : `${value}/`;
+}
 
 mkdirSync(playwrightResultsDir, { recursive: true });
 
@@ -38,16 +57,8 @@ const extraHTTPHeaders = headerEnv
     )
   : undefined;
 
-const httpCredentials =
-  process.env.BASIC_AUTH_USER && process.env.BASIC_AUTH_PASS
-    ? { username: process.env.BASIC_AUTH_USER, password: process.env.BASIC_AUTH_PASS }
-    : undefined;
-
 const cookieEnv = process.env.PROTECTION_COOKIE;
 const storageStatePath = cookieEnv ? '.playwright/auth-storage.json' : undefined;
-
-const statusUser = process.env.STATUS_USER ?? process.env.CI_STATUS_USER ?? 'status-ops';
-const statusPass = process.env.STATUS_PASS ?? process.env.CI_STATUS_PASS ?? 'status-secret';
 
 const sandboxOrigin = normalizeBase(sandboxBaseURL);
 if (isSandbox && !sandboxOrigin) {
@@ -60,7 +71,6 @@ const hasBaseOverride = baseOverride.length > 0;
 const defaultOrigin = sandboxOrigin || normalizeBase(process.env.APP_BASE_URL) || FALLBACK_ORIGIN;
 const targetOrigin = hasBaseOverride ? baseOverride : defaultOrigin;
 const canonicalBaseURL = withTrailingSlash(ensureLocaleBase(targetOrigin));
-const useExternalTarget = hasBaseOverride || isSandbox;
 
 const testEnv = {
   BASE_URL: targetOrigin,

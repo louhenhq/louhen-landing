@@ -16,15 +16,14 @@ export default function AnalyticsInit({ endpoint = '/api/track' }: AnalyticsInit
     if (typeof window === 'undefined') return;
 
     const consentState: ConsentState = getConsent();
-    init({ endpoint, nonce, consentState });
+    init({ endpoint, nonce: nonce ?? undefined, consentState });
 
     void track('page_view', {
       path: window.location.pathname + window.location.search,
-      locale: document.documentElement.getAttribute('lang') ?? 'en',
     });
 
     const unsubscribe = onConsentChange((state) => {
-      init({ endpoint, nonce, consentState: state });
+      init({ endpoint, nonce: nonce ?? undefined, consentState: state });
       if (state === 'granted') {
         void flush();
       }

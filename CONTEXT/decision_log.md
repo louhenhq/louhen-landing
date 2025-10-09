@@ -161,5 +161,10 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
   - Finalised consent storage: `ll_consent=v1:<state>` first-party cookie with 12-month max-age; revocation deletes storage immediately.  
   - Default remains analytics-off: no network calls, cookies, or preconnect/preload to analytics domains before consent is `granted`.  
   - Documented runtime `connect-src` opt-in and nonce requirements in `/CONTEXT/privacy_analytics.md`, `/CONTEXT/security.md`, `/CONTEXT/testing.md`, and the PR checklist to enforce validation coverage.
+- **2025-10-09 — Waitlist confirm route + theme client dedupe**  
+  - Keep → `/waitlist/confirm` stays a page-level redirector; UI logic remains in `app/(site)/waitlist/confirm/page.tsx`.  
+  - Adjust → Legacy GET handler moved to `app/api/waitlist/confirm/route.ts` with tests pointing to the new API path; `rename_map.md` notes the relocation.  
+  - Adjust → `app/theme-client.ts` now has a single set of helpers sourced from `@/lib/theme/constants`, eliminating duplicate `getSavedTheme`/`setTheme` definitions.  
+  - Notes → Home/locale root pages import `ReferralAttribution` via `@components/features/waitlist` to match the feature barrel; build no longer reports duplicate identifiers or missing modules.
 
 ---

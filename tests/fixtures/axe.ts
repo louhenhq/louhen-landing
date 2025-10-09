@@ -37,7 +37,10 @@ export async function runAxe(page: Page, info: TestInfo, context: AxeContext): P
   const filteredViolations = result.violations
     .map((violation) => ({
       ...violation,
-      nodes: violation.nodes.filter((node) => !isAllowed(violation.id, node.target ?? [])),
+      nodes: violation.nodes.filter((node) => {
+        const targets = Array.isArray(node.target) ? (node.target as string[]) : [];
+        return !isAllowed(violation.id, targets);
+      }),
     }))
     .filter((violation) => violation.nodes.length > 0);
 

@@ -24,6 +24,13 @@
 - ❌ **Don’t** import token CSS directly inside feature components or route modules.
 - ❌ **Don’t** add theme toggles that swap CSS files or mutate `<link>` tags—use the existing attribute/variable approach.
 
+## Token Remap Notes
+- `color.status.success|warning|info|danger` → `color.feedback.success|warning|info|error` (email + future semantics share the feedback base scale).
+- `color.neutral.paper` → `color.neutral.0` (email surface alias keeps neutral naming consistent with documentation).
+- `color.brand.teal` → `color.brand.secondary` (legacy teal references now resolve to the secondary brand swatch).
+- `color.light.surface|onSurface|outline|primary|onPrimary` → `color.background.surface`, `color.text.default`, `color.border.subtle`, `color.brand.primary`, `color.brand.onPrimary` respectively (email-light palette uses the same primitives as the main theme).
+- `color.dark.surface|inverseSurface|onSurface|outline|primary|onPrimary` → `color.background.surfaceDark`, `color.background.raisedDark`, `color.text.inverse`, `color.border.strong`, `color.brand.muted`, `color.brand.primary` respectively (email-dark palette aligns to dark-mode primitives).
+
 ## Feature Components — Audit Round
 
 | Component | Decision | Rationale | Required Tokens | Owner | Next Steps |

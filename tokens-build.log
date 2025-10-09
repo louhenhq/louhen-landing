@@ -1,0 +1,18 @@
+
+flutter
+✔︎ build/flutter/tokens.g.dart
+
+email
+✔︎ ../../lib/email/colors.ts
+
+webCssPublic
+✔︎ ../../public/tokens/tokens.css
+✔︎ ../../public/tokens/tokens.dark.css
+✔︎ ../../public/tokens/tokens.hc.css
+
+web
+✔︎ build/web/tokens.css
+✔︎ build/web/tokens.ts
+✔︎ build/web/tokens.dark.css
+✔︎ build/web/tokens.hc.css
+✔︎ build/web/tokens.json

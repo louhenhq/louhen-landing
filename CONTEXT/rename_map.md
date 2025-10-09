@@ -67,6 +67,7 @@ _Tables sorted by `Current Path`; `Status=DECIDE` rows include the follow-up nee
 | app/api/waitlist/route.ts | route | app/api/waitlist/route.ts | same | no | SKIP | Main waitlist API remains for Next constraints. |
 | app/wl/[code]/route.ts | route | app/wl/[code]/route.ts | same | no | SKIP | Short-link route stays put; update imports when libs move. |
 | app/(site)/_lib/referral.ts | util | lib/shared/waitlist/referral.client.ts | referral.client.ts | no | DECIDE | Can we adopt `.client.ts` naming for waitlist-only helpers with `use client`? |
+| app/(site)/waitlist/confirm/route.ts | route | app/api/waitlist/confirm/route.ts | same | no | MIGRATED | 2025-10-09: Server redirect route lives under /api/waitlist/confirm to avoid page conflict; keep GET semantics. |
 | app/(site)/waitlist/_lib/messages.ts | util | lib/shared/waitlist/messages.ts | messages.ts | no | OK | Keep locale loading centralised under shared waitlist namespace. |
 | components/marketing/TrackView.tsx | feature-comp | components/features/waitlist/WaitlistViewTracker.tsx | WaitlistViewTracker.tsx | no | OK | Rename to avoid collision with analytics tracker component. |
 | e2e/waitlist.spec.ts | test:e2e | tests/e2e/waitlist/landing.e2e.ts | landing.e2e.ts | yes (data-ll="wl-form") | MIGRATED | Remote Playwright suite now targets waitlist page via wl-* selectors and mocks API responses. |
@@ -91,7 +92,7 @@ _Tables sorted by `Current Path`; `Status=DECIDE` rows include the follow-up nee
 | --- | --- | --- | --- | --- | --- | --- |
 | app/(site)/components/ConfirmAnalytics.tsx | feature-comp | components/features/waitlist/ConfirmAnalytics.tsx | same | no | MIGRATED | Analytics helper now exported from waitlist barrel. |
 | app/(site)/components/ConfirmResendForm.tsx | feature-comp | components/features/waitlist/ConfirmResendForm.tsx | same | yes (data-ll="wl-resend-form") | MIGRATED | Resend form exposes wl-resend-* selectors for Playwright coverage. |
-| app/(site)/components/ReferralAttribution.tsx | feature-comp | components/features/waitlist/ReferralAttribution.tsx | same | yes (data-ll="wl-referral") | MIGRATED | Referral toast now under waitlist features with stable selector. |
+| app/(site)/components/ReferralAttribution.tsx | feature-comp | components/features/waitlist/ReferralAttribution.tsx | same | yes (data-ll="wl-referral") | MIGRATED | Referral toast now under waitlist features; import via `@components/features/waitlist`. |
 | app/(site)/components/WaitlistForm.tsx | feature-comp | components/features/waitlist/WaitlistFormLegacy.tsx | WaitlistFormLegacy.tsx | yes (data-ll="wl-form") | REMOVED | 2025-10-07: Legacy form retired; canonical WaitlistForm now the sole implementation. |
 | components/waitlist/ResendConfirmForm.tsx | feature-comp | components/features/waitlist/ResendConfirmForm.tsx | same | yes (data-ll="wl-resend-form") | MIGRATED | Marketing resend card uses shared wl-resend-* selectors. |
 | components/waitlist/WaitlistForm.tsx | feature-comp | components/features/waitlist/WaitlistForm.tsx | same | yes (data-ll="wl-form") | MIGRATED | Canonical hCaptcha form with wl-* anchors; exported via feature barrel. |
