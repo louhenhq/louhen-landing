@@ -4,6 +4,7 @@ import { SITE_NAME, LEGAL_ENTITY } from '@/constants/site';
 import { loadMessages } from '@/lib/intl/loadMessages';
 import { OG_IMAGE_HEIGHT, OG_IMAGE_WIDTH } from '@/lib/shared/og/builder';
 import { getStaticOg } from '@/lib/shared/og/fallback';
+import { getFlags } from '@/lib/shared/flags';
 import { defaultLocale, locales, type SupportedLocale } from '@/next-intl.locales';
 import tokens from '@louhen/design-tokens/build/web/tokens.json' assert { type: 'json' };
 
@@ -259,6 +260,11 @@ export async function GET(request: Request) {
   const fallbackTitle = sanitizeParam(url.searchParams.get('title'), MAX_TEXT_LENGTH) ?? FALLBACK_TITLE;
   const fallbackDescription =
     sanitizeParam(url.searchParams.get('description'), MAX_TEXT_LENGTH) ?? FALLBACK_DESCRIPTION;
+
+  const { OG_DYNAMIC_ENABLED } = getFlags({ request });
+  if (!OG_DYNAMIC_ENABLED) {
+    return serveStaticFallback(locale, key, request);
+  }
 
   try {
     const copy = await resolveCopy(locale, variant, fallbackTitle, fallbackDescription);

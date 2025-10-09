@@ -12,6 +12,9 @@
 - [ ] New interactive UI exposes stable `data-testid` selectors.
 - [ ] Lighthouse budgets unaffected or justified (attach before/after numbers if adjusted).
 - [ ] `.env.example` and `/CONTEXT/envs.md` updated when new environment variables are introduced.
+- [ ] Feature flags added/changed are documented in `/CONTEXT/envs.md` with owner + scope (Preview/Production).
+- [ ] Components/routes use `getFlags()` (or provided helpers) instead of reading `process.env` directly.
+- [ ] Tests cover new/changed flag states (or rationale documented when a single state suffices).
 - [ ] **Consent**: No analytics initialised before explicit opt-in; no unexpected trackers added.
 - [ ] No preconnect/preload to analytics domains before consent.
 - [ ] Inline analytics init (if present) uses the SSR nonce.

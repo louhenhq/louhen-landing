@@ -35,9 +35,14 @@ jobs:
       EMAIL_TRANSPORT: noop
       ANALYTICS_STORE_IP: false
       NEXT_PUBLIC_ENV: preview
+      NEXT_PUBLIC_ANALYTICS_ENABLED: 0
       NEXT_PUBLIC_ANALYTICS_DISABLED: 1
       NEXT_PUBLIC_ANALYTICS_DEBUG: 0
       NEXT_PUBLIC_ALLOW_INDEXING: false
+      NEXT_PUBLIC_BANNER_WAITLIST_URGENCY: true
+      NEXT_PUBLIC_WAITLIST_URGENCY: true
+      OG_DYNAMIC_ENABLED: true
+      SECURITY_REPORT_ONLY: true
       # Secrets are masked by GitHub - never echo this token in logs.
       PROTECTION_HEADER: "X-Bypass-Token: ${{ secrets.PREVIEW_BYPASS_TOKEN }}"
     steps:
@@ -202,6 +207,122 @@ jobs:
 
       - name: Ensure test failures bubble up
         if: ${{ steps.run_e2e.outcome == 'failure' || steps.run_axe.outcome == 'failure' }}
+        run: exit 1
+
+  og-static-fallback:
+    name: Playwright (seo static fallback)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: preview
+    permissions:
+      actions: read
+      contents: read
+    concurrency:
+      group: e2e-preview-${{ github.ref }}-og-static
+      cancel-in-progress: true
+    env:
+      NODE_ENV: test
+      CI: true
+      TEST_MODE: '1'
+      IS_PRELAUNCH: true
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 0
+      PREVIEW_BASE_URL: https://staging.louhen.app
+      EMAIL_TRANSPORT: noop
+      ANALYTICS_STORE_IP: false
+      NEXT_PUBLIC_ENV: preview
+      NEXT_PUBLIC_ANALYTICS_ENABLED: 0
+      NEXT_PUBLIC_ANALYTICS_DISABLED: 1
+      NEXT_PUBLIC_ANALYTICS_DEBUG: 0
+      NEXT_PUBLIC_ALLOW_INDEXING: false
+      NEXT_PUBLIC_BANNER_WAITLIST_URGENCY: true
+      NEXT_PUBLIC_WAITLIST_URGENCY: true
+      OG_DYNAMIC_ENABLED: false
+      SECURITY_REPORT_ONLY: true
+      PROTECTION_HEADER: "X-Bypass-Token: ${{ secrets.PREVIEW_BYPASS_TOKEN }}"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+
+      - name: Restore npm cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-
+
+      - name: Restore Playwright cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            pw-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: npm ci --include=dev
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Build application
+        run: npm run build
+
+      - name: Prepare summary directory
+        run: mkdir -p summary
+
+      - name: Run Playwright SEO (static fallback)
+        id: run_static_og
+        continue-on-error: true
+        run: |
+          PLAYWRIGHT_ARTIFACTS_DIR=artifacts/playwright/seo-static \
+          PREVIEW_BASE_URL=$PREVIEW_BASE_URL \
+          npx playwright test tests/e2e/seo --project=desktop-chromium --workers=1 --retries=1 --grep "@og"
+        # Runs only SEO/OG specs with the OG feature disabled to confirm static fallback.
+
+      - name: Verify Playwright artifacts (static fallback)
+        if: always()
+        run: |
+          test -d artifacts/playwright/seo-static
+
+      - name: Upload Playwright HTML report (static fallback)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-seo-static
+          path: artifacts/playwright/seo-static/
+          retention-days: 7
+          if-no-files-found: warn
+          compression-level: 6
+
+      - name: Publish static OG summary
+        if: always()
+        env:
+          E2E_OUTCOME: ${{ steps.run_static_og.outcome }}
+        run: |
+          node <<'NODE'
+          const { appendFileSync } = require('node:fs');
+          const path = process.env.GITHUB_STEP_SUMMARY;
+          if (!path) process.exit(0);
+          const outcome = process.env.E2E_OUTCOME ?? 'unknown';
+          appendFileSync(path, [
+            '## SEO Static Fallback',
+            '',
+            outcome === 'success'
+              ? '- OG dynamic flag disabled via environment; static assets returned successfully.'
+              : '- Static OG fallback run failed. Inspect `playwright-seo-static` artifacts.',
+            '',
+          ].join('\n'));
+          NODE
+
+      - name: Bubble up static OG failures
+        if: ${{ steps.run_static_og.outcome == 'failure' }}
         run: exit 1
 
   e2e-preview-quarantine:

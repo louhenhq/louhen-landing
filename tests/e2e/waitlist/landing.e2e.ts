@@ -84,3 +84,18 @@ test.describe('@mobile waitlist mobile smoke', () => {
     await expect(page.locator('[data-ll="wl-submit"]').first()).toBeVisible();
   });
 });
+
+test.describe('Waitlist urgency badge flag', () => {
+  const urgencyCopy = 'Limited early access available';
+
+  test('toggles urgency badge via feature flag', async ({ page, flags }) => {
+    await flags.set({ BANNER_WAITLIST_URGENCY: false });
+    await page.goto(localeUrl('/waitlist', { locale: defaultLocale }), { waitUntil: 'networkidle' });
+    await expect(page.getByText(urgencyCopy, { exact: false })).toHaveCount(0);
+
+    await flags.set({ BANNER_WAITLIST_URGENCY: true });
+    const cacheBuster = `?t=${Date.now()}`;
+    await page.goto(localeUrl(`/waitlist${cacheBuster}`, { locale: defaultLocale }), { waitUntil: 'networkidle' });
+    await expect(page.getByText(urgencyCopy, { exact: false })).toBeVisible();
+  });
+});

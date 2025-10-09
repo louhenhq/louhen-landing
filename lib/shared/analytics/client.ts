@@ -1,12 +1,14 @@
 import type { AnalyticsEventName, AnalyticsEventPayload, AnalyticsEventPropsMap, IdentifyProps } from '@/lib/analytics.schema';
 import { getConsent as getConsentState, loadFromCookie, onConsentChange as subscribeToConsent, type ConsentState } from '@/lib/shared/consent/api';
+import { getFlags } from '@/lib/shared/flags';
 
 const DEFAULT_ENDPOINT = '/api/track';
 const DEDUPE_WINDOW_MS = 1000;
 const UTM_SESSION_KEY = 'louhen:utm';
 const APP_VERSION = process.env.NEXT_PUBLIC_COMMIT_SHA || 'dev';
-const ANALYTICS_DISABLED = process.env.NEXT_PUBLIC_ANALYTICS_DISABLED === '1';
 const ANALYTICS_DEBUG = process.env.NEXT_PUBLIC_ANALYTICS_DEBUG === '1';
+const ANALYTICS_ENABLED = getFlags().ANALYTICS_ENABLED;
+const ANALYTICS_DISABLED = !ANALYTICS_ENABLED;
 
 const isBrowser = typeof window !== 'undefined';
 

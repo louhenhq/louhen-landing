@@ -1,5 +1,6 @@
 import { test as base } from '@playwright/test';
 import type { BrowserContext, Page } from '@playwright/test';
+import type { FeatureFlags } from '@/lib/shared/flags';
 
 const INTERCEPT_SYMBOL = Symbol('louhen-playwright-intercept');
 
@@ -20,6 +21,8 @@ const noopResponse = {
   },
   body: '/* intercepted */',
 } as const;
+
+type PublicFlagOverrides = Partial<Pick<FeatureFlags, 'ANALYTICS_ENABLED' | 'BANNER_WAITLIST_URGENCY'>>;
 
 async function enableInterceptors(page: Page): Promise<() => Promise<void>> {
   const marker = page as unknown as Record<string | symbol, unknown>;
@@ -180,6 +183,10 @@ export const test = base.extend<{
   consentGranted: ConsentSetter;
   consentDenied: ConsentSetter;
   consentUnknown: ConsentSetter;
+  flags: {
+    set: (overrides: PublicFlagOverrides) => Promise<void>;
+    clear: () => Promise<void>;
+  };
 }>({
   page: async ({ page }, run) => {
     const detach = await enableInterceptors(page);
@@ -217,6 +224,16 @@ export const test = base.extend<{
 
     context.off('page', listener);
     await Promise.all([...cleanups.values()].map((fn) => fn()));
+  },
+  flags: async ({ request }, use) => {
+    const clear = async () => {
+      await request.post('/api/test/flags', { data: {} });
+    };
+    const set = async (overrides: PublicFlagOverrides) => {
+      await request.post('/api/test/flags', { data: overrides });
+    };
+    await use({ set, clear });
+    await clear();
   },
   consentGranted: async ({ page }, apply) => {
     await apply(async (target = page) => {

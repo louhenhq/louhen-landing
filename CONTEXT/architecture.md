@@ -151,6 +151,24 @@ Fail fast on missing envs with clear server-side error logs (no secrets echoed).
 - If Vercel validator lags, provision explicit subdomains (e.g., `tmp.staging.louhen.app`) as fallbacks.
 - Keep production DNS dark prior to launch; only preview domains remain exposed.
 
+### Feature Flags & Environment Helpers
+
+- `lib/shared/flags.ts` owns `getFlags()`, `isPreview()`, `isProduction()`, and `getSiteOrigin()`. Read flags through these helpers instead of `process.env` to keep behaviour auditable and type-safe.
+- Serverside modules pull a fresh `getFlags()` per request (or during build for static paths); client components receive flags via props or the public `NEXT_PUBLIC_*` surface.
+- Example:
+
+```ts
+import { getFlags } from '@/lib/shared/flags';
+
+export function OgRoute() {
+  const { OG_DYNAMIC_ENABLED } = getFlags();
+  return OG_DYNAMIC_ENABLED ? renderDynamicOg() : renderStaticOg();
+}
+```
+
+- When introducing a new flag: update `/CONTEXT/envs.md`, add an owner entry in `/CONTEXT/decision_log.md`, and ensure tests exercise both flag states.
+- **Environment Mapping:** Preview and Production deployments load different defaults for analytics, CSP, and OG behaviour (see `/CONTEXT/envs.md`). These values live in Vercel Project → Settings → Environment Variables and are mirrored in documentation to keep parity. Preview builds default to analytics-off, CSP report-only, and dynamic OG enabled; Production enables analytics and full CSP enforcement.
+
 ---
 
 ## 6) CSP & Inline Scripts

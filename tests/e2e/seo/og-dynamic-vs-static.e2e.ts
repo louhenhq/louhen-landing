@@ -2,7 +2,11 @@ import { expect, test } from '@tests/fixtures/playwright';
 import { OG_IMAGE_MAX_BYTES } from '@lib/shared/og/builder';
 
 test.describe('OG dynamic vs static fallback', () => {
-  test('feature flag toggles between dynamic and static OG images', async ({ page, request }) => {
+  test('@og feature flag toggles between dynamic and static OG images', async ({ page, request }) => {
+    if (process.env.OG_DYNAMIC_ENABLED === 'false') {
+      test.skip(true, 'Dynamic OG disabled via environment for static fallback validation');
+    }
+
     await request.post('/api/test/og-mode', { data: { mode: 'dynamic' } });
 
     try {

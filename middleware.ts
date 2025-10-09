@@ -10,6 +10,7 @@ import {
   type AppLocale,
 } from '@/lib/i18n/locales';
 import { extractLocaleFromCookies } from '@/lib/intl/getLocale';
+import { getFlags, isProduction } from '@/lib/shared/flags';
 
 const intlMiddleware = createIntlMiddleware({
   ...intlRoutingConfig,
@@ -22,9 +23,6 @@ const SHORT_LOCALE_SEGMENT = /^\/([a-z]{2})(?=\/|$)/i;
 const allowIndexOverride = process.env.LH_ALLOW_INDEX === 'true';
 
 const HSTS_MAX_AGE_SECONDS = 60 * 60 * 24 * 730; // 2 years
-const REPORT_ONLY_ENV =
-  process.env.NEXT_PUBLIC_CSP_REPORT_ONLY === '1' || process.env.CSP_REPORT_ONLY === '1';
-
 function generateNonce() {
   return crypto.randomUUID().replace(/-/g, '');
 }
@@ -168,9 +166,9 @@ function applySecurityHeaders(request: NextRequest, response: NextResponse, nonc
     return response;
   }
 
-  const isProdLike =
-    process.env.VERCEL_ENV === 'production' ||
-    (!process.env.VERCEL_ENV && process.env.NODE_ENV === 'production');
+  const flags = getFlags({ request });
+  const enforceCsp = !flags.SECURITY_REPORT_ONLY;
+  const isProdLike = isProduction();
   const isDev = !isProdLike;
   const hostname = request.nextUrl.hostname;
   const isLocalhost = isLoopbackHost(hostname);
@@ -178,7 +176,6 @@ function applySecurityHeaders(request: NextRequest, response: NextResponse, nonc
   const shouldSetCsp = shouldAttachCsp(request, response);
   if (shouldSetCsp) {
     const csp = buildCsp({ nonce, isDev });
-    const enforceCsp = isProdLike || !REPORT_ONLY_ENV;
     const headerName = enforceCsp ? 'Content-Security-Policy' : 'Content-Security-Policy-Report-Only';
     response.headers.set(headerName, csp);
     if (!enforceCsp) {

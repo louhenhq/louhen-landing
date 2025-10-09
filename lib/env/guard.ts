@@ -129,11 +129,12 @@ export function ensureWaitlistPublicEnv(): WaitlistPublicEnvSummary {
     }
   }
 
-  const hasUrgencyFlag = hasEnv('NEXT_PUBLIC_WAITLIST_URGENCY');
+  const hasUrgencyFlag =
+    hasEnv('NEXT_PUBLIC_BANNER_WAITLIST_URGENCY') || hasEnv('NEXT_PUBLIC_WAITLIST_URGENCY');
   if (!hasUrgencyFlag) {
-    appendUnique(missingInProduction, 'NEXT_PUBLIC_WAITLIST_URGENCY');
+    appendUnique(missingInProduction, 'NEXT_PUBLIC_BANNER_WAITLIST_URGENCY');
     if (!runtime.isProduction && !runtime.isTest) {
-      warnings.push('NEXT_PUBLIC_WAITLIST_URGENCY missing; defaulting to enabled locally.');
+      warnings.push('NEXT_PUBLIC_BANNER_WAITLIST_URGENCY missing; defaulting to enabled locally.');
     }
   }
 

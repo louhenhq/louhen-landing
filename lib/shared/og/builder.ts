@@ -1,5 +1,4 @@
-import { isDynamicOgEnabled } from '@/lib/env/media';
-import { getSiteOrigin } from '@/lib/shared/url/get-site-origin';
+import { getFlags, getSiteOrigin } from '@/lib/shared/flags';
 import { getStaticOgUrl } from '@/lib/shared/og/fallback';
 
 const OG_ROUTE_PATH = '/opengraph-image';
@@ -38,7 +37,7 @@ export function getOgUrl({ locale, key, title, description, params }: OgUrlOptio
 }
 
 export function getOgImageUrl(options: OgUrlOptions): string {
-  if (!isDynamicOgEnabled()) {
+  if (!getFlags().OG_DYNAMIC_ENABLED) {
     return getStaticOgUrl(options.locale, options.key);
   }
   return getOgUrl(options);

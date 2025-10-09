@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
+import { cookies } from 'next/headers';
 import { createTranslator } from 'next-intl';
 import { WaitlistForm } from '@components/features/waitlist';
 import { loadWaitlistMessages } from '@/app/(site)/waitlist/_lib/messages';
-import { WAITLIST_URGENCY_COPY_ENABLED } from '@/lib/flags';
+import { getFlags } from '@/lib/shared/flags';
 import { getSiteOrigin, hreflangMapFor, makeCanonical } from '@/lib/seo/shared';
 import { isPrelaunch } from '@/lib/env/prelaunch';
 import { getOgImageEntry } from '@lib/shared/og/builder';
@@ -60,7 +61,10 @@ export default async function WaitlistPage() {
   const trustPodiatrist = t('trust.podiatrist');
   const trustLouhenFit = t('trust.louhenfit');
   const urgencyBadge = t('urgency.badge');
-  const urgencyEnabled = WAITLIST_URGENCY_COPY_ENABLED;
+  const cookieStore = await cookies();
+  const { BANNER_WAITLIST_URGENCY: urgencyEnabled } = getFlags({
+    cookies: cookieStore.getAll(),
+  });
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-col gap-12 px-6 py-12 md:px-10">

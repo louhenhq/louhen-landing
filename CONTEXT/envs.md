@@ -27,10 +27,21 @@ Canonical reference for environment configuration across stages. Update this mat
 | **STATUS_USER / STATUS_PASS** | `status-ops` / `status-secret` | Preview: strong random | secret: `CI_STATUS_USER` / `CI_STATUS_PASS` | Platform | Used by `/status`; rotate with every credential change. |
 | **PREVIEW_BYPASS_TOKEN** | - (set via GitHub secret only) | Vercel Protection Token | secret: `PREVIEW_BYPASS_TOKEN` | Platform | Required for preview Playwright runs; never echo in logs. |
 | **NEXT_PUBLIC_LOCALES / NEXT_PUBLIC_DEFAULT_LOCALE** | `en-de,de-de` / `en-de` | Preview: same as production | workflow env (`ci.yml`) | Localization | Update alongside locale additions in `next-intl`. |
-| **NEXT_PUBLIC_WAITLIST_URGENCY** | `true` default | Preview: experiment-specific | workflow env (`ci.yml`) | Growth Ops | Toggle per campaign; document changes in release notes. |
+| **NEXT_PUBLIC_WAITLIST_URGENCY** | `true` default | Preview: experiment-specific | workflow env (`ci.yml`) | Growth Ops | Legacy toggle; superseded by `NEXT_PUBLIC_BANNER_WAITLIST_URGENCY` when Slice 15 lands. Document interim changes in release notes. |
 | **TEST_MODE** | `0` (set manually for local unit tests) | Preview: `0` | workflow env (`ci.yml` -> `1`) | Platform | CI forces `1` to stub external integrations. |
 | **TEST_E2E_SHORTCIRCUIT** | `true` | Preview: `true` | workflow env (`ci.yml`) | Platform | Ensures Playwright bypasses third-party services. |
 | **NEXT_PUBLIC_ALLOW_INDEXING** | `false` | Preview: `false` | workflow env (`ci.yml`) | Platform | Production toggles to `true`; CI guard prevents accidental enablement. |
+
+## Feature Flags
+
+Codify flags in code via `lib/shared/flags.ts`. Every addition/modification must update this table, `/CONTEXT/decision_log.md`, and the PR checklist. Defaults below assume no environment variable overrides.
+
+| Flag | Scope | Type | Preview Default | Production Default | Owner | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| `NEXT_PUBLIC_ANALYTICS_ENABLED` | Public | boolean | `false` | `true` | Privacy & Analytics | Enables analytics bootstrapping after consent; disabled in Preview to avoid noisy telemetry. |
+| `NEXT_PUBLIC_BANNER_WAITLIST_URGENCY` | Public | boolean | `true` | `true` | Growth Ops | Controls urgency badge visibility on the waitlist experience. |
+| `OG_DYNAMIC_ENABLED` | Server | boolean | `true` (CI toggles to `false` for OG fallback validation) | `true` | Platform | Gates dynamic OG image rendering; static assets serve when disabled. |
+| `SECURITY_REPORT_ONLY` | Server | boolean | `true` | `false` | Security | Runs CSP in report-only mode on Preview for safe experimentation; production enforces. |
 
 ## Operational Notes
 - CI enforces secret hygiene (`jobs.policy-guards`) via a regex scanner and fails any run that finds suspicious secret-like literals outside `.env.example`.
@@ -61,11 +72,14 @@ Canonical reference for environment configuration across stages. Update this mat
 3. **hCaptcha**: provision a new secret/site key pair; deploy to staging first, update GitHub `CI_HCAPTCHA_SECRET`, then swap production. Monitor error rate and revert if verification fails.
 4. **Waitlist hash + suppression salts**: generate cryptographically random strings, update `SUPPRESSION_SALT` and (optionally) `WAITLIST_RATE_HASH_SECRET` in Vercel and GitHub, then re-run `npm run validate:local` to ensure deterministic hashes.
 
-## Feature Flag Policy
-- All flags live in `lib/shared/env/flags.ts` (isomorphic) or `lib/server/env/guard.ts` (server-only). Do not introduce new env names outside these modules without updating this doc.
-- Flag naming: `FEATURE_<CAPS>` for temporary launches; `FLAG_<CAPS>` for persistent toggles. Mirror names in tests when asserting behaviour.
-- Defaults must keep production safe (usually `false`). CI and local development should exercise both code paths via unit/e2e tests.
+## Feature Flag Governance
+- Centralise reads in `lib/shared/flags.ts`. Components and routes consume the typed `getFlags()` helper instead of `process.env`.
+- `getFlags()` surfaces `isPreview()`, `isProduction()`, and `getSiteOrigin()` utilities so behaviour differences stay auditable.
+- Server-only toggles (no `NEXT_PUBLIC_` prefix) must be enforced on the server boundary (API routes, Server Components). Public flags must use the `NEXT_PUBLIC_` prefix and be wired through Playwright fixtures.
+- Document flag owner, scope, and retirement criteria at creation time in this file and `/CONTEXT/decision_log.md`.
 - Remove stale flags within two weeks of launch; update [/CONTEXT/rename_map.md](rename_map.md) if directory moves affect flag consumers.
+- Preview-only tooling (`app/api/test/flags/route.ts`) lets CI override public flags via cookies; the endpoint hard-fails in production environments.
+- Flag defaults are mirrored in Vercel Project → Settings → Environment Variables for both Preview and Production; update the table and `/CONTEXT/decision_log.md` whenever those values change.
 
 ## Fonts Toggle Strategy
 - `NEXT_USE_REMOTE_FONTS=false` self-hosts all fonts (default). Keep this setting unless legal signs off on remote providers.

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { isDynamicOgEnabled, setDynamicOgOverride } from '@/lib/env/media';
+import { getFlags, setOgDynamicOverride } from '@/lib/shared/flags';
 
 type Mode = 'dynamic' | 'static' | 'auto';
 
@@ -24,10 +24,10 @@ export async function POST(request: Request) {
       );
     }
 
-    setDynamicOgOverride(toOverride(mode as Mode));
+    setOgDynamicOverride(toOverride(mode as Mode));
 
     return NextResponse.json(
-      { mode, dynamic: isDynamicOgEnabled() },
+      { mode, dynamic: getFlags().OG_DYNAMIC_ENABLED },
       { headers: { 'Cache-Control': 'no-store' } },
     );
   } catch {

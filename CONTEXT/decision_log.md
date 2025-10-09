@@ -29,6 +29,18 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
 
 ## History
 
+- **2025-10-09 — Feature flag & environment matrix blueprint (Slice 15)**  
+  - Documented the flag catalog in `/CONTEXT/envs.md` with defaults/owners and clarified governance expectations.  
+  - Updated architecture/testing/PR checklist guidance so future code reads flags via `lib/shared/flags.ts` helpers and CI covers both states before rollout.
+
+- **2025-10-09 — Feature flag runtime scaffold (Slice 15 implementation)**  
+  - Introduced `lib/shared/flags.ts` as the typed, single-source helper and rewired OG, analytics, CSP, and waitlist urgency consumers to rely on it.  
+  - Added preview-only `/api/test/flags` overrides, Playwright `flags.set/clear` fixtures, and a static OG fallback CI job so preview workflows exercise both flag states without redeploying.
+
+- **2025-10-09 — Feature flag defaults finalised (Vercel alignment)**  
+  - Locked Preview defaults (analytics off, CSP report-only, dynamic OG on) and Production defaults (analytics on, CSP enforced, dynamic OG on) for `NEXT_PUBLIC_ANALYTICS_ENABLED`, `NEXT_PUBLIC_BANNER_WAITLIST_URGENCY`, `OG_DYNAMIC_ENABLED`, and `SECURITY_REPORT_ONLY`.  
+  - Values are synced in Vercel environment settings and mirrored in `/CONTEXT/envs.md`; CI overrides them only for targeted fallback tests.
+
 - **2025-10-09 — Zustand onboarding store typing alignment**  
   - Adjusted `app/onboarding/[step]/page.tsx` to type the onboarding store via `persist()`/`StateCreator` (no generics on `create`) and bind it through a vanilla store hook that uses `useSyncExternalStore`.  
   - Rationale → Zustand v5 typing no longer accepts generics on `create()`, so the onboarding slice now follows the new middleware-first pattern while retaining the existing hook surface.

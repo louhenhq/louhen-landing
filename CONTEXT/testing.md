@@ -36,6 +36,13 @@ Testing follows the locked pyramid in [/CONTEXT/decision_log.md](decision_log.md
 - **Accessibility**: axe coverage includes the consent banner (focus trap, ARIA roles/labels, Escape-to-dismiss). Treat failures here as blocking.
 - **Playwright fixtures**: `consentUnknown`, `consentGranted`, and `consentDenied` manage the `ll_consent` cookie (`v1:granted|denied`) before navigation. Cookie domains derive from `PREVIEW_BASE_URL` (falling back to localhost/127.0.0.1) so the suite runs unchanged in remote preview mode.
 
+### Feature Flag Matrix
+- Playwright provides a `flags` fixture (see `tests/fixtures/playwright.ts`) with `set(overrides)` / `clear()` helpers. It calls the preview-only `/api/test/flags` endpoint (non-production) to override public flags such as `NEXT_PUBLIC_ANALYTICS_ENABLED` or `NEXT_PUBLIC_BANNER_WAITLIST_URGENCY` before navigation.
+- The override cookie is short-lived and scoped to Preview/CI; local runs can also use it but must clear overrides after assertions (`flags.clear()` handles this automatically).
+- Critical suites (OG metadata, analytics-consent, security headers) should run twice when the flag impacts behaviour. For costly suites, target a sampled matrix (e.g., the preview workflow runs an extra SEO pass with `OG_DYNAMIC_ENABLED=false`).
+- When adding a flag, document the fixtures it needs, ensure default coverage exists, and update this section plus `/CONTEXT/envs.md`.
+- Preview test runs assume the default flag matrix documented in `/CONTEXT/envs.md`; CI overrides may simulate production analytics/CSP behaviour or static OG fallbacks.
+
 ## SEO add-ons
 - `sitemap-http.e2e.ts` samples up to five URLs per locale sitemap (first, middle, last, plus newest additions when available). Override the sample via `SEO_SITEMAP_SAMPLE` if a hotfix needs tighter bounds.
 - HTTP expectations: prefer `200 OK`; allow `401`/`403` only when the preview environment legitimately enforces auth and the bypass header is unavailable (the test logs a warning annotation in that case).
@@ -51,6 +58,7 @@ Testing follows the locked pyramid in [/CONTEXT/decision_log.md](decision_log.md
 
 ## CI Hardening
 - Preview workflow jobs run with a 30-minute timeout and concurrency guard `e2e-preview-${ref}-${suite}` that cancels superseded entries per branch/suite.
+- Preview CI runs an additional `og-static-fallback` job with `OG_DYNAMIC_ENABLED=false` to exercise the static OG path while keeping the main suites on the default dynamic configuration.
 - Caching: npm cache at `~/.npm` keyed by `npm-${os}-${hash(package-lock)}` with `${os}` restore key; Playwright browsers cached at `~/.cache/ms-playwright` keyed `pw-${os}-${hash(package-lock)}` with `${os}` restore key.
 - CI forces `--retries=1`; local runs stay flake-free (no retries). Playwright keeps `trace: on-first-retry`, `screenshot: only-on-failure`, and `video: retain-on-failure` so artifacts surface only when needed.
 - Expected artifacts per suite: `playwright-<suite>-{e2e,axe}` (retained 10 days). Missing folders fail the job.
