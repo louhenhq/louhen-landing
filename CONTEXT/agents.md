@@ -1,3 +1,5 @@
+> Always read /CONTEXT before making changes; follow PLAN → DIFF → VALIDATE → REVERT.
+
 # agents.md — Repo Operating Rules
 
 This file defines how Codex (and other AI assistants) must operate inside this repo.

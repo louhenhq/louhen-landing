@@ -6,11 +6,13 @@ module.exports = {
   color: {
     brand: {
       primary: {
+        key: "{color.brand.primary}",
         value: "#1A4E5F",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#1A4E5F",
+          key: "{color.brand.primary}",
         },
         name: "color-brand-primary",
         attributes: {
@@ -21,11 +23,13 @@ module.exports = {
         path: ["color", "brand", "primary"],
       },
       secondary: {
+        key: "{color.brand.secondary}",
         value: "#147A8C",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#147A8C",
+          key: "{color.brand.secondary}",
         },
         name: "color-brand-secondary",
         attributes: {
@@ -35,12 +39,31 @@ module.exports = {
         },
         path: ["color", "brand", "secondary"],
       },
+      teal: {
+        key: "{color.brand.teal}",
+        value: "#147A8C",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.brand.secondary}",
+          key: "{color.brand.teal}",
+        },
+        name: "color-brand-teal",
+        attributes: {
+          category: "color",
+          type: "brand",
+          item: "teal",
+        },
+        path: ["color", "brand", "teal"],
+      },
       muted: {
+        key: "{color.brand.muted}",
         value: "#A8DADC",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#A8DADC",
+          key: "{color.brand.muted}",
         },
         name: "color-brand-muted",
         attributes: {
@@ -51,11 +74,13 @@ module.exports = {
         path: ["color", "brand", "muted"],
       },
       accent: {
+        key: "{color.brand.accent}",
         value: "#FF6B6B",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#FF6B6B",
+          key: "{color.brand.accent}",
         },
         name: "color-brand-accent",
         attributes: {
@@ -66,11 +91,13 @@ module.exports = {
         path: ["color", "brand", "accent"],
       },
       onPrimary: {
+        key: "{color.brand.onPrimary}",
         value: "#F2FAFA",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#F2FAFA",
+          key: "{color.brand.onPrimary}",
         },
         name: "color-brand-on-primary",
         attributes: {
@@ -81,11 +108,13 @@ module.exports = {
         path: ["color", "brand", "onPrimary"],
       },
       onAccent: {
+        key: "{color.brand.onAccent}",
         value: "#FFFFFF",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#FFFFFF",
+          key: "{color.brand.onAccent}",
         },
         name: "color-brand-on-accent",
         attributes: {
@@ -99,11 +128,13 @@ module.exports = {
     season: {
       spring: {
         accent: {
+          key: "{color.season.spring.accent}",
           value: "#FFE8D6",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
             value: "#FFE8D6",
+            key: "{color.season.spring.accent}",
           },
           name: "color-season-spring-accent",
           attributes: {
@@ -117,11 +148,13 @@ module.exports = {
       },
       autumn: {
         accent: {
+          key: "{color.season.autumn.accent}",
           value: "#FFBFA3",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
             value: "#FFBFA3",
+            key: "{color.season.autumn.accent}",
           },
           name: "color-season-autumn-accent",
           attributes: {
@@ -136,11 +169,13 @@ module.exports = {
     },
     neutral: {
       0: {
+        key: "{color.neutral.0}",
         value: "#FFFFFF",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#FFFFFF",
+          key: "{color.neutral.0}",
         },
         name: "color-neutral-0",
         attributes: {
@@ -151,11 +186,13 @@ module.exports = {
         path: ["color", "neutral", "0"],
       },
       10: {
+        key: "{color.neutral.10}",
         value: "#F8F9FA",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#F8F9FA",
+          key: "{color.neutral.10}",
         },
         name: "color-neutral-10",
         attributes: {
@@ -166,11 +203,13 @@ module.exports = {
         path: ["color", "neutral", "10"],
       },
       20: {
+        key: "{color.neutral.20}",
         value: "#EEF2F5",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#EEF2F5",
+          key: "{color.neutral.20}",
         },
         name: "color-neutral-20",
         attributes: {
@@ -181,11 +220,13 @@ module.exports = {
         path: ["color", "neutral", "20"],
       },
       30: {
+        key: "{color.neutral.30}",
         value: "#E1E8EE",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#E1E8EE",
+          key: "{color.neutral.30}",
         },
         name: "color-neutral-30",
         attributes: {
@@ -196,11 +237,13 @@ module.exports = {
         path: ["color", "neutral", "30"],
       },
       40: {
+        key: "{color.neutral.40}",
         value: "#CBD6E1",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#CBD6E1",
+          key: "{color.neutral.40}",
         },
         name: "color-neutral-40",
         attributes: {
@@ -211,11 +254,13 @@ module.exports = {
         path: ["color", "neutral", "40"],
       },
       50: {
+        key: "{color.neutral.50}",
         value: "#94A3B8",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#94A3B8",
+          key: "{color.neutral.50}",
         },
         name: "color-neutral-50",
         attributes: {
@@ -226,11 +271,13 @@ module.exports = {
         path: ["color", "neutral", "50"],
       },
       60: {
+        key: "{color.neutral.60}",
         value: "#64748B",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#64748B",
+          key: "{color.neutral.60}",
         },
         name: "color-neutral-60",
         attributes: {
@@ -241,11 +288,13 @@ module.exports = {
         path: ["color", "neutral", "60"],
       },
       70: {
+        key: "{color.neutral.70}",
         value: "#475569",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#475569",
+          key: "{color.neutral.70}",
         },
         name: "color-neutral-70",
         attributes: {
@@ -256,11 +305,13 @@ module.exports = {
         path: ["color", "neutral", "70"],
       },
       80: {
+        key: "{color.neutral.80}",
         value: "#334155",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#334155",
+          key: "{color.neutral.80}",
         },
         name: "color-neutral-80",
         attributes: {
@@ -271,11 +322,13 @@ module.exports = {
         path: ["color", "neutral", "80"],
       },
       90: {
+        key: "{color.neutral.90}",
         value: "#1F2937",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#1F2937",
+          key: "{color.neutral.90}",
         },
         name: "color-neutral-90",
         attributes: {
@@ -286,11 +339,13 @@ module.exports = {
         path: ["color", "neutral", "90"],
       },
       100: {
+        key: "{color.neutral.100}",
         value: "#0F172A",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#0F172A",
+          key: "{color.neutral.100}",
         },
         name: "color-neutral-100",
         attributes: {
@@ -300,14 +355,33 @@ module.exports = {
         },
         path: ["color", "neutral", "100"],
       },
+      paper: {
+        key: "{color.neutral.paper}",
+        value: "#FFFFFF",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.neutral.0}",
+          key: "{color.neutral.paper}",
+        },
+        name: "color-neutral-paper",
+        attributes: {
+          category: "color",
+          type: "neutral",
+          item: "paper",
+        },
+        path: ["color", "neutral", "paper"],
+      },
     },
     feedback: {
       success: {
+        key: "{color.feedback.success}",
         value: "#2BB673",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#2BB673",
+          key: "{color.feedback.success}",
         },
         name: "color-feedback-success",
         attributes: {
@@ -318,11 +392,13 @@ module.exports = {
         path: ["color", "feedback", "success"],
       },
       successSurface: {
+        key: "{color.feedback.successSurface}",
         value: "#E6F6F0",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#E6F6F0",
+          key: "{color.feedback.successSurface}",
         },
         name: "color-feedback-success-surface",
         attributes: {
@@ -333,11 +409,13 @@ module.exports = {
         path: ["color", "feedback", "successSurface"],
       },
       successBorder: {
+        key: "{color.feedback.successBorder}",
         value: "#B7E3D1",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#B7E3D1",
+          key: "{color.feedback.successBorder}",
         },
         name: "color-feedback-success-border",
         attributes: {
@@ -348,11 +426,13 @@ module.exports = {
         path: ["color", "feedback", "successBorder"],
       },
       warning: {
+        key: "{color.feedback.warning}",
         value: "#F4B400",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#F4B400",
+          key: "{color.feedback.warning}",
         },
         name: "color-feedback-warning",
         attributes: {
@@ -363,11 +443,13 @@ module.exports = {
         path: ["color", "feedback", "warning"],
       },
       warningSurface: {
+        key: "{color.feedback.warningSurface}",
         value: "#FFF6D6",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#FFF6D6",
+          key: "{color.feedback.warningSurface}",
         },
         name: "color-feedback-warning-surface",
         attributes: {
@@ -378,11 +460,13 @@ module.exports = {
         path: ["color", "feedback", "warningSurface"],
       },
       warningBorder: {
+        key: "{color.feedback.warningBorder}",
         value: "#FBD38D",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#FBD38D",
+          key: "{color.feedback.warningBorder}",
         },
         name: "color-feedback-warning-border",
         attributes: {
@@ -393,11 +477,13 @@ module.exports = {
         path: ["color", "feedback", "warningBorder"],
       },
       error: {
+        key: "{color.feedback.error}",
         value: "#FF6B6B",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#FF6B6B",
+          key: "{color.feedback.error}",
         },
         name: "color-feedback-error",
         attributes: {
@@ -408,11 +494,13 @@ module.exports = {
         path: ["color", "feedback", "error"],
       },
       errorSurface: {
+        key: "{color.feedback.errorSurface}",
         value: "#FFE4E4",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#FFE4E4",
+          key: "{color.feedback.errorSurface}",
         },
         name: "color-feedback-error-surface",
         attributes: {
@@ -423,11 +511,13 @@ module.exports = {
         path: ["color", "feedback", "errorSurface"],
       },
       errorBorder: {
+        key: "{color.feedback.errorBorder}",
         value: "#FFB3B3",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#FFB3B3",
+          key: "{color.feedback.errorBorder}",
         },
         name: "color-feedback-error-border",
         attributes: {
@@ -438,11 +528,13 @@ module.exports = {
         path: ["color", "feedback", "errorBorder"],
       },
       info: {
+        key: "{color.feedback.info}",
         value: "#4A90E2",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#4A90E2",
+          key: "{color.feedback.info}",
         },
         name: "color-feedback-info",
         attributes: {
@@ -453,11 +545,13 @@ module.exports = {
         path: ["color", "feedback", "info"],
       },
       infoSurface: {
+        key: "{color.feedback.infoSurface}",
         value: "#E3F0FF",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#E3F0FF",
+          key: "{color.feedback.infoSurface}",
         },
         name: "color-feedback-info-surface",
         attributes: {
@@ -468,11 +562,13 @@ module.exports = {
         path: ["color", "feedback", "infoSurface"],
       },
       infoBorder: {
+        key: "{color.feedback.infoBorder}",
         value: "#99C2FF",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#99C2FF",
+          key: "{color.feedback.infoBorder}",
         },
         name: "color-feedback-info-border",
         attributes: {
@@ -483,13 +579,85 @@ module.exports = {
         path: ["color", "feedback", "infoBorder"],
       },
     },
+    status: {
+      success: {
+        key: "{color.status.success}",
+        value: "#2BB673",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.feedback.success}",
+          key: "{color.status.success}",
+        },
+        name: "color-status-success",
+        attributes: {
+          category: "color",
+          type: "status",
+          item: "success",
+        },
+        path: ["color", "status", "success"],
+      },
+      warning: {
+        key: "{color.status.warning}",
+        value: "#F4B400",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.feedback.warning}",
+          key: "{color.status.warning}",
+        },
+        name: "color-status-warning",
+        attributes: {
+          category: "color",
+          type: "status",
+          item: "warning",
+        },
+        path: ["color", "status", "warning"],
+      },
+      danger: {
+        key: "{color.status.danger}",
+        value: "#FF6B6B",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.feedback.error}",
+          key: "{color.status.danger}",
+        },
+        name: "color-status-danger",
+        attributes: {
+          category: "color",
+          type: "status",
+          item: "danger",
+        },
+        path: ["color", "status", "danger"],
+      },
+      info: {
+        key: "{color.status.info}",
+        value: "#4A90E2",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.feedback.info}",
+          key: "{color.status.info}",
+        },
+        name: "color-status-info",
+        attributes: {
+          category: "color",
+          type: "status",
+          item: "info",
+        },
+        path: ["color", "status", "info"],
+      },
+    },
     background: {
       canvas: {
+        key: "{color.background.canvas}",
         value: "#FFFFFF",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.neutral.0.value}",
+          value: "{color.neutral.0}",
+          key: "{color.background.canvas}",
         },
         name: "color-background-canvas",
         attributes: {
@@ -500,11 +668,13 @@ module.exports = {
         path: ["color", "background", "canvas"],
       },
       surface: {
+        key: "{color.background.surface}",
         value: "#F8F9FA",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.neutral.10.value}",
+          value: "{color.neutral.10}",
+          key: "{color.background.surface}",
         },
         name: "color-background-surface",
         attributes: {
@@ -515,11 +685,13 @@ module.exports = {
         path: ["color", "background", "surface"],
       },
       raised: {
+        key: "{color.background.raised}",
         value: "#EEF2F5",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.neutral.20.value}",
+          value: "{color.neutral.20}",
+          key: "{color.background.raised}",
         },
         name: "color-background-raised",
         attributes: {
@@ -530,11 +702,13 @@ module.exports = {
         path: ["color", "background", "raised"],
       },
       overlay: {
+        key: "{color.background.overlay}",
         value: "rgba(11, 24, 34, 0.55)",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "rgba(11, 24, 34, 0.55)",
+          key: "{color.background.overlay}",
         },
         name: "color-background-overlay",
         attributes: {
@@ -545,11 +719,13 @@ module.exports = {
         path: ["color", "background", "overlay"],
       },
       canvasDark: {
+        key: "{color.background.canvasDark}",
         value: "#0F1822",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#0F1822",
+          key: "{color.background.canvasDark}",
         },
         name: "color-background-canvas-dark",
         attributes: {
@@ -560,11 +736,13 @@ module.exports = {
         path: ["color", "background", "canvasDark"],
       },
       surfaceDark: {
+        key: "{color.background.surfaceDark}",
         value: "#15202B",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#15202B",
+          key: "{color.background.surfaceDark}",
         },
         name: "color-background-surface-dark",
         attributes: {
@@ -575,11 +753,13 @@ module.exports = {
         path: ["color", "background", "surfaceDark"],
       },
       raisedDark: {
+        key: "{color.background.raisedDark}",
         value: "#1D2B37",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#1D2B37",
+          key: "{color.background.raisedDark}",
         },
         name: "color-background-raised-dark",
         attributes: {
@@ -590,11 +770,13 @@ module.exports = {
         path: ["color", "background", "raisedDark"],
       },
       overlayDark: {
+        key: "{color.background.overlayDark}",
         value: "rgba(4, 12, 24, 0.7)",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "rgba(4, 12, 24, 0.7)",
+          key: "{color.background.overlayDark}",
         },
         name: "color-background-overlay-dark",
         attributes: {
@@ -607,11 +789,13 @@ module.exports = {
     },
     text: {
       default: {
+        key: "{color.text.default}",
         value: "#1F2937",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.neutral.90.value}",
+          value: "{color.neutral.90}",
+          key: "{color.text.default}",
         },
         name: "color-text-default",
         attributes: {
@@ -622,11 +806,13 @@ module.exports = {
         path: ["color", "text", "default"],
       },
       muted: {
+        key: "{color.text.muted}",
         value: "#475569",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.neutral.70.value}",
+          value: "{color.neutral.70}",
+          key: "{color.text.muted}",
         },
         name: "color-text-muted",
         attributes: {
@@ -637,11 +823,13 @@ module.exports = {
         path: ["color", "text", "muted"],
       },
       inverse: {
+        key: "{color.text.inverse}",
         value: "#FFFFFF",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.neutral.0.value}",
+          value: "{color.neutral.0}",
+          key: "{color.text.inverse}",
         },
         name: "color-text-inverse",
         attributes: {
@@ -652,11 +840,13 @@ module.exports = {
         path: ["color", "text", "inverse"],
       },
       link: {
+        key: "{color.text.link}",
         value: "#1A4E5F",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.brand.primary.value}",
+          value: "{color.brand.primary}",
+          key: "{color.text.link}",
         },
         name: "color-text-link",
         attributes: {
@@ -667,11 +857,13 @@ module.exports = {
         path: ["color", "text", "link"],
       },
       linkHover: {
+        key: "{color.text.linkHover}",
         value: "#0F8FA2",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "#0F8FA2",
+          key: "{color.text.linkHover}",
         },
         name: "color-text-link-hover",
         attributes: {
@@ -684,11 +876,13 @@ module.exports = {
     },
     border: {
       subtle: {
+        key: "{color.border.subtle}",
         value: "#E1E8EE",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.neutral.30.value}",
+          value: "{color.neutral.30}",
+          key: "{color.border.subtle}",
         },
         name: "color-border-subtle",
         attributes: {
@@ -699,11 +893,13 @@ module.exports = {
         path: ["color", "border", "subtle"],
       },
       strong: {
+        key: "{color.border.strong}",
         value: "#64748B",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.neutral.60.value}",
+          value: "{color.neutral.60}",
+          key: "{color.border.strong}",
         },
         name: "color-border-strong",
         attributes: {
@@ -714,11 +910,13 @@ module.exports = {
         path: ["color", "border", "strong"],
       },
       focus: {
+        key: "{color.border.focus}",
         value: "#1A4E5F",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.brand.primary.value}",
+          value: "{color.brand.primary}",
+          key: "{color.border.focus}",
         },
         name: "color-border-focus",
         attributes: {
@@ -729,9 +927,201 @@ module.exports = {
         path: ["color", "border", "focus"],
       },
     },
+    light: {
+      surface: {
+        key: "{color.light.surface}",
+        value: "#F8F9FA",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.background.surface}",
+          key: "{color.light.surface}",
+        },
+        name: "color-light-surface",
+        attributes: {
+          category: "color",
+          type: "light",
+          item: "surface",
+        },
+        path: ["color", "light", "surface"],
+      },
+      onSurface: {
+        key: "{color.light.onSurface}",
+        value: "#1F2937",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.text.default}",
+          key: "{color.light.onSurface}",
+        },
+        name: "color-light-on-surface",
+        attributes: {
+          category: "color",
+          type: "light",
+          item: "onSurface",
+        },
+        path: ["color", "light", "onSurface"],
+      },
+      outline: {
+        key: "{color.light.outline}",
+        value: "#E1E8EE",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.border.subtle}",
+          key: "{color.light.outline}",
+        },
+        name: "color-light-outline",
+        attributes: {
+          category: "color",
+          type: "light",
+          item: "outline",
+        },
+        path: ["color", "light", "outline"],
+      },
+      primary: {
+        key: "{color.light.primary}",
+        value: "#1A4E5F",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.brand.primary}",
+          key: "{color.light.primary}",
+        },
+        name: "color-light-primary",
+        attributes: {
+          category: "color",
+          type: "light",
+          item: "primary",
+        },
+        path: ["color", "light", "primary"],
+      },
+      onPrimary: {
+        key: "{color.light.onPrimary}",
+        value: "#F2FAFA",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.brand.onPrimary}",
+          key: "{color.light.onPrimary}",
+        },
+        name: "color-light-on-primary",
+        attributes: {
+          category: "color",
+          type: "light",
+          item: "onPrimary",
+        },
+        path: ["color", "light", "onPrimary"],
+      },
+    },
+    dark: {
+      surface: {
+        key: "{color.dark.surface}",
+        value: "#15202B",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.background.surfaceDark}",
+          key: "{color.dark.surface}",
+        },
+        name: "color-dark-surface",
+        attributes: {
+          category: "color",
+          type: "dark",
+          item: "surface",
+        },
+        path: ["color", "dark", "surface"],
+      },
+      inverseSurface: {
+        key: "{color.dark.inverseSurface}",
+        value: "#1D2B37",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.background.raisedDark}",
+          key: "{color.dark.inverseSurface}",
+        },
+        name: "color-dark-inverse-surface",
+        attributes: {
+          category: "color",
+          type: "dark",
+          item: "inverseSurface",
+        },
+        path: ["color", "dark", "inverseSurface"],
+      },
+      onSurface: {
+        key: "{color.dark.onSurface}",
+        value: "#FFFFFF",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.text.inverse}",
+          key: "{color.dark.onSurface}",
+        },
+        name: "color-dark-on-surface",
+        attributes: {
+          category: "color",
+          type: "dark",
+          item: "onSurface",
+        },
+        path: ["color", "dark", "onSurface"],
+      },
+      outline: {
+        key: "{color.dark.outline}",
+        value: "#64748B",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.border.strong}",
+          key: "{color.dark.outline}",
+        },
+        name: "color-dark-outline",
+        attributes: {
+          category: "color",
+          type: "dark",
+          item: "outline",
+        },
+        path: ["color", "dark", "outline"],
+      },
+      primary: {
+        key: "{color.dark.primary}",
+        value: "#A8DADC",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.brand.muted}",
+          key: "{color.dark.primary}",
+        },
+        name: "color-dark-primary",
+        attributes: {
+          category: "color",
+          type: "dark",
+          item: "primary",
+        },
+        path: ["color", "dark", "primary"],
+      },
+      onPrimary: {
+        key: "{color.dark.onPrimary}",
+        value: "#1A4E5F",
+        filePath: "tokens/tokens.json",
+        isSource: true,
+        original: {
+          value: "{color.brand.primary}",
+          key: "{color.dark.onPrimary}",
+        },
+        name: "color-dark-on-primary",
+        attributes: {
+          category: "color",
+          type: "dark",
+          item: "onPrimary",
+        },
+        path: ["color", "dark", "onPrimary"],
+      },
+    },
   },
   gradient: {
     brand: {
+      key: "{gradient.brand}",
       value: {
         type: "linear",
         angle: 48,
@@ -754,15 +1144,16 @@ module.exports = {
           angle: 48,
           stops: [
             {
-              color: "{color.brand.primary.value}",
+              color: "{color.brand.primary}",
               position: 0,
             },
             {
-              color: "{color.brand.muted.value}",
+              color: "{color.brand.muted}",
               position: 1,
             },
           ],
         },
+        key: "{gradient.brand}",
       },
       name: "gradient-brand",
       attributes: {
@@ -772,6 +1163,7 @@ module.exports = {
       path: ["gradient", "brand"],
     },
     accent: {
+      key: "{gradient.accent}",
       value: {
         type: "linear",
         angle: 32,
@@ -794,15 +1186,16 @@ module.exports = {
           angle: 32,
           stops: [
             {
-              color: "{color.brand.accent.value}",
+              color: "{color.brand.accent}",
               position: 0,
             },
             {
-              color: "{color.season.spring.accent.value}",
+              color: "{color.season.spring.accent}",
               position: 1,
             },
           ],
         },
+        key: "{gradient.accent}",
       },
       name: "gradient-accent",
       attributes: {
@@ -814,11 +1207,13 @@ module.exports = {
   },
   shadow: {
     card: {
+      key: "{shadow.card}",
       value: "0 18px 40px -20px rgba(15, 32, 48, 0.22)",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
         value: "0 18px 40px -20px rgba(15, 32, 48, 0.22)",
+        key: "{shadow.card}",
       },
       name: "shadow-card",
       attributes: {
@@ -828,11 +1223,13 @@ module.exports = {
       path: ["shadow", "card"],
     },
     elevated: {
+      key: "{shadow.elevated}",
       value: "0 28px 60px -18px rgba(9, 22, 35, 0.28)",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
         value: "0 28px 60px -18px rgba(9, 22, 35, 0.28)",
+        key: "{shadow.elevated}",
       },
       name: "shadow-elevated",
       attributes: {
@@ -842,11 +1239,13 @@ module.exports = {
       path: ["shadow", "elevated"],
     },
     focus: {
+      key: "{shadow.focus}",
       value: "0 0 0 3px rgba(26, 78, 95, 0.35)",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
         value: "0 0 0 3px rgba(26, 78, 95, 0.35)",
+        key: "{shadow.focus}",
       },
       name: "shadow-focus",
       attributes: {
@@ -858,11 +1257,13 @@ module.exports = {
   },
   radii: {
     sm: {
+      key: "{radii.sm}",
       value: "0.375rem",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
         value: "0.375rem",
+        key: "{radii.sm}",
       },
       name: "radii-sm",
       attributes: {
@@ -872,11 +1273,13 @@ module.exports = {
       path: ["radii", "sm"],
     },
     md: {
+      key: "{radii.md}",
       value: "0.5rem",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
         value: "0.5rem",
+        key: "{radii.md}",
       },
       name: "radii-md",
       attributes: {
@@ -886,11 +1289,13 @@ module.exports = {
       path: ["radii", "md"],
     },
     lg: {
+      key: "{radii.lg}",
       value: "0.75rem",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
         value: "0.75rem",
+        key: "{radii.lg}",
       },
       name: "radii-lg",
       attributes: {
@@ -900,11 +1305,13 @@ module.exports = {
       path: ["radii", "lg"],
     },
     xl: {
+      key: "{radii.xl}",
       value: "1rem",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
         value: "1rem",
+        key: "{radii.xl}",
       },
       name: "radii-xl",
       attributes: {
@@ -914,11 +1321,13 @@ module.exports = {
       path: ["radii", "xl"],
     },
     "2xl": {
+      key: "{radii.2xl}",
       value: "1.5rem",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
         value: "1.5rem",
+        key: "{radii.2xl}",
       },
       name: "radii-2xl",
       attributes: {
@@ -928,11 +1337,13 @@ module.exports = {
       path: ["radii", "2xl"],
     },
     pill: {
+      key: "{radii.pill}",
       value: "9999px",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
         value: "9999px",
+        key: "{radii.pill}",
       },
       name: "radii-pill",
       attributes: {
@@ -944,11 +1355,13 @@ module.exports = {
   },
   spacing: {
     4: {
+      key: "{spacing.4}",
       value: "0.25rem",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
         value: "0.25rem",
+        key: "{spacing.4}",
       },
       name: "spacing-4",
       attributes: {
@@ -958,11 +1371,13 @@ module.exports = {
       path: ["spacing", "4"],
     },
     8: {
+      key: "{spacing.8}",
       value: "0.5rem",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
         value: "0.5rem",
+        key: "{spacing.8}",
       },
       name: "spacing-8",
       attributes: {
@@ -972,11 +1387,13 @@ module.exports = {
       path: ["spacing", "8"],
     },
     16: {
+      key: "{spacing.16}",
       value: "1rem",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
         value: "1rem",
+        key: "{spacing.16}",
       },
       name: "spacing-16",
       attributes: {
@@ -986,11 +1403,13 @@ module.exports = {
       path: ["spacing", "16"],
     },
     24: {
+      key: "{spacing.24}",
       value: "1.5rem",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
         value: "1.5rem",
+        key: "{spacing.24}",
       },
       name: "spacing-24",
       attributes: {
@@ -1000,11 +1419,13 @@ module.exports = {
       path: ["spacing", "24"],
     },
     32: {
+      key: "{spacing.32}",
       value: "2rem",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
         value: "2rem",
+        key: "{spacing.32}",
       },
       name: "spacing-32",
       attributes: {
@@ -1014,11 +1435,13 @@ module.exports = {
       path: ["spacing", "32"],
     },
     48: {
+      key: "{spacing.48}",
       value: "3rem",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
         value: "3rem",
+        key: "{spacing.48}",
       },
       name: "spacing-48",
       attributes: {
@@ -1028,11 +1451,13 @@ module.exports = {
       path: ["spacing", "48"],
     },
     64: {
+      key: "{spacing.64}",
       value: "4rem",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
         value: "4rem",
+        key: "{spacing.64}",
       },
       name: "spacing-64",
       attributes: {
@@ -1042,11 +1467,13 @@ module.exports = {
       path: ["spacing", "64"],
     },
     gutter: {
+      key: "{spacing.gutter}",
       value: "clamp(1.25rem, 4vw, 3rem)",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
         value: "clamp(1.25rem, 4vw, 3rem)",
+        key: "{spacing.gutter}",
       },
       name: "spacing-gutter",
       attributes: {
@@ -1058,11 +1485,13 @@ module.exports = {
   },
   spacingAlias: {
     xs: {
+      key: "{spacingAlias.xs}",
       value: "0.5rem",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
-        value: "{spacing.8.value}",
+        value: "{spacing.8}",
+        key: "{spacingAlias.xs}",
       },
       name: "spacing-alias-xs",
       attributes: {
@@ -1072,11 +1501,13 @@ module.exports = {
       path: ["spacingAlias", "xs"],
     },
     sm: {
+      key: "{spacingAlias.sm}",
       value: "1rem",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
-        value: "{spacing.16.value}",
+        value: "{spacing.16}",
+        key: "{spacingAlias.sm}",
       },
       name: "spacing-alias-sm",
       attributes: {
@@ -1086,11 +1517,13 @@ module.exports = {
       path: ["spacingAlias", "sm"],
     },
     md: {
+      key: "{spacingAlias.md}",
       value: "1.5rem",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
-        value: "{spacing.24.value}",
+        value: "{spacing.24}",
+        key: "{spacingAlias.md}",
       },
       name: "spacing-alias-md",
       attributes: {
@@ -1100,11 +1533,13 @@ module.exports = {
       path: ["spacingAlias", "md"],
     },
     lg: {
+      key: "{spacingAlias.lg}",
       value: "2rem",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
-        value: "{spacing.32.value}",
+        value: "{spacing.32}",
+        key: "{spacingAlias.lg}",
       },
       name: "spacing-alias-lg",
       attributes: {
@@ -1114,11 +1549,13 @@ module.exports = {
       path: ["spacingAlias", "lg"],
     },
     xl: {
+      key: "{spacingAlias.xl}",
       value: "3rem",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
-        value: "{spacing.48.value}",
+        value: "{spacing.48}",
+        key: "{spacingAlias.xl}",
       },
       name: "spacing-alias-xl",
       attributes: {
@@ -1128,11 +1565,13 @@ module.exports = {
       path: ["spacingAlias", "xl"],
     },
     "2xl": {
+      key: "{spacingAlias.2xl}",
       value: "4rem",
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
-        value: "{spacing.64.value}",
+        value: "{spacing.64}",
+        key: "{spacingAlias.2xl}",
       },
       name: "spacing-alias-2xl",
       attributes: {
@@ -1144,11 +1583,13 @@ module.exports = {
   },
   overlay: {
     pressed: {
+      key: "{overlay.pressed}",
       value: 0.12,
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
         value: 0.12,
+        key: "{overlay.pressed}",
       },
       name: "overlay-pressed",
       attributes: {
@@ -1158,11 +1599,13 @@ module.exports = {
       path: ["overlay", "pressed"],
     },
     hover: {
+      key: "{overlay.hover}",
       value: 0.08,
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
         value: 0.08,
+        key: "{overlay.hover}",
       },
       name: "overlay-hover",
       attributes: {
@@ -1175,11 +1618,13 @@ module.exports = {
   typography: {
     fontFamily: {
       sans: {
+        key: "{typography.fontFamily.sans}",
         value: "Inter",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "Inter",
+          key: "{typography.fontFamily.sans}",
         },
         name: "typography-font-family-sans",
         attributes: {
@@ -1190,11 +1635,13 @@ module.exports = {
         path: ["typography", "fontFamily", "sans"],
       },
       emoji: {
+        key: "{typography.fontFamily.emoji}",
         value: "NotoColorEmoji",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "NotoColorEmoji",
+          key: "{typography.fontFamily.emoji}",
         },
         name: "typography-font-family-emoji",
         attributes: {
@@ -1207,11 +1654,13 @@ module.exports = {
     },
     weight: {
       regular: {
+        key: "{typography.weight.regular}",
         value: 400,
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: 400,
+          key: "{typography.weight.regular}",
         },
         name: "typography-weight-regular",
         attributes: {
@@ -1222,11 +1671,13 @@ module.exports = {
         path: ["typography", "weight", "regular"],
       },
       medium: {
+        key: "{typography.weight.medium}",
         value: 500,
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: 500,
+          key: "{typography.weight.medium}",
         },
         name: "typography-weight-medium",
         attributes: {
@@ -1237,11 +1688,13 @@ module.exports = {
         path: ["typography", "weight", "medium"],
       },
       semibold: {
+        key: "{typography.weight.semibold}",
         value: 600,
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: 600,
+          key: "{typography.weight.semibold}",
         },
         name: "typography-weight-semibold",
         attributes: {
@@ -1252,11 +1705,13 @@ module.exports = {
         path: ["typography", "weight", "semibold"],
       },
       bold: {
+        key: "{typography.weight.bold}",
         value: 700,
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: 700,
+          key: "{typography.weight.bold}",
         },
         name: "typography-weight-bold",
         attributes: {
@@ -1269,11 +1724,13 @@ module.exports = {
     },
     lineHeight: {
       tight: {
+        key: "{typography.lineHeight.tight}",
         value: 1.2,
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: 1.2,
+          key: "{typography.lineHeight.tight}",
         },
         name: "typography-line-height-tight",
         attributes: {
@@ -1284,11 +1741,13 @@ module.exports = {
         path: ["typography", "lineHeight", "tight"],
       },
       snug: {
+        key: "{typography.lineHeight.snug}",
         value: 1.34,
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: 1.34,
+          key: "{typography.lineHeight.snug}",
         },
         name: "typography-line-height-snug",
         attributes: {
@@ -1299,11 +1758,13 @@ module.exports = {
         path: ["typography", "lineHeight", "snug"],
       },
       normal: {
+        key: "{typography.lineHeight.normal}",
         value: 1.5,
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: 1.5,
+          key: "{typography.lineHeight.normal}",
         },
         name: "typography-line-height-normal",
         attributes: {
@@ -1314,11 +1775,13 @@ module.exports = {
         path: ["typography", "lineHeight", "normal"],
       },
       relaxed: {
+        key: "{typography.lineHeight.relaxed}",
         value: 1.64,
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: 1.64,
+          key: "{typography.lineHeight.relaxed}",
         },
         name: "typography-line-height-relaxed",
         attributes: {
@@ -1333,11 +1796,13 @@ module.exports = {
   motion: {
     dur: {
       fast: {
+        key: "{motion.dur.fast}",
         value: 150,
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: 150,
+          key: "{motion.dur.fast}",
         },
         name: "motion-dur-fast",
         attributes: {
@@ -1348,11 +1813,13 @@ module.exports = {
         path: ["motion", "dur", "fast"],
       },
       normal: {
+        key: "{motion.dur.normal}",
         value: 220,
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: 220,
+          key: "{motion.dur.normal}",
         },
         name: "motion-dur-normal",
         attributes: {
@@ -1363,11 +1830,13 @@ module.exports = {
         path: ["motion", "dur", "normal"],
       },
       slow: {
+        key: "{motion.dur.slow}",
         value: 320,
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: 320,
+          key: "{motion.dur.slow}",
         },
         name: "motion-dur-slow",
         attributes: {
@@ -1380,11 +1849,13 @@ module.exports = {
     },
     easing: {
       standard: {
+        key: "{motion.easing.standard}",
         value: "cubic-bezier(0.18, 0.55, 0.2, 0.95)",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "cubic-bezier(0.18, 0.55, 0.2, 0.95)",
+          key: "{motion.easing.standard}",
         },
         name: "motion-easing-standard",
         attributes: {
@@ -1395,11 +1866,13 @@ module.exports = {
         path: ["motion", "easing", "standard"],
       },
       emphasized: {
+        key: "{motion.easing.emphasized}",
         value: "cubic-bezier(0.2, 0, 0, 1)",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
           value: "cubic-bezier(0.2, 0, 0, 1)",
+          key: "{motion.easing.emphasized}",
         },
         name: "motion-easing-emphasized",
         attributes: {
@@ -1413,11 +1886,13 @@ module.exports = {
   },
   zIndex: {
     base: {
+      key: "{zIndex.base}",
       value: 0,
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
         value: 0,
+        key: "{zIndex.base}",
       },
       name: "z-index-base",
       attributes: {
@@ -1427,11 +1902,13 @@ module.exports = {
       path: ["zIndex", "base"],
     },
     header: {
+      key: "{zIndex.header}",
       value: 100,
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
         value: 100,
+        key: "{zIndex.header}",
       },
       name: "z-index-header",
       attributes: {
@@ -1441,11 +1918,13 @@ module.exports = {
       path: ["zIndex", "header"],
     },
     dropdown: {
+      key: "{zIndex.dropdown}",
       value: 1000,
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
         value: 1000,
+        key: "{zIndex.dropdown}",
       },
       name: "z-index-dropdown",
       attributes: {
@@ -1455,11 +1934,13 @@ module.exports = {
       path: ["zIndex", "dropdown"],
     },
     modal: {
+      key: "{zIndex.modal}",
       value: 1100,
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
         value: 1100,
+        key: "{zIndex.modal}",
       },
       name: "z-index-modal",
       attributes: {
@@ -1469,11 +1950,13 @@ module.exports = {
       path: ["zIndex", "modal"],
     },
     toast: {
+      key: "{zIndex.toast}",
       value: 1200,
       filePath: "tokens/tokens.json",
       isSource: true,
       original: {
         value: 1200,
+        key: "{zIndex.toast}",
       },
       name: "z-index-toast",
       attributes: {
@@ -1487,11 +1970,13 @@ module.exports = {
     color: {
       bg: {
         page: {
+          key: "{semantic.color.bg.page}",
           value: "#FFFFFF",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.background.canvas.value}",
+            value: "{color.background.canvas}",
+            key: "{semantic.color.bg.page}",
           },
           name: "semantic-color-bg-page",
           attributes: {
@@ -1503,11 +1988,13 @@ module.exports = {
           path: ["semantic", "color", "bg", "page"],
         },
         card: {
+          key: "{semantic.color.bg.card}",
           value: "#F8F9FA",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.background.surface.value}",
+            value: "{color.background.surface}",
+            key: "{semantic.color.bg.card}",
           },
           name: "semantic-color-bg-card",
           attributes: {
@@ -1519,11 +2006,13 @@ module.exports = {
           path: ["semantic", "color", "bg", "card"],
         },
         raised: {
+          key: "{semantic.color.bg.raised}",
           value: "#EEF2F5",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.background.raised.value}",
+            value: "{color.background.raised}",
+            key: "{semantic.color.bg.raised}",
           },
           name: "semantic-color-bg-raised",
           attributes: {
@@ -1535,11 +2024,13 @@ module.exports = {
           path: ["semantic", "color", "bg", "raised"],
         },
         overlay: {
+          key: "{semantic.color.bg.overlay}",
           value: "rgba(11, 24, 34, 0.55)",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.background.overlay.value}",
+            value: "{color.background.overlay}",
+            key: "{semantic.color.bg.overlay}",
           },
           name: "semantic-color-bg-overlay",
           attributes: {
@@ -1553,11 +2044,13 @@ module.exports = {
       },
       text: {
         body: {
+          key: "{semantic.color.text.body}",
           value: "#1F2937",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.text.default.value}",
+            value: "{color.text.default}",
+            key: "{semantic.color.text.body}",
           },
           name: "semantic-color-text-body",
           attributes: {
@@ -1569,11 +2062,13 @@ module.exports = {
           path: ["semantic", "color", "text", "body"],
         },
         muted: {
+          key: "{semantic.color.text.muted}",
           value: "#475569",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.text.muted.value}",
+            value: "{color.text.muted}",
+            key: "{semantic.color.text.muted}",
           },
           name: "semantic-color-text-muted",
           attributes: {
@@ -1585,11 +2080,13 @@ module.exports = {
           path: ["semantic", "color", "text", "muted"],
         },
         inverse: {
+          key: "{semantic.color.text.inverse}",
           value: "#FFFFFF",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.text.inverse.value}",
+            value: "{color.text.inverse}",
+            key: "{semantic.color.text.inverse}",
           },
           name: "semantic-color-text-inverse",
           attributes: {
@@ -1601,11 +2098,13 @@ module.exports = {
           path: ["semantic", "color", "text", "inverse"],
         },
         link: {
+          key: "{semantic.color.text.link}",
           value: "#1A4E5F",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.text.link.value}",
+            value: "{color.text.link}",
+            key: "{semantic.color.text.link}",
           },
           name: "semantic-color-text-link",
           attributes: {
@@ -1619,11 +2118,13 @@ module.exports = {
       },
       border: {
         subtle: {
+          key: "{semantic.color.border.subtle}",
           value: "#E1E8EE",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.border.subtle.value}",
+            value: "{color.border.subtle}",
+            key: "{semantic.color.border.subtle}",
           },
           name: "semantic-color-border-subtle",
           attributes: {
@@ -1635,11 +2136,13 @@ module.exports = {
           path: ["semantic", "color", "border", "subtle"],
         },
         strong: {
+          key: "{semantic.color.border.strong}",
           value: "#64748B",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.border.strong.value}",
+            value: "{color.border.strong}",
+            key: "{semantic.color.border.strong}",
           },
           name: "semantic-color-border-strong",
           attributes: {
@@ -1651,11 +2154,13 @@ module.exports = {
           path: ["semantic", "color", "border", "strong"],
         },
         focus: {
+          key: "{semantic.color.border.focus}",
           value: "#1A4E5F",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.border.focus.value}",
+            value: "{color.border.focus}",
+            key: "{semantic.color.border.focus}",
           },
           name: "semantic-color-border-focus",
           attributes: {
@@ -1669,11 +2174,13 @@ module.exports = {
       },
       status: {
         success: {
+          key: "{semantic.color.status.success}",
           value: "#2BB673",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.feedback.success.value}",
+            value: "{color.feedback.success}",
+            key: "{semantic.color.status.success}",
           },
           name: "semantic-color-status-success",
           attributes: {
@@ -1685,11 +2192,13 @@ module.exports = {
           path: ["semantic", "color", "status", "success"],
         },
         warning: {
+          key: "{semantic.color.status.warning}",
           value: "#F4B400",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.feedback.warning.value}",
+            value: "{color.feedback.warning}",
+            key: "{semantic.color.status.warning}",
           },
           name: "semantic-color-status-warning",
           attributes: {
@@ -1701,11 +2210,13 @@ module.exports = {
           path: ["semantic", "color", "status", "warning"],
         },
         error: {
+          key: "{semantic.color.status.error}",
           value: "#FF6B6B",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.feedback.error.value}",
+            value: "{color.feedback.error}",
+            key: "{semantic.color.status.error}",
           },
           name: "semantic-color-status-error",
           attributes: {
@@ -1717,11 +2228,13 @@ module.exports = {
           path: ["semantic", "color", "status", "error"],
         },
         info: {
+          key: "{semantic.color.status.info}",
           value: "#4A90E2",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.feedback.info.value}",
+            value: "{color.feedback.info}",
+            key: "{semantic.color.status.info}",
           },
           name: "semantic-color-status-info",
           attributes: {
@@ -1736,11 +2249,13 @@ module.exports = {
       button: {
         primary: {
           bg: {
+            key: "{semantic.color.button.primary.bg}",
             value: "#1A4E5F",
             filePath: "tokens/tokens.json",
             isSource: true,
             original: {
-              value: "{color.brand.primary.value}",
+              value: "{color.brand.primary}",
+              key: "{semantic.color.button.primary.bg}",
             },
             name: "semantic-color-button-primary-bg",
             attributes: {
@@ -1753,11 +2268,13 @@ module.exports = {
             path: ["semantic", "color", "button", "primary", "bg"],
           },
           fg: {
+            key: "{semantic.color.button.primary.fg}",
             value: "#F2FAFA",
             filePath: "tokens/tokens.json",
             isSource: true,
             original: {
-              value: "{color.brand.onPrimary.value}",
+              value: "{color.brand.onPrimary}",
+              key: "{semantic.color.button.primary.fg}",
             },
             name: "semantic-color-button-primary-fg",
             attributes: {
@@ -1772,11 +2289,13 @@ module.exports = {
         },
         secondary: {
           bg: {
+            key: "{semantic.color.button.secondary.bg}",
             value: "#A8DADC",
             filePath: "tokens/tokens.json",
             isSource: true,
             original: {
-              value: "{color.brand.muted.value}",
+              value: "{color.brand.muted}",
+              key: "{semantic.color.button.secondary.bg}",
             },
             name: "semantic-color-button-secondary-bg",
             attributes: {
@@ -1789,11 +2308,13 @@ module.exports = {
             path: ["semantic", "color", "button", "secondary", "bg"],
           },
           fg: {
+            key: "{semantic.color.button.secondary.fg}",
             value: "#1A4E5F",
             filePath: "tokens/tokens.json",
             isSource: true,
             original: {
-              value: "{color.brand.primary.value}",
+              value: "{color.brand.primary}",
+              key: "{semantic.color.button.secondary.fg}",
             },
             name: "semantic-color-button-secondary-fg",
             attributes: {
@@ -1813,11 +2334,13 @@ module.exports = {
     color: {
       bg: {
         page: {
+          key: "{semanticDark.color.bg.page}",
           value: "#0F1822",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.background.canvasDark.value}",
+            value: "{color.background.canvasDark}",
+            key: "{semanticDark.color.bg.page}",
           },
           name: "semantic-dark-color-bg-page",
           attributes: {
@@ -1829,11 +2352,13 @@ module.exports = {
           path: ["semanticDark", "color", "bg", "page"],
         },
         card: {
+          key: "{semanticDark.color.bg.card}",
           value: "#15202B",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.background.surfaceDark.value}",
+            value: "{color.background.surfaceDark}",
+            key: "{semanticDark.color.bg.card}",
           },
           name: "semantic-dark-color-bg-card",
           attributes: {
@@ -1845,11 +2370,13 @@ module.exports = {
           path: ["semanticDark", "color", "bg", "card"],
         },
         raised: {
+          key: "{semanticDark.color.bg.raised}",
           value: "#1D2B37",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.background.raisedDark.value}",
+            value: "{color.background.raisedDark}",
+            key: "{semanticDark.color.bg.raised}",
           },
           name: "semantic-dark-color-bg-raised",
           attributes: {
@@ -1861,11 +2388,13 @@ module.exports = {
           path: ["semanticDark", "color", "bg", "raised"],
         },
         overlay: {
+          key: "{semanticDark.color.bg.overlay}",
           value: "rgba(4, 12, 24, 0.7)",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.background.overlayDark.value}",
+            value: "{color.background.overlayDark}",
+            key: "{semanticDark.color.bg.overlay}",
           },
           name: "semantic-dark-color-bg-overlay",
           attributes: {
@@ -1879,11 +2408,13 @@ module.exports = {
       },
       text: {
         body: {
+          key: "{semanticDark.color.text.body}",
           value: "#FFFFFF",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.text.inverse.value}",
+            value: "{color.text.inverse}",
+            key: "{semanticDark.color.text.body}",
           },
           name: "semantic-dark-color-text-body",
           attributes: {
@@ -1895,11 +2426,13 @@ module.exports = {
           path: ["semanticDark", "color", "text", "body"],
         },
         muted: {
+          key: "{semanticDark.color.text.muted}",
           value: "#CEDBE6",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
             value: "#CEDBE6",
+            key: "{semanticDark.color.text.muted}",
           },
           name: "semantic-dark-color-text-muted",
           attributes: {
@@ -1911,11 +2444,13 @@ module.exports = {
           path: ["semanticDark", "color", "text", "muted"],
         },
         inverse: {
+          key: "{semanticDark.color.text.inverse}",
           value: "#1F2937",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.text.default.value}",
+            value: "{color.text.default}",
+            key: "{semanticDark.color.text.inverse}",
           },
           name: "semantic-dark-color-text-inverse",
           attributes: {
@@ -1927,11 +2462,13 @@ module.exports = {
           path: ["semanticDark", "color", "text", "inverse"],
         },
         link: {
+          key: "{semanticDark.color.text.link}",
           value: "#A8DADC",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.brand.muted.value}",
+            value: "{color.brand.muted}",
+            key: "{semanticDark.color.text.link}",
           },
           name: "semantic-dark-color-text-link",
           attributes: {
@@ -1945,11 +2482,13 @@ module.exports = {
       },
       border: {
         subtle: {
+          key: "{semanticDark.color.border.subtle}",
           value: "#233445",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
             value: "#233445",
+            key: "{semanticDark.color.border.subtle}",
           },
           name: "semantic-dark-color-border-subtle",
           attributes: {
@@ -1961,11 +2500,13 @@ module.exports = {
           path: ["semanticDark", "color", "border", "subtle"],
         },
         strong: {
+          key: "{semanticDark.color.border.strong}",
           value: "#3C4D5E",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
             value: "#3C4D5E",
+            key: "{semanticDark.color.border.strong}",
           },
           name: "semantic-dark-color-border-strong",
           attributes: {
@@ -1977,11 +2518,13 @@ module.exports = {
           path: ["semanticDark", "color", "border", "strong"],
         },
         focus: {
+          key: "{semanticDark.color.border.focus}",
           value: "#A8DADC",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.brand.muted.value}",
+            value: "{color.brand.muted}",
+            key: "{semanticDark.color.border.focus}",
           },
           name: "semantic-dark-color-border-focus",
           attributes: {
@@ -1995,11 +2538,13 @@ module.exports = {
       },
       status: {
         success: {
+          key: "{semanticDark.color.status.success}",
           value: "#2BB673",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.feedback.success.value}",
+            value: "{color.feedback.success}",
+            key: "{semanticDark.color.status.success}",
           },
           name: "semantic-dark-color-status-success",
           attributes: {
@@ -2011,11 +2556,13 @@ module.exports = {
           path: ["semanticDark", "color", "status", "success"],
         },
         warning: {
+          key: "{semanticDark.color.status.warning}",
           value: "#F4B400",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.feedback.warning.value}",
+            value: "{color.feedback.warning}",
+            key: "{semanticDark.color.status.warning}",
           },
           name: "semantic-dark-color-status-warning",
           attributes: {
@@ -2027,11 +2574,13 @@ module.exports = {
           path: ["semanticDark", "color", "status", "warning"],
         },
         error: {
+          key: "{semanticDark.color.status.error}",
           value: "#FF6B6B",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.feedback.error.value}",
+            value: "{color.feedback.error}",
+            key: "{semanticDark.color.status.error}",
           },
           name: "semantic-dark-color-status-error",
           attributes: {
@@ -2043,11 +2592,13 @@ module.exports = {
           path: ["semanticDark", "color", "status", "error"],
         },
         info: {
+          key: "{semanticDark.color.status.info}",
           value: "#4A90E2",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.feedback.info.value}",
+            value: "{color.feedback.info}",
+            key: "{semanticDark.color.status.info}",
           },
           name: "semantic-dark-color-status-info",
           attributes: {
@@ -2062,11 +2613,13 @@ module.exports = {
       button: {
         primary: {
           bg: {
+            key: "{semanticDark.color.button.primary.bg}",
             value: "#A8DADC",
             filePath: "tokens/tokens.json",
             isSource: true,
             original: {
-              value: "{color.brand.muted.value}",
+              value: "{color.brand.muted}",
+              key: "{semanticDark.color.button.primary.bg}",
             },
             name: "semantic-dark-color-button-primary-bg",
             attributes: {
@@ -2079,11 +2632,13 @@ module.exports = {
             path: ["semanticDark", "color", "button", "primary", "bg"],
           },
           fg: {
+            key: "{semanticDark.color.button.primary.fg}",
             value: "#1A4E5F",
             filePath: "tokens/tokens.json",
             isSource: true,
             original: {
-              value: "{color.brand.primary.value}",
+              value: "{color.brand.primary}",
+              key: "{semanticDark.color.button.primary.fg}",
             },
             name: "semantic-dark-color-button-primary-fg",
             attributes: {
@@ -2098,11 +2653,13 @@ module.exports = {
         },
         secondary: {
           bg: {
+            key: "{semanticDark.color.button.secondary.bg}",
             value: "#15202B",
             filePath: "tokens/tokens.json",
             isSource: true,
             original: {
-              value: "{color.background.surfaceDark.value}",
+              value: "{color.background.surfaceDark}",
+              key: "{semanticDark.color.button.secondary.bg}",
             },
             name: "semantic-dark-color-button-secondary-bg",
             attributes: {
@@ -2115,11 +2672,13 @@ module.exports = {
             path: ["semanticDark", "color", "button", "secondary", "bg"],
           },
           fg: {
+            key: "{semanticDark.color.button.secondary.fg}",
             value: "#A8DADC",
             filePath: "tokens/tokens.json",
             isSource: true,
             original: {
-              value: "{color.brand.muted.value}",
+              value: "{color.brand.muted}",
+              key: "{semanticDark.color.button.secondary.fg}",
             },
             name: "semantic-dark-color-button-secondary-fg",
             attributes: {
@@ -2139,11 +2698,13 @@ module.exports = {
     color: {
       bg: {
         page: {
+          key: "{semanticHc.color.bg.page}",
           value: "#FFFFFF",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.background.canvas.value}",
+            value: "{color.background.canvas}",
+            key: "{semanticHc.color.bg.page}",
           },
           name: "semantic-hc-color-bg-page",
           attributes: {
@@ -2155,11 +2716,13 @@ module.exports = {
           path: ["semanticHc", "color", "bg", "page"],
         },
         card: {
+          key: "{semanticHc.color.bg.card}",
           value: "#F8F9FA",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.background.surface.value}",
+            value: "{color.background.surface}",
+            key: "{semanticHc.color.bg.card}",
           },
           name: "semantic-hc-color-bg-card",
           attributes: {
@@ -2171,11 +2734,13 @@ module.exports = {
           path: ["semanticHc", "color", "bg", "card"],
         },
         raised: {
+          key: "{semanticHc.color.bg.raised}",
           value: "#EEF2F5",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.background.raised.value}",
+            value: "{color.background.raised}",
+            key: "{semanticHc.color.bg.raised}",
           },
           name: "semantic-hc-color-bg-raised",
           attributes: {
@@ -2187,11 +2752,13 @@ module.exports = {
           path: ["semanticHc", "color", "bg", "raised"],
         },
         overlay: {
+          key: "{semanticHc.color.bg.overlay}",
           value: "rgba(0, 0, 0, 0.65)",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
             value: "rgba(0, 0, 0, 0.65)",
+            key: "{semanticHc.color.bg.overlay}",
           },
           name: "semantic-hc-color-bg-overlay",
           attributes: {
@@ -2205,11 +2772,13 @@ module.exports = {
       },
       text: {
         body: {
+          key: "{semanticHc.color.text.body}",
           value: "#1F2937",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.text.default.value}",
+            value: "{color.text.default}",
+            key: "{semanticHc.color.text.body}",
           },
           name: "semantic-hc-color-text-body",
           attributes: {
@@ -2221,11 +2790,13 @@ module.exports = {
           path: ["semanticHc", "color", "text", "body"],
         },
         muted: {
+          key: "{semanticHc.color.text.muted}",
           value: "#475569",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.text.muted.value}",
+            value: "{color.text.muted}",
+            key: "{semanticHc.color.text.muted}",
           },
           name: "semantic-hc-color-text-muted",
           attributes: {
@@ -2237,11 +2808,13 @@ module.exports = {
           path: ["semanticHc", "color", "text", "muted"],
         },
         inverse: {
+          key: "{semanticHc.color.text.inverse}",
           value: "#FFFFFF",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.text.inverse.value}",
+            value: "{color.text.inverse}",
+            key: "{semanticHc.color.text.inverse}",
           },
           name: "semantic-hc-color-text-inverse",
           attributes: {
@@ -2253,11 +2826,13 @@ module.exports = {
           path: ["semanticHc", "color", "text", "inverse"],
         },
         link: {
+          key: "{semanticHc.color.text.link}",
           value: "#FF6B6B",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.brand.accent.value}",
+            value: "{color.brand.accent}",
+            key: "{semanticHc.color.text.link}",
           },
           name: "semantic-hc-color-text-link",
           attributes: {
@@ -2271,11 +2846,13 @@ module.exports = {
       },
       border: {
         subtle: {
+          key: "{semanticHc.color.border.subtle}",
           value: "#E1E8EE",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.border.subtle.value}",
+            value: "{color.border.subtle}",
+            key: "{semanticHc.color.border.subtle}",
           },
           name: "semantic-hc-color-border-subtle",
           attributes: {
@@ -2287,11 +2864,13 @@ module.exports = {
           path: ["semanticHc", "color", "border", "subtle"],
         },
         strong: {
+          key: "{semanticHc.color.border.strong}",
           value: "#64748B",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.border.strong.value}",
+            value: "{color.border.strong}",
+            key: "{semanticHc.color.border.strong}",
           },
           name: "semantic-hc-color-border-strong",
           attributes: {
@@ -2303,11 +2882,13 @@ module.exports = {
           path: ["semanticHc", "color", "border", "strong"],
         },
         focus: {
+          key: "{semanticHc.color.border.focus}",
           value: "#FF6B6B",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.brand.accent.value}",
+            value: "{color.brand.accent}",
+            key: "{semanticHc.color.border.focus}",
           },
           name: "semantic-hc-color-border-focus",
           attributes: {
@@ -2321,11 +2902,13 @@ module.exports = {
       },
       status: {
         success: {
+          key: "{semanticHc.color.status.success}",
           value: "#2BB673",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.feedback.success.value}",
+            value: "{color.feedback.success}",
+            key: "{semanticHc.color.status.success}",
           },
           name: "semantic-hc-color-status-success",
           attributes: {
@@ -2337,11 +2920,13 @@ module.exports = {
           path: ["semanticHc", "color", "status", "success"],
         },
         warning: {
+          key: "{semanticHc.color.status.warning}",
           value: "#F4B400",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.feedback.warning.value}",
+            value: "{color.feedback.warning}",
+            key: "{semanticHc.color.status.warning}",
           },
           name: "semantic-hc-color-status-warning",
           attributes: {
@@ -2353,11 +2938,13 @@ module.exports = {
           path: ["semanticHc", "color", "status", "warning"],
         },
         error: {
+          key: "{semanticHc.color.status.error}",
           value: "#FF6B6B",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.feedback.error.value}",
+            value: "{color.feedback.error}",
+            key: "{semanticHc.color.status.error}",
           },
           name: "semantic-hc-color-status-error",
           attributes: {
@@ -2369,11 +2956,13 @@ module.exports = {
           path: ["semanticHc", "color", "status", "error"],
         },
         info: {
+          key: "{semanticHc.color.status.info}",
           value: "#4A90E2",
           filePath: "tokens/tokens.json",
           isSource: true,
           original: {
-            value: "{color.feedback.info.value}",
+            value: "{color.feedback.info}",
+            key: "{semanticHc.color.status.info}",
           },
           name: "semantic-hc-color-status-info",
           attributes: {
@@ -2388,11 +2977,13 @@ module.exports = {
       button: {
         primary: {
           bg: {
+            key: "{semanticHc.color.button.primary.bg}",
             value: "#1A4E5F",
             filePath: "tokens/tokens.json",
             isSource: true,
             original: {
-              value: "{color.brand.primary.value}",
+              value: "{color.brand.primary}",
+              key: "{semanticHc.color.button.primary.bg}",
             },
             name: "semantic-hc-color-button-primary-bg",
             attributes: {
@@ -2405,11 +2996,13 @@ module.exports = {
             path: ["semanticHc", "color", "button", "primary", "bg"],
           },
           fg: {
+            key: "{semanticHc.color.button.primary.fg}",
             value: "#F2FAFA",
             filePath: "tokens/tokens.json",
             isSource: true,
             original: {
-              value: "{color.brand.onPrimary.value}",
+              value: "{color.brand.onPrimary}",
+              key: "{semanticHc.color.button.primary.fg}",
             },
             name: "semantic-hc-color-button-primary-fg",
             attributes: {
@@ -2424,11 +3017,13 @@ module.exports = {
         },
         secondary: {
           bg: {
+            key: "{semanticHc.color.button.secondary.bg}",
             value: "#A8DADC",
             filePath: "tokens/tokens.json",
             isSource: true,
             original: {
-              value: "{color.brand.muted.value}",
+              value: "{color.brand.muted}",
+              key: "{semanticHc.color.button.secondary.bg}",
             },
             name: "semantic-hc-color-button-secondary-bg",
             attributes: {
@@ -2441,11 +3036,13 @@ module.exports = {
             path: ["semanticHc", "color", "button", "secondary", "bg"],
           },
           fg: {
+            key: "{semanticHc.color.button.secondary.fg}",
             value: "#1A4E5F",
             filePath: "tokens/tokens.json",
             isSource: true,
             original: {
-              value: "{color.brand.primary.value}",
+              value: "{color.brand.primary}",
+              key: "{semanticHc.color.button.secondary.fg}",
             },
             name: "semantic-hc-color-button-secondary-fg",
             attributes: {
@@ -2464,11 +3061,13 @@ module.exports = {
   email: {
     light: {
       background: {
-        value: "#FFFFFF",
+        key: "{email.light.background}",
+        value: "#F8F9FA",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.background.canvas.value}",
+          value: "{color.light.surface}",
+          key: "{email.light.background}",
         },
         name: "email-light-background",
         attributes: {
@@ -2479,11 +3078,13 @@ module.exports = {
         path: ["email", "light", "background"],
       },
       surface: {
-        value: "#F8F9FA",
+        key: "{email.light.surface}",
+        value: "#FFFFFF",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.background.surface.value}",
+          value: "{color.neutral.paper}",
+          key: "{email.light.surface}",
         },
         name: "email-light-surface",
         attributes: {
@@ -2494,11 +3095,13 @@ module.exports = {
         path: ["email", "light", "surface"],
       },
       text: {
+        key: "{email.light.text}",
         value: "#1F2937",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.text.default.value}",
+          value: "{color.light.onSurface}",
+          key: "{email.light.text}",
         },
         name: "email-light-text",
         attributes: {
@@ -2509,11 +3112,13 @@ module.exports = {
         path: ["email", "light", "text"],
       },
       muted: {
+        key: "{email.light.muted}",
         value: "#E1E8EE",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.border.subtle.value}",
+          value: "{color.light.outline}",
+          key: "{email.light.muted}",
         },
         name: "email-light-muted",
         attributes: {
@@ -2524,11 +3129,13 @@ module.exports = {
         path: ["email", "light", "muted"],
       },
       link: {
-        value: "#1A4E5F",
+        key: "{email.light.link}",
+        value: "#4A90E2",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.text.link.value}",
+          value: "{color.status.info}",
+          key: "{email.light.link}",
         },
         name: "email-light-link",
         attributes: {
@@ -2539,11 +3146,13 @@ module.exports = {
         path: ["email", "light", "link"],
       },
       border: {
+        key: "{email.light.border}",
         value: "#E1E8EE",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.border.subtle.value}",
+          value: "{color.light.outline}",
+          key: "{email.light.border}",
         },
         name: "email-light-border",
         attributes: {
@@ -2554,11 +3163,13 @@ module.exports = {
         path: ["email", "light", "border"],
       },
       success: {
+        key: "{email.light.success}",
         value: "#2BB673",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.feedback.success.value}",
+          value: "{color.status.success}",
+          key: "{email.light.success}",
         },
         name: "email-light-success",
         attributes: {
@@ -2569,11 +3180,13 @@ module.exports = {
         path: ["email", "light", "success"],
       },
       warning: {
+        key: "{email.light.warning}",
         value: "#F4B400",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.feedback.warning.value}",
+          value: "{color.status.warning}",
+          key: "{email.light.warning}",
         },
         name: "email-light-warning",
         attributes: {
@@ -2583,27 +3196,31 @@ module.exports = {
         },
         path: ["email", "light", "warning"],
       },
-      error: {
+      danger: {
+        key: "{email.light.danger}",
         value: "#FF6B6B",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.feedback.error.value}",
+          value: "{color.status.danger}",
+          key: "{email.light.danger}",
         },
-        name: "email-light-error",
+        name: "email-light-danger",
         attributes: {
           category: "email",
           type: "light",
-          item: "error",
+          item: "danger",
         },
-        path: ["email", "light", "error"],
+        path: ["email", "light", "danger"],
       },
       badge: {
-        value: "#1A4E5F",
+        key: "{email.light.badge}",
+        value: "#147A8C",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.brand.primary.value}",
+          value: "{color.brand.teal}",
+          key: "{email.light.badge}",
         },
         name: "email-light-badge",
         attributes: {
@@ -2614,11 +3231,13 @@ module.exports = {
         path: ["email", "light", "badge"],
       },
       badgeText: {
+        key: "{email.light.badgeText}",
         value: "#F2FAFA",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.brand.onPrimary.value}",
+          value: "{color.light.onPrimary}",
+          key: "{email.light.badgeText}",
         },
         name: "email-light-badge-text",
         attributes: {
@@ -2631,11 +3250,13 @@ module.exports = {
     },
     dark: {
       background: {
-        value: "#0F1822",
+        key: "{email.dark.background}",
+        value: "#15202B",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.background.canvasDark.value}",
+          value: "{color.dark.surface}",
+          key: "{email.dark.background}",
         },
         name: "email-dark-background",
         attributes: {
@@ -2646,11 +3267,13 @@ module.exports = {
         path: ["email", "dark", "background"],
       },
       surface: {
-        value: "#15202B",
+        key: "{email.dark.surface}",
+        value: "#1D2B37",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.background.surfaceDark.value}",
+          value: "{color.dark.inverseSurface}",
+          key: "{email.dark.surface}",
         },
         name: "email-dark-surface",
         attributes: {
@@ -2661,11 +3284,13 @@ module.exports = {
         path: ["email", "dark", "surface"],
       },
       text: {
+        key: "{email.dark.text}",
         value: "#FFFFFF",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.text.inverse.value}",
+          value: "{color.dark.onSurface}",
+          key: "{email.dark.text}",
         },
         name: "email-dark-text",
         attributes: {
@@ -2676,11 +3301,13 @@ module.exports = {
         path: ["email", "dark", "text"],
       },
       muted: {
-        value: "#3F4C5C",
+        key: "{email.dark.muted}",
+        value: "#64748B",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "#3F4C5C",
+          value: "{color.dark.outline}",
+          key: "{email.dark.muted}",
         },
         name: "email-dark-muted",
         attributes: {
@@ -2691,11 +3318,13 @@ module.exports = {
         path: ["email", "dark", "muted"],
       },
       link: {
+        key: "{email.dark.link}",
         value: "#A8DADC",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.brand.muted.value}",
+          value: "{color.dark.primary}",
+          key: "{email.dark.link}",
         },
         name: "email-dark-link",
         attributes: {
@@ -2706,11 +3335,13 @@ module.exports = {
         path: ["email", "dark", "link"],
       },
       border: {
-        value: "#3F4C5C",
+        key: "{email.dark.border}",
+        value: "#64748B",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "#3F4C5C",
+          value: "{color.dark.outline}",
+          key: "{email.dark.border}",
         },
         name: "email-dark-border",
         attributes: {
@@ -2721,11 +3352,13 @@ module.exports = {
         path: ["email", "dark", "border"],
       },
       success: {
+        key: "{email.dark.success}",
         value: "#2BB673",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.feedback.success.value}",
+          value: "{color.status.success}",
+          key: "{email.dark.success}",
         },
         name: "email-dark-success",
         attributes: {
@@ -2736,11 +3369,13 @@ module.exports = {
         path: ["email", "dark", "success"],
       },
       warning: {
+        key: "{email.dark.warning}",
         value: "#F4B400",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.feedback.warning.value}",
+          value: "{color.status.warning}",
+          key: "{email.dark.warning}",
         },
         name: "email-dark-warning",
         attributes: {
@@ -2750,27 +3385,31 @@ module.exports = {
         },
         path: ["email", "dark", "warning"],
       },
-      error: {
+      danger: {
+        key: "{email.dark.danger}",
         value: "#FF6B6B",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.feedback.error.value}",
+          value: "{color.status.danger}",
+          key: "{email.dark.danger}",
         },
-        name: "email-dark-error",
+        name: "email-dark-danger",
         attributes: {
           category: "email",
           type: "dark",
-          item: "error",
+          item: "danger",
         },
-        path: ["email", "dark", "error"],
+        path: ["email", "dark", "danger"],
       },
       badge: {
+        key: "{email.dark.badge}",
         value: "#A8DADC",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.brand.muted.value}",
+          value: "{color.dark.primary}",
+          key: "{email.dark.badge}",
         },
         name: "email-dark-badge",
         attributes: {
@@ -2781,11 +3420,13 @@ module.exports = {
         path: ["email", "dark", "badge"],
       },
       badgeText: {
+        key: "{email.dark.badgeText}",
         value: "#1A4E5F",
         filePath: "tokens/tokens.json",
         isSource: true,
         original: {
-          value: "{color.brand.primary.value}",
+          value: "{color.dark.onPrimary}",
+          key: "{email.dark.badgeText}",
         },
         name: "email-dark-badge-text",
         attributes: {

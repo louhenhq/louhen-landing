@@ -1,8 +1,9 @@
 'use client';
 import * as React from 'react';
+import { useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
-import { create } from 'zustand';
+import { createStore, type Mutate, type StateCreator, type StoreApi } from 'zustand/vanilla';
 import { persist } from 'zustand/middleware';
 import { DEFAULT_LOCALE } from '@/lib/i18n/locales';
 
@@ -20,26 +21,51 @@ type OnboardState = {
   next: () => void;
   prev: () => void;
 };
+type OnboardStoreCreator = StateCreator<
+  OnboardState,
+  [['zustand/persist', OnboardState]]
+>;
 
-export const useOnboard = create<OnboardState>()(
-  persist(
-    (
-      set: (partial: Partial<OnboardState>) => void,
-      get: () => OnboardState
-    ): OnboardState => ({
-      stepIndex: 0,
-      account: {},
-      profile: {},
-      sizing: {},
-      xp: 0,
-      set(key, value) { set({ [key]: value } as Partial<OnboardState>); },
-      goto(s) { set({ stepIndex: Math.max(0, STEPS.indexOf(s)) }); },
-      next() { set({ stepIndex: Math.min(get().stepIndex + 1, STEPS.length - 1) }); },
-      prev() { set({ stepIndex: Math.max(get().stepIndex - 1, 0) }); },
-    }),
-    { name: 'louhen-onboarding' }
-  )
-);
+const createOnboardStore: OnboardStoreCreator = (set, get) => ({
+  stepIndex: 0,
+  account: {},
+  profile: {},
+  sizing: {},
+  xp: 0,
+  set(key, value) { set((prev) => ({ ...prev, [key]: value })); },
+  goto(s) { set({ stepIndex: Math.max(0, STEPS.indexOf(s)) }); },
+  next() { set({ stepIndex: Math.min(get().stepIndex + 1, STEPS.length - 1) }); },
+  prev() { set({ stepIndex: Math.max(get().stepIndex - 1, 0) }); },
+});
+
+type OnboardStore = Mutate<
+  StoreApi<OnboardState>,
+  [['zustand/persist', OnboardState]]
+>;
+
+const onboardStore = createStore(
+  persist(createOnboardStore, { name: 'louhen-onboarding' })
+) as OnboardStore;
+
+const identity = (state: OnboardState) => state;
+
+function useOnboardBase<T = OnboardState>(
+  selector?: (state: OnboardState) => T
+) {
+  const select = (selector ?? identity) as (state: OnboardState) => T;
+  return useSyncExternalStore(
+    onboardStore.subscribe,
+    () => select(onboardStore.getState()),
+    () => select(onboardStore.getInitialState())
+  );
+}
+
+type UseOnboard = typeof useOnboardBase & typeof onboardStore;
+
+export const useOnboard: UseOnboard = Object.assign(
+  useOnboardBase as typeof useOnboardBase,
+  onboardStore
+) as UseOnboard;
 
 // ---------- Validation helpers ----------
 function isEmail(s: string) {

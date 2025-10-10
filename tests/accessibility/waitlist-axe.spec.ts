@@ -1,6 +1,6 @@
 import { createRequire } from 'node:module';
 import { test, expect } from '@playwright/test';
-import axe from 'axe-core';
+import type axe from 'axe-core';
 
 const require = createRequire(import.meta.url);
 

@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.strict.json",
+  "include": [
+    "components/features/method/**/*",
+    "components/blocks/Method*.tsx",
+    "lib/shared/method/**/*",
+    "lib/shared/seo/method-metadata.ts",
+    "lib/shared/routing/method-path.ts"
+  ]
+}

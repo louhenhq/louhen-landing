@@ -1,23 +1,20 @@
 import './globals.css'
 import './styles/tokens.css'
 import type { Metadata, Viewport } from 'next'
-import { cookies, headers } from 'next/headers'
-import { fraunces, inter } from './(site)/fonts'
+import { headers } from 'next/headers'
 import ThemeInit from '@/components/ThemeInit'
 import { ConsentProvider } from '@/components/ConsentProvider'
+import AnalyticsInit from '@/components/AnalyticsInit'
 import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/SeoJsonLd'
 import { SITE_NAME } from '@/constants/site'
-import { getServerConsent } from '@/lib/consent/state'
+import { parseConsentFromCookie } from '@/lib/shared/consent/api'
 import { NonceProvider } from '@/lib/csp/nonce-context'
-import { buildAlternateLanguageMap } from '@/lib/i18n/metadata'
+import { CONTRAST_COOKIE_NAME, THEME_COOKIE_NAME } from '@/lib/theme/constants'
 import tokens from '@louhen/design-tokens/build/web/tokens.json' assert { type: 'json' }
-import {
-  CONTRAST_COOKIE,
-  ContrastPreference,
-  THEME_COOKIE,
-  ThemePreference,
-} from '@/lib/theme/constants'
+import { THEME_INIT_SNIPPET } from '@/lib/theme/init-snippet'
 import { DEFAULT_LOCALE } from '@/lib/i18n/locales'
+import { buildAlternateLanguageMap } from '@/lib/i18n/metadata'
+import { getOgImageEntry } from '@lib/shared/og/builder'
 
 const tokenValues = tokens as Record<string, unknown> & {
   color?: {
@@ -50,13 +47,25 @@ const baseUrl = rawBaseUrl.replace(/\/$/, '')
 const metadataBaseUrl = `${baseUrl}/`
 const defaultDescription =
   'Join the Louhen waitlist and get smarter sizing, curated looks, and fit feedback that improves with every try.'
+const defaultTitle = 'Louhen — Personal style. Effortless fit.'
+const ogImage = getOgImageEntry({
+  locale: DEFAULT_LOCALE.value,
+  key: 'home',
+  title: defaultTitle,
+  description: defaultDescription,
+})
+const themeScript = THEME_INIT_SNIPPET
 
-const allowIndexOverride = process.env.LH_ALLOW_INDEX === 'true'
+function getCookieValue(header: string | null | undefined, name: string): string | null {
+  if (!header) return null;
+  const match = header.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
+}
 
 export const metadata: Metadata = {
   metadataBase: new URL(metadataBaseUrl),
   title: {
-    default: 'Louhen — Personal style. Effortless fit.',
+    default: defaultTitle,
     template: '%s — Louhen',
   },
   description: defaultDescription,
@@ -74,26 +83,19 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: 'website',
-    title: 'Louhen — Personal style. Effortless fit.',
+    title: defaultTitle,
     description: defaultDescription,
     url: '/',
     siteName: SITE_NAME,
-    images: [
-      {
-        url: '/opengraph-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'Louhen — Personal style. Effortless fit.',
-      },
-    ],
+    images: [ogImage],
   },
   twitter: {
     card: 'summary_large_image',
     site: '@louhenhq',
     creator: '@louhenhq',
-    title: 'Louhen — Personal style. Effortless fit.',
+    title: defaultTitle,
     description: defaultDescription,
-    images: ['/opengraph-image.png'],
+    images: [ogImage.url],
   },
 }
 
@@ -106,79 +108,15 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const consentHeaders = await headers();
-  const consent = getServerConsent(consentHeaders);
   const nonce = consentHeaders.get('x-csp-nonce') ?? undefined;
-  const cookieStore = await cookies();
-
-  const rawThemePref = (cookieStore.get(THEME_COOKIE)?.value as ThemePreference | undefined) ?? 'system';
-  const themePref: ThemePreference =
-    rawThemePref === 'light' || rawThemePref === 'dark' ? rawThemePref : 'system';
-
-  const rawContrastPref = (cookieStore.get(CONTRAST_COOKIE)?.value as ContrastPreference | undefined) ?? 'system';
-  const contrastPref: ContrastPreference =
-    rawContrastPref === 'normal' || rawContrastPref === 'more' ? rawContrastPref : 'system';
-
-  const clientThemeHint = consentHeaders.get('sec-ch-prefers-color-scheme')?.toLowerCase();
-  const systemTheme = clientThemeHint === 'dark' ? 'dark' : clientThemeHint === 'light' ? 'light' : undefined;
-
-  const clientContrastHint = consentHeaders.get('sec-ch-prefers-contrast')?.toLowerCase();
-  const forcedColors = consentHeaders.get('sec-ch-forced-colors')?.toLowerCase();
-  const systemContrast =
-    forcedColors === 'active' || clientContrastHint === 'more' ? 'more' : clientContrastHint === 'less' ? 'normal' : undefined;
-
-  const initialThemeAttr = themePref === 'system' ? systemTheme : themePref;
-  const initialContrastAttr = contrastPref === 'system' ? systemContrast : contrastPref;
-  const initialColorScheme = initialThemeAttr === 'dark' ? 'dark' : 'light';
-
-  const themeScript = `(() => {
-    try {
-      const doc = document.documentElement;
-      const pref = ${JSON.stringify(themePref)};
-      const contrastPref = ${JSON.stringify(contrastPref)};
-      const darkQuery = ${JSON.stringify('(prefers-color-scheme: dark)')};
-      const contrastQuery = ${JSON.stringify('(prefers-contrast: more)')};
-      const forcedQuery = ${JSON.stringify('(forced-colors: active)')};
-      const prefersDark = window.matchMedia && window.matchMedia(darkQuery).matches;
-      const prefersHighContrast =
-        (window.matchMedia && window.matchMedia(forcedQuery).matches) ||
-        (window.matchMedia && window.matchMedia(contrastQuery).matches);
-
-      doc.setAttribute('data-theme-mode', pref);
-      doc.setAttribute('data-contrast-mode', contrastPref);
-
-      if (pref === 'dark') {
-        doc.setAttribute('data-theme', 'dark');
-      } else if (pref === 'light') {
-        doc.setAttribute('data-theme', 'light');
-      } else if (pref === 'system') {
-        if (prefersDark) {
-          doc.setAttribute('data-theme', 'dark');
-        } else {
-          doc.removeAttribute('data-theme');
-        }
-      }
-
-      if (contrastPref === 'more') {
-        doc.setAttribute('data-contrast', 'more');
-      } else if (contrastPref === 'normal') {
-        doc.setAttribute('data-contrast', 'normal');
-      } else if (contrastPref === 'system') {
-        if (prefersHighContrast) {
-          doc.setAttribute('data-contrast', 'more');
-        } else {
-          doc.removeAttribute('data-contrast');
-        }
-      }
-
-      const appliedTheme = doc.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
-      doc.style.colorScheme = appliedTheme;
-    } catch (e) {
-      // no-op
-    }
-  })();`;
-
-  const shouldNoIndex =
-    !allowIndexOverride && typeof process.env.VERCEL_ENV === 'string' && process.env.VERCEL_ENV !== 'production'
+  const cookieHeader = consentHeaders.get('cookie');
+  const consent = parseConsentFromCookie(cookieHeader);
+  const cookieTheme = getCookieValue(cookieHeader, THEME_COOKIE_NAME);
+  const cookieContrast = getCookieValue(cookieHeader, CONTRAST_COOKIE_NAME);
+  const initialThemeAttr = cookieTheme === 'light' || cookieTheme === 'dark' ? cookieTheme : undefined;
+  const initialContrastAttr = cookieContrast === 'more' ? 'more' : undefined;
+  const shouldNoIndex = typeof process.env.VERCEL_ENV === 'string' && process.env.VERCEL_ENV !== 'production'
+  const allowIndexOverride = process.env.LH_ALLOW_INDEX === 'true'
   const sameAsProfiles = [
     'https://www.linkedin.com/company/louhen',
     'https://www.instagram.com/louhen',
@@ -186,15 +124,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const searchActionUrl = `${baseUrl}/search?q={search_term_string}`
 
   return (
-    <html
-      lang={DEFAULT_LOCALE.language}
-      data-theme-mode={themePref}
-      data-theme={initialThemeAttr ?? undefined}
-      data-contrast-mode={contrastPref}
-      data-contrast={initialContrastAttr ?? undefined}
-      className={`${fraunces.variable} ${inter.variable}`}
-      style={{ colorScheme: initialColorScheme }}
-    >
+    <html lang="en" data-theme={initialThemeAttr} data-contrast={initialContrastAttr ?? undefined}>
       <head>
         {/* iOS PWA / status bar styling */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -226,9 +156,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body className="min-h-screen antialiased font-sans">
         <NonceProvider nonce={nonce}>
-          <ConsentProvider initialConsent={consent}>
+          <ConsentProvider initialState={consent}>
             {/* Apply theme/contrast on first paint + react to system changes */}
             <ThemeInit />
+            <AnalyticsInit endpoint="/api/track" />
             {children}
           </ConsentProvider>
         </NonceProvider>

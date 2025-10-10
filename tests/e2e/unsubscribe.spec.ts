@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
-import { expect, test } from '@playwright/test';
+import { expect, test } from '@tests/fixtures/playwright';
+import type { APIRequestContext } from '@playwright/test';
 
 import { buildUnsubUrl } from '@/lib/email/tokens';
 
@@ -10,7 +11,7 @@ function uniqueEmail() {
   return `playwright-unsubscribe-${randomUUID()}@example.com`;
 }
 
-async function expectSuppressed(request: import('@playwright/test').APIRequestContext, email: string) {
+async function expectSuppressed(request: APIRequestContext, email: string) {
   await expect
     .poll(async () => {
       const response = await request.get('/api/unsubscribe', {
@@ -31,7 +32,7 @@ test.describe('Unsubscribe flow', () => {
     const url = buildUnsubUrl(email, 'all');
 
     await page.goto(url);
-    await expect(page.getByText(/stop emailing/i)).toBeVisible();
+    await expect(page.getByTestId('unsubscribe-token-success')).toBeVisible();
 
     await expectSuppressed(request, email);
   });
@@ -47,7 +48,7 @@ test.describe('Unsubscribe flow', () => {
 
     await expectSuppressed(request, email);
 
-    await page.goto('/en-de/unsubscribe?status=manual-success');
-    await expect(page.getByText(/Thanks! Your unsubscribe request/i)).toBeVisible();
+    await page.goto('/unsubscribe?status=manual-success');
+    await expect(page.getByTestId('unsubscribe-manual-success')).toBeVisible();
   });
 });

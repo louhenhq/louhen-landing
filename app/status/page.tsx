@@ -38,10 +38,18 @@ function resolveStatusEndpoint(headerStore: HeaderStore): string {
   }
 
   const host = headerStore.get('x-forwarded-host') || headerStore.get('host');
-  const proto = headerStore.get('x-forwarded-proto') || 'https';
   if (!host) {
     throw new Error('Unable to resolve host for status fetch');
   }
+
+  const forwardedProto = headerStore.get('x-forwarded-proto');
+  const normalizedHost = host.toLowerCase();
+  const isLoopbackHost =
+    normalizedHost.startsWith('127.0.0.1') ||
+    normalizedHost.startsWith('localhost') ||
+    normalizedHost.startsWith('[::1]');
+  const proto = forwardedProto ?? (isLoopbackHost ? 'http' : 'https');
+
   return `${proto}://${host}/api/status`;
 }
 
@@ -141,12 +149,15 @@ export default async function StatusPage() {
       </header>
 
       <section className="grid gap-4 md:grid-cols-2">
-        <article className="rounded-lg border border-border bg-bg-card p-4 shadow-sm">
-          <h2 className="text-h3 text-text">Security signals</h2>
-          <dl className="mt-3 space-y-2 text-body-sm text-text-muted">
-            <div className="flex items-center justify-between">
+        <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+          <h2 className="text-sm font-semibold text-slate-700">Security signals</h2>
+          <dl className="mt-3 space-y-2 text-sm text-slate-600">
+            <div className="flex items-center justify-between" data-testid="status-csp-nonce">
               <dt>CSP nonce</dt>
-              <dd className={snapshot.noncePresent ? 'text-feedback-success' : 'text-feedback-error'}>
+              <dd
+                className={snapshot.noncePresent ? 'text-emerald-600' : 'text-rose-600'}
+                data-testid="status-csp-nonce-value"
+              >
                 {snapshot.noncePresent ? 'present' : 'missing'}
               </dd>
             </div>
@@ -165,18 +176,23 @@ export default async function StatusPage() {
           </dl>
         </article>
 
-        <article className="rounded-lg border border-border bg-bg-card p-4 shadow-sm">
-          <h2 className="text-h3 text-text">Email</h2>
-          <dl className="mt-3 space-y-2 text-body-sm text-text-muted">
-            <div className="flex items-center justify-between">
+        <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+          <h2 className="text-sm font-semibold text-slate-700">Email</h2>
+          <dl className="mt-3 space-y-2 text-sm text-slate-600">
+            <div className="flex items-center justify-between" data-testid="status-email-transport">
               <dt>Live transport</dt>
-              <dd className={snapshot.emailTransport ? 'text-feedback-success' : 'text-feedback-warning'}>
+              <dd
+                className={snapshot.emailTransport ? 'text-emerald-600' : 'text-amber-600'}
+                data-testid="status-email-transport-value"
+              >
                 {formatBoolean(snapshot.emailTransport)}
               </dd>
             </div>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between" data-testid="status-transport-mode">
               <dt>Transport mode</dt>
-              <dd className="font-mono text-body-sm uppercase text-text">{snapshot.emailTransportMode}</dd>
+              <dd className="font-mono text-xs uppercase text-slate-800" data-testid="status-transport-mode-value">
+                {snapshot.emailTransportMode}
+              </dd>
             </div>
             <div className="flex items-center justify-between">
               <dt>Suppressions (last {snapshot.suppressionsSampleLimit})</dt>
@@ -186,12 +202,14 @@ export default async function StatusPage() {
         </article>
       </section>
 
-      <section className="rounded-lg border border-border bg-bg-card p-4 shadow-sm">
-        <h2 className="text-h3 text-text">Environment</h2>
-        <dl className="mt-3 grid grid-cols-1 gap-3 text-body-sm text-text-muted md:grid-cols-3">
-          <div>
-            <dt className="text-meta uppercase tracking-[0.2em] text-text-muted">Vercel env</dt>
-            <dd className="font-medium text-text">{snapshot.env.vercelEnv ?? '—'}</dd>
+      <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+        <h2 className="text-sm font-semibold text-slate-700">Environment</h2>
+        <dl className="mt-3 grid grid-cols-1 gap-3 text-sm text-slate-600 md:grid-cols-3">
+          <div data-testid="status-env-vercel">
+            <dt className="text-xs uppercase text-slate-500">Vercel env</dt>
+            <dd className="font-medium text-slate-900" data-testid="status-env-vercel-value">
+              {snapshot.env.vercelEnv ?? '—'}
+            </dd>
           </div>
           <div>
             <dt className="text-meta uppercase tracking-[0.2em] text-text-muted">Commit SHA</dt>

@@ -46,12 +46,11 @@ export const badges = {
 };
 
 export const surfaces = {
-  subtle: 'bg-[var(--semantic-color-bg-surface-subtle, var(--color-light-surface, var(--semantic-color-bg-card)))]',
+  subtle: 'bg-bg-subtle',
 };
 
 export const shadows = {
   soft: 'shadow-card',
-  elevated: 'shadow-elevated',
 };
 
 export const focusRing = 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus focus-visible:shadow-[var(--shadow-focus)]';

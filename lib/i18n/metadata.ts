@@ -1,20 +1,8 @@
+import { getSiteOrigin } from '@/lib/shared/url/get-site-origin';
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES, buildPathForLocale, buildUrlForLocale, type AppLocale } from './locales';
 
-const FALLBACK_SITE_URL = 'https://louhen-landing.vercel.app';
-
-function resolveRawSiteUrl() {
-  const candidates = [
-    process.env.APP_BASE_URL,
-    process.env.NEXT_PUBLIC_SITE_URL,
-    FALLBACK_SITE_URL,
-  ];
-
-  const resolved = candidates.find((value) => typeof value === 'string' && value.trim().length);
-  return (resolved ?? FALLBACK_SITE_URL).trim();
-}
-
 export function resolveSiteBaseUrl(): string {
-  return resolveRawSiteUrl().replace(/\/$/, '');
+  return getSiteOrigin();
 }
 
 function ensureLeadingSlash(path: string): string {
@@ -30,7 +18,7 @@ export function buildCanonicalPath(locale: AppLocale, pathname: string): string 
 }
 
 export function buildCanonicalUrl(locale: AppLocale, pathname: string): string {
-  const baseUrl = resolveSiteBaseUrl();
+  const baseUrl = getSiteOrigin();
   return buildUrlForLocale(baseUrl, locale, pathname);
 }
 
@@ -48,7 +36,7 @@ export function buildAlternateLanguageMap(pathname: string): Record<string, stri
 }
 
 export function buildAlternateLanguageUrlMap(pathname: string): Record<string, string> {
-  const baseUrl = resolveSiteBaseUrl();
+  const baseUrl = getSiteOrigin();
   const normalizedPath = ensureLeadingSlash(pathname);
 
   const languages = SUPPORTED_LOCALES.reduce<Record<string, string>>((acc, descriptor) => {

@@ -1,0 +1,5 @@
+
+# Generated artifacts
+packages/design-tokens/build/
+public/tokens/
+.next/

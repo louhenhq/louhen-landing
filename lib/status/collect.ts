@@ -1,8 +1,8 @@
-import { parseConsentCookie } from '@/lib/consent/cookie';
 import { getEmailTransport } from '@/lib/email/transport';
 import { getDb } from '@/lib/firebaseAdmin';
 import { ensureWaitlistServerEnv } from '@/lib/env/guard';
 import { isTestMode } from '@/lib/testMode';
+import { parseConsentFromCookie, type ConsentState } from '@/lib/shared/consent/api';
 
 const startedAt = new Date();
 const SUPPRESSIONS_SAMPLE_LIMIT = 20;
@@ -53,9 +53,8 @@ async function countRecentSuppressions(): Promise<number | null> {
   }
 }
 
-function snapshotConsent(headers: Headers): ConsentSnapshot {
-  const consent = parseConsentCookie(headers);
-  if (!consent) {
+function mapConsentState(state: ConsentState): ConsentSnapshot {
+  if (state === 'unknown') {
     return {
       analytics: null,
       marketing: null,
@@ -64,10 +63,16 @@ function snapshotConsent(headers: Headers): ConsentSnapshot {
   }
 
   return {
-    analytics: Boolean(consent.analytics),
-    marketing: Boolean(consent.marketing),
-    timestamp: consent.timestamp,
+    analytics: state === 'granted',
+    marketing: false,
+    timestamp: null,
   };
+}
+
+function snapshotConsent(headers: Headers): ConsentSnapshot {
+  const cookieHeader = headers.get('cookie');
+  const state = parseConsentFromCookie(cookieHeader);
+  return mapConsentState(state);
 }
 
 function resolveEnvInfo(): EnvInfo {

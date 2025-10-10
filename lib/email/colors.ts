@@ -1,30 +1,30 @@
 // GENERATED FILE - DO NOT EDIT. Generated from design tokens.
 // Source: packages/design-tokens/tokens/tokens.json (email.* tokens)
 export const emailColors = {
-  background: '#FFFFFF',
-  badge: '#1A4E5F',
+  background: '#F8F9FA',
+  badge: '#147A8C',
   badgeText: '#F2FAFA',
   border: '#E1E8EE',
-  error: '#FF6B6B',
-  link: '#1A4E5F',
+  danger: '#FF6B6B',
+  link: '#4A90E2',
   muted: '#E1E8EE',
   success: '#2BB673',
-  surface: '#F8F9FA',
+  surface: '#FFFFFF',
   text: '#1F2937',
   warning: '#F4B400',
 } as const;
 export type EmailColorName = keyof typeof emailColors;
 
 export const emailColorsDark = {
-  background: '#0F1822',
+  background: '#15202B',
   badge: '#A8DADC',
   badgeText: '#1A4E5F',
-  border: '#3F4C5C',
-  error: '#FF6B6B',
+  border: '#64748B',
+  danger: '#FF6B6B',
   link: '#A8DADC',
-  muted: '#3F4C5C',
+  muted: '#64748B',
   success: '#2BB673',
-  surface: '#15202B',
+  surface: '#1D2B37',
   text: '#FFFFFF',
   warning: '#F4B400',
 } as const;

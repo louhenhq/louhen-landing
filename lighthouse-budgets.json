@@ -1,0 +1,107 @@
+[
+  {
+    "path": "/",
+    "resourceSizes": [
+      {
+        "resourceType": "total",
+        "budget": 1700
+      },
+      {
+        "resourceType": "script",
+        "budget": 350
+      },
+      {
+        "resourceType": "image",
+        "budget": 600
+      }
+    ],
+    "timings": [
+      {
+        "metric": "first-contentful-paint",
+        "budget": 1500
+      },
+      {
+        "metric": "largest-contentful-paint",
+        "budget": 3000
+      },
+      {
+        "metric": "total-blocking-time",
+        "budget": 200
+      },
+      {
+        "metric": "cumulative-layout-shift",
+        "budget": 0.02
+      }
+    ]
+  },
+  {
+    "path": "/waitlist",
+    "resourceSizes": [
+      {
+        "resourceType": "total",
+        "budget": 1800
+      },
+      {
+        "resourceType": "script",
+        "budget": 400
+      },
+      {
+        "resourceType": "image",
+        "budget": 700
+      }
+    ],
+    "timings": [
+      {
+        "metric": "first-contentful-paint",
+        "budget": 1500
+      },
+      {
+        "metric": "largest-contentful-paint",
+        "budget": 3200
+      },
+      {
+        "metric": "total-blocking-time",
+        "budget": 220
+      },
+      {
+        "metric": "cumulative-layout-shift",
+        "budget": 0.02
+      }
+    ]
+  },
+  {
+    "path": "/method",
+    "resourceSizes": [
+      {
+        "resourceType": "total",
+        "budget": 2000
+      },
+      {
+        "resourceType": "script",
+        "budget": 450
+      },
+      {
+        "resourceType": "image",
+        "budget": 900
+      }
+    ],
+    "timings": [
+      {
+        "metric": "first-contentful-paint",
+        "budget": 1700
+      },
+      {
+        "metric": "largest-contentful-paint",
+        "budget": 3300
+      },
+      {
+        "metric": "total-blocking-time",
+        "budget": 240
+      },
+      {
+        "metric": "cumulative-layout-shift",
+        "budget": 0.025
+      }
+    ]
+  }
+]

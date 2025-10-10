@@ -1,14 +1,14 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { verifyToken } from '@/lib/security/hcaptcha';
 
-const originalFetch = global.fetch;
+const globalWithMutableFetch = globalThis as typeof globalThis & { fetch?: typeof fetch };
+const originalFetch = globalWithMutableFetch.fetch;
 
 afterEach(() => {
   if (originalFetch) {
-    global.fetch = originalFetch;
+    globalWithMutableFetch.fetch = originalFetch;
   } else {
-    // @ts-expect-error - restore to undefined when not present
-    delete global.fetch;
+    Reflect.deleteProperty(globalWithMutableFetch, 'fetch');
   }
   vi.restoreAllMocks();
 });
@@ -20,8 +20,7 @@ describe('hCaptcha verification', () => {
       headers: { 'content-type': 'application/json' },
     });
     const fetchMock = vi.fn().mockResolvedValue(mockResponse);
-    // @ts-expect-error - assign mock fetch
-    global.fetch = fetchMock;
+    globalWithMutableFetch.fetch = fetchMock as unknown as typeof fetch;
 
     const result = await verifyToken({ token: 'token', secret: 'secret', remoteIp: '127.0.0.1' });
     expect(result.success).toBe(true);
@@ -35,8 +34,7 @@ describe('hCaptcha verification', () => {
       headers: { 'content-type': 'application/json' },
     });
     const fetchMock = vi.fn().mockResolvedValue(mockResponse);
-    // @ts-expect-error - assign mock fetch
-    global.fetch = fetchMock;
+    globalWithMutableFetch.fetch = fetchMock as unknown as typeof fetch;
 
     const result = await verifyToken({ token: 'token', secret: 'secret' });
     expect(result.success).toBe(false);
@@ -46,8 +44,7 @@ describe('hCaptcha verification', () => {
   it('returns failure on non-200 response', async () => {
     const mockResponse = new Response('error', { status: 500 });
     const fetchMock = vi.fn().mockResolvedValue(mockResponse);
-    // @ts-expect-error - assign mock fetch
-    global.fetch = fetchMock;
+    globalWithMutableFetch.fetch = fetchMock as unknown as typeof fetch;
 
     const result = await verifyToken({ token: 'token', secret: 'secret' });
     expect(result.success).toBe(false);
@@ -56,8 +53,7 @@ describe('hCaptcha verification', () => {
 
   it('returns failure on network error', async () => {
     const fetchMock = vi.fn().mockRejectedValue(new Error('network down'));
-    // @ts-expect-error - assign mock fetch
-    global.fetch = fetchMock;
+    globalWithMutableFetch.fetch = fetchMock as unknown as typeof fetch;
 
     const result = await verifyToken({ token: 'token', secret: 'secret' });
     expect(result.success).toBe(false);

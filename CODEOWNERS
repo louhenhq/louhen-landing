@@ -1,0 +1,18 @@
+# Default reviewers
+* @louhen/engineering @louhen/qa
+
+# End-to-end tests
+tests/e2e/** @louhen/e2e-team @louhen/engineering
+
+# Accessibility tests
+tests/axe/** @louhen/accessibility @louhen/engineering
+
+# Performance & SEO tooling
+lighthouserc.cjs @louhen/performance @louhen/seo
+scripts/run-lighthouse.mjs @louhen/performance @louhen/seo
+
+# CI workflows
+.github/workflows/** @louhen/ci @louhen/engineering
+
+# Documentation / runbooks
+CONTEXT/** @louhen/docs @louhen/engineering

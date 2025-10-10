@@ -1,31 +1,23 @@
-import Header from '@/app/(site)/components/Header';
-import Footer from '@/app/(site)/components/Footer';
-import { layout } from '@/app/(site)/_lib/ui';
-import { BreadcrumbJsonLd, TechArticleJsonLd } from '@/components/SeoJsonLd';
+import type { Metadata } from 'next';
+import { Footer } from '@components/features/footer';
+import { Header } from '@components/features/header-nav';
+import { layout } from '@app/(site)/_lib/ui';
+import { BreadcrumbJsonLd, TechArticleJsonLd } from '@components/SeoJsonLd';
+import MethodHero from '@components/features/method/MethodHero';
+import MethodCta from '@components/features/method/MethodCta';
+import MethodTrustLayer from '@components/features/method/MethodTrustLayer';
+import MethodHowItWorks from '@components/blocks/MethodHowItWorks';
+import MethodPillars from '@components/blocks/MethodPillars';
+import { getHeaderUserState } from '@lib/auth/userState.server';
+import { localeHomePath } from '@lib/shared/routing/legal-path';
+import { methodPath } from '@lib/shared/routing/method-path';
+import { getSiteOrigin } from '@lib/seo/shared';
+import { getOgImageUrl } from '@lib/shared/og/builder';
+import { buildMethodTechArticleSchema } from '@lib/shared/method/article-schema';
+import { buildMethodMetadata } from '@lib/shared/seo/method-metadata';
 import type { SupportedLocale } from '@/next-intl.locales';
 import { headers } from 'next/headers';
-import { getTranslations } from 'next-intl/server';
-import { readWaitlistSession } from '@/lib/waitlist/session';
-import { getPreOnboardingDraft } from '@/lib/firestore/waitlist';
-import { METHOD_EXIT_NUDGE_ENABLED, METHOD_STICKY_CTA_ENABLED } from '@/lib/flags';
-import MethodHero from './_components/MethodHero';
-import Pillars from './_components/Pillars';
-import HowItWorks from './_components/HowItWorks';
-import TrustLayer from './_components/TrustLayer';
-import MethodCta from './_components/MethodCta';
-import Testimonial from './_components/Testimonial';
-import FounderNote from './_components/FounderNote';
-import FaqTeaser from './_components/FaqTeaser';
-import StickyCta from './_components/StickyCta';
-import ExitNudge from './_components/ExitNudge';
-import { MethodExperienceProvider } from './_components/MethodExperienceProvider';
-import SkipToCtaLink from './_components/SkipToCtaLink';
-import { buildMethodTechArticleSchema } from './articleSchema';
-import {
-  buildCanonicalPath,
-  buildCanonicalUrl,
-  resolveSiteBaseUrl,
-} from '@/lib/i18n/metadata';
+import { getTranslations, unstable_setRequestLocale } from 'next-intl/server';
 
 export const runtime = 'nodejs';
 
@@ -33,16 +25,35 @@ type MethodPageProps = {
   params: Promise<{ locale: SupportedLocale }>;
 };
 
+const FALLBACK_METHOD_TITLE = 'Method – Louhen';
+const FALLBACK_METHOD_DESCRIPTION = 'How Louhen works: fit-first guidance, trusted sizing, and effortless discovery.';
+
+export async function generateMetadata({ params }: MethodPageProps): Promise<Metadata> {
+  const { locale } = await params;
+  return buildMethodMetadata({ locale });
+}
+
 export default async function MethodPage({ params }: MethodPageProps) {
   const { locale } = await params;
+  unstable_setRequestLocale(locale);
   const headerStore = await headers();
   const nonce = headerStore.get('x-csp-nonce') ?? undefined;
+  const headerUserState = await getHeaderUserState();
 
   const t = await getTranslations({ locale, namespace: 'method' });
 
-  const baseUrl = resolveSiteBaseUrl();
-  const localizedPath = buildCanonicalPath(locale, '/method/');
-  const articleUrl = buildCanonicalUrl(locale, '/method/');
+  let homeLabel = locale.startsWith('de') ? 'Startseite' : 'Home';
+  try {
+    const common = await getTranslations({ locale, namespace: 'common' });
+    homeLabel = common('breadcrumb.home');
+  } catch {
+    // fall back to locale heuristic defined above
+  }
+
+  const baseUrl = getSiteOrigin();
+  const localizedPath = methodPath(locale);
+  const articleUrl = `${baseUrl}${localizedPath}`;
+  const homeUrl = `${baseUrl}${localeHomePath(locale)}`;
 
   const pillarTitles = (() => {
     const raw = t.raw('pillars.items');
@@ -60,56 +71,57 @@ export default async function MethodPage({ params }: MethodPageProps) {
       .filter((value): value is string => typeof value === 'string' && value.trim().length > 0);
   })();
 
+  let schemaTitle = FALLBACK_METHOD_TITLE;
+  let schemaDescription = FALLBACK_METHOD_DESCRIPTION;
+  try {
+    schemaTitle = t('seo.title');
+  } catch {
+    // fallback handled above
+  }
+  try {
+    schemaDescription = t('seo.description');
+  } catch {
+    // fallback handled above
+  }
+
+  const ogImageUrl = getOgImageUrl({
+    locale,
+    key: 'method',
+    title: schemaTitle,
+    description: schemaDescription,
+  });
+
   const schema = buildMethodTechArticleSchema({
     url: articleUrl,
     headline: t('hero.title'),
-    description: t('seo.description'),
+    description: schemaDescription,
     locale,
     sections: [...pillarTitles, ...howTitles, t('trust.headline'), t('faqTeaser.title')],
     baseUrl,
     brandName: 'Louhen',
-    image: `${baseUrl}/opengraph-image.png`,
+    image: ogImageUrl,
     datePublished: '2025-01-15T00:00:00.000Z',
     dateModified: '2025-01-15T00:00:00.000Z',
   });
 
-  const sessionId = await readWaitlistSession();
-  const profileDraft = sessionId ? await getPreOnboardingDraft(sessionId) : null;
-  const primaryChildName = profileDraft?.children?.[0]?.name?.trim() || null;
-  const variantPersonalized = Boolean(primaryChildName);
-  const route = localizedPath;
-
   return (
     <div className={layout.page}>
-      <SkipToCtaLink
-        targetId="join-waitlist"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-sm focus:top-sm focus:z-50 focus:rounded-md focus:bg-brand-primary focus:px-sm focus:py-4 focus:text-brand-onPrimary focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-border-focus"
-      >
-        {t('a11y.skipToCta')}
-      </SkipToCtaLink>
-      <TechArticleJsonLd schema={schema} nonce={nonce} />
       <BreadcrumbJsonLd
         nonce={nonce}
         items={[
-          { name: 'Home', item: baseUrl },
-          { name: t('hero.title'), item: articleUrl },
+          { name: homeLabel, item: homeUrl },
+          { name: t('seo.title'), item: articleUrl },
         ]}
       />
-      <Header />
-      <MethodExperienceProvider locale={locale} route={route} variantPersonalized={variantPersonalized}>
-        <main id="main">
-          <MethodHero locale={locale} childName={primaryChildName} />
-          <Pillars />
-          <HowItWorks childName={primaryChildName} />
-          <TrustLayer />
-          <Testimonial />
-          <FounderNote />
-          <FaqTeaser locale={locale} />
-          <MethodCta locale={locale} />
-        </main>
-        {METHOD_STICKY_CTA_ENABLED ? <StickyCta locale={locale} /> : null}
-        {METHOD_EXIT_NUDGE_ENABLED ? <ExitNudge faqSelector="#method-faq-teaser" /> : null}
-      </MethodExperienceProvider>
+      <TechArticleJsonLd schema={schema} nonce={nonce} />
+      <Header userState={headerUserState} />
+      <main id="main-content" role="main" aria-labelledby="method-hero-title">
+        <MethodHero />
+        <MethodPillars />
+        <MethodHowItWorks />
+        <MethodTrustLayer />
+        <MethodCta locale={locale} />
+      </main>
       <Footer />
     </div>
   );

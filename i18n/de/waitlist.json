@@ -26,8 +26,7 @@
       "title": "Du bist dabei!",
       "subtitle": "Dein Platz ist gesichert. Halte dein Postfach für Frühzugang bereit.",
       "preOnboarding": {
-        "cta": "Weiter zur Voranmeldung",
-        "completed": "Danke! Deine Familienangaben sind bereits gespeichert."
+        "cta": "Weiter zur Voranmeldung"
       },
       "privacy": "Wir respektieren dein Postfach und schreiben nur mit Einwilligung.",
       "share": {
@@ -35,16 +34,13 @@
         "copy": "Link kopieren",
         "whatsapp": "Auf WhatsApp teilen",
         "email": "Per E-Mail einladen"
-      },
-      "return": "Zurück zur Übersicht"
+      }
     },
     "expired": {
       "title": "Bestätigungslink abgelaufen",
       "subtitle": "Fordere einen neuen Link an, um deine Anmeldung abzuschließen.",
       "resend": {
-        "cta": "Neuen Bestätigungslink senden",
-        "success": "Schau in dein Postfach – der neue Bestätigungslink ist unterwegs.",
-        "rateLimited": "Zu viele Versuche. Bitte versuch es in Kürze erneut."
+        "cta": "Neuen Bestätigungslink senden"
       }
     },
     "already": {
@@ -60,19 +56,15 @@
     }
   },
   "preonboarding": {
-    "badge": "Founding-Parent-Vorschau",
     "title": "Erzähl uns mehr (optional)",
     "subtitle": "Mit ein paar Angaben können wir Frühzugänge besser auf deine Familie abstimmen.",
     "parent": {
       "firstName": {
-        "label": "Vorname Elternteil",
-        "placeholder": "z. B. Alex"
+        "label": "Vorname Elternteil"
       }
     },
     "child": {
       "section": "Kinder",
-      "add": "Weiteres Kind hinzufügen",
-      "legend": "Kind {index}",
       "name": {
         "label": "Name des Kindes"
       },
@@ -80,52 +72,22 @@
         "label": "Geburtsdatum"
       },
       "weight": {
-        "label": "Gewicht (kg)",
-        "placeholder": "kg"
+        "label": "Gewicht"
       },
       "shoeSize": {
-        "label": "Schuhgröße",
-        "placeholder": "EU"
-      },
-      "remove": "Kind {index} entfernen"
+        "label": "Schuhgröße"
+      }
     },
     "save": {
-      "cta": "Familienprofil speichern"
+      "cta": "Speichern und fortfahren"
     },
-    "success": {
-      "saved": "Gespeichert – wir nutzen dein Profil für frühzeitige Drops."
-    },
-    "status": {
-      "completed": "Danke! Dein Familienprofil ist bereits hinterlegt.",
-      "editHint": "Aktualisiere die Angaben unten, falls sich etwas ändert."
-    },
-    "errors": {
-      "date": "Bitte gib ein gültiges Datum (JJJJ-MM-TT) ein.",
-      "weight": "Gewicht zwischen 0,1 und 100 kg eingeben.",
-      "childRequired": "Füge mindestens ein Kind hinzu.",
-      "invalidChildren": "Bitte prüfe die Angaben der Kinder und versuch es erneut.",
-      "session": "Wir konnten deine Wartelisten-Session nicht verifizieren. Bitte bestätige deine E-Mail erneut."
-    },
-    "actions": {
-      "returnToWaitlist": "Zur Warteliste"
-    },
-    "incentive": {
-      "title": "Warum mehr teilen?",
-      "body": "So sichern wir dir das Founding-Parent-Abzeichen und senden zuerst passende Looks."
-    },
-    "privacy": {
-      "label": "Hinweis zum Datenschutz",
-      "body": "Die Angaben bleiben privat und dienen nur personalisierten Empfehlungen. Du kannst sie jederzeit ändern oder löschen."
-    }
+    "comingSoon": "Demnächst verfügbar – wir schalten diesen Schritt bald frei."
   },
   "errors": {
     "required": "Dieses Feld ist erforderlich.",
     "email": {
       "invalid": "Bitte gib eine gültige E-Mail-Adresse ein."
     },
-    "generic": "Etwas ist schiefgelaufen. Bitte versuch es erneut.",
-    "rateLimited": "Zu viele Anfragen. Bitte versuch es später noch einmal.",
-    "invalid": "Bitte überprüfe das Formular und versuch es erneut.",
-    "network": "Netzwerkfehler. Bitte versuch es noch einmal."
+    "generic": "Etwas ist schiefgelaufen. Bitte versuch es erneut."
   }
 }

@@ -8,7 +8,7 @@
     "postinstall": "npm run build",
     "sync:dart": "cp build/flutter/tokens.dart ../../app/lib/src/tokens/tokens.dart"
   },
-  "dependencies": {
-    "style-dictionary": "^4.0.0"
+  "devDependencies": {
+    "style-dictionary": "^5.1.1"
   }
 }

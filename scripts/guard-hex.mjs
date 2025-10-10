@@ -16,6 +16,7 @@ const SKIP_PATH_SNIPPETS = [
   `${join('', '.cache')}`,
   `${join('', 'playwright-report')}`,
   `${join('', 'test-results')}`,
+  `${join('', 'artifacts')}`,
   `${join('', 'ci-artifacts')}`,
   `${join('', 'public', 'tokens')}`,
   `${join('', 'packages', 'design-tokens')}`,
@@ -123,7 +124,7 @@ function verifyGeneratedHeader(absPath) {
     if (firstLine !== GENERATED_HEADER) {
       generatedHeaderViolations.push({ file: absPath, expected: GENERATED_HEADER, actual: firstLine || '' });
     }
-  } catch (error) {
+  } catch {
     generatedHeaderViolations.push({ file: absPath, expected: GENERATED_HEADER, actual: '<<unable to read file>>' });
   }
 }

@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { NextResponse } from 'next/server';
+import type { NextResponse } from 'next/server';
 
 const WAITLIST_SESSION_COOKIE = 'waitlist_session';
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 30; // 30 days

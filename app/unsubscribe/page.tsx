@@ -40,18 +40,21 @@ export default async function UnsubscribePage({ searchParams }: PageProps) {
   const manualSuccess = statusParam === 'manual-success';
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-lg flex-col gap-6 px-6 py-16">
+    <main className="mx-auto flex min-h-screen max-w-lg flex-col gap-6 px-6 py-16" data-testid="unsubscribe-root">
       <header className="space-y-2">
-        <h1 className="text-display-lg text-text">Manage email preferences</h1>
-        <p className="text-body text-text-muted">
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-900" data-testid="unsubscribe-heading">
+          Manage email preferences
+        </h1>
+        <p className="text-sm text-slate-600">
           Use this page to unsubscribe from Louhen updates. You can always rejoin the waitlist or resubscribe later.
         </p>
       </header>
 
       {status === 'token-success' && (
         <div
-          className="rounded-lg border border-feedback-success-border bg-feedback-success-surface px-sm py-sm text-body-sm text-feedback-success"
+          className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800"
           role="status"
+          data-testid="unsubscribe-token-success"
         >
           <p>Success! We&apos;ll stop emailing{tokenEmail ? ` ${maskEmail(tokenEmail)}` : ''}.</p>
         </div>
@@ -59,8 +62,9 @@ export default async function UnsubscribePage({ searchParams }: PageProps) {
 
       {status === 'token-invalid' && (
         <div
-          className="rounded-lg border border-feedback-warning-border bg-feedback-warning-surface px-sm py-sm text-body-sm text-feedback-warning"
+          className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
           role="status"
+          data-testid="unsubscribe-token-invalid"
         >
           <p>The unsubscribe link has expired or is invalid. You can still unsubscribe manually below.</p>
         </div>
@@ -68,10 +72,11 @@ export default async function UnsubscribePage({ searchParams }: PageProps) {
 
       {manualSuccess && (
         <div
-          className="rounded-lg border border-feedback-success-border bg-feedback-success-surface px-sm py-sm text-body-sm text-feedback-success"
+          className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800"
           role="status"
+          data-testid="unsubscribe-manual-success"
         >
-          <p>Thanks! Your unsubscribe request has been processed.</p>
+          <p data-testid="unsubscribe-manual-success-copy">Thanks! Your unsubscribe request has been processed.</p>
         </div>
       )}
 

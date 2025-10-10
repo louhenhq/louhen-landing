@@ -3,7 +3,7 @@ import { cookies, headers } from 'next/headers';
 import { NextIntlClientProvider, type AbstractIntlMessages } from 'next-intl';
 import LandingExperience from '@/app/(site)/components/LandingExperience';
 import LocaleSuggestion from '@/app/(site)/components/LocaleSuggestion';
-import ReferralAttribution from '@/app/(site)/components/ReferralAttribution';
+import { ReferralAttribution } from '@components/features/waitlist';
 import { loadMessages } from '@/lib/intl/loadMessages';
 import {
   DEFAULT_LOCALE,
@@ -17,8 +17,10 @@ import {
   buildCanonicalUrl,
   resolveSiteBaseUrl,
 } from '@/lib/i18n/metadata';
+import { getOgImageEntry } from '@lib/shared/og/builder';
 import { LOCALE_COOKIE } from '@/lib/theme/constants';
 import { SITE_NAME } from '@/constants/site';
+import { getHeaderUserState } from '@/lib/auth/userState.server';
 const BOT_REGEX = /(bot|crawler|spider|bingpreview|facebookexternalhit|pinterest|embedly|quora link preview)/i;
 
 type RootSearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -47,8 +49,15 @@ export async function generateMetadata({ searchParams }: MetadataArgs): Promise<
   const canonicalUrl = buildCanonicalUrl(DEFAULT_LOCALE.value, '/');
   const languages = buildAlternateLanguageMap('/');
 
+  const baseOgImage = getOgImageEntry({
+    locale: DEFAULT_LOCALE.value,
+    key: 'home',
+    title: defaultTitle,
+    description: defaultDescription,
+  });
   const ref = firstParam(resolvedSearchParams.ref);
-  if (!ref) {
+  const sanitizedRef = ref ? ref.trim().slice(0, 64) : null;
+  if (!sanitizedRef) {
     return {
       title: defaultTitle,
       description: defaultDescription,
@@ -60,17 +69,26 @@ export async function generateMetadata({ searchParams }: MetadataArgs): Promise<
         title: defaultTitle,
         description: defaultDescription,
         url: canonicalUrl,
+        images: [baseOgImage],
       },
       twitter: {
+        card: 'summary_large_image',
         title: defaultTitle,
         description: defaultDescription,
+        images: [baseOgImage.url],
       },
     };
   }
 
-  const sharePath = `${canonicalPath}?ref=${encodeURIComponent(ref)}`;
+  const sharePath = `${canonicalPath}?ref=${encodeURIComponent(sanitizedRef)}`;
   const fullUrl = `${baseUrl}${sharePath}`;
-  const imageUrl = `${baseUrl}/opengraph-image?locale=${DEFAULT_LOCALE.value}&ref=${encodeURIComponent(ref)}`;
+  const invitedOgImage = getOgImageEntry({
+    locale: DEFAULT_LOCALE.value,
+    key: 'home-invited',
+    title: defaultTitle,
+    description: defaultDescription,
+    params: { ref: sanitizedRef },
+  });
 
   return {
     title: defaultTitle,
@@ -83,12 +101,13 @@ export async function generateMetadata({ searchParams }: MetadataArgs): Promise<
       title: defaultTitle,
       description: defaultDescription,
       url: fullUrl,
-      images: [imageUrl],
+      images: [invitedOgImage],
     },
     twitter: {
+      card: 'summary_large_image',
       title: defaultTitle,
       description: defaultDescription,
-      images: [imageUrl],
+      images: [invitedOgImage.url],
     },
   };
 }
@@ -129,6 +148,7 @@ export default async function RootLandingPage({ searchParams }: RootPageProps) {
   const resolvedSearchParams = await searchParams;
   const referralToast = ((messagesRecord.referral ?? {}) as Record<string, unknown>).appliedToast;
   const toastMessage = typeof referralToast === 'string' ? referralToast : null;
+  const headerUserState = await getHeaderUserState();
 
   return (
     <NextIntlClientProvider
@@ -138,7 +158,7 @@ export default async function RootLandingPage({ searchParams }: RootPageProps) {
     >
       <ReferralAttribution searchParams={resolvedSearchParams} message={toastMessage} />
       {suggestion ? <LocaleSuggestion targetLocale={suggestion.locale} reason={suggestion.reason} /> : null}
-      <LandingExperience />
+      <LandingExperience userState={headerUserState} />
     </NextIntlClientProvider>
   );
 }

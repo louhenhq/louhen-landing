@@ -1,15 +1,20 @@
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
+import type { Metadata } from 'next';
 import { FieldValue } from 'firebase-admin/firestore';
 import { createTranslator, type AbstractIntlMessages } from 'next-intl';
 import { initAdmin } from '@/lib/firebaseAdmin';
 import { sha256Hex } from '@/lib/crypto/token';
-import ConfirmResendForm from '@/app/(site)/components/ConfirmResendForm';
-import ConfirmAnalytics from '@/app/(site)/components/ConfirmAnalytics';
+import { ConfirmResendForm, ConfirmAnalytics } from '@components/features/waitlist';
 import { cn, layout, text } from '@/app/(site)/_lib/ui';
 import { loadMessages } from '@/lib/intl/loadMessages';
+import { isPrelaunch } from '@/lib/env/prelaunch';
+import { getSiteOrigin, hreflangMapFor, makeCanonical } from '@/lib/seo/shared';
+import { getOgImageEntry } from '@lib/shared/og/builder';
+import { waitlistConfirmPath } from '@lib/shared/routing/waitlist-path';
 import type { SupportedLocale } from '@/next-intl.locales';
+import { unstable_setRequestLocale } from 'next-intl/server';
 import SharePanel from '@/app/(site)/components/SharePanel';
 
 type ConfirmPageProps = {
@@ -93,8 +98,63 @@ function getShareCopy(localeMessages: Record<string, unknown>, locale: Supported
   return { ...fallback, ...share };
 }
 
+export async function generateMetadata({ params }: ConfirmPageProps): Promise<Metadata> {
+  const { locale } = params;
+  const baseUrl = getSiteOrigin();
+  const canonicalPath = waitlistConfirmPath(locale);
+  const canonicalUrl = makeCanonical(canonicalPath, baseUrl);
+  const hreflang = hreflangMapFor(waitlistConfirmPath, baseUrl);
+  const robots = isPrelaunch()
+    ? { index: false, follow: false }
+    : undefined;
+
+  let title = 'Confirm your Louhen waitlist spot';
+  let description = 'Verify your email to secure access to the Louhen waitlist.';
+
+  try {
+    const localeMessages = await loadMessages(locale);
+    const confirmMessages = getConfirmMessages(localeMessages as Record<string, unknown>);
+    title = confirmMessages.success.title;
+    description = confirmMessages.success.body;
+  } catch {
+    // fall back to defaults
+  }
+
+  const ogImage = getOgImageEntry({
+    locale,
+    key: 'confirm',
+    title,
+    description,
+  });
+
+  return {
+    title,
+    description,
+    robots,
+    alternates: {
+      canonical: canonicalUrl,
+      languages: hreflang,
+    },
+    openGraph: {
+      title,
+      description,
+      url: canonicalUrl,
+      locale,
+      type: 'website',
+      images: [ogImage],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [ogImage.url],
+    },
+  };
+}
+
 export default async function ConfirmPage({ params, searchParams }: ConfirmPageProps) {
   const { locale } = params;
+  unstable_setRequestLocale(locale);
   const token = typeof searchParams?.token === 'string' ? searchParams.token.trim() : '';
   const localeMessages = await loadMessages(locale);
   const baseMessages = localeMessages as Record<string, unknown>;

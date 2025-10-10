@@ -1,277 +1,129 @@
-/* CODEx: map design tokens into Tailwind theme via CSS variables */
+import tokensJson from './packages/design-tokens/build/web/tokens.json' assert { type: 'json' }
 import type { Config } from 'tailwindcss'
 
-const withVar = (name: string, fallback?: string) =>
-  fallback ? `var(${name}, ${fallback})` : `var(${name})`
+type NestedRecord = Record<string, string | NestedRecord>
 
-export default {
-  darkMode: ['class', '[data-theme="dark"]'],
+const tokens = tokensJson as Record<string, string>
+
+const normalizeTokenName = (name: string) => name.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`)
+
+const cssVar = (name: string) => `var(${normalizeTokenName(name)})`
+const remFromToken = (name: string) => `calc(var(${normalizeTokenName(name)}) / 16 * 1rem)`
+const pxFromToken = (name: string) => `calc(var(${normalizeTokenName(name)}) * 1px)`
+
+const slugify = (value: string) =>
+  value
+    .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+    .replace(/_/g, '-')
+    .replace(/\.+/g, '-')
+    .replace(/-+/g, '-')
+    .toLowerCase()
+
+const assignNested = (target: NestedRecord, segments: string[], value: string) => {
+  if (segments.length === 0) return
+  const [head, ...rest] = segments
+  if (rest.length === 0) {
+    target[head] = value
+    return
+  }
+  if (typeof target[head] !== 'object' || target[head] === null || Array.isArray(target[head])) {
+    target[head] = {}
+  }
+  assignNested(target[head] as NestedRecord, rest, value)
+}
+
+const buildColorTokens = () => {
+  const tree: NestedRecord = {}
+  const prefixes: Array<{ match: string; segments: (parts: string[]) => string[] }> = [
+    {
+      match: '--color-',
+      segments: (parts) => parts.slice(1),
+    },
+    {
+      match: '--semantic-color-',
+      segments: (parts) => ['semantic', ...parts.slice(2)],
+    },
+    {
+      match: '--semanticDark-color-',
+      segments: (parts) => ['semantic-dark', ...parts.slice(3)],
+    },
+    {
+      match: '--semanticHc-color-',
+      segments: (parts) => ['semantic-hc', ...parts.slice(3)],
+    },
+  ]
+
+  for (const key of Object.keys(tokens)) {
+    const prefixEntry = prefixes.find(({ match }) => key.startsWith(match))
+    if (!prefixEntry) continue
+
+    const value = tokens[key]
+    if (typeof value !== 'string' || value.includes('[object Object]')) continue
+
+    const normalized = normalizeTokenName(key).replace(/^--/, '')
+    const parts = normalized.split('-').filter(Boolean)
+    const segments = prefixEntry.segments(parts)
+    if (segments.length === 0) continue
+
+    assignNested(tree, segments, cssVar(key))
+  }
+
+  return tree
+}
+
+const buildSpacingTokens = () =>
+  Object.fromEntries(
+    Object.keys(tokens)
+      .filter((key) => key.startsWith('--spacing-'))
+      .map((key) => [slugify(key.replace('--spacing-', '')), remFromToken(key)]),
+  )
+
+const buildRadiusTokens = () =>
+  Object.fromEntries(
+    Object.keys(tokens)
+      .filter((key) => key.startsWith('--radii-'))
+      .map((key) => [slugify(key.replace('--radii-', '')), pxFromToken(key)]),
+  )
+
+const buildFontSizeTokens = () =>
+  Object.fromEntries(
+    Object.keys(tokens)
+      .filter((key) => key.startsWith('--typography-size-'))
+      .map((key) => [slugify(key.replace('--typography-size-', '')), remFromToken(key)]),
+  )
+
+const buildBoxShadowTokens = () => {
+  const scale: Record<string, string> = {}
+  for (const key of Object.keys(tokens)) {
+    if (!key.startsWith('--elevation-level')) continue
+    const suffix = key.replace('--elevation-', '')
+    const slug = slugify(suffix)
+    const offset = pxFromToken(key)
+    const blur = `calc(var(${normalizeTokenName(key)}) * 2px)`
+    scale[slug] = `0 ${offset} ${blur} 0 var(--color-light-shadow)`
+    scale[`dark-${slug}`] = `0 ${offset} ${blur} 0 var(--color-dark-shadow)`
+  }
+  return scale
+}
+
+const config = {
   content: [
     './app/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
-    './pages/**/*.{ts,tsx}',
+    './components/features/**/*.{ts,tsx}',
     './lib/**/*.{ts,tsx}',
+    './src/**/*.{ts,tsx}',
   ],
   theme: {
     extend: {
-      fontFamily: {
-        display: [
-          'var(--typography-font-family-display)',
-          'Fraunces',
-          'Iowan Old Style',
-          'Palatino Linotype',
-          'Palatino',
-          'Times New Roman',
-          'ui-serif',
-          'serif',
-        ],
-        heading: [
-          'var(--typography-font-family-display)',
-          'Fraunces',
-          'Iowan Old Style',
-          'Palatino Linotype',
-          'Palatino',
-          'Times New Roman',
-          'ui-serif',
-          'serif',
-        ],
-        sans: [
-          'var(--typography-font-family-sans)',
-          'Inter',
-          'Segoe UI',
-          'Helvetica Neue',
-          'Arial',
-          'system-ui',
-          '-apple-system',
-          'BlinkMacSystemFont',
-          'sans-serif',
-        ],
-      },
-      colors: {
-        // semantic palettes (light/dark/hc come from :root data-attrs)
-        bg: {
-          DEFAULT: withVar('--semantic-color-bg-page'),
-          card: withVar('--semantic-color-bg-card'),
-          raised: withVar('--semantic-color-bg-raised'),
-          overlay: withVar('--semantic-color-bg-overlay'),
-        },
-        text: {
-          DEFAULT: withVar('--semantic-color-text-body'),
-          muted: withVar('--semantic-color-text-muted'),
-          inverse: withVar('--semantic-color-text-inverse'),
-          link: withVar('--semantic-color-text-link'),
-        },
-        border: {
-          DEFAULT: withVar('--semantic-color-border-subtle'),
-          subtle: withVar('--semantic-color-border-subtle'),
-          strong: withVar('--semantic-color-border-strong'),
-          focus: withVar('--semantic-color-border-focus'),
-        },
-        status: {
-          success: withVar('--semantic-color-status-success'),
-          warning: withVar('--semantic-color-status-warning'),
-          error: withVar('--semantic-color-status-error'),
-          info: withVar('--semantic-color-status-info'),
-        },
-        feedback: {
-          success: withVar('--color-feedback-success'),
-          'success-surface': withVar('--color-feedback-success-surface'),
-          'success-border': withVar('--color-feedback-success-border'),
-          warning: withVar('--color-feedback-warning'),
-          'warning-surface': withVar('--color-feedback-warning-surface'),
-          'warning-border': withVar('--color-feedback-warning-border'),
-          error: withVar('--color-feedback-error'),
-          'error-surface': withVar('--color-feedback-error-surface'),
-          'error-border': withVar('--color-feedback-error-border'),
-          info: withVar('--color-feedback-info'),
-          'info-surface': withVar('--color-feedback-info-surface'),
-          'info-border': withVar('--color-feedback-info-border'),
-        },
-        brand: {
-          primary: withVar('--color-brand-primary'),
-          secondary: withVar('--color-brand-secondary'),
-          muted: withVar('--color-brand-muted'),
-          accent: withVar('--color-brand-accent'),
-          onPrimary: withVar('--color-brand-on-primary'),
-          onAccent: withVar('--color-brand-on-accent'),
-        },
-        neutral: {
-          0: withVar('--color-neutral-0'),
-          10: withVar('--color-neutral-10'),
-          20: withVar('--color-neutral-20'),
-          30: withVar('--color-neutral-30'),
-          40: withVar('--color-neutral-40'),
-          50: withVar('--color-neutral-50'),
-          60: withVar('--color-neutral-60'),
-          70: withVar('--color-neutral-70'),
-          80: withVar('--color-neutral-80'),
-          90: withVar('--color-neutral-90'),
-          100: withVar('--color-neutral-100'),
-        },
-        slate: {
-          50: withVar('--color-neutral-10'),
-          100: withVar('--color-neutral-20'),
-          200: withVar('--color-neutral-30'),
-          300: withVar('--color-neutral-40'),
-          400: withVar('--color-neutral-50'),
-          500: withVar('--color-neutral-60'),
-          600: withVar('--color-neutral-70'),
-          700: withVar('--color-neutral-80'),
-          800: withVar('--color-neutral-90'),
-          900: withVar('--color-neutral-100'),
-        },
-        emerald: {
-          50: withVar('--color-feedback-success-surface'),
-          200: withVar('--color-feedback-success-border'),
-          500: withVar('--color-feedback-success'),
-          600: withVar('--color-feedback-success'),
-          700: withVar('--color-feedback-success'),
-        },
-        amber: {
-          50: withVar('--color-feedback-warning-surface'),
-          200: withVar('--color-feedback-warning-border'),
-          600: withVar('--color-feedback-warning'),
-        },
-        rose: {
-          50: withVar('--color-feedback-error-surface'),
-          200: withVar('--color-feedback-error-border'),
-          400: withVar('--color-feedback-error'),
-          500: withVar('--color-feedback-error'),
-          600: withVar('--color-feedback-error'),
-        },
-        white: withVar('--color-neutral-0'),
-        black: withVar('--color-neutral-100'),
-        shadow: {
-          focus: withVar('--shadow-focus'),
-        },
-      },
-      fontSize: {
-        'display-xl': [
-          'clamp(2.5rem, 1.65rem + 2.8vw, 3.5rem)',
-          {
-            lineHeight: '1.1',
-            letterSpacing: '-0.02em',
-            fontWeight: '700',
-            fontFamily: 'var(--typography-font-family-display)',
-            fontOpticalSizing: 'auto',
-            fontVariationSettings: '"opsz" 48',
-          },
-        ],
-        'display-lg': [
-          'clamp(2rem, 1.45rem + 1.6vw, 2.75rem)',
-          {
-            lineHeight: '1.18',
-            letterSpacing: '-0.015em',
-            fontWeight: '600',
-            fontFamily: 'var(--typography-font-family-display)',
-            fontOpticalSizing: 'auto',
-            fontVariationSettings: '"opsz" 40',
-          },
-        ],
-        h3: [
-          'clamp(1.75rem, 1.45rem + 0.6vw, 2.125rem)',
-          {
-            lineHeight: '1.24',
-            letterSpacing: '-0.01em',
-            fontWeight: '600',
-            fontFamily: 'var(--typography-font-family-display)',
-            fontOpticalSizing: 'auto',
-            fontVariationSettings: '"opsz" 32',
-          },
-        ],
-        body: [
-          '1rem',
-          {
-            lineHeight: '1.6',
-            letterSpacing: '-0.01em',
-            fontWeight: '400',
-            fontFamily: 'var(--typography-font-family-sans)',
-          },
-        ],
-        'body-sm': [
-          '0.9375rem',
-          {
-            lineHeight: '1.5',
-            letterSpacing: '-0.005em',
-            fontWeight: '400',
-            fontFamily: 'var(--typography-font-family-sans)',
-          },
-        ],
-        label: [
-          '1rem',
-          {
-            lineHeight: '1.35',
-            letterSpacing: '0.015em',
-            fontWeight: '600',
-            fontFamily: 'var(--typography-font-family-sans)',
-          },
-        ],
-        meta: [
-          '0.8125rem',
-          {
-            lineHeight: '1.4',
-            letterSpacing: '0.075em',
-            fontWeight: '500',
-            fontFamily: 'var(--typography-font-family-sans)',
-          },
-        ],
-      },
-      accentColor: {
-        brand: withVar('--color-brand-primary'),
-        success: withVar('--color-feedback-success'),
-        info: withVar('--color-feedback-info'),
-      },
-      spacing: {
-        xs: withVar('--spacing-alias-xs'),
-        sm: withVar('--spacing-alias-sm'),
-        md: withVar('--spacing-alias-md'),
-        lg: withVar('--spacing-alias-lg'),
-        xl: withVar('--spacing-alias-xl'),
-        '2xl': withVar('--spacing-alias-2xl'),
-        gutter: withVar('--spacing-gutter'),
-        4: withVar('--spacing-4'),
-        8: withVar('--spacing-8'),
-        16: withVar('--spacing-16'),
-        24: withVar('--spacing-24'),
-        32: withVar('--spacing-32'),
-        48: withVar('--spacing-48'),
-        64: withVar('--spacing-64'),
-      },
-      borderRadius: {
-        DEFAULT: withVar('--radii-md'),
-        sm: withVar('--radii-sm'),
-        md: withVar('--radii-md'),
-        lg: withVar('--radii-lg'),
-        xl: withVar('--radii-xl'),
-        '2xl': withVar('--radii-2xl'),
-        pill: withVar('--radii-pill'),
-      },
-      zIndex: {
-        header: 'var(--z-index-header)',
-        modal: 'var(--z-index-modal)',
-        toast: 'var(--z-index-toast)',
-      },
-      boxShadow: {
-        DEFAULT: withVar('--shadow-card'),
-        sm: withVar('--shadow-card'),
-        md: withVar('--shadow-card'),
-        lg: withVar('--shadow-elevated'),
-        xl: withVar('--shadow-elevated'),
-        '2xl': withVar('--shadow-elevated'),
-        card: withVar('--shadow-card'),
-        elevated: withVar('--shadow-elevated'),
-        focus: withVar('--shadow-focus'),
-      },
-      transitionDuration: {
-        fast: 'var(--motion-dur-fast)',
-        base: 'var(--motion-dur-normal)',
-        slow: 'var(--motion-dur-slow)',
-      },
-      letterSpacing: {
-        tight: 'var(--typography-letter-spacing-tight)',
-        wide: 'var(--typography-letter-spacing-wide)',
-      },
+      colors: buildColorTokens(),
+      spacing: buildSpacingTokens(),
+      borderRadius: buildRadiusTokens(),
+      fontSize: buildFontSizeTokens(),
+      boxShadow: buildBoxShadowTokens(),
     },
   },
   plugins: [],
 } satisfies Config
+
+export default config

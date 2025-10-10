@@ -1,5 +1,6 @@
 import { buildStandardHeaders } from '@/lib/email/headers';
 import { getEmailTransport } from '@/lib/email/transport';
+import { getSiteOrigin } from '@/lib/shared/url/get-site-origin';
 
 const SUBJECTS: Record<'en' | 'de', string> = {
   en: 'Confirm your spot on the Louhen waitlist ✨',
@@ -29,13 +30,8 @@ function resolveLocale(locale?: string | null): 'en' | 'de' {
   return locale.toLowerCase().startsWith('de') ? 'de' : 'en';
 }
 
-function resolveBaseUrl() {
-  const base = process.env.APP_BASE_URL?.trim() || process.env.NEXT_PUBLIC_SITE_URL?.trim() || 'http://localhost:3000';
-  return base.replace(/\/$/, '');
-}
-
 function buildConfirmUrl(token: string): string {
-  return `${resolveBaseUrl()}/waitlist/confirm?token=${encodeURIComponent(token)}`;
+  return `${getSiteOrigin()}/waitlist/confirm?token=${encodeURIComponent(token)}`;
 }
 
 function buildHtmlCopy(locale: 'en' | 'de', confirmUrl: string): string {

@@ -1,28 +1,70 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { loadFromCookie, onConsentChange, setConsent, type ConsentState } from '@/lib/shared/consent/api';
 
 const BUTTON_CLASSES =
-  'inline-flex items-center justify-center rounded-pill border border-border min-h-[44px] min-w-[44px] px-lg py-sm text-label transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-60';
+  'inline-flex items-center justify-center rounded-pill border px-md py-sm text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus';
 
-const PRIMARY_BUTTON_CLASSES = `${BUTTON_CLASSES} bg-brand-primary text-brand-onPrimary border-brand-primary hover:opacity-90`;
-const SECONDARY_BUTTON_CLASSES = `${BUTTON_CLASSES} bg-bg-card text-text border-border hover:bg-bg`;
+const PRIMARY_BUTTON_CLASSES = `${BUTTON_CLASSES} bg-brand-primary text-white border-brand-primary hover:opacity-90`;
+const SECONDARY_BUTTON_CLASSES = `${BUTTON_CLASSES} bg-bg-subtle text-text border-border hover:bg-bg`;
+const TERTIARY_BUTTON_CLASSES =
+  'inline-flex items-center justify-center rounded-pill px-md py-sm text-sm font-medium text-text-muted hover:text-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus';
 
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
 
 type ConsentBannerProps = {
-  open: boolean;
-  onAccept: () => void;
-  onReject: () => void;
+  forceOpen?: boolean;
+  onClose?: () => void;
   onLearnMoreHref?: string;
 };
 
-export default function ConsentBanner({ open, onAccept, onReject, onLearnMoreHref = '/en-de/method' }: ConsentBannerProps) {
+export default function ConsentBanner({ forceOpen = false, onClose, onLearnMoreHref = '/legal/privacy' }: ConsentBannerProps) {
+  const t = useTranslations('header.consent.manager');
   const containerRef = useRef<HTMLDivElement | null>(null);
   const firstButtonRef = useRef<HTMLButtonElement | null>(null);
   const lastActiveElement = useRef<Element | null>(null);
+  const [consentState, setConsentState] = useState<ConsentState>('unknown');
+  const [internalOpen, setInternalOpen] = useState<boolean>(forceOpen);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const initial = loadFromCookie();
+    setConsentState(initial);
+    if (initial === 'unknown') {
+      setInternalOpen(true);
+    }
+
+    const unsubscribe = onConsentChange((next) => {
+      setConsentState(next);
+      if (next !== 'unknown') {
+        setInternalOpen(false);
+        onClose?.();
+      }
+    });
+    return unsubscribe;
+  }, [onClose]);
+
+  useEffect(() => {
+    if (forceOpen) {
+      setInternalOpen(true);
+      return;
+    }
+    if (consentState !== 'unknown') {
+      setInternalOpen(false);
+    }
+  }, [forceOpen, consentState]);
+
+  const open = useMemo(() => {
+    if (forceOpen) return true;
+    if (consentState === 'unknown') {
+      return internalOpen;
+    }
+    return internalOpen && forceOpen;
+  }, [forceOpen, consentState, internalOpen]);
 
   useEffect(() => {
     if (!open) return;
@@ -36,7 +78,7 @@ export default function ConsentBanner({ open, onAccept, onReject, onLearnMoreHre
       if (!containerRef.current) return;
       if (event.key === 'Escape') {
         event.preventDefault();
-        onReject();
+        onClose?.();
         return;
       }
       if (event.key !== 'Tab') return;
@@ -49,8 +91,8 @@ export default function ConsentBanner({ open, onAccept, onReject, onLearnMoreHre
         return;
       }
 
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
+      const first = focusable[0]!;
+      const last = focusable[focusable.length - 1]!;
 
       if (!event.shiftKey && document.activeElement === last) {
         event.preventDefault();
@@ -69,44 +111,76 @@ export default function ConsentBanner({ open, onAccept, onReject, onLearnMoreHre
         lastActiveElement.current.focus({ preventScroll: true });
       }
     };
-  }, [open, onReject]);
+  }, [open, onClose]);
 
   if (!open) return null;
 
   return (
     <div
-      ref={containerRef}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="consent-banner-title"
-      aria-describedby="consent-banner-description"
-      className="fixed inset-x-0 bottom-0 z-[999] bg-bg-card/95 backdrop-blur shadow-elevated"
+      className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50 px-gutter py-xl"
+      role="presentation"
+      onClick={() => {
+        setInternalOpen(false);
+        onClose?.();
+      }}
     >
-      <div className="mx-auto flex max-w-4xl flex-col gap-md px-sm py-lg sm:flex-row sm:items-center sm:gap-lg">
-        <div className="flex-1 text-body text-text-muted">
-          <p id="consent-banner-title" className="text-label text-text">
-            We use cookies to improve your experience
-          </p>
-          <p id="consent-banner-description" className="mt-xs text-body-sm text-text-muted">
-            Louhen uses essential cookies to run the site and optional analytics to learn what helps families most.
-            You can change your choice any time.
-          </p>
+      <div
+        ref={containerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="consent-manager-title"
+        aria-describedby="consent-manager-description"
+        className="w-full max-w-lg rounded-3xl border border-border bg-bg shadow-card"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-sm border-b border-border px-lg py-md">
+          <div>
+            <h2 id="consent-manager-title" className="text-lg font-semibold text-text">
+              {t('title')}
+            </h2>
+            <p id="consent-manager-description" className="mt-xs text-sm text-text-muted">
+              {t('description')}
+            </p>
+          </div>
+          <button
+            type="button"
+            className={TERTIARY_BUTTON_CLASSES}
+            onClick={() => {
+              setInternalOpen(false);
+              onClose?.();
+            }}
+            aria-label={t('close')}
+          >
+            {t('close')}
+          </button>
         </div>
-        <div className="flex flex-col gap-sm sm:w-auto sm:flex-row sm:items-center">
+        <div className="flex flex-col gap-sm px-lg py-lg">
           <button
             ref={firstButtonRef}
             type="button"
             className={PRIMARY_BUTTON_CLASSES}
-            onClick={onAccept}
+            onClick={() => {
+              setConsent('granted');
+              setInternalOpen(false);
+              onClose?.();
+            }}
             data-consent-accept
           >
-            Accept all
+            {t('accept')}
           </button>
-          <button type="button" className={SECONDARY_BUTTON_CLASSES} onClick={onReject}>
-            Reject non-essential
+          <button
+            type="button"
+            className={SECONDARY_BUTTON_CLASSES}
+            onClick={() => {
+              setConsent('denied');
+              setInternalOpen(false);
+              onClose?.();
+            }}
+          >
+            {t('reject')}
           </button>
-          <Link className="touch-target touch-padding text-label text-brand-primary underline" href={onLearnMoreHref}>
-            Learn about our Method
+          <Link className="text-sm font-medium text-brand-primary underline" href={onLearnMoreHref}>
+            {t('settings')}
           </Link>
         </div>
       </div>
