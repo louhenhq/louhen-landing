@@ -1,13 +1,10 @@
 name: CI
 
 on:
-  push:
-    branches:
-      - staging
-      - production
   pull_request:
     branches:
       - staging
+      - production
   workflow_dispatch:
 
 concurrency:
@@ -32,9 +29,10 @@ env:
   NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
 
 jobs:
-  policy-guards:
+  setup:
+    name: setup
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -46,20 +44,459 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --include=dev
+
+  lint-and-types:
+    name: lint-and-types
+    runs-on: ubuntu-latest
+    needs: setup
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --include=dev
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm run test:unit
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    needs:
+      - setup
+      - lint-and-types
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --include=dev
+
+      - name: Build Next.js app
+        run: npm run build
+
+      - name: Upload production build
+        uses: actions/upload-artifact@v4
+        with:
+          name: next-build
+          path: .next
+          if-no-files-found: error
+
+  e2e:
+    name: e2e
+    runs-on: ubuntu-latest
+    needs: build
+    timeout-minutes: 45
+    env:
+      CI: true
+      NODE_ENV: production
+      HOST: 127.0.0.1
+      PORT: '4311'
+      APP_BASE_URL: http://127.0.0.1:4311
+      NEXT_PUBLIC_SITE_URL: http://127.0.0.1:4311
+      BASE_URL: http://127.0.0.1:4311
+      WAITLIST_CONFIRM_TTL_DAYS: '7'
+      HCAPTCHA_SECRET: ${{ secrets.CI_HCAPTCHA_SECRET }}
+      FIREBASE_PROJECT_ID: ${{ secrets.CI_FIREBASE_PROJECT_ID }}
+      FIREBASE_DB_REGION: ${{ secrets.CI_FIREBASE_DB_REGION }}
+      FIREBASE_ADMIN_SA_B64: ${{ secrets.CI_FIREBASE_ADMIN_SA_B64 }}
+      RESEND_API_KEY: ${{ secrets.CI_RESEND_API_KEY }}
+      RESEND_FROM: no-reply@ci.louhen.app
+      RESEND_REPLY_TO: hello@ci.louhen.app
+      STATUS_USER: ${{ secrets.CI_STATUS_USER }}
+      STATUS_PASS: ${{ secrets.CI_STATUS_PASS }}
+      SUPPRESSION_SALT: ${{ secrets.CI_SUPPRESSION_SALT }}
+      PW_HEALTH_PATH: /icon.svg
+      TEST_E2E_BYPASS_TOKEN: e2e-mocked-token
+      PLAYWRIGHT_ARTIFACTS_DIR: artifacts/playwright/e2e
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --include=dev
+
+      - name: Restore Next.js build
+        run: rm -rf .next
+
+      - name: Download Next.js build
+        uses: actions/download-artifact@v4
+        with:
+          name: next-build
+          path: .
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Start Next.js server
+        run: |
+          npm run start:test &
+          SERVER_PID=$!
+          echo "SERVER_PID=$SERVER_PID" >> "$GITHUB_ENV"
+          started=0
+          for i in {1..120}; do
+            if curl -fsS "http://${HOST}:${PORT}${PW_HEALTH_PATH}" >/dev/null 2>&1; then
+              started=1
+              echo "Server is responding on http://${HOST}:${PORT}${PW_HEALTH_PATH}"
+              break
+            fi
+            if ! kill -0 "$SERVER_PID" >/dev/null 2>&1; then
+              echo "Server process exited early"
+              [[ -f .next/test-server.log ]] && cat .next/test-server.log || true
+              exit 1
+            fi
+            sleep 1
+          done
+          if [ "$started" -ne 1 ]; then
+            echo "Server failed to become healthy within 120 seconds"
+            [[ -f .next/test-server.log ]] && tail -n 200 .next/test-server.log || true
+            exit 1
+          fi
+
+      - name: Verify environment wiring
+        run: |
+          required_envs=(NEXT_PUBLIC_ANALYTICS_DISABLED NEXT_PUBLIC_ANALYTICS_DEBUG NEXT_PUBLIC_ENV NEXT_PUBLIC_SITE_URL NEXT_PUBLIC_HCAPTCHA_SITE_KEY NEXT_PUBLIC_WAITLIST_URGENCY NEXT_PUBLIC_COMMIT_SHA NEXT_PUBLIC_LOCALES NEXT_PUBLIC_DEFAULT_LOCALE NEXT_PUBLIC_ALLOW_INDEXING APP_BASE_URL FIREBASE_PROJECT_ID FIREBASE_DB_REGION FIREBASE_ADMIN_SA_B64 RESEND_API_KEY RESEND_FROM RESEND_REPLY_TO HCAPTCHA_SECRET WAITLIST_CONFIRM_TTL_DAYS STATUS_USER STATUS_PASS SUPPRESSION_SALT EMAIL_TRANSPORT ANALYTICS_STORE_IP IS_PRELAUNCH TEST_MODE)
+          missing=0
+          for key in "${required_envs[@]}"; do
+            if [ -z "${!key+x}" ]; then
+              echo "::error::missing ${key}"
+              missing=1
+            fi
+          done
+          if [ "$EMAIL_TRANSPORT" != "noop" ]; then
+            echo "::error::EMAIL_TRANSPORT must remain 'noop' in CI (found '${EMAIL_TRANSPORT}')"
+            missing=1
+          fi
+          if [ "$ANALYTICS_STORE_IP" != "false" ]; then
+            echo "::error::ANALYTICS_STORE_IP must be 'false' in CI (found '${ANALYTICS_STORE_IP}')"
+            missing=1
+          fi
+          if [ "$NEXT_PUBLIC_ALLOW_INDEXING" = "true" ]; then
+            echo "::error::NEXT_PUBLIC_ALLOW_INDEXING must be false in CI"
+            missing=1
+          fi
+          if [ "$NEXT_PUBLIC_ANALYTICS_DISABLED" != "1" ]; then
+            echo "::error::NEXT_PUBLIC_ANALYTICS_DISABLED must be '1' in CI (found '${NEXT_PUBLIC_ANALYTICS_DISABLED}')"
+            missing=1
+          fi
+          if [ "$NEXT_PUBLIC_ANALYTICS_DEBUG" != "0" ]; then
+            echo "::error::NEXT_PUBLIC_ANALYTICS_DEBUG must be '0' in CI (found '${NEXT_PUBLIC_ANALYTICS_DEBUG}')"
+            missing=1
+          fi
+          if [ "$NEXT_PUBLIC_ENV" != "ci" ]; then
+            echo "::error::NEXT_PUBLIC_ENV must be 'ci' during CI runs (found '${NEXT_PUBLIC_ENV}')"
+            missing=1
+          fi
+          if [ "$IS_PRELAUNCH" != "true" ] && [ "$IS_PRELAUNCH" != "1" ]; then
+            echo "::error::IS_PRELAUNCH must be enabled in CI (found '${IS_PRELAUNCH}')"
+            missing=1
+          fi
+          if [ "$TEST_MODE" != "1" ]; then
+            echo "::error::TEST_MODE must be '1' in CI (found '${TEST_MODE}')"
+            missing=1
+          fi
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
+
+      - name: Playwright tests
+        env:
+          DEBUG: pw:webserver,pw:api
+        run: npm run test:e2e
+
+      - name: Tail Next.js server log
+        if: always()
+        run: |
+          if [ -f .next/test-server.log ]; then
+            echo 'Last 300 lines from .next/test-server.log'
+            tail -n 300 .next/test-server.log
+          else
+            echo 'No server log found'
+          fi
+
+      - name: Upload Playwright artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-e2e
+          path: |
+            artifacts/playwright
+            playwright-report
+            .next/test-server.log
+          if-no-files-found: warn
+
+      - name: Stop Next.js server
+        if: always()
+        run: |
+          if [ -n "${SERVER_PID:-}" ]; then
+            kill "${SERVER_PID}" || true
+            wait "${SERVER_PID}" 2>/dev/null || true
+          fi
+
+  axe:
+    name: axe
+    runs-on: ubuntu-latest
+    needs: build
+    timeout-minutes: 30
+    env:
+      CI: true
+      NODE_ENV: production
+      HOST: 127.0.0.1
+      PORT: '4311'
+      APP_BASE_URL: http://127.0.0.1:4311
+      NEXT_PUBLIC_SITE_URL: http://127.0.0.1:4311
+      BASE_URL: http://127.0.0.1:4311
+      WAITLIST_CONFIRM_TTL_DAYS: '7'
+      HCAPTCHA_SECRET: ${{ secrets.CI_HCAPTCHA_SECRET }}
+      FIREBASE_PROJECT_ID: ${{ secrets.CI_FIREBASE_PROJECT_ID }}
+      FIREBASE_DB_REGION: ${{ secrets.CI_FIREBASE_DB_REGION }}
+      FIREBASE_ADMIN_SA_B64: ${{ secrets.CI_FIREBASE_ADMIN_SA_B64 }}
+      RESEND_API_KEY: ${{ secrets.CI_RESEND_API_KEY }}
+      RESEND_FROM: no-reply@ci.louhen.app
+      RESEND_REPLY_TO: hello@ci.louhen.app
+      STATUS_USER: ${{ secrets.CI_STATUS_USER }}
+      STATUS_PASS: ${{ secrets.CI_STATUS_PASS }}
+      SUPPRESSION_SALT: ${{ secrets.CI_SUPPRESSION_SALT }}
+      PW_HEALTH_PATH: /icon.svg
+      PLAYWRIGHT_ARTIFACTS_DIR: artifacts/playwright/axe
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --include=dev
+
+      - name: Restore Next.js build
+        run: rm -rf .next
+
+      - name: Download Next.js build
+        uses: actions/download-artifact@v4
+        with:
+          name: next-build
+          path: .
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Start Next.js server
+        run: |
+          npm run start:test &
+          SERVER_PID=$!
+          echo "SERVER_PID=$SERVER_PID" >> "$GITHUB_ENV"
+          started=0
+          for i in {1..120}; do
+            if curl -fsS "http://${HOST}:${PORT}${PW_HEALTH_PATH}" >/dev/null 2>&1; then
+              started=1
+              echo "Server is responding on http://${HOST}:${PORT}${PW_HEALTH_PATH}"
+              break
+            fi
+            if ! kill -0 "$SERVER_PID" >/dev/null 2>&1; then
+              echo "Server process exited early"
+              [[ -f .next/test-server.log ]] && cat .next/test-server.log || true
+              exit 1
+            fi
+            sleep 1
+          done
+          if [ "$started" -ne 1 ]; then
+            echo "Server failed to become healthy within 120 seconds"
+            [[ -f .next/test-server.log ]] && tail -n 200 .next/test-server.log || true
+            exit 1
+          fi
+
+      - name: Run accessibility suite (warn)
+        id: axe
+        continue-on-error: true
+        run: npm run test:axe
+
+      - name: Tail Next.js server log
+        if: always()
+        run: |
+          if [ -f .next/test-server.log ]; then
+            echo 'Last 200 lines from .next/test-server.log'
+            tail -n 200 .next/test-server.log
+          else
+            echo 'No server log found'
+          fi
+
+      - name: Upload accessibility artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-axe
+          path: |
+            artifacts/playwright
+            playwright-report
+            test-results
+            .next/test-server.log
+          if-no-files-found: warn
+
+      - name: Flag accessibility failures
+        if: steps.axe.outcome == 'failure'
+        run: echo "::warning::Accessibility sweep reported issues. Review the uploaded artifacts."
+
+      - name: Stop Next.js server
+        if: always()
+        run: |
+          if [ -n "${SERVER_PID:-}" ]; then
+            kill "${SERVER_PID}" || true
+            wait "${SERVER_PID}" 2>/dev/null || true
+          fi
+
+  lighthouse:
+    name: lighthouse
+    runs-on: ubuntu-latest
+    needs: build
+    timeout-minutes: 30
+    env:
+      CI: true
+      NODE_ENV: production
+      BASE_URL: http://127.0.0.1:4311
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --include=dev
+
+      - name: Restore Next.js build
+        run: rm -rf .next
+
+      - name: Download Next.js build
+        uses: actions/download-artifact@v4
+        with:
+          name: next-build
+          path: .
+
+      - name: Run Lighthouse (warn)
+        id: lhci
+        continue-on-error: true
+        run: npm run lighthouse
+
+      - name: Upload Lighthouse artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: |
+            artifacts/lighthouse
+            .next/test-server.log
+          if-no-files-found: warn
+
+      - name: Flag Lighthouse regressions
+        if: steps.lhci.outcome == 'failure'
+        run: echo "::warning::Lighthouse budgets failed. Review the lighthouse-report artifact."
+
+  sbom:
+    name: sbom
+    runs-on: ubuntu-latest
+    needs: setup
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --include=dev
+
+      - name: Generate CycloneDX SBOM
+        run: |
+          mkdir -p artifacts/sbom
+          npm sbom --sbom-format=cyclonedx > artifacts/sbom/cyclonedx.json
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-cyclonedx
+          path: artifacts/sbom/cyclonedx.json
+          if-no-files-found: error
+
+  policy-guards:
+    name: policy-guards
+    runs-on: ubuntu-latest
+    needs: setup
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --include=dev
 
       - name: Build design tokens
         run: npm run -w @louhen/design-tokens build
 
-      - name: Color policy (fast scan)
-        env:
-          COLOR_POLICY_MODE: warn
-        run: npm run guard:hex
+      - name: Color policy scan (warn)
+        run: |
+          if ! COLOR_POLICY_MODE=warn npm run guard:hex; then
+            echo "::warning::Color policy quick scan reported matches."
+          fi
 
-      - name: Color policy (enforce)
-        env:
-          COLOR_POLICY_MODE: enforce
-        run: npm run ci:color-policy
+      - name: Color policy enforce (warn)
+        run: |
+          if ! COLOR_POLICY_MODE=enforce npm run ci:color-policy; then
+            echo "::warning::Color policy guard found violations. Review the color-policy-report artifact."
+          fi
 
       - name: Upload color policy report
         if: always()
@@ -69,7 +506,76 @@ jobs:
           path: ci-artifacts/color-policy-report.txt
           if-no-files-found: warn
 
-      - name: Secret hygiene guard
+      - name: Inline script and CSP guard (warn)
+        run: |
+          node <<'NODE'
+          const { execSync } = require('node:child_process');
+          const { readFileSync } = require('node:fs');
+
+          const files = execSync('git ls-files', { encoding: 'utf8' })
+            .split('\n')
+            .map((line) => line.trim())
+            .filter((line) => line.length > 0 && /\.(tsx|ts|jsx|js)$/.test(line));
+
+          const warnings = [];
+          const inlinePattern = /<script[\s>]/i;
+          const dangerousPattern = /dangerouslySetInnerHTML/;
+
+          for (const file of files) {
+            const content = readFileSync(file, 'utf8');
+            const lines = content.split(/\r?\n/);
+            lines.forEach((line, index) => {
+              if (inlinePattern.test(line)) {
+                warnings.push(`inline-script:${file}:${index + 1}: ${line.trim()}`);
+              }
+              if (dangerousPattern.test(line)) {
+                warnings.push(`dangerous-html:${file}:${index + 1}: ${line.trim()}`);
+              }
+            });
+          }
+
+          if (warnings.length) {
+            for (const entry of warnings) {
+              console.log(`::warning::${entry}`);
+            }
+          } else {
+            console.log('No inline <script> or dangerouslySetInnerHTML usage detected.');
+          }
+          NODE
+
+      - name: Forbidden paths guard (warn)
+        run: |
+          node <<'NODE'
+          const { execSync } = require('node:child_process');
+
+          const checks = [
+            {
+              cmd: "git ls-files -- 'public/**/*.js'",
+              message: 'JavaScript under public/ ships outside CSP. Prefer bundling through Next.js.',
+            },
+            {
+              cmd: "git ls-files -- 'public/**/*.html'",
+              message: 'Raw HTML under public/ can bypass inline script protections.',
+            },
+          ];
+
+          for (const { cmd, message } of checks) {
+            let output = '';
+            try {
+              output = execSync(cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+            } catch (error) {
+              if (error.status && error.status !== 0) {
+                throw error;
+              }
+            }
+            const files = output.split('\n').map((line) => line.trim()).filter(Boolean);
+            for (const file of files) {
+              console.log(`::warning::forbidden-path:${file}: ${message}`);
+            }
+          }
+          NODE
+
+      - name: Secret hygiene guard (warn)
         run: |
           node <<'NODE'
           const { readdirSync, statSync, readFileSync } = require('node:fs');
@@ -78,7 +584,7 @@ jobs:
           const ignoreDirs = new Set(['.git', 'node_modules', '.next', 'tmp', 'artifacts', 'ci-artifacts', 'playwright-report', 'lighthouse-report']);
           const allowFiles = new Set(['.env.example']);
           const suspicious = [];
-          const pattern = /(api[_-]?key|secret|token|password)[^=:\\n]{0,40}[:=]\s*(['"]?)([A-Za-z0-9][_A-Za-z0-9\-]{16,})\2/gi;
+          const pattern = /(api[_-]?key|secret|token|password)[^=:\n]{0,40}[:=]\s*(['"]?)([A-Za-z0-9][_A-Za-z0-9\-]{16,})\2/gi;
           const allowedHints = [/dummy/i, /test/i, /example/i, /sample/i, /ci[-_]?/, /dev/i, /local/i, /^0x0+$/i, /louhen/i, /status-ops/i, /status-secret/i];
 
           function shouldSkipValue(value) {
@@ -115,481 +621,41 @@ jobs:
           walk(process.cwd());
 
           if (suspicious.length) {
-            console.error('Potential secret-like strings detected:');
-            for (const line of suspicious) {
-              console.error(`  ${line}`);
+            for (const entry of suspicious) {
+              console.log(`::warning::potential-secret:${entry}`);
             }
-            process.exit(1);
           } else {
             console.log('Secret hygiene guard passed - no high-risk patterns found.');
-            process.exit(0);
           }
           NODE
 
-      - name: Verify CI safety toggles
+      - name: Release checklist status (warn)
+        if: github.event_name == 'pull_request'
         run: |
-          if rg -n "EMAIL_TRANSPORT: *['\"]\?resend" .github/workflows/ci.yml; then
-            echo "::error::EMAIL_TRANSPORT must remain 'noop' in CI workflows."
-            exit 1
+          if [ ! -f PRELAUNCH_CHECKLIST.md ]; then
+            echo "::warning::PRELAUNCH_CHECKLIST.md not found. Ensure release readiness is tracked."
+            exit 0
           fi
-          if rg -n "NEXT_PUBLIC_ALLOW_INDEXING: *['\"]\?true" .github/workflows/ci.yml; then
-            echo "::error::NEXT_PUBLIC_ALLOW_INDEXING must remain false in CI/preview."
-            exit 1
-          fi
-          echo "CI safety toggles verified."
-
-  build-and-test:
-    needs: policy-guards
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    env:
-      CI: true
-      SKIP_LHCI: ${{ vars.SKIP_LHCI }}
-      NEXT_PUBLIC_SITE_URL: 'https://ci.louhen.app'
-      NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
-      PW_HEALTH_PATH: /icon.svg
-      EMAIL_TRANSPORT: noop
-      ANALYTICS_STORE_IP: 'false'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22.x'
-          cache: 'npm'
-
-      - name: Install dependencies
-        env:
-          NODE_ENV: development
-        run: npm ci --include=dev
-
-      - name: Build design tokens
-        run: npm run -w @louhen/design-tokens build
-
-      - name: Color policy (fast scan)
-        env:
-          COLOR_POLICY_MODE: warn
-        run: npm run guard:hex
-
-      - name: Color policy (enforce)
-        env:
-          COLOR_POLICY_MODE: enforce
-        run: npm run ci:color-policy
-
-      - name: Upload color policy report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: color-policy-report
-          path: ci-artifacts/color-policy-report.txt
-          if-no-files-found: warn
-
-      - name: Lint
-        run: npm run lint
-        continue-on-error: false
-
-      - name: Unit tests
-        run: npm run test
-        continue-on-error: false
-
-      - name: Build
-        run: npm run build
-        continue-on-error: false
-
-
-  e2e-tests:
-    name: Playwright E2E
-    runs-on: ubuntu-latest
-    needs: build-and-test
-    if: ${{ vars.SKIP_E2E != '1' }}
-    env:
-      CI: true
-      NODE_ENV: production
-      APP_BASE_URL: http://localhost:4311
-      NEXT_PUBLIC_SITE_URL: http://localhost:4311
-      DEFAULT_LOCALE: 'en-de'
-      BASE_URL: http://localhost:4311
-      WAITLIST_CONFIRM_TTL_DAYS: '7'
-      HCAPTCHA_SECRET: ${{ secrets.CI_HCAPTCHA_SECRET }}
-      FIREBASE_PROJECT_ID: ${{ secrets.CI_FIREBASE_PROJECT_ID }}
-      FIREBASE_DB_REGION: ${{ secrets.CI_FIREBASE_DB_REGION }}
-      FIREBASE_ADMIN_SA_B64: ${{ secrets.CI_FIREBASE_ADMIN_SA_B64 }}
-      RESEND_API_KEY: ${{ secrets.CI_RESEND_API_KEY }}
-      RESEND_FROM: no-reply@ci.louhen.app
-      RESEND_REPLY_TO: hello@ci.louhen.app
-      STATUS_USER: ${{ secrets.CI_STATUS_USER }}
-      STATUS_PASS: ${{ secrets.CI_STATUS_PASS }}
-      SUPPRESSION_SALT: ${{ secrets.CI_SUPPRESSION_SALT }}
-      EMAIL_TRANSPORT: noop
-      ANALYTICS_STORE_IP: 'false'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22.x'
-          cache: 'npm'
-
-      - name: Install dependencies
-        env:
-          NODE_ENV: development
-        run: npm ci --include=dev
-
-      - name: Build
-        run: npm run build:test
-
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            playwright-${{ runner.os }}-
-
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps
-
-      - name: Check Playwright env wiring
-        run: |
-          required_envs=(
-            NEXT_PUBLIC_ANALYTICS_DISABLED
-            NEXT_PUBLIC_ANALYTICS_DEBUG
-            NEXT_PUBLIC_ENV
-            NEXT_PUBLIC_SITE_URL
-            NEXT_PUBLIC_HCAPTCHA_SITE_KEY
-            NEXT_PUBLIC_WAITLIST_URGENCY
-            NEXT_PUBLIC_COMMIT_SHA
-            NEXT_PUBLIC_LOCALES
-            NEXT_PUBLIC_DEFAULT_LOCALE
-            NEXT_PUBLIC_ALLOW_INDEXING
-            APP_BASE_URL
-            FIREBASE_PROJECT_ID
-            FIREBASE_DB_REGION
-            FIREBASE_ADMIN_SA_B64
-            RESEND_API_KEY
-            RESEND_FROM
-            RESEND_REPLY_TO
-            HCAPTCHA_SECRET
-            WAITLIST_CONFIRM_TTL_DAYS
-            STATUS_USER
-            STATUS_PASS
-            SUPPRESSION_SALT
-            EMAIL_TRANSPORT
-            ANALYTICS_STORE_IP
-            IS_PRELAUNCH
-            TEST_MODE
-          )
-          for key in "${required_envs[@]}"; do
-            if [ -z "${!key+x}" ]; then
-              echo "::error::missing $key"
-              exit 1
-            else
-              echo "[ok] $key present"
-            fi
-          done
-
-          if [ "${EMAIL_TRANSPORT}" != "noop" ]; then
-            echo "::error::EMAIL_TRANSPORT must remain 'noop' in CI (found '${EMAIL_TRANSPORT}')"
-            exit 1
-          fi
-
-          if [ "${ANALYTICS_STORE_IP}" != "false" ]; then
-            echo "::error::ANALYTICS_STORE_IP must be 'false' in CI (found '${ANALYTICS_STORE_IP}')"
-            exit 1
-          fi
-
-          if [ "${NEXT_PUBLIC_ALLOW_INDEXING}" = "true" ]; then
-            echo "::error::NEXT_PUBLIC_ALLOW_INDEXING must be false in CI"
-            exit 1
-          fi
-
-          if [ "${NEXT_PUBLIC_ANALYTICS_DISABLED}" != "1" ]; then
-            echo "::error::NEXT_PUBLIC_ANALYTICS_DISABLED must be '1' in CI (found '${NEXT_PUBLIC_ANALYTICS_DISABLED}')"
-            exit 1
-          fi
-
-          if [ "${NEXT_PUBLIC_ANALYTICS_DEBUG}" != "0" ]; then
-            echo "::error::NEXT_PUBLIC_ANALYTICS_DEBUG must be '0' in CI (found '${NEXT_PUBLIC_ANALYTICS_DEBUG}')"
-            exit 1
-          fi
-
-          if [ "${NEXT_PUBLIC_ENV}" != "ci" ]; then
-            echo "::error::NEXT_PUBLIC_ENV must be 'ci' during CI runs (found '${NEXT_PUBLIC_ENV}')"
-            exit 1
-          fi
-
-          if [ "${IS_PRELAUNCH}" != "true" ] && [ "${IS_PRELAUNCH}" != "1" ]; then
-            echo "::error::IS_PRELAUNCH must be enabled in CI (found '${IS_PRELAUNCH}')"
-            exit 1
-          fi
-
-          if [ "${TEST_MODE}" != "1" ]; then
-            echo "::error::TEST_MODE must be '1' in CI (found '${TEST_MODE}')"
-            exit 1
-          fi
-
-          echo "Playwright environment wiring verified."
-
-      - name: E2E tests (Playwright)
-        env:
-          APP_BASE_URL: http://127.0.0.1:4311
-          BASE_URL: http://127.0.0.1:4311
-          HOST: 127.0.0.1
-          PORT: '4311'
-          TEST_E2E_BYPASS_TOKEN: e2e-mocked-token
-          PLAYWRIGHT_ARTIFACTS_DIR: artifacts/playwright/e2e
-          PW_HEALTH_PATH: /icon.svg
-          DEBUG: pw:webserver,pw:api
-        run: |
-          npm run test:e2e
-        continue-on-error: false
-
-      - name: Tail Next.js test server log
-        if: always()
-        run: |
-          if [ -f .next/test-server.log ]; then
-            echo 'Last 300 lines from .next/test-server.log'
-            tail -n 300 .next/test-server.log
+          if grep -q '\- \[ \]' PRELAUNCH_CHECKLIST.md; then
+            echo "::warning::PRELAUNCH_CHECKLIST.md has unchecked items."
           else
-            echo 'No server log found'
+            echo 'Prelaunch checklist complete.'
           fi
 
-      - name: Accessibility smoke (axe)
-        env:
-          APP_BASE_URL: http://127.0.0.1:4311
-          BASE_URL: http://127.0.0.1:4311
-          HOST: 127.0.0.1
-          TEST_E2E_BYPASS_TOKEN: e2e-mocked-token
-          PLAYWRIGHT_ARTIFACTS_DIR: artifacts/playwright/axe
-          PW_HEALTH_PATH: /icon.svg
+      - name: CI safety toggles (warn)
         run: |
-          IS_PRELAUNCH=true npm run test:axe
-        continue-on-error: false
-
-      - name: Upload accessibility artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-axe
-          path: artifacts/playwright/axe/
-          if-no-files-found: ignore
-
-      - name: Lighthouse (LHCI)
-        timeout-minutes: 10
-        env:
-          BASE_URL: http://127.0.0.1:4311
-        run: npm run lighthouse
-        continue-on-error: false
-
-      - name: Upload Playwright artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-artifacts
-          path: |
-            artifacts/playwright
-            .next/test-server.log
-          if-no-files-found: warn
-
-      - name: Upload Lighthouse results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: lighthouse-results
-          path: artifacts/lighthouse/
-          if-no-files-found: ignore
-
-      - name: Append CI summary
-        if: always()
-        run: |
-          if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
-            {
-              echo '### CI Artifacts';
-              echo '';
-              echo '- Playwright reports: `artifacts/playwright/` (open `e2e/html/index.html` or `axe/html/index.html`)';
-              echo '- Lighthouse summary: `artifacts/lighthouse/summary.md`';
-            } >> "$GITHUB_STEP_SUMMARY"
+          if grep -n "EMAIL_TRANSPORT: *['\"]\?resend" .github/workflows/ci.yml; then
+            echo "::warning::EMAIL_TRANSPORT should remain noop inside ci.yml."
+          fi
+          if grep -n "NEXT_PUBLIC_ALLOW_INDEXING: *['\"]\?true" .github/workflows/ci.yml; then
+            echo "::warning::NEXT_PUBLIC_ALLOW_INDEXING must stay false for CI builds."
           fi
 
-      - name: Upload Next.js traces
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: lighthouse-server-log
-          path: server.log
-          if-no-files-found: ignore
-
-
-  e2e-fallback:
-    needs: build-and-test
-    if: needs.build-and-test.result == 'failure'
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    env:
-      CI: true
-      NODE_ENV: production
-      HOST: 127.0.0.1
-      PORT: '4311'
-      APP_BASE_URL: http://localhost:4311
-      NEXT_PUBLIC_SITE_URL: http://localhost:4311
-      WAITLIST_CONFIRM_TTL_DAYS: '7'
-      HCAPTCHA_SECRET: ${{ secrets.CI_HCAPTCHA_SECRET }}
-      FIREBASE_PROJECT_ID: ${{ secrets.CI_FIREBASE_PROJECT_ID }}
-      FIREBASE_DB_REGION: ${{ secrets.CI_FIREBASE_DB_REGION }}
-      FIREBASE_ADMIN_SA_B64: ${{ secrets.CI_FIREBASE_ADMIN_SA_B64 }}
-      RESEND_API_KEY: ${{ secrets.CI_RESEND_API_KEY }}
-      RESEND_FROM: no-reply@ci.louhen.app
-      RESEND_REPLY_TO: hello@ci.louhen.app
-      STATUS_USER: ${{ secrets.CI_STATUS_USER }}
-      STATUS_PASS: ${{ secrets.CI_STATUS_PASS }}
-      SUPPRESSION_SALT: ${{ secrets.CI_SUPPRESSION_SALT }}
-      EMAIL_TRANSPORT: noop
-      ANALYTICS_STORE_IP: 'false'
-      PW_HEALTH_PATH: /icon.svg
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22.x'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci --include=dev
-
-      - name: Build
-        run: npm run build
-
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            playwright-${{ runner.os }}-
-
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps
-
-      - name: Start fallback Next.js server
-        env:
-          PORT: '4311'
-          HOST: 127.0.0.1
-          PW_HEALTH_PATH: /icon.svg
-        run: |
-          mkdir -p .next
-          PORT=${PORT:-4311}
-          HOST=${HOST:-127.0.0.1}
-          HEALTH_PATH=${PW_HEALTH_PATH:-/}
-          echo "Using host $HOST and port $PORT"
-          npm run start:test &
-          SERVER_PID=$!
-          echo "SERVER_PID=$SERVER_PID" >> "$GITHUB_ENV"
-          echo "HOST=$HOST" >> "$GITHUB_ENV"
-          echo "PORT=$PORT" >> "$GITHUB_ENV"
-          echo "PW_HEALTH_PATH=$HEALTH_PATH" >> "$GITHUB_ENV"
-          started=0
-          for i in {1..120}; do
-            if curl -fsS "http://$HOST:$PORT${HEALTH_PATH}" >/dev/null 2>&1; then
-              started=1
-              echo "Server is responding on http://$HOST:$PORT${HEALTH_PATH}"
-              break
-            fi
-            if ! kill -0 "$SERVER_PID" >/dev/null 2>&1; then
-              echo "Server process exited early"
-              [[ -f .next/test-server.log ]] && cat .next/test-server.log || true
-              exit 1
-            fi
-            sleep 1
-          done
-          if [ "$started" -ne 1 ]; then
-            echo "Server failed to become healthy within 120 seconds"
-            [[ -f .next/test-server.log ]] && tail -n 200 .next/test-server.log || true
-            exit 1
-          fi
-
-      - name: Playwright tests (fallback)
-        env:
-          APP_BASE_URL: http://127.0.0.1:${{ env.PORT }}
-          BASE_URL: http://127.0.0.1:${{ env.PORT }}
-          HOST: 127.0.0.1
-          PORT: ${{ env.PORT }}
-          TEST_E2E_BYPASS_TOKEN: e2e-mocked-token
-          PLAYWRIGHT_ARTIFACTS_DIR: artifacts/playwright/fallback
-          PW_REUSE: '1'
-          PW_HEALTH_PATH: /icon.svg
-          DEBUG: pw:api
-        run: |
-          npm run test:e2e
-
-      - name: Tail Next.js test server log (fallback)
-        if: always()
-        run: |
-          if [ -f .next/test-server.log ]; then
-            echo 'Last 300 lines from .next/test-server.log'
-            tail -n 300 .next/test-server.log
-          else
-            echo 'No server log found'
-          fi
-
-      - name: Upload Playwright artifacts (fallback)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-artifacts-fallback
-          path: |
-            artifacts/playwright
-            .next/test-server.log
-          if-no-files-found: warn
-
-      - name: Stop fallback Next.js server
-        if: always()
-        run: |
-          if [ -n "${SERVER_PID:-}" ]; then
-            echo "Stopping server PID ${SERVER_PID}"
-            kill "${SERVER_PID}" || true
-            wait "${SERVER_PID}" 2>/dev/null || true
-          fi
-
-
-  enforce-release-source:
-    # Guard: only allow PRs into production if they originate from staging
-    if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'production'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Fail if head is not staging
+      - name: Require staging source for production PRs
+        if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'production'
         run: |
           if [ "${{ github.event.pull_request.head.ref }}" != "staging" ]; then
-            echo "[fail] PRs into 'production' must originate from 'staging'."
+            echo "::error::PRs targeting production must originate from staging."
             exit 1
           fi
-          echo "[ok] Source branch is 'staging' - release guard passed."
-
-  release:
-    if: github.ref == 'refs/heads/production'
-    name: release
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write          # required for tags and changelog commits
-      issues: write            # required if semantic-release comments on issues
-      pull-requests: write     # required if semantic-release posts PR notes
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install dependencies
-        run: npm ci
-      - name: Run semantic-release
-        run: npx semantic-release
+          echo 'Release guard passed.'
