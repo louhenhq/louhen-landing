@@ -153,6 +153,7 @@ export async function upsertPending(email: string, input: WaitlistUpsertInput): 
   const data = existingDoc.data() as Record<string, unknown> | undefined;
   const currentStatus = (typeof data?.status === 'string' ? data.status : 'pending') as WaitlistDoc['status'];
   if (currentStatus === 'confirmed') {
+    console.log('[GUARD][service]', { email, statusBefore: currentStatus });
     return {
       created: false,
       status: currentStatus,
@@ -175,6 +176,7 @@ export async function upsertPending(email: string, input: WaitlistUpsertInput): 
     updatePayload.utm = input.utm;
   }
 
+  console.log('[WRITE][service][pending]', { email, statusBefore: currentStatus });
   updatePayload.status = 'pending';
   updatePayload.consent = {
     gdpr: Boolean(input.consent),

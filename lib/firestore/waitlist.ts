@@ -421,6 +421,7 @@ export async function upsertPending(email: string, input: WaitlistUpsertInput): 
     }
 
     if (existingDoc.status === 'confirmed') {
+      console.log('[GUARD][repo]', { email, statusBefore: existingDoc.status });
       return {
         created: false,
         status: 'confirmed',
@@ -439,6 +440,10 @@ export async function upsertPending(email: string, input: WaitlistUpsertInput): 
       existingDoc.utm = input.utm;
     }
 
+    console.log('[WRITE][repo][pending]', { email, statusBefore: existingDoc.status });
+    if (existingDoc.status === 'confirmed') {
+      throw new Error('INVARIANT:CONFIRMED_DOWNGRADE_REPO');
+    }
     existingDoc.status = 'pending';
     existingDoc.consent = {
       gdpr: Boolean(input.consent),
@@ -498,6 +503,7 @@ export async function upsertPending(email: string, input: WaitlistUpsertInput): 
   const data = existingDoc.data() as Record<string, unknown> | undefined;
   const currentStatus = (typeof data?.status === 'string' ? data.status : 'pending') as WaitlistDoc['status'];
   if (currentStatus === 'confirmed') {
+    console.log('[GUARD][repo]', { email, statusBefore: currentStatus });
     return {
       created: false,
       status: 'confirmed',
@@ -520,6 +526,10 @@ export async function upsertPending(email: string, input: WaitlistUpsertInput): 
     updatePayload.utm = input.utm;
   }
 
+  console.log('[WRITE][repo][pending]', { email, statusBefore: currentStatus });
+  if (currentStatus === 'confirmed') {
+    throw new Error('INVARIANT:CONFIRMED_DOWNGRADE_REPO');
+  }
   updatePayload.status = 'pending';
   updatePayload.consent = {
     gdpr: Boolean(input.consent),
