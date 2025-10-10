@@ -1,17 +1,26 @@
 name: CI
 
+# STRICT_CI toggle: set to 'true' to treat warn-mode jobs (axe, lighthouse, policy-guards) as blocking.
+# Defaults to 'false'. Configure via workflow dispatch input or repository/environment variables.
+
 on:
   pull_request:
     branches:
       - staging
       - production
   workflow_dispatch:
+    inputs:
+      strict_ci:
+        description: 'Set true to enforce accessibility, performance, and policy jobs as blocking checks.'
+        default: 'false'
+        required: false
 
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/production' }}
 
 env:
+  STRICT_CI: ${{ format('{0}', (github.event.inputs.strict_ci != '' && toLower(github.event.inputs.strict_ci) == 'true') || toLower(vars.STRICT_CI || '') == 'true' || toLower(secrets.STRICT_CI || '') == 'true') }}
   TEST_MODE: '1'
   TEST_E2E_SHORTCIRCUIT: 'true'
   IS_PRELAUNCH: 'true'
@@ -140,6 +149,16 @@ jobs:
 
       - name: Install dependencies
         run: npm ci --include=dev
+
+      - name: CI mode summary
+        run: |
+          if [ "${STRICT_CI}" = "true" ]; then
+            MODE='🔴 CI STRICT MODE'
+          else
+            MODE='🟢 CI WARN MODE'
+          fi
+          echo "$MODE"
+          echo "$MODE" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Restore Next.js build
         run: rm -rf .next
@@ -305,6 +324,16 @@ jobs:
       - name: Install dependencies
         run: npm ci --include=dev
 
+      - name: CI mode summary
+        run: |
+          if [ "${STRICT_CI}" = "true" ]; then
+            MODE='🔴 CI STRICT MODE'
+          else
+            MODE='🟢 CI WARN MODE'
+          fi
+          echo "$MODE"
+          echo "$MODE" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Restore Next.js build
         run: rm -rf .next
 
@@ -381,6 +410,12 @@ jobs:
         if: steps.axe.outcome == 'failure'
         run: echo "::warning::Accessibility sweep reported issues. Review the uploaded artifacts."
 
+      - name: Enforce accessibility violations (strict)
+        if: ${{ env.STRICT_CI == 'true' && steps.axe.outcome == 'failure' }}
+        run: |
+          echo "::error::STRICT_CI enabled. Accessibility violations are blocking."
+          exit 1
+
       - name: Stop Next.js server
         if: always()
         run: |
@@ -439,6 +474,12 @@ jobs:
         if: steps.lhci.outcome == 'failure'
         run: echo "::warning::Lighthouse budgets failed. Review the lighthouse-report artifact."
 
+      - name: Enforce Lighthouse regressions (strict)
+        if: ${{ env.STRICT_CI == 'true' && steps.lhci.outcome == 'failure' }}
+        run: |
+          echo "::error::STRICT_CI enabled. Lighthouse regressions are blocking."
+          exit 1
+
   sbom:
     name: sbom
     runs-on: ubuntu-latest
@@ -483,18 +524,36 @@ jobs:
       - name: Install dependencies
         run: npm ci --include=dev
 
+      - name: CI mode summary
+        run: |
+          if [ "${STRICT_CI}" = "true" ]; then
+            MODE='🔴 CI STRICT MODE'
+          else
+            MODE='🟢 CI WARN MODE'
+          fi
+          echo "$MODE"
+          echo "$MODE" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Build design tokens
         run: npm run -w @louhen/design-tokens build
 
       - name: Color policy scan (warn)
         run: |
           if ! COLOR_POLICY_MODE=warn npm run guard:hex; then
+            if [ "${STRICT_CI}" = "true" ]; then
+              echo "::error::Color policy quick scan reported matches while STRICT_CI is enabled."
+              exit 1
+            fi
             echo "::warning::Color policy quick scan reported matches."
           fi
 
       - name: Color policy enforce (warn)
         run: |
           if ! COLOR_POLICY_MODE=enforce npm run ci:color-policy; then
+            if [ "${STRICT_CI}" = "true" ]; then
+              echo "::error::Color policy guard found violations while STRICT_CI is enabled. Review the color-policy-report artifact."
+              exit 1
+            fi
             echo "::warning::Color policy guard found violations. Review the color-policy-report artifact."
           fi
 
@@ -538,6 +597,10 @@ jobs:
             for (const entry of warnings) {
               console.log(`::warning::${entry}`);
             }
+            if (process.env.STRICT_CI === 'true') {
+              console.log('::error::STRICT_CI enabled. Inline script or dangerouslySetInnerHTML usage is blocking.');
+              process.exit(1);
+            }
           } else {
             console.log('No inline <script> or dangerouslySetInnerHTML usage detected.');
           }
@@ -559,6 +622,8 @@ jobs:
             },
           ];
 
+          let violations = 0;
+
           for (const { cmd, message } of checks) {
             let output = '';
             try {
@@ -571,7 +636,13 @@ jobs:
             const files = output.split('\n').map((line) => line.trim()).filter(Boolean);
             for (const file of files) {
               console.log(`::warning::forbidden-path:${file}: ${message}`);
+              violations += 1;
             }
+          }
+
+          if (violations > 0 && process.env.STRICT_CI === 'true') {
+            console.log('::error::STRICT_CI enabled. Forbidden public assets detected.');
+            process.exit(1);
           }
           NODE
 
@@ -624,6 +695,10 @@ jobs:
             for (const entry of suspicious) {
               console.log(`::warning::potential-secret:${entry}`);
             }
+            if (process.env.STRICT_CI === 'true') {
+              console.log('::error::STRICT_CI enabled. Potential secrets detected.');
+              process.exit(1);
+            }
           } else {
             console.log('Secret hygiene guard passed - no high-risk patterns found.');
           }
@@ -632,23 +707,35 @@ jobs:
       - name: Release checklist status (warn)
         if: github.event_name == 'pull_request'
         run: |
+          issues=0
           if [ ! -f PRELAUNCH_CHECKLIST.md ]; then
             echo "::warning::PRELAUNCH_CHECKLIST.md not found. Ensure release readiness is tracked."
-            exit 0
-          fi
-          if grep -q '\- \[ \]' PRELAUNCH_CHECKLIST.md; then
+            issues=1
+          elif grep -q '\- \[ \]' PRELAUNCH_CHECKLIST.md; then
             echo "::warning::PRELAUNCH_CHECKLIST.md has unchecked items."
+            issues=1
           else
             echo 'Prelaunch checklist complete.'
+          fi
+          if [ "${STRICT_CI}" = "true" ] && [ "$issues" -eq 1 ]; then
+            echo "::error::STRICT_CI enabled. PRELAUNCH_CHECKLIST findings are blocking."
+            exit 1
           fi
 
       - name: CI safety toggles (warn)
         run: |
+          found=0
           if grep -n "EMAIL_TRANSPORT: *['\"]\?resend" .github/workflows/ci.yml; then
             echo "::warning::EMAIL_TRANSPORT should remain noop inside ci.yml."
+            found=1
           fi
           if grep -n "NEXT_PUBLIC_ALLOW_INDEXING: *['\"]\?true" .github/workflows/ci.yml; then
             echo "::warning::NEXT_PUBLIC_ALLOW_INDEXING must stay false for CI builds."
+            found=1
+          fi
+          if [ "${STRICT_CI}" = "true" ] && [ "$found" -eq 1 ]; then
+            echo "::error::STRICT_CI enabled. CI safety toggle findings are blocking."
+            exit 1
           fi
 
       - name: Require staging source for production PRs
