@@ -225,14 +225,14 @@ export const test = base.extend<{
     context.off('page', listener);
     await Promise.all([...cleanups.values()].map((fn) => fn()));
   },
-  flags: async ({ request }, use) => {
+  flags: async ({ request }, provideFlagHelpers) => {
     const clear = async () => {
       await request.post('/api/test/flags', { data: {} });
     };
     const set = async (overrides: PublicFlagOverrides) => {
       await request.post('/api/test/flags', { data: overrides });
     };
-    await use({ set, clear });
+    await provideFlagHelpers({ set, clear });
     await clear();
   },
   consentGranted: async ({ page }, apply) => {

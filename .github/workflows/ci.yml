@@ -20,7 +20,7 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/production' }}
 
 env:
-  STRICT_CI: ${{ format('{0}', (github.event.inputs.strict_ci != '' && toLower(github.event.inputs.strict_ci) == 'true') || toLower(vars.STRICT_CI || '') == 'true' || toLower(secrets.STRICT_CI || '') == 'true') }}
+  STRICT_CI: ${{ (((github.event.inputs.strict_ci || '') == 'true') || ((vars.STRICT_CI || '') == 'true') || ((secrets.STRICT_CI || '') == 'true')) && 'true' || 'false' }}
   TEST_MODE: '1'
   TEST_E2E_SHORTCIRCUIT: 'true'
   IS_PRELAUNCH: 'true'
