@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node", "@playwright/test"]
+  },
+  "include": [
+    "playwright.config.*",
+    "tests/fixtures/**/*.ts",
+    "tests/e2e/**/*.ts",
+    "tests/axe/**/*.ts",
+    "tests/accessibility/**/*.ts"
+  ]
+}
