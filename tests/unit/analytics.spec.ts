@@ -29,6 +29,7 @@ beforeEach(async () => {
 
   const consentApi = await import('@/lib/shared/consent/api');
   consentApi.clearConsent();
+  consentApi.setConsent('granted');
 });
 
 describe('client analytics', () => {
