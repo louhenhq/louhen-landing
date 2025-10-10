@@ -1,6 +1,6 @@
 import { expect, test } from '@tests/fixtures/playwright';
 import { runAxe } from '@tests/fixtures/axe';
-import { getDefaultLocale, getTestLocales, localeUrl } from '@tests/e2e/_utils/url';
+import { getDefaultLocale, getTestLocales, localeUrl, setLocaleCookie } from '@tests/e2e/_utils/url';
 import type { Page } from '@playwright/test';
 
 const MOBILE_VIEWPORT = { width: 390, height: 844 } as const;
@@ -44,14 +44,24 @@ for (const locale of locales) {
   for (const route of ROUTES) {
     test(`${locale} ${route.name} accessibility`, async ({ page }, testInfo) => {
       await page.setViewportSize({ width: 1280, height: 900 });
-      await page.goto(localeUrl(route.path, { locale }), { waitUntil: 'networkidle' });
+      await setLocaleCookie(page.context(), locale);
+      const target = route.path === '/' ? '/' : localeUrl(route.path, { locale });
+      await page.goto(target, { waitUntil: 'domcontentloaded' });
+      if (route.path === '/') {
+        await expect(page).toHaveURL(new RegExp(`/${locale}/?(?:[?#].*)?$`));
+      }
       await route.ready(page);
       await runAxe(page, testInfo, { route: route.name, locale, viewport: 'desktop' });
     });
 
     test(`@mobile ${locale} ${route.name} accessibility`, async ({ page }, testInfo) => {
       await page.setViewportSize(MOBILE_VIEWPORT);
-      await page.goto(localeUrl(route.path, { locale }), { waitUntil: 'networkidle' });
+      await setLocaleCookie(page.context(), locale);
+      const target = route.path === '/' ? '/' : localeUrl(route.path, { locale });
+      await page.goto(target, { waitUntil: 'domcontentloaded' });
+      if (route.path === '/') {
+        await expect(page).toHaveURL(new RegExp(`/${locale}/?(?:[?#].*)?$`));
+      }
       await route.ready(page);
       await runAxe(page, testInfo, { route: route.name, locale, viewport: 'mobile' });
     });

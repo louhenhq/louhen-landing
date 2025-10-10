@@ -12,7 +12,7 @@ async function activeElementInsideDrawer(page: Page) {
 
 test.describe('@mobile Header mobile drawer', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(localeUrl('?utm_source=drawer-spec'), { waitUntil: 'networkidle' });
+    await page.goto(localeUrl('?utm_source=drawer-spec'), { waitUntil: 'domcontentloaded' });
   });
 
   test('opens with dialog semantics, traps focus, and closes on Escape', async ({ page }) => {

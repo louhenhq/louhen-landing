@@ -1,13 +1,15 @@
 import { expect, test } from '@tests/fixtures/playwright';
 import { runAxe } from '@tests/fixtures/axe';
-import { getDefaultLocale, localeUrl } from '@tests/e2e/_utils/url';
+import { getDefaultLocale, setLocaleCookie } from '@tests/e2e/_utils/url';
 
 const locale = getDefaultLocale();
 
 test.describe('Footer — accessibility', () => {
   test('contentinfo landmark and axe', async ({ page }, testInfo) => {
     await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto(localeUrl('/', { locale }), { waitUntil: 'networkidle' });
+    await setLocaleCookie(page.context(), locale);
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveURL(new RegExp(`/${locale}/?(?:[?#].*)?$`));
 
     const footer = page.locator('[data-ll="footer-root"]');
     await expect(footer).toHaveAttribute('role', 'contentinfo');

@@ -6,7 +6,7 @@ test.describe('Header CTA modes', () => {
     await page.addInitScript(() => {
       window.__LOUHEN_HEADER_PHASE__ = 'waitlist';
     });
-    await page.goto(localeUrl('?utm_source=cta-waitlist'), { waitUntil: 'networkidle' });
+    await page.goto(localeUrl('?utm_source=cta-waitlist'), { waitUntil: 'domcontentloaded' });
 
     const cta = page.locator('[data-ll="nav-waitlist-cta"]').first();
     await expect(cta).toHaveText('Join the waitlist');
@@ -18,7 +18,8 @@ test.describe('Header CTA modes', () => {
     await page.addInitScript(() => {
       window.__LOUHEN_HEADER_PHASE__ = 'access';
     });
-    await page.goto(localeUrl(), { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveURL(/\/de-de\/?$/);
 
     const cta = page.locator('[data-ll="nav-waitlist-cta"]').first();
     await expect(cta).toHaveAttribute('href', /onboarding\/request-access\?utm_source=header/);
@@ -29,7 +30,8 @@ test.describe('Header CTA modes', () => {
     await page.addInitScript(() => {
       window.__LOUHEN_HEADER_PHASE__ = 'download';
     });
-    await page.goto(localeUrl(), { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveURL(/\/de-de\/?$/);
 
     const cta = page.locator('[data-ll="nav-waitlist-cta"]').first();
     await expect(cta).toHaveAttribute('href', /download\?utm_source=header/);

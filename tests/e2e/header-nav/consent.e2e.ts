@@ -9,7 +9,7 @@ test.describe('Header consent controls', () => {
       await route.fulfill({ status: 204, body: '' });
     });
 
-    await page.goto(localeUrl('?utm_source=consent-header'), { waitUntil: 'networkidle' });
+    await page.goto(localeUrl('?utm_source=consent-header'), { waitUntil: 'domcontentloaded' });
 
     const consentButton = page.getByTestId('header-consent-button-desktop');
     await expect(consentButton).toBeVisible();

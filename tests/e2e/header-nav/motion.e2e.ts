@@ -4,7 +4,7 @@ import { localeUrl } from '../_utils/url';
 test.describe('Header motion', () => {
   test('shrinks, hides on scroll down, and reveals on scroll up', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto(localeUrl('?utm_source=motion-desktop'), { waitUntil: 'networkidle' });
+    await page.goto(localeUrl('?utm_source=motion-desktop'), { waitUntil: 'domcontentloaded' });
 
     const header = page.locator('[data-ll="nav-root"]');
     await expect(header).toHaveAttribute('data-header-state', 'default');
@@ -21,7 +21,7 @@ test.describe('Header motion', () => {
 
   test('focus within keeps header visible after hide', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto(localeUrl('?utm_source=motion-focus'), { waitUntil: 'networkidle' });
+    await page.goto(localeUrl('?utm_source=motion-focus'), { waitUntil: 'domcontentloaded' });
 
     const header = page.locator('[data-ll="nav-root"]');
 
@@ -41,7 +41,7 @@ test.describe('Header motion', () => {
   test('reduced motion keeps header static', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto(localeUrl('?utm_source=motion-reduced'), { waitUntil: 'networkidle' });
+    await page.goto(localeUrl('?utm_source=motion-reduced'), { waitUntil: 'domcontentloaded' });
 
     const header = page.locator('[data-ll="nav-root"]');
     await expect(header).toHaveAttribute('data-motion', 'disabled');

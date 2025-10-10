@@ -10,7 +10,7 @@ test.describe('OG dynamic vs static fallback', () => {
     await request.post('/api/test/og-mode', { data: { mode: 'dynamic' } });
 
     try {
-      await page.goto('/waitlist', { waitUntil: 'networkidle' });
+      await page.goto('/waitlist', { waitUntil: 'domcontentloaded' });
       const dynamicOg = await page.getAttribute('meta[property="og:image"]', 'content');
       expect(dynamicOg).toBeTruthy();
       expect(dynamicOg).toContain('/opengraph-image');
@@ -29,7 +29,7 @@ test.describe('OG dynamic vs static fallback', () => {
 
       await request.post('/api/test/og-mode', { data: { mode: 'static' } });
       const cacheBuster = `?t=${Date.now()}`;
-      await page.goto(`/waitlist${cacheBuster}`, { waitUntil: 'networkidle' });
+      await page.goto(`/waitlist${cacheBuster}`, { waitUntil: 'domcontentloaded' });
       const staticOg = await page.getAttribute('meta[property="og:image"]', 'content');
       expect(staticOg).toBeTruthy();
       expect(staticOg).not.toContain('/opengraph-image');

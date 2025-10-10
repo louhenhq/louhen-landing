@@ -64,7 +64,7 @@ test.describe('Localized legal pages', () => {
 
         test(`${locale} ${path} renders localized content`, async ({ page }) => {
           const url = localeUrl(`/legal/${slug}`, { locale });
-          const response = await page.goto(url, { waitUntil: 'networkidle' });
+          const response = await page.goto(url, { waitUntil: 'domcontentloaded' });
           expect(response?.status()).toBe(200);
 
           const h1 = page.locator('h1').first();

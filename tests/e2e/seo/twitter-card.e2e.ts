@@ -58,7 +58,7 @@ test.describe('Twitter card metadata', () => {
         ]);
       }
 
-      await page.goto(target.path, { waitUntil: 'networkidle' });
+      await page.goto(target.path, { waitUntil: 'domcontentloaded' });
       const twitterCard = await page.getAttribute('meta[name="twitter:card"]', 'content');
       expect(twitterCard, `${target.name} should define twitter:card`).toBe('summary_large_image');
     }

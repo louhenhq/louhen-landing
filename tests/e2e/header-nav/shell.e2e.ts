@@ -1,9 +1,9 @@
 import { test, expect } from '@tests/fixtures/playwright';
-import { localeUrl } from '../_utils/url';
 
 test.describe('Header shell structure', () => {
   test('desktop header renders primary navigation and hides drawer trigger', async ({ page }) => {
-    await page.goto(localeUrl(), { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveURL(/\/de-de\/?$/);
 
     const banner = page.locator('[data-ll="nav-root"]');
     await expect(banner).toBeVisible();
@@ -23,7 +23,8 @@ test.describe('Header shell structure', () => {
 
   test('mobile drawer trigger toggles menu', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto(localeUrl(), { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveURL(/\/de-de\/?$/);
 
     const trigger = page.locator('[data-ll="nav-menu-button"]');
     await expect(trigger).toBeVisible();

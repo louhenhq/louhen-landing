@@ -22,7 +22,7 @@ test.describe('Method page smoke test', () => {
       const messages = (await loadMessages(locale)) as { method?: Partial<MethodMessages> };
       const methodMessages = messages.method ?? {};
 
-      const response = await page.goto(methodPath(locale), { waitUntil: 'networkidle' });
+      const response = await page.goto(methodPath(locale), { waitUntil: 'domcontentloaded' });
       expect(response?.status()).toBe(200);
 
       if (methodMessages.seo?.title) {
@@ -65,7 +65,7 @@ test.describe('Method page smoke test', () => {
 
 test.describe('@mobile method mobile smoke', () => {
   test('renders hero and CTA on mobile view', async ({ page }) => {
-    await page.goto(localeUrl('/method', { locale: defaultLocale }), { waitUntil: 'networkidle' });
+    await page.goto(localeUrl('/method', { locale: defaultLocale }), { waitUntil: 'domcontentloaded' });
     await expect(page.locator('[data-testid="method-hero"]').first()).toBeVisible();
     await expect(page.locator('[data-testid="method-hero-cta"]').first()).toBeVisible();
   });

@@ -17,7 +17,7 @@ async function focusWithTab(page: Page, target: Locator): Promise<void> {
 test.describe('Waitlist form — keyboard errors', () => {
   test('focuses first invalid control and exposes error descriptions', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto(localeUrl('/waitlist'), { waitUntil: 'networkidle' });
+    await page.goto(localeUrl('/waitlist'), { waitUntil: 'domcontentloaded' });
 
     const emailInput = page.getByTestId('wl-email-input');
     const consentCheckbox = page.getByTestId('wl-consent-checkbox');

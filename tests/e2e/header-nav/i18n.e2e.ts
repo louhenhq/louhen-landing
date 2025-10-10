@@ -6,7 +6,7 @@ const EXPECTED_HREFLANGS = ['en-de', 'de-de', 'fr-fr', 'nl-nl', 'it-it', 'x-defa
 test.describe('Header locale switcher', () => {
   test('desktop switch preserves path, query, and metadata', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto(localeUrl('/method?utm_source=playwright'), { waitUntil: 'networkidle' });
+    await page.goto(localeUrl('/method?utm_source=playwright'), { waitUntil: 'domcontentloaded' });
 
     const select = page.locator('[data-ll="nav-locale-switcher"] select').first();
     await select.selectOption('de-de');
@@ -28,7 +28,7 @@ test.describe('Header locale switcher', () => {
 
   test('mobile drawer switch closes after changing locale', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto(localeUrl('?ref=mobile-test'), { waitUntil: 'networkidle' });
+    await page.goto(localeUrl('?ref=mobile-test'), { waitUntil: 'domcontentloaded' });
 
     const trigger = page.locator('[data-ll="nav-menu-button"]');
     await trigger.click();

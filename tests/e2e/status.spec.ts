@@ -65,7 +65,7 @@ test.describe('status diagnostics page', () => {
 
     try {
       const authedPage = await context.newPage();
-      const response = await authedPage.goto('/status', { waitUntil: 'networkidle' });
+      const response = await authedPage.goto('/status', { waitUntil: 'domcontentloaded' });
       expect(response?.status()).toBe(200);
       await expect(authedPage.getByRole('heading', { name: /Operational diagnostics/i })).toBeVisible();
       await expect(authedPage.getByTestId('status-csp-nonce-value')).toBeVisible();

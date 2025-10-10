@@ -1,5 +1,4 @@
 import { expect, test } from '@tests/fixtures/playwright';
-import { localeUrl } from '../_utils/url';
 
 function getDirective(header: string, name: string): string | null {
   const pattern = new RegExp(`${name}\\s+([^;]+)`, 'i');
@@ -23,8 +22,7 @@ function containsUnsafeInline(header: string) {
 
 test.describe('Security headers', () => {
   test('HTML response advertises strict headers and a nonced CSP', async ({ page }) => {
-    const homeUrl = localeUrl();
-    const navigationResponse = await page.goto(homeUrl, { waitUntil: 'domcontentloaded' });
+    const navigationResponse = await page.goto('/', { waitUntil: 'domcontentloaded' });
     expect(navigationResponse, 'Expected a navigation response for the HTML page').toBeTruthy();
     // Always inspect the navigation response so we validate the exact HTML payload after redirects/caching.
     const headers = navigationResponse!.headers();

@@ -1,13 +1,18 @@
 import { expect, test } from '@tests/fixtures/playwright';
 import { runAxe } from '@tests/fixtures/axe';
-import { getDefaultLocale, localeUrl } from '@tests/e2e/_utils/url';
+import { getDefaultLocale, localeUrl, setLocaleCookie } from '@tests/e2e/_utils/url';
 
 const locale = getDefaultLocale();
 
 test.describe('Header navigation — accessibility', () => {
+  test.beforeEach(async ({ context }) => {
+    await setLocaleCookie(context, locale);
+  });
+
   test('desktop landmarks and axe', async ({ page }, testInfo) => {
     await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto(localeUrl('/', { locale }), { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveURL(/\/de-de\/?$/);
 
     const banner = page.locator('[data-ll="nav-root"]');
     await expect(banner).toHaveAttribute('role', 'banner');
@@ -24,7 +29,8 @@ test.describe('Header navigation — accessibility', () => {
 
   test('@mobile drawer semantics and axe', async ({ page }, testInfo) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto(localeUrl('/', { locale }), { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveURL(/\/de-de\/?$/);
 
     const menuTrigger = page.locator('[data-ll="nav-menu-button"]');
     await expect(menuTrigger).toBeVisible();

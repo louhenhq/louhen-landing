@@ -1,9 +1,10 @@
 import { expect, test } from '@tests/fixtures/playwright';
-import { localeUrl } from './_utils/url';
+import { setLocaleCookie } from './_utils/url';
 
 test.describe('Landing analytics sentinel', () => {
   test('consent gating blocks analytics until accepted', async ({ context, page }) => {
     await context.clearCookies();
+    await setLocaleCookie(context);
     await page.setViewportSize({ width: 1280, height: 900 });
 
     let trackCalls = 0;
@@ -12,7 +13,8 @@ test.describe('Landing analytics sentinel', () => {
       await route.fulfill({ status: 204, body: '{}' });
     });
 
-    await page.goto(localeUrl(), { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveURL(/\/de-de\/?$/);
 
     const analyticsReadyInitial = await page.evaluate(() => window.__LOUHEN_ANALYTICS_READY === true);
     expect(analyticsReadyInitial).toBe(false);

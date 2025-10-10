@@ -1,6 +1,7 @@
 import { test as base } from '@playwright/test';
 import type { APIRequestContext, BrowserContext, Page } from '@playwright/test';
 import type { FeatureFlags } from '@/lib/shared/flags';
+import { setLocaleCookie } from '@tests/e2e/_utils/url';
 
 const INTERCEPT_SYMBOL = Symbol('louhen-playwright-intercept');
 
@@ -214,6 +215,8 @@ export const test = base.extend<{
     };
 
     await Promise.all(context.pages().map((page) => applyToPage(page)));
+
+    await setLocaleCookie(context);
 
     const listener = (page: Page) => {
       void applyToPage(page);

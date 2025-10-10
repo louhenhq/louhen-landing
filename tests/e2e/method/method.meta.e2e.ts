@@ -43,7 +43,7 @@ test.describe('Method page metadata', () => {
       }
       expect(status).toBe(200);
 
-      await page.goto(targetPath, { waitUntil: 'networkidle' });
+      await page.goto(targetPath, { waitUntil: 'domcontentloaded' });
 
       const expectedTitle =
         methodMessages.seo?.title ?? defaultMethodMessages.seo?.title ?? DEFAULT_METHOD_TITLE;

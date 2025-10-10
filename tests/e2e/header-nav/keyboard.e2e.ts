@@ -1,6 +1,5 @@
 import { expect, test } from '@tests/fixtures/playwright';
 import type { Page } from '@playwright/test';
-import { localeUrl } from '../_utils/url';
 
 async function focusMenuTrigger(page: Page): Promise<void> {
   const trigger = page.locator('[data-ll="nav-menu-button"]');
@@ -23,7 +22,8 @@ async function activeElementInsideDrawer(page: Page): Promise<boolean> {
 test.describe('@mobile keyboard navigation — header drawer', () => {
   test('opens, traps focus, and restores trigger focus', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto(localeUrl(), { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveURL(/\/de-de\/?$/);
 
     const trigger = page.locator('[data-ll="nav-menu-button"]');
     await focusMenuTrigger(page);

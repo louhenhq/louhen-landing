@@ -26,7 +26,8 @@ test.describe('Consent (granted)', () => {
       await route.continue();
     });
 
-    await page.goto(localeUrl(), { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveURL(/\/de-de\/?$/);
 
     await expect(page.getByRole('dialog', { name: /cookies/i })).toHaveCount(0);
     await expect

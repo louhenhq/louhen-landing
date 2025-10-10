@@ -5,7 +5,7 @@ const SUPPORTED_HREFLANGS = ['en-de', 'de-de', 'fr-fr', 'nl-nl', 'it-it', 'x-def
 
 test.describe('Header SEO touchpoints', () => {
   test('privacy page canonical + hreflang per locale', async ({ page }) => {
-    await page.goto(localeUrl('/legal/privacy'), { waitUntil: 'networkidle' });
+    await page.goto(localeUrl('/legal/privacy'), { waitUntil: 'domcontentloaded' });
 
     const canonical = await page.locator('link[rel="canonical"]').first().getAttribute('href');
     expect(canonical).toContain('/legal/privacy');
@@ -15,7 +15,7 @@ test.describe('Header SEO touchpoints', () => {
       expect(href as string).toContain('/legal/privacy');
     }
 
-    await page.goto(localeUrl('/legal/privacy', { locale: 'de-de' }), { waitUntil: 'networkidle' });
+    await page.goto(localeUrl('/legal/privacy', { locale: 'de-de' }), { waitUntil: 'domcontentloaded' });
     const canonicalDe = await page.locator('link[rel="canonical"]').first().getAttribute('href');
     expect(canonicalDe).toContain('/legal/privacy');
   });
@@ -25,7 +25,8 @@ test.describe('Header SEO touchpoints', () => {
       content: `window.__LOUHEN_PROMO_RIBBON__ = { id: 'playwright-test', href: '/promo' };`,
     });
 
-    await page.goto(localeUrl(), { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveURL(/\/de-de\/?$/);
 
     const cta = page.locator('[data-ll="nav-waitlist-cta"]').first();
     const ctaHref = await cta.getAttribute('href');

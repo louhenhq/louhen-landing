@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
+import { setLocaleCookie } from '@tests/e2e/_utils/url';
 
 const LOCALES = ['de-de', 'en-de', 'fr-fr', 'nl-nl', 'it-it'] as const;
 const BASELINE_DIR = path.resolve(process.cwd(), 'tests/__screenshots__/landing-v1');
@@ -18,7 +19,8 @@ test.describe('Landing visual baselines', () => {
     test(`landing surfaces — ${locale}`, async ({ page }, testInfo) => {
       await page.setViewportSize({ width: 1280, height: 900 });
       await page.emulateMedia({ reducedMotion: 'reduce' });
-      await page.goto(`/${locale}/`, { waitUntil: 'networkidle' });
+      await setLocaleCookie(page.context(), locale);
+      await page.goto(`/${locale}/`, { waitUntil: 'domcontentloaded' });
       await page.waitForTimeout(500);
 
       const sections = [
@@ -42,7 +44,7 @@ test.describe('Landing visual baselines', () => {
         });
       }
 
-      await page.goto(`/${locale}/method/`, { waitUntil: 'networkidle' });
+      await page.goto(`/${locale}/method/`, { waitUntil: 'domcontentloaded' });
       await page.waitForTimeout(500);
       const methodHero = page.locator('[data-testid="method-hero"]');
       await methodHero.scrollIntoViewIfNeeded();

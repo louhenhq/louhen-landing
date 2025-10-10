@@ -21,7 +21,7 @@ async function seedAuthHintCookies(page: Page) {
 
 test.describe('Header user state awareness', () => {
   test('guest experience keeps waitlist CTA and hides logout link', async ({ page }) => {
-    await page.goto(localeUrl('?utm_source=user-state-guest'), { waitUntil: 'networkidle' });
+    await page.goto(localeUrl('?utm_source=user-state-guest'), { waitUntil: 'domcontentloaded' });
 
     await expect(page.locator('[data-ll="nav-waitlist-cta"]').first()).toHaveText('Join the waitlist');
     await expect(page.getByTestId('header-logout')).toHaveCount(0);
@@ -45,7 +45,7 @@ test.describe('Header user state awareness', () => {
       await route.fulfill({ status: 204, body: '' });
     });
 
-    await page.goto(localeUrl('?utm_source=user-state-hinted'), { waitUntil: 'networkidle' });
+    await page.goto(localeUrl('?utm_source=user-state-hinted'), { waitUntil: 'domcontentloaded' });
 
     const dashboardCta = page.locator('[data-ll="nav-waitlist-cta"]').first();
     await expect(dashboardCta).toHaveText('Dashboard');

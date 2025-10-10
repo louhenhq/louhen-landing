@@ -74,7 +74,7 @@ const hasBaseOverride = baseOverride.length > 0;
 
 const defaultOrigin = sandboxOrigin || normalizeBase(process.env.APP_BASE_URL) || FALLBACK_ORIGIN;
 const targetOrigin = hasBaseOverride ? baseOverride : defaultOrigin;
-const canonicalBaseURL = withTrailingSlash(ensureLocaleBase(targetOrigin));
+const baseTestURL = withTrailingSlash(targetOrigin);
 
 const testEnv = {
   BASE_URL: targetOrigin,
@@ -118,7 +118,8 @@ const httpCredentials = statusUser && statusPass ? { username: statusUser, passw
 
 const config: PlaywrightTestConfig = {
   testDir: 'tests',
-  testMatch: ['**/*.e2e.ts', '**/*.axe.ts', '**/*.spec.ts'],
+  testMatch: ['e2e/**/*.e2e.ts', 'e2e/**/*.spec.ts', 'axe/**/*.axe.ts'],
+  testIgnore: ['unit/**'],
   timeout: process.env.CI ? 90_000 : 60_000,
   retries: process.env.CI ? 1 : 0,
   workers: process.env.CI ? 1 : 2,
@@ -131,7 +132,7 @@ const config: PlaywrightTestConfig = {
     timeout: 5_000,
   },
   use: {
-    baseURL: canonicalBaseURL,
+    baseURL: baseTestURL,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',

@@ -4,7 +4,7 @@ import { localeUrl } from '../_utils/url';
 test.describe('Header theme toggle', () => {
   test('desktop theme selection persists across reloads', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto(localeUrl('?utm_source=theme-desktop'), { waitUntil: 'networkidle' });
+    await page.goto(localeUrl('?utm_source=theme-desktop'), { waitUntil: 'domcontentloaded' });
 
     const themeSelect = page.getByTestId('header-theme-select-desktop');
     await expect(themeSelect).toBeVisible();
@@ -12,7 +12,7 @@ test.describe('Header theme toggle', () => {
     await themeSelect.selectOption('dark');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 
-    await page.reload({ waitUntil: 'networkidle' });
+    await page.reload({ waitUntil: 'domcontentloaded' });
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     await expect(themeSelect).toHaveValue('dark');
 
@@ -31,7 +31,7 @@ test.describe('Header theme toggle', () => {
   test('mobile theme change closes drawer and updates attribute', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(localeUrl('?utm_source=theme-mobile', { locale: 'de-de' }), {
-      waitUntil: 'networkidle',
+      waitUntil: 'domcontentloaded',
     });
 
     const trigger = page.locator('[data-ll="nav-menu-button"]');

@@ -1,10 +1,10 @@
 import { expect, test } from '@tests/fixtures/playwright';
 import type { BrowserContext, Page } from '@playwright/test';
-import { localeUrl } from '../_utils/url';
+import { localeUrl, setLocaleCookie, getCookieDomain } from '../_utils/url';
 
 const CONSENT_COOKIE_VALUE = () => encodeURIComponent('v1:granted');
 
-const COOKIE_DOMAIN = new URL(localeUrl()).hostname;
+const COOKIE_DOMAIN = getCookieDomain();
 
 async function seedConsent(context: BrowserContext) {
   await context.addCookies([
@@ -21,17 +21,18 @@ async function applyAuthHint(context: BrowserContext) {
 async function setThemePreference(context: BrowserContext, theme: 'light' | 'dark' | 'system') {
   if (theme === 'system') return;
   await context.addCookies([
-    { name: 'lh_theme_pref', value: theme, domain: 'localhost', path: '/' },
+    { name: 'lh_theme_pref', value: theme, domain: COOKIE_DOMAIN, path: '/' },
   ]);
 }
 
 async function gotoReady(page: Page, path: string) {
-  await page.goto(localeUrl(path), { waitUntil: 'networkidle' });
+  await page.goto(localeUrl(path), { waitUntil: 'domcontentloaded' });
 }
 
 test.describe('Header regression pack', () => {
   test.beforeEach(async ({ context }) => {
     await context.clearCookies();
+    await setLocaleCookie(context);
     await seedConsent(context);
     await setThemePreference(context, 'light');
   });
@@ -44,7 +45,7 @@ test.describe('Header regression pack', () => {
     const guestWidth = await cta.evaluate((node) => node.getBoundingClientRect().width);
 
     await applyAuthHint(context);
-    await page.reload({ waitUntil: 'networkidle' });
+    await page.reload({ waitUntil: 'domcontentloaded' });
 
     const hintedCta = page.locator('[data-ll="nav-waitlist-cta"]').first();
     await expect(hintedCta).toHaveText('Dashboard');

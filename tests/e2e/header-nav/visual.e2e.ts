@@ -1,5 +1,5 @@
 import { expect, test } from '@tests/fixtures/playwright';
-import { localeUrl } from '../_utils/url';
+import { localeUrl, setLocaleCookie, getCookieDomain } from '../_utils/url';
 
 type Scenario = {
   name: string;
@@ -12,6 +12,7 @@ type Scenario = {
 };
 
 const shouldRunVisuals = process.env.HEADER_VISUAL === '1';
+const COOKIE_DOMAIN = getCookieDomain();
 
 const SCENARIOS: Scenario[] = [
   {
@@ -49,24 +50,25 @@ test.describe('Header visual snapshots', () => {
   for (const scenario of SCENARIOS) {
     test(`${scenario.name}`, async ({ page, context }) => {
       await context.clearCookies();
+      await setLocaleCookie(context, scenario.locale);
       await context.addCookies([
         {
           name: 'll_consent',
           value: encodeURIComponent('v1:granted'),
-          domain: 'localhost',
+          domain: COOKIE_DOMAIN,
           path: '/',
         },
       ]);
 
       if (scenario.theme !== 'system') {
         await context.addCookies([
-          { name: 'lh_theme_pref', value: scenario.theme, domain: 'localhost', path: '/' },
+          { name: 'lh_theme_pref', value: scenario.theme, domain: COOKIE_DOMAIN, path: '/' },
         ]);
       }
 
       if (scenario.hinted) {
         await context.addCookies([
-          { name: 'LH_AUTH', value: '1', domain: 'localhost', path: '/' },
+          { name: 'LH_AUTH', value: '1', domain: COOKIE_DOMAIN, path: '/' },
         ]);
       }
 
@@ -79,7 +81,7 @@ test.describe('Header visual snapshots', () => {
       }
 
       await page.setViewportSize(scenario.viewport);
-      await page.goto(localeUrl(scenario.path, { locale: scenario.locale }), { waitUntil: 'networkidle' });
+      await page.goto(localeUrl(scenario.path, { locale: scenario.locale }), { waitUntil: 'domcontentloaded' });
 
       const header = page.locator('[data-ll="nav-root"]');
       await header.waitFor({ state: 'visible' });
