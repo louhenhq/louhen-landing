@@ -105,6 +105,7 @@ jobs:
       - name: Detect Next build output
         id: detect_next_build
         run: |
+          echo "NEXT_BUILD_DIR=${NEXT_BUILD_DIR}"
           if [ -d "${NEXT_BUILD_DIR}" ] && find "${NEXT_BUILD_DIR}" -type f -print -quit >/dev/null 2>&1; then
             echo "Detected Next build artifacts in ${NEXT_BUILD_DIR}"
             echo "has_next=true" >> "$GITHUB_OUTPUT"
@@ -208,14 +209,14 @@ jobs:
             fi
             if ! kill -0 "$SERVER_PID" >/dev/null 2>&1; then
               echo "Server process exited early"
-              [[ -f .next/test-server.log ]] && cat .next/test-server.log || true
+              [[ -f "${NEXT_BUILD_DIR}/test-server.log" ]] && cat "${NEXT_BUILD_DIR}/test-server.log" || true
               exit 1
             fi
             sleep 1
           done
           if [ "$started" -ne 1 ]; then
             echo "Server failed to become healthy within 120 seconds"
-            [[ -f .next/test-server.log ]] && tail -n 200 .next/test-server.log || true
+            [[ -f "${NEXT_BUILD_DIR}/test-server.log" ]] && tail -n 200 "${NEXT_BUILD_DIR}/test-server.log" || true
             exit 1
           fi
 
@@ -273,9 +274,9 @@ jobs:
       - name: Tail Next.js server log
         if: always()
         run: |
-          if [ -f .next/test-server.log ]; then
-            echo 'Last 300 lines from .next/test-server.log'
-            tail -n 300 .next/test-server.log
+          if [ -f "${NEXT_BUILD_DIR}/test-server.log" ]; then
+            echo "Last 300 lines from ${NEXT_BUILD_DIR}/test-server.log"
+            tail -n 300 "${NEXT_BUILD_DIR}/test-server.log"
           else
             echo 'No server log found'
           fi
@@ -288,7 +289,7 @@ jobs:
           path: |
             artifacts/playwright
             playwright-report
-            .next/test-server.log
+            ${{ env.NEXT_BUILD_DIR }}/test-server.log
           if-no-files-found: warn
 
       - name: Stop Next.js server
@@ -385,14 +386,14 @@ jobs:
             fi
             if ! kill -0 "$SERVER_PID" >/dev/null 2>&1; then
               echo "Server process exited early"
-              [[ -f .next/test-server.log ]] && cat .next/test-server.log || true
+              [[ -f "${NEXT_BUILD_DIR}/test-server.log" ]] && cat "${NEXT_BUILD_DIR}/test-server.log" || true
               exit 1
             fi
             sleep 1
           done
           if [ "$started" -ne 1 ]; then
             echo "Server failed to become healthy within 120 seconds"
-            [[ -f .next/test-server.log ]] && tail -n 200 .next/test-server.log || true
+            [[ -f "${NEXT_BUILD_DIR}/test-server.log" ]] && tail -n 200 "${NEXT_BUILD_DIR}/test-server.log" || true
             exit 1
           fi
 
@@ -404,9 +405,9 @@ jobs:
       - name: Tail Next.js server log
         if: always()
         run: |
-          if [ -f .next/test-server.log ]; then
-            echo 'Last 200 lines from .next/test-server.log'
-            tail -n 200 .next/test-server.log
+          if [ -f "${NEXT_BUILD_DIR}/test-server.log" ]; then
+            echo "Last 200 lines from ${NEXT_BUILD_DIR}/test-server.log"
+            tail -n 200 "${NEXT_BUILD_DIR}/test-server.log"
           else
             echo 'No server log found'
           fi
@@ -420,7 +421,7 @@ jobs:
             artifacts/playwright
             playwright-report
             test-results
-            .next/test-server.log
+            ${{ env.NEXT_BUILD_DIR }}/test-server.log
           if-no-files-found: warn
 
       - name: Flag accessibility failures
@@ -491,7 +492,7 @@ jobs:
           name: lighthouse-report
           path: |
             artifacts/lighthouse
-            .next/test-server.log
+            ${{ env.NEXT_BUILD_DIR }}/test-server.log
           if-no-files-found: warn
 
       - name: Flag Lighthouse regressions
@@ -640,7 +641,8 @@ jobs:
           const { readdirSync, statSync, readFileSync } = require('node:fs');
           const { join, relative } = require('node:path');
 
-          const ignoreDirs = new Set(['.git', 'node_modules', '.next', 'tmp', 'artifacts', 'ci-artifacts', 'playwright-report', 'lighthouse-report']);
+          const buildDir = process.env.NEXT_BUILD_DIR || '.next';
+          const ignoreDirs = new Set(['.git', 'node_modules', buildDir, 'tmp', 'artifacts', 'ci-artifacts', 'playwright-report', 'lighthouse-report']);
           const allowFiles = new Set(['.env.example']);
           const suspicious = [];
           const pattern = /(api[_-]?key|secret|token|password)[^=:\n]{0,40}[:=]\s*(['"]?)([A-Za-z0-9][_A-Za-z0-9\-]{16,})\2/gi;
