@@ -16,6 +16,21 @@ type TechArticleSchema = {
   '@type': 'TechArticle';
 } & Record<string, unknown>;
 
+function formatLocaleForSchema(locale: string): string {
+  if (!locale) {
+    return locale;
+  }
+  const segments = locale.split('-');
+  if (segments.length !== 2) {
+    return locale;
+  }
+  const [language, region] = segments;
+  if (!language || !region) {
+    return locale;
+  }
+  return `${language.toLowerCase()}-${region.toUpperCase()}`;
+}
+
 export function buildMethodTechArticleSchema({
   url,
   headline,
@@ -37,7 +52,7 @@ export function buildMethodTechArticleSchema({
     '@type': 'TechArticle',
     headline,
     description,
-    inLanguage: locale,
+    inLanguage: formatLocaleForSchema(locale),
     url,
     mainEntityOfPage: url,
     author: {

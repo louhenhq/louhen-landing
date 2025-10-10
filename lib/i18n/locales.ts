@@ -1,6 +1,6 @@
 import { LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE, COOKIE_PATH, COOKIE_SAME_SITE } from '../theme/constants';
 
-export const FULL_LOCALES = ['en-de', 'de-de'] as const;
+export const FULL_LOCALES = ['de-de', 'en-de', 'fr-fr', 'nl-nl', 'it-it'] as const;
 
 export type AppLocale = (typeof FULL_LOCALES)[number];
 
@@ -16,21 +16,48 @@ export type LocaleDescriptor = {
 
 export const SUPPORTED_LOCALES: LocaleDescriptor[] = [
   {
-    value: 'en-de',
-    label: 'English (Germany)',
-    nativeName: 'English (Deutschland)',
-    language: 'en',
-    region: 'DE',
-    hrefLang: 'en-DE',
-    isDefault: true,
-  },
-  {
     value: 'de-de',
     label: 'Deutsch (Deutschland)',
     nativeName: 'Deutsch (Deutschland)',
     language: 'de',
     region: 'DE',
     hrefLang: 'de-DE',
+    isDefault: true,
+  },
+  {
+    value: 'en-de',
+    label: 'English (Germany)',
+    nativeName: 'English (Deutschland)',
+    language: 'en',
+    region: 'DE',
+    hrefLang: 'en-DE',
+    isDefault: false,
+  },
+  {
+    value: 'fr-fr',
+    label: 'Français (France)',
+    nativeName: 'Français (France)',
+    language: 'fr',
+    region: 'FR',
+    hrefLang: 'fr-FR',
+    isDefault: false,
+  },
+  {
+    value: 'nl-nl',
+    label: 'Nederlands (Nederland)',
+    nativeName: 'Nederlands (Nederland)',
+    language: 'nl',
+    region: 'NL',
+    hrefLang: 'nl-NL',
+    isDefault: false,
+  },
+  {
+    value: 'it-it',
+    label: 'Italiano (Italia)',
+    nativeName: 'Italiano (Italia)',
+    language: 'it',
+    region: 'IT',
+    hrefLang: 'it-IT',
     isDefault: false,
   },
 ];
@@ -40,6 +67,9 @@ export const DEFAULT_LOCALE = SUPPORTED_LOCALES.find((entry) => entry.isDefault)
 export const SHORT_TO_FULL: Record<string, AppLocale> = {
   en: 'en-de',
   de: 'de-de',
+  fr: 'fr-fr',
+  nl: 'nl-nl',
+  it: 'it-it',
 };
 
 export const LOCALE_SEGMENT_PATTERN = /^\/([a-z]{2}-[a-z]{2})(?=\/|$)/;

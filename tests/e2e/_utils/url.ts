@@ -1,4 +1,4 @@
-const DEFAULT_LOCALE = process.env.NEXT_PUBLIC_DEFAULT_LOCALE ?? 'en-de';
+const DEFAULT_LOCALE = process.env.NEXT_PUBLIC_DEFAULT_LOCALE ?? 'de-de';
 const BASE_URL = (process.env.BASE_URL ?? 'http://127.0.0.1:4311').replace(/\/$/, '');
 
 const declaredLocales = (process.env.NEXT_PUBLIC_LOCALES ?? '')

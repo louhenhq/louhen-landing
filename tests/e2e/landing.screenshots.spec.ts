@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const LOCALES = ['en-de', 'de-de'] as const;
+const LOCALES = ['de-de', 'en-de', 'fr-fr', 'nl-nl', 'it-it'] as const;
 const BASELINE_DIR = path.resolve(process.cwd(), 'tests/__screenshots__/landing-v1');
 
 async function ensureBaselineDir() {

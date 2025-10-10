@@ -26,7 +26,14 @@ Canonical reference for environment configuration across stages. Update this mat
 | **SUPPRESSION_SALT** | `unsubscribe-secret` | Preview: preview salt | secret: `CI_SUPPRESSION_SALT` | Platform | Required to generate deterministic unsubscribe tokens. |
 | **STATUS_USER / STATUS_PASS** | `status-ops` / `status-secret` | Preview: strong random | secret: `CI_STATUS_USER` / `CI_STATUS_PASS` | Platform | Used by `/status`; rotate with every credential change. |
 | **PREVIEW_BYPASS_TOKEN** | - (set via GitHub secret only) | Vercel Protection Token | secret: `PREVIEW_BYPASS_TOKEN` | Platform | Required for preview Playwright runs; never echo in logs. |
-| **NEXT_PUBLIC_LOCALES / NEXT_PUBLIC_DEFAULT_LOCALE** | `en-de,de-de` / `en-de` | Preview: same as production | workflow env (`ci.yml`) | Localization | Update alongside locale additions in `next-intl`. |
+| **NEXT_PUBLIC_LOCALES / NEXT_PUBLIC_DEFAULT_LOCALE** | `en-de,de-de,fr-fr,nl-nl,it-it` / `de-de` | Preview: same as production | workflow env (`ci.yml`) | Localization | Update alongside locale additions in `next-intl`. |
+
+## Required Environment Variables
+
+| Variable | Value | Purpose | Notes |
+| --- | --- | --- | --- |
+| `NEXT_PUBLIC_LOCALES` | `en-de,de-de,fr-fr,nl-nl,it-it` | Static locale list for client/runtime; must match hardcoded locales in source so Next.js static analysis stays in sync. | Parity rule: set identically in Vercel (Preview + Production) and GitHub Actions Variables to keep CI in lockstep. Change control: requires docs update + full redeploy of Preview and Production. |
+| `NEXT_PUBLIC_DEFAULT_LOCALE` | `de-de` | Default locale for Germany; drives SSR locale negotiation, canonical URLs, `hreflang`, and JSON-LD language codes. | Same parity + change control rules as `NEXT_PUBLIC_LOCALES`. |
 | **NEXT_PUBLIC_WAITLIST_URGENCY** | `true` default | Preview: experiment-specific | workflow env (`ci.yml`) | Growth Ops | Legacy toggle; superseded by `NEXT_PUBLIC_BANNER_WAITLIST_URGENCY` when Slice 15 lands. Document interim changes in release notes. |
 | **TEST_MODE** | `0` (set manually for local unit tests) | Preview: `0` | workflow env (`ci.yml` -> `1`) | Platform | CI forces `1` to stub external integrations. |
 | **TEST_E2E_SHORTCIRCUIT** | `true` | Preview: `true` | workflow env (`ci.yml`) | Platform | Ensures Playwright bypasses third-party services. |

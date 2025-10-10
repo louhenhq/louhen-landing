@@ -1,5 +1,5 @@
 import { test as base } from '@playwright/test';
-import type { BrowserContext, Page } from '@playwright/test';
+import type { APIRequestContext, BrowserContext, Page } from '@playwright/test';
 import type { FeatureFlags } from '@/lib/shared/flags';
 
 const INTERCEPT_SYMBOL = Symbol('louhen-playwright-intercept');
@@ -225,15 +225,8 @@ export const test = base.extend<{
     context.off('page', listener);
     await Promise.all([...cleanups.values()].map((fn) => fn()));
   },
-  flags: async ({ request }, use) => {
-    const clear = async () => {
-      await request.post('/api/test/flags', { data: {} });
-    };
-    const set = async (overrides: PublicFlagOverrides) => {
-      await request.post('/api/test/flags', { data: overrides });
-    };
-    await use({ set, clear });
-    await clear();
+  flags: async ({ request }, provide) => {
+    await provideFlagFixture(request, provide);
   },
   consentGranted: async ({ page }, apply) => {
     await apply(async (target = page) => {
@@ -253,3 +246,17 @@ export const test = base.extend<{
 });
 
 export const expect = test.expect;
+
+async function provideFlagFixture(
+  request: APIRequestContext,
+  provide: (helpers: { set: (overrides: PublicFlagOverrides) => Promise<void>; clear: () => Promise<void> }) => Promise<void>,
+) {
+  const clear = async () => {
+    await request.post('/api/test/flags', { data: {} });
+  };
+  const set = async (overrides: PublicFlagOverrides) => {
+    await request.post('/api/test/flags', { data: overrides });
+  };
+  await provide({ set, clear });
+  await clear();
+}

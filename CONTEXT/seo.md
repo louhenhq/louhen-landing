@@ -5,7 +5,7 @@ Locked decisions: canonical host `https://www.louhen.app`, preview `https://stag
 ## Canonical Host & Redirects
 - Production always resolves to `https://www.louhen.app`; apex `https://louhen.app` issues a permanent `301` to `https://www.louhen.app`.
 - Preview traffic stays on `https://staging.louhen.app` (and `*.staging.louhen.app`) with `noindex` enforced until GA.
-- Never emit canonical links to the apex or staging hosts; QA must verify `<link rel="canonical">` and `hreflang` entries point to `https://www.louhen.app/{locale}`.
+- Never emit canonical links to the apex or staging hosts; QA must verify `<link rel="canonical">` and `hreflang` entries point to `https://www.louhen.app/{locale}` (the default locale `de-de` may omit the prefix in canonical paths, e.g., `/method`).
 
 ## Pre-launch policy
 - `isPrelaunch()` (see `lib/env/prelaunch.ts`) toggles `<meta name="robots" content="noindex, nofollow">` across marketing pages (home, method, waitlist, confirm flows, legal). Leave the flag enabled in preview and staging until GA.
@@ -19,7 +19,7 @@ Locked decisions: canonical host `https://www.louhen.app`, preview `https://stag
 - Revalidate caches/CDN entries after toggling crawl settings.
 - Ensure every `<link rel="canonical">`, `hreflang`, and `x-default` entry resolves to `https://www.louhen.app/{locale}`; never reference the apex domain.
 
-- Supported locales: `en`, `de`, `en-de`, `de-de`, `de-at` (see [/CONTEXT/i18n.md](i18n.md)). All canonical pages expose a full hreflang set, including `x-default`.
+- Supported locales: `en`, `de`, `fr`, `nl`, `it`, `en-de`, `de-de`, `fr-fr`, `nl-nl`, `it-it` (see [/CONTEXT/i18n.md](i18n.md)). All canonical pages expose a full hreflang set, including `x-default` mapping to the default locale (`de-de`).
 - `/sitemap.xml` now returns a sitemap index. It links to `/sitemaps/sitemap-<locale>.xml` files that list only the canonical URLs for that locale; the default-locale sitemap also includes `/waitlist`.
 - Shared metadata builders (`lib/seo/*Metadata.ts`) and page-level `generateMetadata()` helpers must call `hreflangMapFor` with the exact canonical path so alternates stay aligned (the waitlist page still uses `/waitlist` for every locale).
 - Default-locale routes (without a locale prefix) must call `unstable_setRequestLocale(defaultLocale)` so rendered metadata (canonical + hreflang) stays in sync with the locale-aware builders.

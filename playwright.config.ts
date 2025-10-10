@@ -18,6 +18,8 @@ const playwrightResultsDir = path.join(artifactsRoot, 'results');
 const FALLBACK_ORIGIN = 'https://staging.louhen.app';
 const sandboxBaseURL = process.env.PREVIEW_BASE_URL ?? '';
 const isSandbox = process.env.SANDBOX_VALIDATION === '1';
+const SUPPORTED_LOCALE_SUFFIXES = ['en-de', 'de-de', 'fr-fr', 'nl-nl', 'it-it'] as const;
+const DEFAULT_LOCALE_SEGMENT = process.env.NEXT_PUBLIC_DEFAULT_LOCALE ?? 'de-de';
 
 function normalizeBase(raw?: string | null): string {
   if (!raw) return '';
@@ -26,8 +28,10 @@ function normalizeBase(raw?: string | null): string {
 
 function ensureLocaleBase(origin: string): string {
   if (!origin) return '';
-  if (origin.endsWith('/en-de') || origin.endsWith('/de-de')) return origin;
-  return `${origin}/en-de`;
+  if (SUPPORTED_LOCALE_SUFFIXES.some((segment) => origin.endsWith(`/${segment}`))) {
+    return origin;
+  }
+  return `${origin}/${DEFAULT_LOCALE_SEGMENT}`;
 }
 
 function withTrailingSlash(value: string): string {

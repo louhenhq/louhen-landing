@@ -18,8 +18,8 @@ env:
   EMAIL_TRANSPORT: noop
   ANALYTICS_STORE_IP: 'false'
   NEXT_PUBLIC_ENV: 'ci'
-  NEXT_PUBLIC_LOCALES: 'en-de,de-de'
-  NEXT_PUBLIC_DEFAULT_LOCALE: 'en-de'
+  NEXT_PUBLIC_LOCALES: 'en-de,de-de,fr-fr,nl-nl,it-it'
+  NEXT_PUBLIC_DEFAULT_LOCALE: 'de-de'
   NEXT_PUBLIC_ANALYTICS_DISABLED: '1'
   NEXT_PUBLIC_ANALYTICS_DEBUG: '0'
   NEXT_PUBLIC_ALLOW_INDEXING: 'false'
@@ -34,6 +34,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - name: 🔎 CI Context
+        run: |
+          echo '🔎 CI Context: NEXT_PUBLIC_LOCALES=${NEXT_PUBLIC_LOCALES}'
+          echo '🔎 CI Context: NEXT_PUBLIC_DEFAULT_LOCALE=${NEXT_PUBLIC_DEFAULT_LOCALE}'
+
       - name: Checkout
         uses: actions/checkout@v4
 

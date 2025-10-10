@@ -1,7 +1,7 @@
 import { test, expect } from '@tests/fixtures/playwright';
 import { localeUrl } from '../_utils/url';
 
-const SUPPORTED_HREFLANGS = ['en', 'de', 'en-de', 'de-de', 'de-at', 'x-default'] as const;
+const SUPPORTED_HREFLANGS = ['en-de', 'de-de', 'fr-fr', 'nl-nl', 'it-it', 'x-default'] as const;
 
 test.describe('Header SEO touchpoints', () => {
   test('privacy page canonical + hreflang per locale', async ({ page }) => {
@@ -17,7 +17,7 @@ test.describe('Header SEO touchpoints', () => {
 
     await page.goto(localeUrl('/legal/privacy', { locale: 'de-de' }), { waitUntil: 'networkidle' });
     const canonicalDe = await page.locator('link[rel="canonical"]').first().getAttribute('href');
-    expect(canonicalDe).toContain('/de/legal/privacy');
+    expect(canonicalDe).toContain('/legal/privacy');
   });
 
   test('header CTA and ribbon links apply normalized UTMs', async ({ page }) => {

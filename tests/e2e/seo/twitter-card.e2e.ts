@@ -19,7 +19,7 @@ test.describe('Twitter card metadata', () => {
     await page.context().addCookies([
       {
         name: 'NEXT_LOCALE',
-        value: testLocales[0] ?? 'en-de',
+        value: testLocales[0] ?? 'de-de',
         domain: hostname,
         path: '/',
       },
@@ -51,7 +51,7 @@ test.describe('Twitter card metadata', () => {
         await page.context().addCookies([
           {
             name: 'NEXT_LOCALE',
-            value: testLocales[0] ?? 'en-de',
+            value: testLocales[0] ?? 'de-de',
             domain: hostname,
             path: '/',
           },

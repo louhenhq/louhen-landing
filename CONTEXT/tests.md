@@ -3,7 +3,7 @@
 Single source of truth for automated coverage, environments, and CI wiring. Every new suite or route must update this file so the matrix stays aligned with locked decisions.
 
 > **At a glance**
-> - **Canonical coverage:** `/[locale]/`, `/[locale]/waitlist`, `/[locale]/method` x `{en-de, de-de}`. Desktop Playwright covers interactivity; mobile Lighthouse covers performance & SEO.  
+> - **Canonical coverage:** `/[locale]/`, `/[locale]/waitlist`, `/[locale]/method` x `{de-de (default), en-de}`. Desktop Playwright covers interactivity; mobile Lighthouse covers performance & SEO. Screenshot baselines extend to `fr-fr`, `nl-nl`, `it-it`.  
 > - **CI jobs:** `policy-guards` -> `build-and-test` mirror `npm run validate:local`; `e2e-fallback` (rerun on failure) and `e2e:preview` (staging smoke) extend the matrix.  
 > - **Artifacts:** Playwright (`artifacts/playwright/<suite>/`), axe JSON next to the Playwright reports, Lighthouse (`artifacts/lighthouse/`), server traces (`server.log` uploaded when present).
 
@@ -11,9 +11,9 @@ Single source of truth for automated coverage, environments, and CI wiring. Ever
 
 | Route | Locale focus | Device targets | Automated checks | Notes |
 | --- | --- | --- | --- | --- |
-| `/[locale]/` (home) | `en-de` (x-default) + one non-default (`de-de`) | Desktop Playwright + mobile Lighthouse | `tests/e2e/landing.spec.ts` (analytics sentinel), `tests/e2e/header-nav/*`, `tests/axe/canonical.axe.ts`, `tests/e2e/seo/home.meta.e2e.ts`, Lighthouse mobile audit | Sentinel enforces consent gating and CTA instrumentation. Header-nav suite covers desktop and mobile drawer UX. |
+| `/[locale]/` (home) | `de-de` (x-default) + alternate (`en-de`) | Desktop Playwright + mobile Lighthouse | `tests/e2e/landing.spec.ts` (analytics sentinel), `tests/e2e/header-nav/*`, `tests/axe/canonical.axe.ts`, `tests/e2e/seo/home.meta.e2e.ts`, Lighthouse mobile audit | Sentinel enforces consent gating and CTA instrumentation. Header-nav suite covers desktop and mobile drawer UX; visual baselines also cover `fr-fr`, `nl-nl`, `it-it`. |
 | `/[locale]/waitlist` | Same locale pair | Desktop Playwright + mobile Lighthouse | `tests/e2e/waitlist/landing.e2e.ts`, `tests/e2e/waitlist/api.e2e.ts`, `tests/axe/canonical.axe.ts`, Lighthouse mobile audit (`/waitlist`) | API suite runs under `TEST_E2E_SHORTCIRCUIT=true` so no external services fire. |
-| `/[locale]/method` | Same locale pair | Desktop Playwright + mobile Lighthouse | `tests/e2e/method/smoke.e2e.ts`, `tests/e2e/method/method.meta.e2e.ts`, `tests/e2e/seo/canonical-uniqueness.e2e.ts`, `tests/axe/canonical.axe.ts`, Lighthouse mobile audit | Metadata spec enforces breadcrumb JSON-LD and canonical uniqueness across locales. |
+| `/[locale]/method` | Same locale pair | Desktop Playwright + mobile Lighthouse | `tests/e2e/method/smoke.e2e.ts`, `tests/e2e/method/method.meta.e2e.ts`, `tests/e2e/seo/canonical-uniqueness.e2e.ts`, `tests/axe/canonical.axe.ts`, Lighthouse mobile audit | Metadata spec enforces breadcrumb JSON-LD and canonical uniqueness across locales; JSON-LD asserts `de-DE` as the default language code. |
 
 Other routes (legal, security headers, status API, unsubscribe) are covered by targeted suites listed later, but the three surfaces above define the locked marketing funnel.
 
