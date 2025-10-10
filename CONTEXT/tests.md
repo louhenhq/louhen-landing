@@ -31,7 +31,7 @@ Other routes (legal, security headers, status API, unsubscribe) are covered by t
 ## Test types & commands
 
 ### Unit (Vitest)
-- Location: `tests/unit/**/*` configured via `vitest.config.ts` and `vitest.setup.ts`.
+- Location: `tests/unit/**/*` configured via `vitest.config.ts` and setup files under `tests/unit/` (for example `tests/unit/vitest.setup.ts`).
 - Run `npm run test:unit` (or `npm run test`) for CI parity, `npm run test:unit:watch` while developing.
 - Focus: waitlist validation, TTL helpers, routing utilities, metadata builders, email headers, security primitives. Typecheck scripts (`npm run typecheck`, strict configs) complement but do not replace unit coverage.
 

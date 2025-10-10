@@ -319,7 +319,7 @@ _Tables sorted by `Current Path`; `Status=DECIDE` rows include the follow-up nee
 | scripts/summarize_playwright_failures.mjs | util | scripts/qa/summarize-playwright-failures.mjs | summarize-playwright-failures.mjs | no | OK | Works with new config/playwright location. |
 | tailwind.config.ts | util | config/tailwind.config.ts | tailwind.config.ts | no | OK | Update build scripts to new config path. |
 | vitest.config.ts | util | config/vitest.config.ts | vitest.config.ts | no | OK | Ensure `vitest` CLI picks relocated config. |
-| vitest.setup.ts | util | tests/setup/vitest.setup.ts | vitest.setup.ts | no | OK | Lives alongside test setup helpers. |
+| vitest.setup.ts | util | tests/unit/vitest.setup.ts | vitest.setup.ts | no | OK | Lives alongside unit test setup helpers. |
 
 ### Feature: types-constants
 
@@ -335,7 +335,7 @@ _Tables sorted by `Current Path`; `Status=DECIDE` rows include the follow-up nee
 | --- | --- | --- | --- | --- | --- | --- |
 | tests/e2e/__skip__.spec.ts | test:e2e | tests/e2e/_legacy/__skip__.spec.ts | __skip__.spec.ts | no | DECIDE | Retire skip spec or keep as legacy reference? |
 | tests/e2e/_utils/url.ts | util | tests/e2e/utils/url.ts | url.ts | no | OK | Move helper under utils folder; adjust imports. |
-| tests/setup.server-mocks.ts | util | tests/setup/server-mocks.ts | server-mocks.ts | no | OK | Align setup helper with new folder structure. |
+| tests/setup.server-mocks.ts | util | tests/unit/setup.server-mocks.ts | setup.server-mocks.ts | no | OK | Align unit test helper with new folder structure. |
 
 ### Feature: design-tokens
 
