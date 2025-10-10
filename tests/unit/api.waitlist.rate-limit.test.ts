@@ -66,6 +66,15 @@ class InMemoryWaitlistRepository implements WaitlistSignupDependencies['repo'], 
       };
     }
 
+    if (existing.status === 'confirmed') {
+      return {
+        created: false,
+        status: 'confirmed',
+        docId: existing.id,
+        locale: existing.locale ?? null,
+      };
+    }
+
     const record = existing;
     record.status = 'pending';
     record.locale = input.locale ?? record.locale ?? null;
