@@ -150,6 +150,10 @@ describe('waitlist Firestore helpers', () => {
     const hash = 'lookup';
     await markConfirmedByTokenHash('lookup-123');
 
+    const confirmed = await findByEmail('confirmed@example.com');
+    expect(confirmed?.status).toBe('confirmed');
+    expect(confirmed?.confirmTokenHash).toBeNull();
+
     await upsertPending('confirmed@example.com', buildInput({ confirmTokenHash: 'new-hash', confirmTokenLookupHash: hash }));
     const record = await findByEmail('confirmed@example.com');
     expect(record?.status).toBe('confirmed');
