@@ -163,7 +163,7 @@ jobs:
         run: npm ci --include=dev
 
       - name: Report build artifact availability
-        run: echo "has_next=${{ needs.build.outputs.has_next }}"
+        run: echo "has_next=${{ needs.build.outputs.has_next }} NEXT_BUILD_DIR=${{ env.NEXT_BUILD_DIR }}"
 
       - name: Restore Next.js build
         run: rm -rf "${NEXT_BUILD_DIR}"
@@ -173,16 +173,20 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: next-build
-          path: .
+          path: ${{ env.NEXT_BUILD_DIR }}
 
-      - name: Ensure Next.js build is available
+      - name: Local build fallback
+        if: needs.build.outputs.has_next != 'true'
         run: |
-          if [ -d "${NEXT_BUILD_DIR}" ] && find "${NEXT_BUILD_DIR}" -type f -print -quit >/dev/null 2>&1; then
-            echo "Next build found in ${NEXT_BUILD_DIR}"
-          else
-            echo "::notice::No Next build detected; building locally"
-            npm run build
+          if [ ! -d node_modules ]; then
+            npm ci --include=dev
           fi
+          npm run build
+
+      - name: Verify Next build directory
+        run: |
+          echo "NEXT_BUILD_DIR=${NEXT_BUILD_DIR}"
+          ls -la "${NEXT_BUILD_DIR}" || true
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -340,7 +344,7 @@ jobs:
         run: npm ci --include=dev
 
       - name: Report build artifact availability
-        run: echo "has_next=${{ needs.build.outputs.has_next }}"
+        run: echo "has_next=${{ needs.build.outputs.has_next }} NEXT_BUILD_DIR=${{ env.NEXT_BUILD_DIR }}"
 
       - name: Restore Next.js build
         run: rm -rf "${NEXT_BUILD_DIR}"
@@ -350,16 +354,20 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: next-build
-          path: .
+          path: ${{ env.NEXT_BUILD_DIR }}
 
-      - name: Ensure Next.js build is available
+      - name: Local build fallback
+        if: needs.build.outputs.has_next != 'true'
         run: |
-          if [ -d "${NEXT_BUILD_DIR}" ] && find "${NEXT_BUILD_DIR}" -type f -print -quit >/dev/null 2>&1; then
-            echo "Next build found in ${NEXT_BUILD_DIR}"
-          else
-            echo "::notice::No Next build detected; building locally"
-            npm run build
+          if [ ! -d node_modules ]; then
+            npm ci --include=dev
           fi
+          npm run build
+
+      - name: Verify Next build directory
+        run: |
+          echo "NEXT_BUILD_DIR=${NEXT_BUILD_DIR}"
+          ls -la "${NEXT_BUILD_DIR}" || true
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -459,7 +467,7 @@ jobs:
         run: npm ci --include=dev
 
       - name: Report build artifact availability
-        run: echo "has_next=${{ needs.build.outputs.has_next }}"
+        run: echo "has_next=${{ needs.build.outputs.has_next }} NEXT_BUILD_DIR=${{ env.NEXT_BUILD_DIR }}"
 
       - name: Restore Next.js build
         run: rm -rf "${NEXT_BUILD_DIR}"
@@ -469,16 +477,20 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: next-build
-          path: .
+          path: ${{ env.NEXT_BUILD_DIR }}
 
-      - name: Ensure Next.js build is available
+      - name: Local build fallback
+        if: needs.build.outputs.has_next != 'true'
         run: |
-          if [ -d "${NEXT_BUILD_DIR}" ] && find "${NEXT_BUILD_DIR}" -type f -print -quit >/dev/null 2>&1; then
-            echo "Next build found in ${NEXT_BUILD_DIR}"
-          else
-            echo "::notice::No Next build detected; building locally"
-            npm run build
+          if [ ! -d node_modules ]; then
+            npm ci --include=dev
           fi
+          npm run build
+
+      - name: Verify Next build directory
+        run: |
+          echo "NEXT_BUILD_DIR=${NEXT_BUILD_DIR}"
+          ls -la "${NEXT_BUILD_DIR}" || true
 
       - name: Run Lighthouse (warn)
         id: lhci
