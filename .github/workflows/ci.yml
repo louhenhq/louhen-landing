@@ -27,6 +27,7 @@ env:
   NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
   COMMIT_SHA: ${{ github.sha }}
   NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
+  NEXT_BUILD_DIR: .next
 
 jobs:
   setup:
@@ -83,6 +84,8 @@ jobs:
       - setup
       - lint-and-types
     timeout-minutes: 30
+    outputs:
+      has_next: ${{ steps.detect_next_build.outputs.has_next }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -99,12 +102,23 @@ jobs:
       - name: Build Next.js app
         run: npm run build
 
+      - name: Detect Next build output
+        id: detect_next_build
+        run: |
+          if [ -d "${NEXT_BUILD_DIR}" ] && find "${NEXT_BUILD_DIR}" -type f -print -quit >/dev/null 2>&1; then
+            echo "Detected Next build artifacts in ${NEXT_BUILD_DIR}"
+            echo "has_next=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::No build artifacts detected in ${NEXT_BUILD_DIR}"
+            echo "has_next=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Upload Next build (if present)
-        if: success() && hashFiles('.next/**') != ''
+        if: steps.detect_next_build.outputs.has_next == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: next-build
-          path: .next
+          path: ${{ env.NEXT_BUILD_DIR }}
           if-no-files-found: ignore
 
   e2e:
@@ -147,14 +161,27 @@ jobs:
       - name: Install dependencies
         run: npm ci --include=dev
 
+      - name: Report build artifact availability
+        run: echo "has_next=${{ needs.build.outputs.has_next }}"
+
       - name: Restore Next.js build
-        run: rm -rf .next
+        run: rm -rf "${NEXT_BUILD_DIR}"
 
       - name: Download Next.js build
+        if: needs.build.outputs.has_next == 'true'
         uses: actions/download-artifact@v4
         with:
           name: next-build
           path: .
+
+      - name: Ensure Next.js build is available
+        run: |
+          if [ -d "${NEXT_BUILD_DIR}" ] && find "${NEXT_BUILD_DIR}" -type f -print -quit >/dev/null 2>&1; then
+            echo "Next build found in ${NEXT_BUILD_DIR}"
+          else
+            echo "::notice::No Next build detected; building locally"
+            npm run build
+          fi
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -311,14 +338,27 @@ jobs:
       - name: Install dependencies
         run: npm ci --include=dev
 
+      - name: Report build artifact availability
+        run: echo "has_next=${{ needs.build.outputs.has_next }}"
+
       - name: Restore Next.js build
-        run: rm -rf .next
+        run: rm -rf "${NEXT_BUILD_DIR}"
 
       - name: Download Next.js build
+        if: needs.build.outputs.has_next == 'true'
         uses: actions/download-artifact@v4
         with:
           name: next-build
           path: .
+
+      - name: Ensure Next.js build is available
+        run: |
+          if [ -d "${NEXT_BUILD_DIR}" ] && find "${NEXT_BUILD_DIR}" -type f -print -quit >/dev/null 2>&1; then
+            echo "Next build found in ${NEXT_BUILD_DIR}"
+          else
+            echo "::notice::No Next build detected; building locally"
+            npm run build
+          fi
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -417,14 +457,27 @@ jobs:
       - name: Install dependencies
         run: npm ci --include=dev
 
+      - name: Report build artifact availability
+        run: echo "has_next=${{ needs.build.outputs.has_next }}"
+
       - name: Restore Next.js build
-        run: rm -rf .next
+        run: rm -rf "${NEXT_BUILD_DIR}"
 
       - name: Download Next.js build
+        if: needs.build.outputs.has_next == 'true'
         uses: actions/download-artifact@v4
         with:
           name: next-build
           path: .
+
+      - name: Ensure Next.js build is available
+        run: |
+          if [ -d "${NEXT_BUILD_DIR}" ] && find "${NEXT_BUILD_DIR}" -type f -print -quit >/dev/null 2>&1; then
+            echo "Next build found in ${NEXT_BUILD_DIR}"
+          else
+            echo "::notice::No Next build detected; building locally"
+            npm run build
+          fi
 
       - name: Run Lighthouse (warn)
         id: lhci
