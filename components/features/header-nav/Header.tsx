@@ -140,7 +140,8 @@ export default function Header({ onCta, userState: userStateProp }: HeaderProps)
   const drawerCloseLabel = t('drawer.close');
   const menuButtonLabel = t('drawer.open');
 
-  const ctaLabel = t(ctaConfig.labelKey as Parameters<typeof t>[0]);
+  const ctaKey = (ctaConfig.labelKey ?? '').replace(/^header\./, '') as Parameters<typeof t>[0];
+  const ctaLabel = t(ctaKey);
   const skipLinkLabel = t('skipLink');
   const showAuthLinks = userState === 'hinted';
   const logoutHref = useMemo(() => resolveLogoutUrl(), []);

@@ -8,14 +8,11 @@ const HOST = process.env.HOST ?? '127.0.0.1';
 const parsedPort = Number.parseInt(process.env.PORT ?? '4311', 10);
 const PORT = Number.isFinite(parsedPort) ? parsedPort : 4311;
 const HEALTH_PATH = process.env.PW_HEALTH_PATH ?? '/icon.svg';
-const fallbackLocalURL = `http://localhost:${PORT}`;
-const envBaseURL = process.env.BASE_URL ?? process.env.PREVIEW_BASE_URL ?? null;
-const baseURL = envBaseURL ?? fallbackLocalURL;
-const isRemote = envBaseURL !== null;
+const fallbackLocalURL = `http://127.0.0.1:${PORT}`;
 const shouldSkipWebServer = process.env.PLAYWRIGHT_SKIP === '1';
 const artifactsRoot = process.env.PLAYWRIGHT_ARTIFACTS_DIR ?? 'artifacts/playwright';
 const playwrightResultsDir = path.join(artifactsRoot, 'results');
-const FALLBACK_ORIGIN = 'https://staging.louhen.app';
+const FALLBACK_ORIGIN = fallbackLocalURL;
 const sandboxBaseURL = process.env.PREVIEW_BASE_URL ?? '';
 const isSandbox = process.env.SANDBOX_VALIDATION === '1';
 function normalizeBase(raw?: string | null): string {
@@ -26,6 +23,17 @@ function normalizeBase(raw?: string | null): string {
 function withTrailingSlash(value: string): string {
   if (!value) return value;
   return value.endsWith('/') ? value : `${value}/`;
+}
+
+const LOOPBACK_HOSTS = new Set(['127.0.0.1', 'localhost', '0.0.0.0', '::1', '[::1]']);
+
+function isLoopbackOrigin(value: string): boolean {
+  try {
+    const parsed = new URL(value);
+    return LOOPBACK_HOSTS.has(parsed.hostname);
+  } catch {
+    return false;
+  }
 }
 
 mkdirSync(playwrightResultsDir, { recursive: true });
@@ -61,9 +69,10 @@ if (isSandbox && !sandboxOrigin) {
 const baseOverride = normalizeBase(process.env.BASE_URL);
 const hasBaseOverride = baseOverride.length > 0;
 
-const defaultOrigin = sandboxOrigin || normalizeBase(process.env.APP_BASE_URL) || FALLBACK_ORIGIN;
+const defaultOrigin = isSandbox ? sandboxOrigin : FALLBACK_ORIGIN;
 const targetOrigin = hasBaseOverride ? baseOverride : defaultOrigin;
 const baseTestURL = withTrailingSlash(targetOrigin);
+const resolvedBaseURL = targetOrigin;
 
 // Keep test env flags explicit so local + CI runs share the same prelaunch gating.
 const testEnv = {
@@ -74,7 +83,7 @@ const testEnv = {
   IS_PRELAUNCH: process.env.IS_PRELAUNCH ?? 'true',
   TEST_E2E_BYPASS_TOKEN: 'e2e-mocked-token',
   NEXT_PUBLIC_ENV: process.env.NEXT_PUBLIC_ENV ?? 'ci',
-  NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? baseURL,
+  NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? resolvedBaseURL,
   NEXT_PUBLIC_HCAPTCHA_SITE_KEY: process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY ?? 'test_site_key',
   NEXT_PUBLIC_WAITLIST_URGENCY: process.env.NEXT_PUBLIC_WAITLIST_URGENCY ?? 'true',
   NEXT_PUBLIC_BANNER_WAITLIST_URGENCY: process.env.NEXT_PUBLIC_BANNER_WAITLIST_URGENCY ?? 'true',
@@ -147,6 +156,8 @@ const config: PlaywrightTestConfig = {
   globalSetup: 'tests/setup/auth.setup.ts',
 };
 
+const shouldStartWebServer = !shouldSkipWebServer && isLoopbackOrigin(targetOrigin);
+
 if (shouldSkipWebServer) {
   config.projects = [
     {
@@ -175,7 +186,7 @@ if (shouldSkipWebServer) {
       use: { ...devices['Desktop Chrome'] },
     },
   ];
-  if (!isRemote) {
+  if (shouldStartWebServer) {
     config.webServer = {
       command: 'npm run start:test',
       url: `${fallbackLocalURL}${HEALTH_PATH}`,

@@ -16,13 +16,14 @@ type HeroProps = {
 export default function Hero({ onJoinClick }: HeroProps) {
   const t = useTranslations('hero');
   const trust = useTranslations('trust');
-  const trustCopy = useTranslations('trustCopy');
   const prefersReducedMotion = usePrefersReducedMotion();
   const [isAnimated, setIsAnimated] = useState(false);
   const trustBadges = useMemo(() => {
     const raw = trust.raw('badges') as Record<string, string> | undefined;
     return raw ? Object.values(raw) : [];
   }, [trust]);
+  const fitGuaranteeCopy = t('microTrust');
+  const fitDetailCopy = t('trust');
   const onCtaClick: MouseEventHandler<HTMLButtonElement> = (event) => {
     event.preventDefault();
     onJoinClick();
@@ -61,12 +62,12 @@ export default function Hero({ onJoinClick }: HeroProps) {
                 {t('secondary')}
               </Button>
             </div>
-            <p className={cn(text.meta, 'text-text-muted')}>{trustCopy('fitGuarantee')}</p>
+            <p className={cn(text.meta, 'text-text-muted')}>{fitGuaranteeCopy}</p>
           </div>
           <div className="flex flex-col gap-md">
             <HeroTwinBadge />
             <div className="flex flex-col gap-sm">
-              <span className={text.bodyMuted}>{trustCopy('fitDetail')}</span>
+              <span className={text.bodyMuted}>{fitDetailCopy}</span>
               <div className="flex flex-wrap items-center gap-sm text-meta text-text-muted">
                 {trustBadges.map((badge: string) => (
                   <span key={badge} className="rounded-pill border border-border px-md py-xs">

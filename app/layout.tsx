@@ -3,12 +3,10 @@ import './styles/tokens.css'
 import type { Metadata, Viewport } from 'next'
 import { headers } from 'next/headers'
 import ThemeInit from '@/components/ThemeInit'
-import { ConsentProvider } from '@/components/ConsentProvider'
 import AnalyticsInit from '@/components/AnalyticsInit'
 import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/SeoJsonLd'
 import { PageReadySentinel } from '@/components/PageReadySentinel'
 import { SITE_NAME } from '@/constants/site'
-import { parseConsentFromCookie } from '@/lib/shared/consent/api'
 import { NonceProvider } from '@/lib/csp/nonce-context'
 import { CONTRAST_COOKIE_NAME, THEME_COOKIE_NAME } from '@/lib/theme/constants'
 import tokens from '@louhen/design-tokens/build/web/tokens.json' assert { type: 'json' }
@@ -111,7 +109,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const consentHeaders = await headers();
   const nonce = consentHeaders.get('x-csp-nonce') ?? undefined;
   const cookieHeader = consentHeaders.get('cookie');
-  const consent = parseConsentFromCookie(cookieHeader);
   const cookieTheme = getCookieValue(cookieHeader, THEME_COOKIE_NAME);
   const cookieContrast = getCookieValue(cookieHeader, CONTRAST_COOKIE_NAME);
   const initialThemeAttr = cookieTheme === 'light' || cookieTheme === 'dark' ? cookieTheme : undefined;
@@ -157,19 +154,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body className="min-h-screen antialiased font-sans">
         <NonceProvider nonce={nonce}>
-          <ConsentProvider initialState={consent}>
-            {/* Apply theme/contrast on first paint + react to system changes */}
-            <ThemeInit />
-            <AnalyticsInit endpoint="/api/track" />
-            <PageReadySentinel />
-            <span
-              data-testid="lh-csp-nonce"
-              data-state={nonce ? 'present' : 'missing'}
-              aria-hidden="true"
-              style={{ position: 'fixed', inset: 'auto auto 0 0', width: 1, height: 1, overflow: 'hidden', pointerEvents: 'none', opacity: 0 }}
-            />
-            {children}
-          </ConsentProvider>
+          {/* Apply theme/contrast on first paint + react to system changes */}
+          <ThemeInit />
+          <AnalyticsInit endpoint="/api/track" />
+          <PageReadySentinel />
+          <span
+            data-testid="lh-csp-nonce"
+            data-state={nonce ? 'present' : 'missing'}
+            aria-hidden="true"
+            style={{ position: 'fixed', inset: 'auto auto 0 0', width: 1, height: 1, overflow: 'hidden', pointerEvents: 'none', opacity: 0 }}
+          />
+          {children}
         </NonceProvider>
       </body>
     </html>

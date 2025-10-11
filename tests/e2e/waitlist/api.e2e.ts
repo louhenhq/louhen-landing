@@ -14,7 +14,7 @@ function validWaitlistPayload() {
 }
 
 test.describe('API /api/waitlist', () => {
-  test('400 on invalid payload (missing email)', async ({ request }) => {
+  test('400 on invalid payload (missing email) @extended', async ({ request }) => {
     const response = await request.post('/api/waitlist', {
       data: {
         locale: LOCALE,
@@ -32,7 +32,7 @@ test.describe('API /api/waitlist', () => {
     expect(JSON.stringify(body)).toMatch(/email/i);
   });
 
-  test('rejects non-JSON bodies', async ({ request }) => {
+  test('rejects non-JSON bodies @extended', async ({ request }) => {
     const response = await request.post('/api/waitlist', {
       data: 'email=foo',
       headers: { 'content-type': 'text/plain' },
@@ -43,7 +43,7 @@ test.describe('API /api/waitlist', () => {
     expect(body).toMatch(/parse|json/i);
   });
 
-  test('rejects invalid email and surfaces field name', async ({ request }) => {
+  test('rejects invalid email and surfaces field name @extended', async ({ request }) => {
     const response = await request.post('/api/waitlist', {
       data: {
         email: 'not-an-email',
@@ -59,7 +59,7 @@ test.describe('API /api/waitlist', () => {
     expect(body).toMatch(/email/i);
   });
 
-  test('200/201 on valid payload when short-circuit enabled', async ({ request }) => {
+  test('200/201 on valid payload when short-circuit enabled @critical', async ({ request }) => {
     test.skip(!SHORT_CIRCUIT_ENABLED, 'Requires TEST_E2E_SHORTCIRCUIT to bypass external services.');
 
     const response = await request.post('/api/waitlist', {

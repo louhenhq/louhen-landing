@@ -48,17 +48,69 @@ These principles sit alongside the [Selector Policy](#selector-policy) and are n
 
 ## Execution Environment
 - Playwright globally sets `testIdAttribute="data-testid"`; shared primitives expose deterministic ids so selectors never fall back to CSS.
+- E2E runs against local preview by default (`BASE_URL` → `http://127.0.0.1:4311`), preserving the localhost-only network policy. CI sets this `BASE_URL` explicitly. Local E2E starts from the localized entry (e.g., `/de-de`) to avoid redirect timing; middleware performs one-shot locale redirect with loop guards.
 - Artifact policy: `trace='on'`, `video='retain-on-failure'`, and `screenshot='only-on-failure'`. CI uploads `artifacts/playwright/**` so every failure ships with trace/video/screenshot bundles.
 - Network policy: only loopback origins (`http://127.0.0.1`, `http://localhost`, `http://0.0.0.0`, `http://[::1]`) and fixture-derived ports are allowed. All other requests abort and fail the spec; see [/CONTEXT/security.md](security.md#network-policy-for-tests) before expanding the allowlist.
 - Environment echo: Playwright logs a single-line JSON containing `baseURL`, `IS_PRELAUNCH`, `CSP_REPORT_ONLY`, `DEFAULT_LOCALE`, and `ANALYTICS_ENABLED`. CI repeats the same keys up front so developers can spot drift between local and remote runs.
 - Accessibility coverage runs via the `axe` project (`npm run test:axe`) across `/`, `/waitlist`, and `/method` (default + secondary locale). Treat any serious/critical violation as a merge blocker.
 
+### Suite Tiers & Tags
+- `@smoke` (≤3 min): home (`tests/e2e/landing.spec.ts`), waitlist (`tests/e2e/waitlist/landing.e2e.ts` happy-path and mobile check), method (`tests/e2e/method/smoke.e2e.ts`), security headers/network policy, and JSON-LD presence (`tests/e2e/seo/home.meta.e2e.ts`). Run with `npm run test:e2e:smoke`.
+- `@critical` (≤10 min): everything in `@smoke` plus waitlist API happy paths (`tests/e2e/waitlist/api.e2e.ts`), confirmation + pre-onboarding flows (`tests/e2e/waitlist.flow.spec.ts`), and similar checkout/login journeys. Run with `npm run test:e2e:critical`.
+- `@extended`: error paths, feature-flag matrices, screenshots, and cross-browser/visual suites. Run with `npm run test:e2e:extended` (typically nightly).
+- Add the relevant tag(s) to every new spec. If a scenario spans tiers, include both annotations (e.g., `@smoke @critical`).
+
 ### Shell-agnostic execution
-- Do not source Homebrew (or any user shell profile) inside npm scripts. Invoke tools via `npx`/`node_modules/.bin` so commands succeed in restricted shells and CI containers.
-- Lint/test scripts must run without `/bin/ps`, `pkill`, or other process-inspection helpers. Server lifecycle is delegated to Playwright `webServer` (`reuseExistingServer: true`).
-- Local and CI runs share the same scripts: `npm run lint`, `npm run test:e2e`, `npm run test:axe`. They only rely on environment variables defined in the repo or the workflow file.
-- CI executes npm/Playwright commands via `bash --noprofile --norc` to avoid auto-sourcing Homebrew or custom shell profiles. Developers who see `Operation not permitted` warnings locally can grant their terminal Full Disk Access in System Settings → Privacy & Security, but the repo must not depend on `ps`.
-- ESLint ignores generated artifacts (artifacts/, playwright-report/, test-results/, trace bundles, tokens output, etc.) via the top-level `ignores` block in `eslint.config.mjs`; we do not maintain a `.eslintignore`. Linting remains focused on authored app + test sources. See [/CONTEXT/security.md](security.md#network-policy-for-tests) for the network restriction that generated traces enforce.
+- Run lint/test commands via `npx` or direct package binaries—never source user profiles or Homebrew shellenv inside npm scripts.
+- CI invokes all npm/Playwright steps with `bash --noprofile --norc -eo pipefail {0}`. Mirror this locally when debugging sandbox issues.
+- Avoid `/bin/ps`, `pkill`, or other process-inspection helpers in scripts. Playwright `webServer` owns lifecycle management (`reuseExistingServer: true`).
+- Local and CI shims share the same entrypoints: `npm run lint`, `npm run test:e2e:smoke`, `npm run test:e2e:critical`, `npm run test:axe`, and `npm run test:unit:coverage`.
+- If a sandboxed shell still auto-sources Homebrew, use `bash --noprofile --norc` or grant Full Disk Access to your terminal; do not update repo scripts to depend on Homebrew.
+- ESLint ignore globs live in `eslint.config.mjs` (`ignores` block). We intentionally exclude generated outputs (artifacts/, trace bundles, public/tokens, etc.) and lint only authored application + test sources.
+
+## Flake Policy & Quarantine
+- Intermittent failures must be quarantined or fixed within 24 hours. Move the offending spec to `tests/_quarantine/` or mark it with `test.fixme()` and an issue link.
+- File a `flake:` labeled issue containing the failing trace/video, console logs, and suspected root cause. Note the suite tier and owner.
+- Deflake weekly: bisect (`git bisect` or Playwright trace comparison), land the fix, and restore the test.
+- CI runs the quarantine suite in a non-blocking job so flakes stay visible while mainline is protected.
+
+## Coverage Policy
+- Unit/integration coverage must stay above **branches 80 %** and **lines/statements 85 %** (functions 80 %). CI enforces thresholds automatically when `CI=true`.
+- Local check: `npm run test:unit:coverage`. Coverage reports live under `coverage/` and fail the build if thresholds are missed.
+- Generated files, `.d.ts`, Playwright specs, and snapshots are excluded. Document any additional exclusions in this section.
+
+## Feature Flags & Locale Matrix
+- Smoke/critical suites run with default production flags only. Extended suites may flip a limited set of flags (e.g., `BANNER_WAITLIST_URGENCY`, theme) and must clean up after themselves.
+- Locale coverage always includes the default locale (`de-de`) plus one non-default locale (currently `en-de`). Avoid full Cartesian matrices.
+
+## API Contracts & Schema Checks
+- Contract tests protect any module that emits JSON/HTML fragments (SEO builders, JSON-LD, status payloads). Store them alongside the module or under `tests/unit/contracts/`.
+- Prefer schema assertions (Zod/TypeBox/JSON schema). If snapshots are used, they must capture shape only—no marketing copy.
+- Never snapshot large DOM trees. Use targeted selectors + expectations instead. See `/CONTEXT/contracts.md` for the full playbook.
+
+## Golden Fixtures & Test Data Governance
+- Curated fixtures live under `tests/fixtures/golden/` with a README describing provenance and update cadence. Keep them tiny (≤5 KB) and deterministic.
+- Changes to golden fixtures require review from the owning team (see `/CONTEXT/owners.md`) and must surface diff context in the PR.
+- E2E specs must not mutate shared data; seed deterministically and clean up within the test.
+
+## Skip & Retry Rules
+- `test.skip` / `test.fixme` require an issue link (`TODO(color.brand.primary): …`) plus a revisit date or milestone. Remove as soon as the issue is resolved.
+- Global retries remain `0`. Temporary per-project retries (`1` max) are allowed only while a linked issue exists and the spec sits in quarantine.
+
+## Triage SOP & Ownership
+- PR author investigates failures immediately: download the artifact bundle, review trace/video, console, network logs, and security header dumps.
+- Infra/env issues → label `ci:`; app/test bugs → label `bug:` plus the affected route/component, then loop in the owner from `/CONTEXT/owners.md`.
+- SLAs: `@smoke` failures fixed same business day; `@critical` within 48 hours; `@extended` scheduled during the next deflake slot.
+
+## Suite Cadence
+- **PR workflow** (current `ci.yml`): run `@smoke` and `@critical` suites plus the axe sweep. All steps fail the build on regression.
+- **Nightly workflow**: run `@extended`, screenshots, optional cross-browser matrix, and Lighthouse smoke (`npm run lighthouse`). Upload artifacts for morning triage.
+- **Weekly**: execute the quarantine suite; review open `flake:` issues during the deflake meeting and graduate fixed specs back to tiered folders.
+
+## Dependency Hygiene
+- Runtime dependencies stay pinned; dev-only tooling may use carets but resolves via `package-lock.json`.
+- Renovate bumps land weekly and must pass the full validation matrix (lint, coverage, smoke/critical E2E). See `/CONTEXT/deps.md` for the full policy.
+- New dependencies require justification in the PR, review from the owning squad, and (when long-lived) a `/CONTEXT/decision_log.md` entry.
 
 ## Selector Policy
 - **Hierarchy:**  
@@ -79,7 +131,8 @@ These principles sit alongside the [Selector Policy](#selector-policy) and are n
 ### Playwright end-to-end
 - Location: `tests/e2e/**`; configuration in `playwright.config.ts` exposes `desktop-chromium` (default) and `mobile-chromium` (runs specs tagged `@mobile`, skips `@desktop-only`).
 - Commands:
-  - `npm run test:e2e` - desktop + tagged mobile.
+  - `npm run test:e2e:smoke` / `npm run test:e2e:critical` - PR parity.
+  - `npm run test:e2e:extended` - nightly/full regression.
   - `npm run e2e:local` - local debug with extra logging.
   - `npm run qa:e2e` / `npm run qa` - orchestration commands used in CI.
 - Key suites:
@@ -91,7 +144,7 @@ These principles sit alongside the [Selector Policy](#selector-policy) and are n
 - Global setup writes `.playwright/auth-storage.json` when `PROTECTION_COOKIE` is provided; preview workflows feed `PROTECTION_HEADER`.
 - Import `test`/`expect` from `@tests/fixtures/playwright`; the fixture blocks third-party calls (`/api/track`, hCaptcha, GA, Vercel Insights) and stubs `navigator.sendBeacon`. Combine locator auto-waiting with the selector hierarchy above—no `page.waitForTimeout`.
 - Mark mobile-specific specs with `@mobile`; use `@desktop-only` when intentionally excluded.
-- Quarantine flaky specs with `@quarantine`, file a tracking issue (use the QA gap template), and link the failure URL plus artifacts. Remove the tag once stabilised.
+- Move flaky specs into `tests/_quarantine/` (or mark `test.fixme()`), file a `flake:` issue with traces, and unblock the main tiers within 24 hours.
 - Extend `tests/fixtures/playwright.ts` if new network intercepts or environment shims are required.
 
 ### Playwright + axe accessibility
@@ -118,6 +171,7 @@ These principles sit alongside the [Selector Policy](#selector-policy) and are n
   - Missing `BASE_URL` / server not healthy -> ensure `npm run validate:local` finished the build and health check; confirm port 4311 available.
   - Analytics sentinel failures -> ensure consent dialog is rendered; check `window.__LOUHEN_ANALYTICS_READY` remains false pre-consent.
   - Indexing flags -> `NEXT_PUBLIC_ALLOW_INDEXING` must be `false` in CI/preview; update Vercel only when launching publicly.
+  - Sandboxed shells that auto-source Homebrew may still emit `/bin/ps` warnings; run `npm run lint` / `npm run test:e2e` via `npx` in a normal terminal (or `bash --noprofile --norc`) to mirror CI.
 
 ## References
 - Analytics sentinel reference implementation: `tests/e2e/landing.spec.ts`.

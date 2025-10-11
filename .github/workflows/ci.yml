@@ -50,6 +50,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
+        # prevent Homebrew profile sourcing in CI
         shell: bash --noprofile --norc -eo pipefail {0}
         run: npm ci --include=dev
 
@@ -70,14 +71,17 @@ jobs:
         run: npm ci --include=dev
 
       - name: Lint
+        # prevent Homebrew profile sourcing in CI
         shell: bash --noprofile --norc -eo pipefail {0}
         run: npm run lint
 
       - name: Type check
+        # prevent Homebrew profile sourcing in CI
         shell: bash --noprofile --norc -eo pipefail {0}
         run: npm run typecheck
 
       - name: Unit tests
+        # prevent Homebrew profile sourcing in CI
         shell: bash --noprofile --norc -eo pipefail {0}
         run: npm run test:unit
 
@@ -101,10 +105,12 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
+        # prevent Homebrew profile sourcing in CI
         shell: bash --noprofile --norc -eo pipefail {0}
         run: npm ci --include=dev
 
       - name: Build Next.js app
+        # prevent Homebrew profile sourcing in CI
         shell: bash --noprofile --norc -eo pipefail {0}
         run: npm run build
 
@@ -177,6 +183,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
+        # prevent Homebrew profile sourcing in CI
         shell: bash --noprofile --norc -eo pipefail {0}
         run: npm ci --include=dev
 
@@ -272,11 +279,19 @@ jobs:
         run: |
           node -e "const snapshot = {}; const pick = (k) => { if (process.env[k] !== undefined) snapshot[k] = process.env[k]; }; ['APP_BASE_URL','BASE_URL','IS_PRELAUNCH','CSP_REPORT_ONLY','NEXT_PUBLIC_CSP_REPORT_ONLY','NEXT_PUBLIC_DEFAULT_LOCALE','NEXT_PUBLIC_ANALYTICS_ENABLED'].forEach(pick); if (!snapshot.CSP_REPORT_ONLY && snapshot.NEXT_PUBLIC_CSP_REPORT_ONLY) snapshot.CSP_MODE = snapshot.NEXT_PUBLIC_CSP_REPORT_ONLY; console.log('PLAYWRIGHT_ENV', JSON.stringify(snapshot));"
 
-      - name: Playwright tests
+      - name: Playwright smoke suite
+        # prevent Homebrew profile sourcing in CI
         shell: bash --noprofile --norc -eo pipefail {0}
         env:
           DEBUG: pw:webserver,pw:api
-        run: npm run test:e2e
+        run: npm run test:e2e:smoke
+
+      - name: Playwright critical suite
+        # prevent Homebrew profile sourcing in CI
+        shell: bash --noprofile --norc -eo pipefail {0}
+        env:
+          DEBUG: pw:webserver,pw:api
+        run: npm run test:e2e:critical
 
       - name: Tail Next.js server log
         if: always()
@@ -337,6 +352,8 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
+        # prevent Homebrew profile sourcing in CI
+        shell: bash --noprofile --norc -eo pipefail {0}
         run: npm ci --include=dev
 
       - name: Report build artifact availability
@@ -379,6 +396,7 @@ jobs:
       - name: Run accessibility suite (warn)
         id: axe
         continue-on-error: true
+        # prevent Homebrew profile sourcing in CI
         shell: bash --noprofile --norc -eo pipefail {0}
         run: npm run test:axe
 
@@ -408,6 +426,110 @@ jobs:
         if: steps.axe.outcome == 'failure'
         run: echo "::warning::Accessibility sweep reported issues. Review the uploaded artifacts."
 
+  quarantine:
+    name: quarantine (non-blocking)
+    runs-on: ubuntu-latest
+    needs: build
+    continue-on-error: true
+    timeout-minutes: 25
+    env:
+      CI: true
+      NODE_ENV: production
+      HOST: 127.0.0.1
+      PORT: '4311'
+      APP_BASE_URL: http://127.0.0.1:4311
+      NEXT_PUBLIC_SITE_URL: http://127.0.0.1:4311
+      BASE_URL: http://127.0.0.1:4311
+      WAITLIST_CONFIRM_TTL_DAYS: '7'
+      HCAPTCHA_SECRET: ${{ secrets.CI_HCAPTCHA_SECRET }}
+      FIREBASE_PROJECT_ID: ${{ secrets.CI_FIREBASE_PROJECT_ID }}
+      FIREBASE_DB_REGION: ${{ secrets.CI_FIREBASE_DB_REGION }}
+      FIREBASE_ADMIN_SA_B64: ${{ secrets.CI_FIREBASE_ADMIN_SA_B64 }}
+      RESEND_API_KEY: ${{ secrets.CI_RESEND_API_KEY }}
+      RESEND_FROM: no-reply@ci.louhen.app
+      RESEND_REPLY_TO: hello@ci.louhen.app
+      STATUS_USER: ${{ secrets.CI_STATUS_USER }}
+      STATUS_PASS: ${{ secrets.CI_STATUS_PASS }}
+      SUPPRESSION_SALT: ${{ secrets.CI_SUPPRESSION_SALT }}
+      PW_HEALTH_PATH: /icon.svg
+      PLAYWRIGHT_ARTIFACTS_DIR: artifacts/playwright/quarantine
+      TS_NODE_PROJECT: tsconfig.e2e.json
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        # prevent Homebrew profile sourcing in CI
+        shell: bash --noprofile --norc -eo pipefail {0}
+        run: npm ci --include=dev
+
+      - name: Restore Next.js build
+        run: rm -rf "${NEXT_BUILD_DIR}"
+
+      - name: Download Next.js build
+        if: needs.build.outputs.has_next == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: next-build
+          path: ${{ env.NEXT_BUILD_DIR }}
+
+      - name: Local build fallback
+        if: needs.build.outputs.has_next != 'true'
+        # prevent Homebrew profile sourcing in CI
+        shell: bash --noprofile --norc -eo pipefail {0}
+        run: |
+          if [ ! -d node_modules ]; then
+            npm ci --include=dev
+          fi
+          npm run build
+
+      - name: Detect quarantine specs
+        id: quarantine
+        run: |
+          if ls tests/_quarantine/**/*.ts 1>/dev/null 2>&1 || ls tests/_quarantine/**/*.tsx 1>/dev/null 2>&1; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Cache Playwright browsers
+        if: steps.quarantine.outputs.found == 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
+      - name: Install Playwright browsers
+        if: steps.quarantine.outputs.found == 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Run quarantine suite (non-blocking)
+        if: steps.quarantine.outputs.found == 'true'
+        # prevent Homebrew profile sourcing in CI
+        shell: bash --noprofile --norc -eo pipefail {0}
+        env:
+          DEBUG: pw:webserver,pw:api
+        run: npx playwright test tests/_quarantine --project=desktop-chromium --workers=1
+
+      - name: Upload quarantine artifacts
+        if: always() && steps.quarantine.outputs.found == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-quarantine
+          path: |
+            artifacts/playwright
+            playwright-report
+            ${{ env.NEXT_BUILD_DIR }}/test-server.log
+          if-no-files-found: warn
+
   lighthouse:
     name: lighthouse
     runs-on: ubuntu-latest
@@ -428,6 +550,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
+        # prevent Homebrew profile sourcing in CI
         shell: bash --noprofile --norc -eo pipefail {0}
         run: npm ci --include=dev
 
@@ -446,6 +569,7 @@ jobs:
 
       - name: Local build fallback
         if: needs.build.outputs.has_next != 'true'
+        # prevent Homebrew profile sourcing in CI
         shell: bash --noprofile --norc -eo pipefail {0}
         run: |
           if [ ! -d node_modules ]; then
@@ -461,6 +585,7 @@ jobs:
       - name: Run Lighthouse (warn)
         id: lhci
         continue-on-error: true
+        # prevent Homebrew profile sourcing in CI
         shell: bash --noprofile --norc -eo pipefail {0}
         run: npm run lighthouse
 

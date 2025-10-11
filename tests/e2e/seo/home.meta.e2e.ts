@@ -5,7 +5,7 @@ const locales = getTestLocales();
 
 test.describe('Home metadata', () => {
   for (const locale of locales) {
-    test(`${locale} exposes description and JSON-LD`, async ({ page }) => {
+    test(`${locale} exposes description and JSON-LD @smoke`, async ({ page }) => {
       await setLocaleCookie(page.context(), locale);
       await page.goto('/', { waitUntil: 'domcontentloaded' });
       await expect(page).toHaveURL(new RegExp(`/${locale}/?(?:[?#].*)?$`));

@@ -21,7 +21,7 @@ function containsUnsafeInline(header: string) {
 }
 
 test.describe('Security headers', () => {
-  test('HTML response advertises strict headers and a nonced CSP', async ({ page }) => {
+  test('HTML response advertises strict headers and a nonced CSP @smoke', async ({ page }) => {
     const navigationResponse = await page.goto('/', { waitUntil: 'domcontentloaded' });
     expect(navigationResponse, 'Expected a navigation response for the HTML page').toBeTruthy();
     // Always inspect the navigation response so we validate the exact HTML payload after redirects/caching.

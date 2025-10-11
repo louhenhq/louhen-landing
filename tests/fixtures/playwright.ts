@@ -253,7 +253,9 @@ async function enableInterceptors(page: Page): Promise<() => Promise<void>> {
   });
 
   return async () => {
-    await Promise.all(intercepts.map(({ url, handler }) => page.unroute(url, handler)));
+    if (!page.isClosed()) {
+      await Promise.all(intercepts.map(({ url, handler }) => page.unroute(url, handler)));
+    }
     page.off('console', consoleListener);
     page.off('requestfinished', requestFinishedListener);
     page.off('requestfailed', requestFailedListener);

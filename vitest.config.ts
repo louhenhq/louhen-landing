@@ -30,7 +30,15 @@ export default defineConfig({
     setupFiles: ['./tests/unit/setup.server-mocks.ts', './tests/unit/vitest.setup.ts'],
     globals: true,
     coverage: {
-      enabled: false,
+      enabled: process.env.COVERAGE === '1' || process.env.CI === 'true',
+      reporter: ['text', 'lcov'],
+      thresholds: {
+        branches: 80,
+        lines: 85,
+        functions: 80,
+        statements: 85,
+      },
+      exclude: ['**/tests/e2e/**', '**/__snapshots__/**', '**/*.d.ts', '**/node_modules/**'],
     },
     exclude: ['e2e/**', 'playwright.config.ts', 'tests/e2e/**', 'tests/accessibility/**'],
   },

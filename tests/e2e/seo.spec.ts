@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-const rawBaseUrl = process.env.APP_BASE_URL ?? 'http://localhost:4311';
+const rawBaseUrl = process.env.APP_BASE_URL ?? 'http://127.0.0.1:4311';
 const baseUrl = rawBaseUrl.replace(/\/$/, '');
 const fallbackBaseUrl = 'https://louhen-landing.vercel.app';
 const allowedHosts = [

@@ -11,6 +11,7 @@ import {
 } from '@/lib/i18n/locales';
 import { extractLocaleFromCookies } from '@/lib/intl/getLocale';
 import { getFlags, isProduction } from '@/lib/shared/flags';
+import { COOKIE_PATH, COOKIE_SAME_SITE, LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE } from '@/lib/theme/constants';
 
 const intlMiddleware = createIntlMiddleware({
   ...intlRoutingConfig,
@@ -21,6 +22,17 @@ const SUPPORTED_LOCALE_VALUES = new Set(FULL_LOCALES.map((value) => value.toLowe
 const ALREADY_LOCALIZED = /^\/([a-z]{2}-[a-z]{2})(?=\/|$)/i;
 const SHORT_LOCALE_SEGMENT = /^\/([a-z]{2})(?=\/|$)/i;
 const allowIndexOverride = process.env.LH_ALLOW_INDEX === 'true';
+const LOCALE_REDIRECT_COOKIE = '__ll_locale_redirect';
+const LOCALE_REDIRECT_MAX_AGE = 5;
+const NEXT_LOCALE_COOKIE = 'NEXT_LOCALE';
+const STATIC_PATH_PREFIXES = ['/assets', '/opengraph-image'];
+const STATIC_PATH_EXACT = new Set([
+  '/favicon.ico',
+  '/robots.txt',
+  '/sitemap.xml',
+  '/icon.svg',
+]);
+const EXTENSION_PATTERN = /\.[a-z0-9]+$/i;
 
 const HSTS_MAX_AGE_SECONDS = 60 * 60 * 24 * 730; // 2 years
 function generateNonce() {
@@ -124,6 +136,38 @@ function isLoopbackHost(hostname: string | null | undefined) {
   return normalized === 'localhost' || normalized === '127.0.0.1' || normalized === '[::1]' || normalized === '::1';
 }
 
+function isLoopbackOriginValue(value: string | null | undefined) {
+  if (!value) {
+    return false;
+  }
+  try {
+    const parsed = new URL(value);
+    return isLoopbackHost(parsed.hostname);
+  } catch {
+    return false;
+  }
+}
+
+function shouldBypassLocalization(pathname: string) {
+  const normalised = pathname.toLowerCase();
+  if (normalised.startsWith('/_next') || normalised.startsWith('/api')) {
+    return true;
+  }
+  for (const prefix of STATIC_PATH_PREFIXES) {
+    if (normalised.startsWith(prefix)) {
+      return true;
+    }
+  }
+  if (STATIC_PATH_EXACT.has(normalised)) {
+    return true;
+  }
+  const lastSegment = normalised.split('/').pop() ?? '';
+  if (EXTENSION_PATTERN.test(lastSegment)) {
+    return true;
+  }
+  return false;
+}
+
 function normalizeAppLocale(locale: string | null | undefined): AppLocale {
   if (!locale) {
     return DEFAULT_LOCALE.value;
@@ -139,7 +183,17 @@ function normalizeAppLocale(locale: string | null | undefined): AppLocale {
   return DEFAULT_LOCALE.value;
 }
 
-function resolvePreferredLocale(request: NextRequest): AppLocale {
+const ENV_DEFAULT_LOCALE = normalizeAppLocale(
+  process.env.DEFAULT_LOCALE ?? process.env.NEXT_PUBLIC_DEFAULT_LOCALE ?? DEFAULT_LOCALE.value
+);
+
+function resolvePreferredLocale(
+  request: NextRequest,
+  options: { forceDefault?: boolean } = {}
+): AppLocale {
+  if (options.forceDefault) {
+    return ENV_DEFAULT_LOCALE;
+  }
   const cookieHeader = request.headers.get('cookie');
   const cookieLocale = extractLocaleFromCookies(cookieHeader);
   if (cookieLocale) {
@@ -151,7 +205,7 @@ function resolvePreferredLocale(request: NextRequest): AppLocale {
     return headerLocale;
   }
 
-  return DEFAULT_LOCALE.value;
+  return ENV_DEFAULT_LOCALE;
 }
 
 function buildRedirectUrl(request: NextRequest, locale: AppLocale) {
@@ -159,6 +213,19 @@ function buildRedirectUrl(request: NextRequest, locale: AppLocale) {
   const pathname = request.nextUrl.pathname || '/';
   url.pathname = buildPathForLocale(locale, pathname);
   return url;
+}
+
+function applyLocaleCookies(response: NextResponse, locale: AppLocale) {
+  response.cookies.set(LOCALE_COOKIE, locale, {
+    path: COOKIE_PATH,
+    sameSite: COOKIE_SAME_SITE,
+    maxAge: LOCALE_COOKIE_MAX_AGE,
+  });
+  response.cookies.set(NEXT_LOCALE_COOKIE, locale, {
+    path: COOKIE_PATH,
+    sameSite: COOKIE_SAME_SITE,
+    maxAge: LOCALE_COOKIE_MAX_AGE,
+  });
 }
 
 function applySecurityHeaders(request: NextRequest, response: NextResponse, nonce: string) {
@@ -213,13 +280,14 @@ export function middleware(request: NextRequest) {
     request.headers.set('x-allow-robots', 'true');
   }
 
+  const baseUrlIsLoopback = isLoopbackOriginValue(process.env.BASE_URL);
+  const forceDefaultLocale = isLocalhost || baseUrlIsLoopback;
+  const localeRedirectCookie = request.cookies.get(LOCALE_REDIRECT_COOKIE);
+  const hasLocaleRedirectCookie = localeRedirectCookie?.value === '1';
+
   const { pathname } = request.nextUrl;
 
-  if (
-    pathname.startsWith('/_next') ||
-    pathname.startsWith('/api') ||
-    pathname.includes('.', 1)
-  ) {
+  if (shouldBypassLocalization(pathname)) {
     const response = NextResponse.next();
     return applySecurityHeaders(request, response, nonce);
   }
@@ -228,11 +296,13 @@ export function middleware(request: NextRequest) {
   if (localizedMatch) {
     const locale = localizedMatch[1]?.toLowerCase() ?? '';
     if (SUPPORTED_LOCALE_VALUES.has(locale)) {
-      const response = intlMiddleware(request);
+      const localizedResponse =
+        forceDefaultLocale && locale === ENV_DEFAULT_LOCALE ? NextResponse.next() : intlMiddleware(request);
+      applyLocaleCookies(localizedResponse, locale as AppLocale);
       if (shouldAllowIndex) {
-        response.headers.set('x-robots-tag', 'index, follow');
+        localizedResponse.headers.set('x-robots-tag', 'index, follow');
       }
-      return applySecurityHeaders(request, response, nonce);
+      return applySecurityHeaders(request, localizedResponse, nonce);
     }
   }
 
@@ -252,9 +322,29 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  const targetLocale = resolvePreferredLocale(request);
+  const targetLocale = resolvePreferredLocale(request, { forceDefault: forceDefaultLocale });
   const redirectUrl = buildRedirectUrl(request, targetLocale);
+
+  if (pathname === '/' && hasLocaleRedirectCookie) {
+    const rewriteUrl = request.nextUrl.clone();
+    rewriteUrl.pathname = redirectUrl.pathname;
+    const rewriteResponse = NextResponse.rewrite(rewriteUrl);
+    applyLocaleCookies(rewriteResponse, targetLocale);
+    if (shouldAllowIndex) {
+      rewriteResponse.headers.set('x-robots-tag', 'index, follow');
+    }
+    return applySecurityHeaders(request, rewriteResponse, nonce);
+  }
+
   const response = NextResponse.redirect(redirectUrl, 308);
+  if (pathname === '/') {
+    response.cookies.set(LOCALE_REDIRECT_COOKIE, '1', {
+      path: '/',
+      maxAge: LOCALE_REDIRECT_MAX_AGE,
+      sameSite: COOKIE_SAME_SITE,
+    });
+  }
+  applyLocaleCookies(response, targetLocale);
   if (shouldAllowIndex) {
     response.headers.set('x-robots-tag', 'index, follow');
   }

@@ -1,9 +1,12 @@
 import { expect, test } from '@tests/fixtures/playwright';
+import { defaultLocale } from '@/next-intl.locales';
 
 type AnalyticsEvent = {
   name?: string;
   [key: string]: unknown;
 };
+
+const localizedHome = `/${defaultLocale}`;
 
 test.describe('Consent (granted)', () => {
   test('initialises analytics and flushes queued events', async ({ consentGranted, page }) => {
@@ -25,9 +28,10 @@ test.describe('Consent (granted)', () => {
       await route.continue();
     });
 
-    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.goto(localizedHome, { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('networkidle');
     await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
-    await expect(page).toHaveURL(/\/de-de\/?$/);
+    await expect(page).toHaveURL(new RegExp(`/${defaultLocale}/?(?:[?#].*)?$`));
 
     await expect(page.getByRole('dialog', { name: /cookies/i })).toHaveCount(0);
     await expect

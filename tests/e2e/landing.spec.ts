@@ -2,7 +2,7 @@ import { expect, test } from '@tests/fixtures/playwright';
 import { setLocaleCookie } from './_utils/url';
 
 test.describe('Landing analytics sentinel', () => {
-  test('consent gating blocks analytics until accepted', async ({ context, page }) => {
+  test('consent gating blocks analytics until accepted @smoke', async ({ context, page }) => {
     await context.clearCookies();
     await setLocaleCookie(context);
     await page.setViewportSize({ width: 1280, height: 900 });

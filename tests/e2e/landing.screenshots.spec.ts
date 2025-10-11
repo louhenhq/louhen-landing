@@ -16,7 +16,7 @@ test.describe('Landing visual baselines', () => {
   });
 
   for (const locale of LOCALES) {
-    test(`landing surfaces — ${locale}`, async ({ page }, testInfo) => {
+    test(`landing surfaces — ${locale} @extended`, async ({ page }, testInfo) => {
       await page.setViewportSize({ width: 1280, height: 900 });
       await page.emulateMedia({ reducedMotion: 'reduce' });
       await setLocaleCookie(page.context(), locale);

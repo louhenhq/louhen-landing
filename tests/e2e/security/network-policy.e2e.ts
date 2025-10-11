@@ -1,7 +1,7 @@
 import { expect, test } from '@tests/fixtures/playwright';
 
 test.describe('Network policy', () => {
-  test('blocks external requests by default', async ({ page, networkPolicy }) => {
+  test('blocks external requests by default @smoke', async ({ page, networkPolicy }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
 

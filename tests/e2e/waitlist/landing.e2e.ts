@@ -7,7 +7,7 @@ const defaultLocale = getDefaultLocale();
 
 test.describe('Waitlist form (waitlist page)', () => {
   for (const locale of locales) {
-    test(`${locale} submits with consent`, async ({ page }) => {
+    test(`${locale} submits with consent @critical`, async ({ page }) => {
       await page.route(WAITLIST_API, async (route) => {
         await route.fulfill({
           status: 200,
@@ -46,7 +46,7 @@ test.describe('Waitlist form (waitlist page)', () => {
       }
     });
 
-    test(`${locale} surfaces server errors`, async ({ page }) => {
+    test(`${locale} surfaces server errors @extended`, async ({ page }) => {
       await page.route(WAITLIST_API, async (route) => {
         await route.fulfill({
           status: 500,
@@ -80,7 +80,7 @@ test.describe('Waitlist form (waitlist page)', () => {
 });
 
 test.describe('@mobile waitlist mobile smoke', () => {
-  test('renders waitlist form on mobile view', async ({ page }) => {
+  test('renders waitlist form on mobile view @smoke', async ({ page }) => {
     await setLocaleCookie(page.context(), defaultLocale);
     await page.goto(localeUrl('/waitlist', { locale: defaultLocale }), { waitUntil: 'domcontentloaded' });
     await expect(page.locator('[data-ll="wl-form"]').first()).toBeVisible();
@@ -91,7 +91,7 @@ test.describe('@mobile waitlist mobile smoke', () => {
 test.describe('Waitlist urgency badge flag', () => {
   const urgencyCopy = 'Limited early access available';
 
-  test('toggles urgency badge via feature flag', async ({ page, flags }) => {
+  test('toggles urgency badge via feature flag @extended', async ({ page, flags }) => {
     await flags.set({ BANNER_WAITLIST_URGENCY: false });
     await setLocaleCookie(page.context(), defaultLocale);
     await page.goto(localeUrl('/waitlist', { locale: defaultLocale }), { waitUntil: 'domcontentloaded' });

@@ -10,7 +10,7 @@ const PRELAUNCH_FLAG =
   (process.env.IS_PRELAUNCH?.trim() === 'true' || process.env.IS_PRELAUNCH?.trim() === '1') ||
   (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'production');
 
-const rawBaseUrl = process.env.APP_BASE_URL ?? 'http://localhost:4311';
+const rawBaseUrl = process.env.APP_BASE_URL ?? 'http://127.0.0.1:4311';
 const fallbackBaseUrl = 'https://louhen-landing.vercel.app';
 const allowedHosts = [
   (() => {

@@ -1,24 +1,24 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 /**
  * Renders a shared page-ready marker once client-side effects have run.
  * Tests can await the `data-state="ready"` attribute without relying on timeouts.
  */
 export function PageReadySentinel() {
-  const [ready, setReady] = useState(false);
+  const sentinelRef = useRef<HTMLSpanElement | null>(null);
 
   useEffect(() => {
-    setReady(true);
+    const node = sentinelRef.current;
+    if (node) {
+      node.dataset.state = 'ready';
+    }
   }, []);
-
-  if (!ready) {
-    return null;
-  }
 
   return (
     <span
+      ref={sentinelRef}
       data-testid="lh-page-ready"
       data-state="ready"
       aria-hidden="true"

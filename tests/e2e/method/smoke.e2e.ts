@@ -18,7 +18,7 @@ const defaultLocale = getDefaultLocale() as SupportedLocale;
 
 test.describe('Method page smoke test', () => {
   for (const locale of localesToTest as SupportedLocale[]) {
-    test(`${locale} renders localized hero and key content`, async ({ page }) => {
+    test(`${locale} renders localized hero and key content @smoke`, async ({ page }) => {
       const messages = (await loadMessages(locale)) as { method?: Partial<MethodMessages> };
       const methodMessages = messages.method ?? {};
 
@@ -69,7 +69,7 @@ test.describe('Method page smoke test', () => {
 });
 
 test.describe('@mobile method mobile smoke', () => {
-  test('renders hero and CTA on mobile view', async ({ page }) => {
+  test('renders hero and CTA on mobile view @smoke', async ({ page }) => {
     await page.goto(localeUrl('/method', { locale: defaultLocale }), { waitUntil: 'domcontentloaded' });
     await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
     await expect(page.getByTestId('lh-hero-method-root')).toBeVisible();

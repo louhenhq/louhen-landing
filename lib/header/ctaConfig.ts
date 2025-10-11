@@ -77,7 +77,7 @@ function resolveDashboardConfig(): HeaderCtaConfig {
   return {
     id: 'dashboard',
     mode: 'authenticated',
-    labelKey: 'header.cta.dashboard',
+    labelKey: 'cta.dashboard',
     analyticsTarget,
     action: {
       type: 'link',
@@ -99,7 +99,7 @@ export function buildHeaderCta(locale: SupportedLocale, options?: { userState?: 
     return {
       id: 'waitlist',
       mode,
-      labelKey: 'header.cta.waitlist',
+      labelKey: 'cta.waitlist',
       analyticsTarget: `#${DEFAULT_WAITLIST_TARGET}`,
       action: {
         type: 'scroll',
@@ -118,7 +118,7 @@ export function buildHeaderCta(locale: SupportedLocale, options?: { userState?: 
     return {
       id: 'access',
       mode,
-      labelKey: 'header.cta.access',
+      labelKey: 'cta.access',
       analyticsTarget,
       action: {
         type: 'link',
@@ -137,7 +137,7 @@ export function buildHeaderCta(locale: SupportedLocale, options?: { userState?: 
   return {
     id: 'download',
     mode,
-    labelKey: 'header.cta.download',
+    labelKey: 'cta.download',
     analyticsTarget,
     action: {
       type: 'link',

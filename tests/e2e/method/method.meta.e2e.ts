@@ -28,7 +28,7 @@ const localesToTest = getTestLocales() as SupportedLocale[];
 
 test.describe('Method page metadata', () => {
   for (const locale of localesToTest) {
-    test(`${locale} metadata reflects localized copy and canonical policy`, async ({ page }) => {
+    test(`${locale} metadata reflects localized copy and canonical policy @extended`, async ({ page }) => {
       const messages = (await loadMessages(locale)) as { method?: MethodMessages };
       const methodMessages = messages.method ?? {};
       const defaultMethodMessages =

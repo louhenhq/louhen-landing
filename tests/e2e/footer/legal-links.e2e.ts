@@ -31,12 +31,18 @@ test.describe('Footer legal links', () => {
       for (const keyPage of KEY_PAGES) {
         test(`${keyPage.name} renders footer`, async ({ page, context }) => {
           await setLocaleCookie(context, locale);
-          const target = keyPage.path === '/' ? '/' : localeUrl(keyPage.path, { locale });
+          const target =
+            keyPage.path === '/'
+              ? `/${locale}`
+              : localeUrl(keyPage.path, { locale });
           await page.goto(target, { waitUntil: 'domcontentloaded' });
-          if (keyPage.path === '/') {
-            const expectedLocale = locale === defaultLocale ? defaultLocale : locale;
-            await expect(page).toHaveURL(new RegExp(`/${expectedLocale}/?(?:[?#].*)?$`));
-          }
+          await page.waitForLoadState('networkidle');
+          const expectedLocale = locale === defaultLocale ? defaultLocale : locale;
+          const expectedPath =
+            keyPage.path === '/'
+              ? `/${expectedLocale}`
+              : `/${expectedLocale}${keyPage.path}`;
+          await expect(page).toHaveURL(new RegExp(`${escapeForRegex(expectedPath)}(?:/)?(?:[?#].*)?$`));
 
           const footer = page.locator('[data-ll="footer-root"]').first();
           await expect(footer, `Footer should be visible on ${keyPage.name} for ${locale}`).toBeVisible();
@@ -48,8 +54,9 @@ test.describe('Footer legal links', () => {
         const page = await context.newPage();
 
         await setLocaleCookie(context, locale);
-        await page.goto('/', { waitUntil: 'domcontentloaded' });
         const expectedLocale = locale === defaultLocale ? defaultLocale : locale;
+        await page.goto(`/${expectedLocale}`, { waitUntil: 'domcontentloaded' });
+        await page.waitForLoadState('networkidle');
         await expect(page).toHaveURL(new RegExp(`/${expectedLocale}/?(?:[?#].*)?$`));
 
         const privacyLink = page.locator('[data-ll="footer-privacy-link"]').first();

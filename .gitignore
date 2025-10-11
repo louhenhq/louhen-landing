@@ -47,3 +47,4 @@ next-env.d.ts
 playwright-report/
 .playwright/
 ci-artifacts/color-policy-report.txt
+.env.local

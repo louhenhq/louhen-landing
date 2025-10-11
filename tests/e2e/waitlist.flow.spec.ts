@@ -7,7 +7,7 @@ function uniqueEmail(label: string) {
 }
 
 test.describe('Waitlist flows', () => {
-  test('happy path with pre-onboarding and already confirmed revisit', async ({ page }) => {
+  test('happy path with pre-onboarding and already confirmed revisit @critical', async ({ page }) => {
     const email = uniqueEmail('happy');
 
     const payload = await seedWaitlistUser(page.request, email);
@@ -43,7 +43,7 @@ test.describe('Waitlist flows', () => {
     await expect(page.getByRole('status')).toContainText('already saved');
   });
 
-  test('expired token flow with resend produces new confirmation', async ({ page, request }) => {
+  test('expired token flow with resend produces new confirmation @extended', async ({ page, request }) => {
     const email = uniqueEmail('expired');
 
     const payload = await seedWaitlistUser(page.request, email);
