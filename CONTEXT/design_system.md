@@ -12,6 +12,7 @@
 
 ## Guardrails & Follow-up Automation
 - Policy (effective immediately): no raw color literals, no arbitrary Tailwind color/shadow utilities, and no duplicate token CSS imports. Prefer semantic helpers in `layout`, `buttons`, etc., and expand those helpers if a new pattern is required.
+- Shared primitives must expose stable `data-testid` hooks by default and forward a `testId` prop so Playwright selectors stay decoupled from incidental DOM structure.
 - Upcoming automation (future slices): ESLint rule to block raw color literals/arbitrary utilities; Tailwind plugin for token scale validation; CI check that `app/styles/tokens.css` remains the sole runtime import.
 - Code review checklist: verify new components only use semantic utilities, confirm Tailwind `extend` handled any new token mapping, and ensure dark/high-contrast support remains attribute-driven.
 

@@ -420,7 +420,16 @@ export async function upsertPending(email: string, input: WaitlistUpsertInput): 
       };
     }
 
-    const shouldUpdateToken = existingDoc.status !== 'confirmed';
+    const statusBefore = existingDoc.status as WaitlistDoc['status'];
+    if (statusBefore === 'confirmed') {
+      console.log('[GUARD][repo]', { email, statusBefore });
+      return {
+        created: false,
+        status: 'confirmed',
+        docId: existingDoc.id,
+        locale: existingDoc.locale ?? null,
+      };
+    }
 
     if (input.locale) {
       existingDoc.locale = input.locale;
@@ -432,25 +441,24 @@ export async function upsertPending(email: string, input: WaitlistUpsertInput): 
       existingDoc.utm = input.utm;
     }
 
-    if (shouldUpdateToken) {
-      existingDoc.status = 'pending';
-      existingDoc.consent = {
-        gdpr: Boolean(input.consent),
-        at: now,
-      };
-      existingDoc.confirmTokenHash = input.confirmTokenHash;
-      existingDoc.confirmTokenLookupHash = input.confirmTokenLookupHash;
-      existingDoc.confirmSalt = input.confirmSalt;
-      existingDoc.confirmExpiresAt = input.confirmExpiresAt;
-      existingDoc.confirmedAt = null;
-    }
-
+    console.log('[WRITE][repo][pending]', { email, statusBefore });
+    assertNotConfirmed(statusBefore, 'REPO');
+    existingDoc.status = 'pending';
+    existingDoc.consent = {
+      gdpr: Boolean(input.consent),
+      at: now,
+    };
+    existingDoc.confirmTokenHash = input.confirmTokenHash;
+    existingDoc.confirmTokenLookupHash = input.confirmTokenLookupHash;
+    existingDoc.confirmSalt = input.confirmSalt;
+    existingDoc.confirmExpiresAt = input.confirmExpiresAt;
+    existingDoc.confirmedAt = null;
     existingDoc.updatedAt = now;
     saveTestDoc(existingDoc);
 
     return {
       created: false,
-      status: shouldUpdateToken ? 'pending' : existingDoc.status,
+      status: 'pending',
       docId: existingDoc.id,
       locale: existingDoc.locale ?? null,
     };
@@ -492,8 +500,16 @@ export async function upsertPending(email: string, input: WaitlistUpsertInput): 
   }
 
   const data = existingDoc.data() as Record<string, unknown> | undefined;
-  const currentStatus = (typeof data?.status === 'string' ? data.status : 'pending') as WaitlistDoc['status'];
-  const shouldUpdateToken = currentStatus !== 'confirmed';
+  const statusBefore = (typeof data?.status === 'string' ? data.status : 'pending') as WaitlistDoc['status'];
+  if (statusBefore === 'confirmed') {
+    console.log('[GUARD][repo]', { email, statusBefore });
+    return {
+      created: false,
+      status: 'confirmed',
+      docId: existingDoc.id,
+      locale: (input.locale ?? data?.locale ?? null) as string | null | undefined,
+    };
+  }
 
   const updatePayload: Record<string, unknown> = {
     updatedAt: now,
@@ -509,24 +525,24 @@ export async function upsertPending(email: string, input: WaitlistUpsertInput): 
     updatePayload.utm = input.utm;
   }
 
-  if (shouldUpdateToken) {
-    updatePayload.status = 'pending';
-    updatePayload.consent = {
-      gdpr: Boolean(input.consent),
-      at: now,
-    };
-    updatePayload.confirmTokenHash = input.confirmTokenHash;
-    updatePayload.confirmTokenLookupHash = input.confirmTokenLookupHash;
-    updatePayload.confirmSalt = input.confirmSalt;
-    updatePayload.confirmExpiresAt = input.confirmExpiresAt;
-    updatePayload.confirmedAt = null;
-  }
+  console.log('[WRITE][repo][pending]', { email, statusBefore });
+  assertNotConfirmed(statusBefore, 'REPO');
+  updatePayload.status = 'pending';
+  updatePayload.consent = {
+    gdpr: Boolean(input.consent),
+    at: now,
+  };
+  updatePayload.confirmTokenHash = input.confirmTokenHash;
+  updatePayload.confirmTokenLookupHash = input.confirmTokenLookupHash;
+  updatePayload.confirmSalt = input.confirmSalt;
+  updatePayload.confirmExpiresAt = input.confirmExpiresAt;
+  updatePayload.confirmedAt = null;
 
   await existingDoc.ref.set(updatePayload, { merge: true });
 
   return {
     created: false,
-    status: shouldUpdateToken ? 'pending' : currentStatus,
+    status: 'pending',
     docId: existingDoc.id,
     locale: (input.locale ?? data?.locale ?? null) as string | null | undefined,
   };
@@ -801,4 +817,9 @@ export async function markExpiredByTokenHash(tokenHash: string): Promise<'expire
   );
 
   return 'expired';
+}
+function assertNotConfirmed(status: WaitlistDoc['status'], context: string) {
+  if (status === 'confirmed') {
+    throw new Error(`INVARIANT:CONFIRMED_DOWNGRADE_${context}`);
+  }
 }

@@ -9,6 +9,8 @@ import { generateToken, hashToken } from '@/lib/security/tokens';
 import { getExpiryDate } from '@/lib/waitlistConfirmTtl';
 import { parseSignupDTO } from '@lib/shared/validation/waitlist-schema';
 import { ensureWaitlistServerEnv } from '@/lib/env/guard';
+import { enforceRateLimit, type RateLimitDecision } from '@/lib/rate/limiter';
+import { getWaitlistSubmitRule, type RateLimitRule } from '@/lib/rate/rules';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -41,86 +43,138 @@ function errorResponse(error: HttpError) {
   );
 }
 
-export async function POST(request: Request) {
-  try {
-    // TODO: integrate IP/email rate limiting (Slice 3).
-    const payload = parseSignupDTO(await readJson(request));
+type WaitlistSignupRepository = {
+  upsertPending: typeof upsertPending;
+};
 
-    if (process.env.TEST_E2E_SHORTCIRCUIT === 'true') {
-      return NextResponse.json({ ok: true, shortCircuit: true }, { status: 200 });
-    }
+type WaitlistSignupDependencies = {
+  repo: WaitlistSignupRepository;
+  rateLimiter: (rule: RateLimitRule, identifier: string) => Promise<RateLimitDecision>;
+  getRule: () => RateLimitRule;
+};
 
-    const { captcha } = ensureWaitlistServerEnv();
-    const secret = process.env.HCAPTCHA_SECRET?.trim();
-    if (!secret || !captcha.hasSecret) {
-      throw new InternalServerError('Missing hCaptcha credentials');
-    }
+const defaultSignupDependencies: WaitlistSignupDependencies = {
+  repo: { upsertPending },
+  rateLimiter: enforceRateLimit,
+  getRule: getWaitlistSubmitRule,
+};
 
-    const isDevBypass = process.env.NODE_ENV !== 'production' && payload.hcaptchaToken === 'dev-bypass';
+function rateLimitExceeded(decision: RateLimitDecision) {
+  const body: Record<string, unknown> = {
+    ok: false,
+    code: 'rate_limited',
+    message: 'Rate limit exceeded',
+  };
+  if (decision.retryAfterSeconds) {
+    body.retryAfterSeconds = decision.retryAfterSeconds;
+  }
+  const response = NextResponse.json(body, { status: 429 });
+  if (decision.retryAfterSeconds) {
+    response.headers.set('Retry-After', String(decision.retryAfterSeconds));
+  }
+  return response;
+}
 
-    if (!isDevBypass) {
-      const verification = await verifyCaptchaToken({
-        token: payload.hcaptchaToken,
-        secret,
-        remoteIp: resolveRemoteIp(request),
+export function createWaitlistPostHandler(
+  overrides: Partial<WaitlistSignupDependencies> = {}
+) {
+  const deps: WaitlistSignupDependencies = {
+    repo: overrides.repo ?? defaultSignupDependencies.repo,
+    rateLimiter: overrides.rateLimiter ?? defaultSignupDependencies.rateLimiter,
+    getRule: overrides.getRule ?? defaultSignupDependencies.getRule,
+  };
+
+  return async function POST(request: Request) {
+    try {
+      const payload = parseSignupDTO(await readJson(request));
+
+      if (process.env.TEST_E2E_SHORTCIRCUIT === 'true') {
+        return NextResponse.json({ ok: true, shortCircuit: true }, { status: 200 });
+      }
+
+      const rule = deps.getRule();
+      const identifier = resolveRemoteIp(request) ?? 'anonymous';
+      const decision = await deps.rateLimiter(rule, identifier);
+      if (!decision.allowed) {
+        return rateLimitExceeded(decision);
+      }
+
+      const { captcha } = ensureWaitlistServerEnv();
+      const secret = process.env.HCAPTCHA_SECRET?.trim();
+      if (!secret || !captcha.hasSecret) {
+        throw new InternalServerError('Missing hCaptcha credentials');
+      }
+
+      const isDevBypass = process.env.NODE_ENV !== 'production' && payload.hcaptchaToken === 'dev-bypass';
+
+      if (!isDevBypass) {
+        const verification = await verifyCaptchaToken({
+          token: payload.hcaptchaToken,
+          secret,
+          remoteIp: resolveRemoteIp(request),
+        });
+
+        if (!verification.success) {
+          throw new BadRequestError('captcha_invalid', 'Captcha verification failed', {
+            details: verification.errorCodes,
+          });
+        }
+      }
+
+      const confirmToken = generateToken();
+      const { hash, salt, lookupHash } = hashToken(confirmToken);
+      const expiresAt = getExpiryDate();
+
+      const upsertResult = await deps.repo.upsertPending(payload.email, {
+        locale: payload.locale ?? null,
+        utm: payload.utm,
+        ref: payload.ref ?? null,
+        consent: payload.consent,
+        confirmExpiresAt: expiresAt,
+        confirmTokenHash: hash,
+        confirmTokenLookupHash: lookupHash,
+        confirmSalt: salt,
       });
 
-      if (!verification.success) {
-        throw new BadRequestError('captcha_invalid', 'Captcha verification failed', {
-          details: verification.errorCodes,
-        });
+      if (upsertResult.status === 'pending') {
+        try {
+          await sendWaitlistConfirmEmail({
+            email: payload.email,
+            locale: payload.locale ?? upsertResult.locale ?? null,
+            token: confirmToken,
+          });
+        } catch (error) {
+          console.error('[waitlist:confirm-email]', {
+            docId: upsertResult.docId,
+            message: error instanceof Error ? error.message : 'unknown_error',
+          });
+        }
       }
-    }
 
-    const confirmToken = generateToken();
-    const { hash, salt, lookupHash } = hashToken(confirmToken);
-    const expiresAt = getExpiryDate();
-
-    const upsertResult = await upsertPending(payload.email, {
-      locale: payload.locale ?? null,
-      utm: payload.utm,
-      ref: payload.ref ?? null,
-      consent: payload.consent,
-      confirmExpiresAt: expiresAt,
-      confirmTokenHash: hash,
-      confirmTokenLookupHash: lookupHash,
-      confirmSalt: salt,
-    });
-
-    if (upsertResult.status === 'pending') {
-      try {
-        await sendWaitlistConfirmEmail({
-          email: payload.email,
-          locale: payload.locale ?? upsertResult.locale ?? null,
-          token: confirmToken,
-        });
-      } catch (error) {
-        console.error('[waitlist:confirm-email]', {
-          docId: upsertResult.docId,
-          message: error instanceof Error ? error.message : 'unknown_error',
-        });
+      return NextResponse.json({ ok: true });
+    } catch (error) {
+      if (error instanceof BadRequestError) {
+        return errorResponse(error);
       }
-    }
 
-    return NextResponse.json({ ok: true });
-  } catch (error) {
-    if (error instanceof BadRequestError) {
-      return errorResponse(error);
-    }
+      if (error instanceof HttpError) {
+        console.error('[waitlist:signup]', { code: error.code, message: error.message });
+        return errorResponse(error);
+      }
 
-    if (error instanceof HttpError) {
-      console.error('[waitlist:signup]', { code: error.code, message: error.message });
-      return errorResponse(error);
+      console.error('[waitlist:signup]', { message: error instanceof Error ? error.message : 'unknown_error' });
+      return NextResponse.json(
+        {
+          ok: false,
+          code: 'internal_error',
+          message: 'Unable to process request',
+        },
+        { status: 500 }
+      );
     }
-
-    console.error('[waitlist:signup]', { message: error instanceof Error ? error.message : 'unknown_error' });
-    return NextResponse.json(
-      {
-        ok: false,
-        code: 'internal_error',
-        message: 'Unable to process request',
-      },
-      { status: 500 }
-    );
-  }
+  };
 }
+
+export type { WaitlistSignupDependencies };
+
+export const POST = createWaitlistPostHandler();

@@ -48,9 +48,14 @@
       "label": "Language",
       "en": "English",
       "de": "Deutsch",
+      "fr": "Français",
+      "nl": "Nederlands",
+      "it": "Italiano",
       "en-de": "English (Germany)",
       "de-de": "German (Germany)",
-      "de-at": "German (Austria)",
+      "fr-fr": "French (France)",
+      "nl-nl": "Dutch (Netherlands)",
+      "it-it": "Italian (Italy)",
       "submit": "Switch locale"
     },
     "theme": {

@@ -43,21 +43,21 @@ export default function Hero({ onJoinClick }: HeroProps) {
       aria-labelledby="hero-heading"
       tabIndex={-1}
       className={cn(layout.section, 'bg-bg')}
-      data-testid="landing-hero"
+      data-testid="lh-hero-landing-root"
     >
       <div className={cn(layout.container, layout.grid, 'items-center gap-y-xl')}>
         <div className="md:col-span-6 lg:col-span-5 flex flex-col gap-lg">
           <div className="flex flex-col gap-sm">
             <p className={cn(text.eyebrow, 'text-brand-primary')}>Louhen</p>
-            <h1 id="hero-heading" className={cn(text.hero, 'max-w-xl')}>{t('h1')}</h1>
-            <p className={cn(text.subheading, 'max-w-lg')}>{t('sub')}</p>
+            <h1 id="hero-heading" className={cn(text.hero, 'max-w-xl')} data-testid="lh-hero-landing-title">{t('h1')}</h1>
+            <p className={cn(text.subheading, 'max-w-lg')} data-testid="lh-hero-landing-subtitle">{t('sub')}</p>
           </div>
           <div className="flex flex-col gap-sm">
             <div className="flex flex-col gap-sm sm:flex-row sm:items-center sm:gap-sm">
-              <Button size="lg" className="w-full sm:w-auto" onClick={onCtaClick}>
+              <Button size="lg" className="w-full sm:w-auto" onClick={onCtaClick} testId="lh-cta-join-waitlist">
                 {t('cta')}
               </Button>
-              <Button as="a" variant="secondary" size="lg" href="#how" className="w-full sm:w-auto">
+              <Button as="a" variant="secondary" size="lg" href="#how" className="w-full sm:w-auto" testId="lh-hero-landing-cta-secondary">
                 {t('secondary')}
               </Button>
             </div>

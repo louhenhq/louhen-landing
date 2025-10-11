@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 
 import { getTotals, getTopReferrers, getBlocks, getTrendDaily } from '@/app/admin/_lib/metrics';
 import { loadMessages } from '@/lib/intl/loadMessages';
+import { defaultLocale } from '@/next-intl.locales';
 import Sparkline from '@/app/admin/components/Sparkline';
 
 type SearchParams = Record<string, string | string[] | undefined>;
@@ -35,7 +36,7 @@ export default async function MetricsPage({ searchParams }: { searchParams: Sear
     getTopReferrers(),
     getBlocks(),
     getTrendDaily(),
-    loadMessages('en-de'),
+    loadMessages(defaultLocale),
   ]);
 
   const metricsCopy = ((messages as Record<string, unknown>).admin as Record<string, unknown> | undefined)?.metrics as Record<string, unknown> | undefined;

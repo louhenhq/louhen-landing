@@ -46,3 +46,29 @@ test.describe('/en-de/method page smoke test', () => {
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   });
 });
+
+test.describe('/de-de/method page smoke test', () => {
+  test('renders localized hero, skip link, and CTA target', async ({ page }) => {
+    await page.goto('/de-de/method/');
+    const heroHeading = page.getByRole('heading', { level: 1 });
+    await expect(heroHeading).toBeVisible();
+    await expect(page.locator('#join-waitlist')).toBeVisible();
+  });
+
+  test('privacy and waitlist links stay within the default locale', async ({ page }) => {
+    await page.goto('/de-de/method/');
+    const waitlistLink = page.locator('a[href*="/waitlist"]').first();
+    await Promise.all([
+      page.waitForURL(/\/de-de\/waitlist(\?|#|$)/),
+      waitlistLink.click(),
+    ]);
+    await page.goBack();
+    await page.waitForURL(/\/de-de\/method\/?$/);
+
+    const privacyLink = page.locator('a[href*="/privacy"]').first();
+    await Promise.all([
+      page.waitForURL(/\/de-de\/privacy\/?$/),
+      privacyLink.click(),
+    ]);
+  });
+});

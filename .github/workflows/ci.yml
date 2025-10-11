@@ -18,8 +18,8 @@ env:
   EMAIL_TRANSPORT: noop
   ANALYTICS_STORE_IP: 'false'
   NEXT_PUBLIC_ENV: 'ci'
-  NEXT_PUBLIC_LOCALES: 'en-de,de-de'
-  NEXT_PUBLIC_DEFAULT_LOCALE: 'en-de'
+  NEXT_PUBLIC_LOCALES: 'en-de,de-de,fr-fr,nl-nl,it-it'
+  NEXT_PUBLIC_DEFAULT_LOCALE: 'de-de'
   NEXT_PUBLIC_ANALYTICS_DISABLED: '1'
   NEXT_PUBLIC_ANALYTICS_DEBUG: '0'
   NEXT_PUBLIC_ALLOW_INDEXING: 'false'
@@ -27,6 +27,7 @@ env:
   NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
   COMMIT_SHA: ${{ github.sha }}
   NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
+  NEXT_BUILD_DIR: .next
 
 jobs:
   setup:
@@ -34,6 +35,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - name: 🔎 CI Context
+        run: |
+          echo '🔎 CI Context: NEXT_PUBLIC_LOCALES=${NEXT_PUBLIC_LOCALES}'
+          echo '🔎 CI Context: NEXT_PUBLIC_DEFAULT_LOCALE=${NEXT_PUBLIC_DEFAULT_LOCALE}'
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -44,6 +50,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
+        shell: bash --noprofile --norc -eo pipefail {0}
         run: npm ci --include=dev
 
   lint-and-types:
@@ -63,12 +70,15 @@ jobs:
         run: npm ci --include=dev
 
       - name: Lint
+        shell: bash --noprofile --norc -eo pipefail {0}
         run: npm run lint
 
       - name: Type check
+        shell: bash --noprofile --norc -eo pipefail {0}
         run: npm run typecheck
 
       - name: Unit tests
+        shell: bash --noprofile --norc -eo pipefail {0}
         run: npm run test:unit
 
   build:
@@ -78,6 +88,8 @@ jobs:
       - setup
       - lint-and-types
     timeout-minutes: 30
+    outputs:
+      has_next: ${{ steps.detect_next_build.outputs.has_next }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -89,17 +101,42 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
+        shell: bash --noprofile --norc -eo pipefail {0}
         run: npm ci --include=dev
 
       - name: Build Next.js app
+        shell: bash --noprofile --norc -eo pipefail {0}
         run: npm run build
 
-      - name: Upload production build
+      - name: Detect Next build output
+        id: detect_next_build
+        run: |
+          echo "NEXT_BUILD_DIR=${NEXT_BUILD_DIR}"
+          if [ -d "${NEXT_BUILD_DIR}" ]; then
+            ls -la "${NEXT_BUILD_DIR}" || true
+            count=$(find "${NEXT_BUILD_DIR}" -type f -print | wc -l | tr -d '[:space:]')
+            count=${count:-0}
+          else
+            echo "::notice::Build directory ${NEXT_BUILD_DIR} does not exist"
+            count=0
+          fi
+          echo "NEXT_BUILD_FILE_COUNT=${count}"
+          if [ "${count}" -gt 0 ]; then
+            echo "Detected Next build artifacts in ${NEXT_BUILD_DIR}"
+            echo "has_next=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::No build artifacts detected in ${NEXT_BUILD_DIR}"
+            echo "has_next=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload Next build (if present)
+        if: steps.detect_next_build.outputs.has_next == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: next-build
-          path: .next
+          path: ${{ github.workspace }}/${{ env.NEXT_BUILD_DIR }}
           if-no-files-found: error
+          include-hidden-files: true
 
   e2e:
     name: e2e
@@ -128,6 +165,7 @@ jobs:
       PW_HEALTH_PATH: /icon.svg
       TEST_E2E_BYPASS_TOKEN: e2e-mocked-token
       PLAYWRIGHT_ARTIFACTS_DIR: artifacts/playwright/e2e
+      TS_NODE_PROJECT: tsconfig.e2e.json
     steps:
       - uses: actions/checkout@v4
         with:
@@ -139,16 +177,39 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
+        shell: bash --noprofile --norc -eo pipefail {0}
         run: npm ci --include=dev
 
+      - name: Report build artifact availability
+        run: echo "has_next=${{ needs.build.outputs.has_next }} NEXT_BUILD_DIR=${{ env.NEXT_BUILD_DIR }}"
+
       - name: Restore Next.js build
-        run: rm -rf .next
+        run: rm -rf "${NEXT_BUILD_DIR}"
 
       - name: Download Next.js build
+        if: needs.build.outputs.has_next == 'true'
         uses: actions/download-artifact@v4
         with:
           name: next-build
-          path: .
+          path: ${{ env.NEXT_BUILD_DIR }}
+
+      - name: Local build fallback
+        if: needs.build.outputs.has_next != 'true'
+        shell: bash --noprofile --norc -eo pipefail {0}
+        run: |
+          if [ ! -d node_modules ]; then
+            npm ci --include=dev
+          fi
+          npm run build
+
+      - name: Verify Next build directory
+        run: |
+          echo "NEXT_BUILD_DIR=${NEXT_BUILD_DIR}"
+          ls -la "${NEXT_BUILD_DIR}" || true
+
+      - name: Echo Playwright env snapshot
+        run: |
+          node -e "const snapshot = {}; const pick = (k) => { if (process.env[k] !== undefined) snapshot[k] = process.env[k]; }; ['APP_BASE_URL','BASE_URL','IS_PRELAUNCH','CSP_REPORT_ONLY','NEXT_PUBLIC_CSP_REPORT_ONLY','NEXT_PUBLIC_DEFAULT_LOCALE','NEXT_PUBLIC_ANALYTICS_ENABLED'].forEach(pick); if (!snapshot.CSP_REPORT_ONLY && snapshot.NEXT_PUBLIC_CSP_REPORT_ONLY) snapshot.CSP_MODE = snapshot.NEXT_PUBLIC_CSP_REPORT_ONLY; console.log('PLAYWRIGHT_ENV', JSON.stringify(snapshot));"
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -160,31 +221,6 @@ jobs:
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
-
-      - name: Start Next.js server
-        run: |
-          npm run start:test &
-          SERVER_PID=$!
-          echo "SERVER_PID=$SERVER_PID" >> "$GITHUB_ENV"
-          started=0
-          for i in {1..120}; do
-            if curl -fsS "http://${HOST}:${PORT}${PW_HEALTH_PATH}" >/dev/null 2>&1; then
-              started=1
-              echo "Server is responding on http://${HOST}:${PORT}${PW_HEALTH_PATH}"
-              break
-            fi
-            if ! kill -0 "$SERVER_PID" >/dev/null 2>&1; then
-              echo "Server process exited early"
-              [[ -f .next/test-server.log ]] && cat .next/test-server.log || true
-              exit 1
-            fi
-            sleep 1
-          done
-          if [ "$started" -ne 1 ]; then
-            echo "Server failed to become healthy within 120 seconds"
-            [[ -f .next/test-server.log ]] && tail -n 200 .next/test-server.log || true
-            exit 1
-          fi
 
       - name: Verify environment wiring
         run: |
@@ -232,7 +268,12 @@ jobs:
             exit 1
           fi
 
+      - name: Echo Playwright env snapshot
+        run: |
+          node -e "const snapshot = {}; const pick = (k) => { if (process.env[k] !== undefined) snapshot[k] = process.env[k]; }; ['APP_BASE_URL','BASE_URL','IS_PRELAUNCH','CSP_REPORT_ONLY','NEXT_PUBLIC_CSP_REPORT_ONLY','NEXT_PUBLIC_DEFAULT_LOCALE','NEXT_PUBLIC_ANALYTICS_ENABLED'].forEach(pick); if (!snapshot.CSP_REPORT_ONLY && snapshot.NEXT_PUBLIC_CSP_REPORT_ONLY) snapshot.CSP_MODE = snapshot.NEXT_PUBLIC_CSP_REPORT_ONLY; console.log('PLAYWRIGHT_ENV', JSON.stringify(snapshot));"
+
       - name: Playwright tests
+        shell: bash --noprofile --norc -eo pipefail {0}
         env:
           DEBUG: pw:webserver,pw:api
         run: npm run test:e2e
@@ -240,9 +281,9 @@ jobs:
       - name: Tail Next.js server log
         if: always()
         run: |
-          if [ -f .next/test-server.log ]; then
-            echo 'Last 300 lines from .next/test-server.log'
-            tail -n 300 .next/test-server.log
+          if [ -f "${NEXT_BUILD_DIR}/test-server.log" ]; then
+            echo "Last 300 lines from ${NEXT_BUILD_DIR}/test-server.log"
+            tail -n 300 "${NEXT_BUILD_DIR}/test-server.log"
           else
             echo 'No server log found'
           fi
@@ -255,16 +296,8 @@ jobs:
           path: |
             artifacts/playwright
             playwright-report
-            .next/test-server.log
+            ${{ env.NEXT_BUILD_DIR }}/test-server.log
           if-no-files-found: warn
-
-      - name: Stop Next.js server
-        if: always()
-        run: |
-          if [ -n "${SERVER_PID:-}" ]; then
-            kill "${SERVER_PID}" || true
-            wait "${SERVER_PID}" 2>/dev/null || true
-          fi
 
   axe:
     name: axe
@@ -292,6 +325,7 @@ jobs:
       SUPPRESSION_SALT: ${{ secrets.CI_SUPPRESSION_SALT }}
       PW_HEALTH_PATH: /icon.svg
       PLAYWRIGHT_ARTIFACTS_DIR: artifacts/playwright/axe
+      TS_NODE_PROJECT: tsconfig.e2e.json
     steps:
       - uses: actions/checkout@v4
         with:
@@ -305,14 +339,31 @@ jobs:
       - name: Install dependencies
         run: npm ci --include=dev
 
+      - name: Report build artifact availability
+        run: echo "has_next=${{ needs.build.outputs.has_next }} NEXT_BUILD_DIR=${{ env.NEXT_BUILD_DIR }}"
+
       - name: Restore Next.js build
-        run: rm -rf .next
+        run: rm -rf "${NEXT_BUILD_DIR}"
 
       - name: Download Next.js build
+        if: needs.build.outputs.has_next == 'true'
         uses: actions/download-artifact@v4
         with:
           name: next-build
-          path: .
+          path: ${{ env.NEXT_BUILD_DIR }}
+
+      - name: Local build fallback
+        if: needs.build.outputs.has_next != 'true'
+        run: |
+          if [ ! -d node_modules ]; then
+            npm ci --include=dev
+          fi
+          npm run build
+
+      - name: Verify Next build directory
+        run: |
+          echo "NEXT_BUILD_DIR=${NEXT_BUILD_DIR}"
+          ls -la "${NEXT_BUILD_DIR}" || true
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -325,42 +376,18 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Start Next.js server
-        run: |
-          npm run start:test &
-          SERVER_PID=$!
-          echo "SERVER_PID=$SERVER_PID" >> "$GITHUB_ENV"
-          started=0
-          for i in {1..120}; do
-            if curl -fsS "http://${HOST}:${PORT}${PW_HEALTH_PATH}" >/dev/null 2>&1; then
-              started=1
-              echo "Server is responding on http://${HOST}:${PORT}${PW_HEALTH_PATH}"
-              break
-            fi
-            if ! kill -0 "$SERVER_PID" >/dev/null 2>&1; then
-              echo "Server process exited early"
-              [[ -f .next/test-server.log ]] && cat .next/test-server.log || true
-              exit 1
-            fi
-            sleep 1
-          done
-          if [ "$started" -ne 1 ]; then
-            echo "Server failed to become healthy within 120 seconds"
-            [[ -f .next/test-server.log ]] && tail -n 200 .next/test-server.log || true
-            exit 1
-          fi
-
       - name: Run accessibility suite (warn)
         id: axe
         continue-on-error: true
+        shell: bash --noprofile --norc -eo pipefail {0}
         run: npm run test:axe
 
       - name: Tail Next.js server log
         if: always()
         run: |
-          if [ -f .next/test-server.log ]; then
-            echo 'Last 200 lines from .next/test-server.log'
-            tail -n 200 .next/test-server.log
+          if [ -f "${NEXT_BUILD_DIR}/test-server.log" ]; then
+            echo "Last 200 lines from ${NEXT_BUILD_DIR}/test-server.log"
+            tail -n 200 "${NEXT_BUILD_DIR}/test-server.log"
           else
             echo 'No server log found'
           fi
@@ -374,20 +401,12 @@ jobs:
             artifacts/playwright
             playwright-report
             test-results
-            .next/test-server.log
+            ${{ env.NEXT_BUILD_DIR }}/test-server.log
           if-no-files-found: warn
 
       - name: Flag accessibility failures
         if: steps.axe.outcome == 'failure'
         run: echo "::warning::Accessibility sweep reported issues. Review the uploaded artifacts."
-
-      - name: Stop Next.js server
-        if: always()
-        run: |
-          if [ -n "${SERVER_PID:-}" ]; then
-            kill "${SERVER_PID}" || true
-            wait "${SERVER_PID}" 2>/dev/null || true
-          fi
 
   lighthouse:
     name: lighthouse
@@ -409,20 +428,40 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
+        shell: bash --noprofile --norc -eo pipefail {0}
         run: npm ci --include=dev
 
+      - name: Report build artifact availability
+        run: echo "has_next=${{ needs.build.outputs.has_next }} NEXT_BUILD_DIR=${{ env.NEXT_BUILD_DIR }}"
+
       - name: Restore Next.js build
-        run: rm -rf .next
+        run: rm -rf "${NEXT_BUILD_DIR}"
 
       - name: Download Next.js build
+        if: needs.build.outputs.has_next == 'true'
         uses: actions/download-artifact@v4
         with:
           name: next-build
-          path: .
+          path: ${{ env.NEXT_BUILD_DIR }}
+
+      - name: Local build fallback
+        if: needs.build.outputs.has_next != 'true'
+        shell: bash --noprofile --norc -eo pipefail {0}
+        run: |
+          if [ ! -d node_modules ]; then
+            npm ci --include=dev
+          fi
+          npm run build
+
+      - name: Verify Next build directory
+        run: |
+          echo "NEXT_BUILD_DIR=${NEXT_BUILD_DIR}"
+          ls -la "${NEXT_BUILD_DIR}" || true
 
       - name: Run Lighthouse (warn)
         id: lhci
         continue-on-error: true
+        shell: bash --noprofile --norc -eo pipefail {0}
         run: npm run lighthouse
 
       - name: Upload Lighthouse artifacts
@@ -432,7 +471,7 @@ jobs:
           name: lighthouse-report
           path: |
             artifacts/lighthouse
-            .next/test-server.log
+            ${{ env.NEXT_BUILD_DIR }}/test-server.log
           if-no-files-found: warn
 
       - name: Flag Lighthouse regressions
@@ -581,7 +620,8 @@ jobs:
           const { readdirSync, statSync, readFileSync } = require('node:fs');
           const { join, relative } = require('node:path');
 
-          const ignoreDirs = new Set(['.git', 'node_modules', '.next', 'tmp', 'artifacts', 'ci-artifacts', 'playwright-report', 'lighthouse-report']);
+          const buildDir = process.env.NEXT_BUILD_DIR || '.next';
+          const ignoreDirs = new Set(['.git', 'node_modules', buildDir, 'tmp', 'artifacts', 'ci-artifacts', 'playwright-report', 'lighthouse-report']);
           const allowFiles = new Set(['.env.example']);
           const suspicious = [];
           const pattern = /(api[_-]?key|secret|token|password)[^=:\n]{0,40}[:=]\s*(['"]?)([A-Za-z0-9][_A-Za-z0-9\-]{16,})\2/gi;

@@ -18,16 +18,9 @@ const playwrightResultsDir = path.join(artifactsRoot, 'results');
 const FALLBACK_ORIGIN = 'https://staging.louhen.app';
 const sandboxBaseURL = process.env.PREVIEW_BASE_URL ?? '';
 const isSandbox = process.env.SANDBOX_VALIDATION === '1';
-
 function normalizeBase(raw?: string | null): string {
   if (!raw) return '';
   return raw.trim().replace(/\/+$/, '');
-}
-
-function ensureLocaleBase(origin: string): string {
-  if (!origin) return '';
-  if (origin.endsWith('/en-de') || origin.endsWith('/de-de')) return origin;
-  return `${origin}/en-de`;
 }
 
 function withTrailingSlash(value: string): string {
@@ -70,13 +63,15 @@ const hasBaseOverride = baseOverride.length > 0;
 
 const defaultOrigin = sandboxOrigin || normalizeBase(process.env.APP_BASE_URL) || FALLBACK_ORIGIN;
 const targetOrigin = hasBaseOverride ? baseOverride : defaultOrigin;
-const canonicalBaseURL = withTrailingSlash(ensureLocaleBase(targetOrigin));
+const baseTestURL = withTrailingSlash(targetOrigin);
 
+// Keep test env flags explicit so local + CI runs share the same prelaunch gating.
 const testEnv = {
   BASE_URL: targetOrigin,
   APP_BASE_URL: targetOrigin,
   TEST_MODE: '1',
   TEST_E2E_SHORTCIRCUIT: 'true',
+  IS_PRELAUNCH: process.env.IS_PRELAUNCH ?? 'true',
   TEST_E2E_BYPASS_TOKEN: 'e2e-mocked-token',
   NEXT_PUBLIC_ENV: process.env.NEXT_PUBLIC_ENV ?? 'ci',
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? baseURL,
@@ -110,13 +105,24 @@ for (const [key, value] of Object.entries(testEnv)) {
   }
 }
 
+const loggedEnv = {
+  baseURL: baseTestURL,
+  IS_PRELAUNCH: process.env.IS_PRELAUNCH,
+  CSP_REPORT_ONLY: process.env.CSP_REPORT_ONLY ?? process.env.NEXT_PUBLIC_CSP_REPORT_ONLY ?? '0',
+  DEFAULT_LOCALE: process.env.NEXT_PUBLIC_DEFAULT_LOCALE ?? 'de-de',
+  ANALYTICS_ENABLED: process.env.NEXT_PUBLIC_ANALYTICS_ENABLED ?? '0',
+};
+console.info('[playwright:env]', JSON.stringify(loggedEnv, null, 2));
+
 const httpCredentials = statusUser && statusPass ? { username: statusUser, password: statusPass } : undefined;
+
+console.info('[playwright:env]', JSON.stringify(loggedEnv));
 
 const config: PlaywrightTestConfig = {
   testDir: 'tests',
-  testMatch: ['**/*.e2e.ts', '**/*.axe.ts', '**/*.spec.ts'],
+  testIgnore: ['unit/**'],
   timeout: process.env.CI ? 90_000 : 60_000,
-  retries: process.env.CI ? 1 : 0,
+  retries: 0,
   workers: process.env.CI ? 1 : 2,
   reporter: [
     ['html', { outputFolder: path.join(artifactsRoot, 'html'), open: 'never' }],
@@ -127,10 +133,11 @@ const config: PlaywrightTestConfig = {
     timeout: 5_000,
   },
   use: {
-    baseURL: canonicalBaseURL,
-    trace: 'on-first-retry',
+    baseURL: baseTestURL,
+    trace: 'on',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
+    testIdAttribute: 'data-testid',
     httpCredentials,
     extraHTTPHeaders,
     storageState: storageStatePath,
@@ -152,20 +159,27 @@ if (shouldSkipWebServer) {
   config.projects = [
     {
       name: 'desktop-chromium',
+      testMatch: ['e2e/**/*.e2e.ts', 'e2e/**/*.spec.ts'],
       use: { ...devices['Desktop Chrome'] },
     },
     {
       name: 'mobile-chromium',
+      testMatch: ['e2e/**/*.e2e.ts', 'e2e/**/*.spec.ts'],
       use: { ...devices['Pixel 5'] },
       grep: /@mobile/,
       grepInvert: /@desktop-only/,
+    },
+    {
+      name: 'axe',
+      testMatch: ['axe/**/*.axe.ts'],
+      use: { ...devices['Desktop Chrome'] },
     },
   ];
   if (!isRemote) {
     config.webServer = {
       command: 'npm run start:test',
       url: `${fallbackLocalURL}${HEALTH_PATH}`,
-      reuseExistingServer: Boolean(process.env.PW_REUSE) || !process.env.CI,
+      reuseExistingServer: true,
       timeout: 120_000,
       env: {
         ...testEnv,

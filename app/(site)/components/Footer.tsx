@@ -19,7 +19,7 @@ export default function Footer() {
   return (
     <footer
       className={cn('border-t border-border/50 bg-bg/90 backdrop-blur-sm')}
-      data-testid="landing-footer"
+      data-testid="lh-footer-site-root"
     >
       <div className={cn(layout.container, 'flex flex-col gap-xl py-[calc(var(--layout-section-padding-clamp)/1.5)]')}>
         <div className={cn(layout.grid, 'items-start gap-y-lg')}>

@@ -12,6 +12,12 @@ This repo follows the locked decisions in [/CONTEXT/decision_log.md](decision_lo
 - `Cross-Origin-Resource-Policy: same-site`.
 - `Cache-Control` varies by route (`no-store` for auth/status, `public, max-age=0` for marketing pages); any change must mirror the existing pattern in middleware or route handlers.
 
+### Network Policy for Tests
+- Playwright aborts any network request that is not a loopback origin. Allowed origins are limited to `http://127.0.0.1`, `http://localhost`, `http://0.0.0.0`, and `http://[::1]` (plus the ports derived from `BASE_URL`). Data and blob URLs remain permitted for fixtures.
+- The allowlist lives in `tests/fixtures/playwright.ts`; expanding it requires updating this section and documenting the rationale in [/CONTEXT/tests.md](tests.md#shell-agnostic-execution).
+- Blocked requests cause the spec to fail and attach `blocked-requests.json` so CI surfaces the offending URL immediately.
+- ESLint ignores generated Playwright artifacts (trace bundles, reports) so linting stays focused on authored code; see [/CONTEXT/tests.md](tests.md#shell-agnostic-execution) for tooling scope.
+
 ## Content Security Policy Lifecycle
 - `middleware.ts` generates a single nonce per request, forwards it via the incoming request header (`x-csp-nonce`) and injects it into the rendered response. Downstream layouts call `headers().get('x-csp-nonce')` and hydrate the React `NonceProvider`, which freezes the first SSR nonce so client re-renders cannot mutate it. Client components call `useNonce()` for inline scripts.
 - **Production / preview defaults**:
@@ -55,4 +61,9 @@ Keep this reference aligned with naming/structure docs ([naming.md](naming.md), 
 ## Testing & Verification
 - Manual spot-check: `curl -I https://<host>` (or preview URL) should show the headers listed above; production responses include HSTS.
 - Browser devtools: inspect `<script>` tags (ThemeInit, JSON-LD) and confirm `nonce` attributes match the middleware value with no CSP violations in the console.
-- Local/preview QA: run the Playwright header check (`tests/e2e/security/headers.e2e.ts`) once added, and review any CSP report-only findings before switching preview back to enforce mode.
+- Local/preview QA: run the Playwright header check (`tests/e2e/security/headers.e2e.ts`). The spec attaches a JSON dump of the inspected headers to `test.info()` so CI artifacts surface the exact directives on failure.
+- Automated suites must assert:
+  - `lh-csp-nonce` + JSON-LD nonces exist and match the server-provided value.
+  - No inline script executes without a nonce and CSP forbids `'unsafe-inline'`.
+  - Analytics bootstrap remains blocked until consent rewrites `connect-src`.
+- When CSP relaxations or new hosts are introduced, update the security tests + this doc in the same PR and link the `/CONTEXT/decision_log.md` entry.

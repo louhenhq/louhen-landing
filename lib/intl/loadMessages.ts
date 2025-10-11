@@ -8,8 +8,14 @@ type LocaleImporter = () => Promise<MessagesRecord>;
 const IMPORTERS: Partial<Record<SupportedLocale, LocaleImporter>> = {
   en: async () => (await import('@/messages/en.json')).default as MessagesRecord,
   de: async () => (await import('@/messages/de.json')).default as MessagesRecord,
+  fr: async () => (await import('@/messages/fr.json')).default as MessagesRecord,
+  nl: async () => (await import('@/messages/nl.json')).default as MessagesRecord,
+  it: async () => (await import('@/messages/it.json')).default as MessagesRecord,
   'en-de': async () => (await import('@/messages/en-de.json')).default as MessagesRecord,
   'de-de': async () => (await import('@/messages/de-de.json')).default as MessagesRecord,
+  'fr-fr': async () => (await import('@/messages/fr-fr.json')).default as MessagesRecord,
+  'nl-nl': async () => (await import('@/messages/nl-nl.json')).default as MessagesRecord,
+  'it-it': async () => (await import('@/messages/it-it.json')).default as MessagesRecord,
 };
 
 const FALLBACK_CHAINS: Record<SupportedLocale, SupportedLocale[]> = {
@@ -17,7 +23,12 @@ const FALLBACK_CHAINS: Record<SupportedLocale, SupportedLocale[]> = {
   de: [],
   'en-de': ['en'],
   'de-de': ['de'],
-  'de-at': ['de-de', 'de'],
+  fr: ['en'],
+  nl: ['en'],
+  it: ['en'],
+  'fr-fr': ['fr', 'en'],
+  'nl-nl': ['nl', 'en'],
+  'it-it': ['it', 'en'],
 };
 
 function isRecord(value: unknown): value is MessagesRecord {

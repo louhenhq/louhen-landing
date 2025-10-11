@@ -31,6 +31,7 @@ export function Footer() {
   return (
     <footer
       data-ll="footer-root"
+      data-testid="lh-footer-root"
       role="contentinfo"
       className={cn(layout.section, 'border-t border-border bg-bg')}
     >

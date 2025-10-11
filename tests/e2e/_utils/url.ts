@@ -1,5 +1,15 @@
-const DEFAULT_LOCALE = process.env.NEXT_PUBLIC_DEFAULT_LOCALE ?? 'en-de';
+import type { BrowserContext } from '@playwright/test';
+
+const DEFAULT_LOCALE = process.env.NEXT_PUBLIC_DEFAULT_LOCALE ?? 'de-de';
 const BASE_URL = (process.env.BASE_URL ?? 'http://127.0.0.1:4311').replace(/\/$/, '');
+const LOCALE_COOKIE = process.env.NEXT_LOCALE_COOKIE ?? 'NEXT_LOCALE';
+const COOKIE_DOMAIN = (() => {
+  try {
+    return new URL(`${BASE_URL}/`).hostname;
+  } catch {
+    return '127.0.0.1';
+  }
+})();
 
 const declaredLocales = (process.env.NEXT_PUBLIC_LOCALES ?? '')
   .split(',')
@@ -26,17 +36,38 @@ export const getDefaultLocale = () => DEFAULT_LOCALE;
 
 export const getTestLocales = () => TEST_LOCALES;
 
+export const getBaseUrl = () => BASE_URL;
+
+export const getCookieDomain = () => COOKIE_DOMAIN;
+
+export const localeCookieName = () => LOCALE_COOKIE;
+
 export const localeUrl = (path = '', options?: { locale?: string }) => {
   const locale = resolveLocale(options?.locale);
   const localePrefix = `/${locale}`;
   if (!path || path === '/') {
-    return new URL(localePrefix, `${BASE_URL}/`).toString();
+    return '/';
   }
 
   if (path.startsWith('?') || path.startsWith('#')) {
-    return new URL(`${localePrefix}${path}`, `${BASE_URL}/`).toString();
+    return `${localePrefix}${path}`;
   }
 
   const normalised = path.startsWith('/') ? path : `/${path}`;
-  return new URL(`${localePrefix}${normalised}`, `${BASE_URL}/`).toString();
+  return `${localePrefix}${normalised}`;
+};
+
+export const absoluteLocaleUrl = (path = '', options?: { locale?: string }) => {
+  return new URL(localeUrl(path, options), `${BASE_URL}/`).toString();
+};
+
+export const setLocaleCookie = async (context: BrowserContext, locale?: string) => {
+  await context.addCookies([
+    {
+      name: LOCALE_COOKIE,
+      value: resolveLocale(locale),
+      domain: COOKIE_DOMAIN,
+      path: '/',
+    },
+  ]);
 };

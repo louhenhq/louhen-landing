@@ -25,7 +25,7 @@ export default function MethodHero({ childName = null }: MethodHeroProps = {}) {
 
   return (
     <section
-      data-testid="method-hero"
+      data-testid="lh-hero-method-root"
       data-ll="method-hero"
       className="bg-bg"
       aria-labelledby="method-hero-title"
@@ -37,10 +37,10 @@ export default function MethodHero({ childName = null }: MethodHeroProps = {}) {
               {t('eyebrow')}
             </span>
           ) : null}
-          <h1 id="method-hero-title" className={cn(text.hero, 'text-balance')}>
+          <h1 id="method-hero-title" className={cn(text.hero, 'text-balance')} data-testid="lh-hero-method-title">
             {t('title')}
           </h1>
-          <p className={cn(text.subheading, 'text-balance')}>
+          <p className={cn(text.subheading, 'text-balance')} data-testid="lh-hero-method-subtitle">
             {subtitle}
           </p>
         </div>
@@ -50,8 +50,8 @@ export default function MethodHero({ childName = null }: MethodHeroProps = {}) {
             href={`/${locale}/waitlist`}
             prefetch={false}
             onClick={() => registerCtaInteraction('hero')}
-            data-testid="method-hero-cta"
             data-ll="method-hero-cta"
+            testId="lh-hero-method-cta-primary"
           >
             {t('cta')}
           </Button>

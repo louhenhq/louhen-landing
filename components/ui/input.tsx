@@ -5,10 +5,11 @@ import { cn, focusRing } from '@/app/(site)/_lib/ui';
 
 export type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   invalid?: boolean;
+  testId?: string;
 };
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { className, invalid = false, disabled, type = 'text', ...rest },
+  { className, invalid = false, disabled, type = 'text', testId, ...rest },
   ref
 ) {
   return (
@@ -18,6 +19,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       data-invalid={invalid ? 'true' : undefined}
       disabled={disabled}
       aria-invalid={invalid || undefined}
+      data-testid={testId}
       className={cn(
         'block w-full rounded-2xl border border-border bg-bg px-md py-sm text-body text-text placeholder:text-text-muted/80',
         'transition-[border-color,box-shadow,background-color,color] duration-200 ease-out motion-reduce:duration-150 motion-reduce:transition-[border-color,background-color,color]',

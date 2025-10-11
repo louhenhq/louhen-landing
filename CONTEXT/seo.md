@@ -5,7 +5,7 @@ Locked decisions: canonical host `https://www.louhen.app`, preview `https://stag
 ## Canonical Host & Redirects
 - Production always resolves to `https://www.louhen.app`; apex `https://louhen.app` issues a permanent `301` to `https://www.louhen.app`.
 - Preview traffic stays on `https://staging.louhen.app` (and `*.staging.louhen.app`) with `noindex` enforced until GA.
-- Never emit canonical links to the apex or staging hosts; QA must verify `<link rel="canonical">` and `hreflang` entries point to `https://www.louhen.app/{locale}`.
+- Never emit canonical links to the apex or staging hosts; QA must verify `<link rel="canonical">` and `hreflang` entries point to `https://www.louhen.app/{locale}` (the default locale `de-de` may omit the prefix in canonical paths, e.g., `/method`).
 
 ## Pre-launch policy
 - `isPrelaunch()` (see `lib/env/prelaunch.ts`) toggles `<meta name="robots" content="noindex, nofollow">` across marketing pages (home, method, waitlist, confirm flows, legal). Leave the flag enabled in preview and staging until GA.
@@ -19,7 +19,7 @@ Locked decisions: canonical host `https://www.louhen.app`, preview `https://stag
 - Revalidate caches/CDN entries after toggling crawl settings.
 - Ensure every `<link rel="canonical">`, `hreflang`, and `x-default` entry resolves to `https://www.louhen.app/{locale}`; never reference the apex domain.
 
-- Supported locales: `en`, `de`, `en-de`, `de-de`, `de-at` (see [/CONTEXT/i18n.md](i18n.md)). All canonical pages expose a full hreflang set, including `x-default`.
+- Supported locales: `en`, `de`, `fr`, `nl`, `it`, `en-de`, `de-de`, `fr-fr`, `nl-nl`, `it-it` (see [/CONTEXT/i18n.md](i18n.md)). All canonical pages expose a full hreflang set, including `x-default` mapping to the default locale (`de-de`).
 - `/sitemap.xml` now returns a sitemap index. It links to `/sitemaps/sitemap-<locale>.xml` files that list only the canonical URLs for that locale; the default-locale sitemap also includes `/waitlist`.
 - Shared metadata builders (`lib/seo/*Metadata.ts`) and page-level `generateMetadata()` helpers must call `hreflangMapFor` with the exact canonical path so alternates stay aligned (the waitlist page still uses `/waitlist` for every locale).
 - Default-locale routes (without a locale prefix) must call `unstable_setRequestLocale(defaultLocale)` so rendered metadata (canonical + hreflang) stays in sync with the locale-aware builders.
@@ -62,6 +62,12 @@ Locked decisions: canonical host `https://www.louhen.app`, preview `https://stag
 - Include at least one legal route in periodic Lighthouse runs to ensure canonical tags, robots directives, and performance budgets remain within targets. CI audits every locale's privacy page and the default locale's terms page.
 - Track regressions in the Lighthouse artifact stored in CI; treat metadata drift as a launch blocker.
 - Playwright SEO add-ons (`tests/e2e/seo/`) enforce sitemap HTTP integrity and canonical uniqueness on every preview run. Adjust sampling thresholds via `SEO_SITEMAP_SAMPLE` if a temporary hotfix requires a smaller set.
+
+## Testing Expectations & Guardrails
+- Metadata specs must assert title, description, canonical, robots (`noindex` when `IS_PRELAUNCH`), OG/Twitter tags, and JSON-LD, using the deterministic ids exposed by `components/SeoJsonLd.tsx` (`lh-jsonld-organization`, `lh-jsonld-website`, `lh-jsonld-breadcrumb`, etc.).
+- Cover each route in the default locale (`de-de`) **and** at least one non-default locale, verifying `<html lang>`, `hreflang`, and `x-default` entries match the canonical host rules above.
+- Fail tests if any structured data references preview/staging hosts or missing locales. Attach header and metadata dumps to Playwright test info so CI artifacts surface the current values.
+- Lighthouse smoke runs enforce the budgets documented in [/CONTEXT/performance.md](performance.md). Temporary waivers require the `perf-waiver` label plus an entry in `/CONTEXT/decision_log.md` with an expiry date.
 
 ## Social Preview Strategy
 - OG/Twitter metadata must emit absolute URLs (no relative paths). `twitter:card` remains locked to `summary_large_image`; prefer mirroring OG titles/descriptions for parity.

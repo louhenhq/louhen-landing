@@ -1,5 +1,4 @@
 import { test, expect } from '@tests/fixtures/playwright';
-import { localeUrl } from '../_utils/url';
 
 test.describe('Header promo ribbon', () => {
   test('renders, tracks dismissal, and stays hidden after reload', async ({ page }) => {
@@ -10,7 +9,8 @@ test.describe('Header promo ribbon', () => {
       };
     });
 
-    await page.goto(localeUrl(), { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveURL(/\/de-de\/?$/);
 
     const ribbon = page.locator('[data-ribbon]');
     await expect(ribbon).toBeVisible();
@@ -19,7 +19,7 @@ test.describe('Header promo ribbon', () => {
     await page.getByRole('button', { name: 'Dismiss' }).click();
     await expect(ribbon).toHaveCount(0);
 
-    await page.reload({ waitUntil: 'networkidle' });
+    await page.reload({ waitUntil: 'domcontentloaded' });
     await expect(page.locator('[data-ribbon]')).toHaveCount(0);
     await expect(page.locator('[data-ribbon-placeholder]')).toBeVisible();
   });

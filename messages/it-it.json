@@ -1,0 +1,17 @@
+{
+  "header": {
+    "locale": {
+      "label": "Lingua",
+      "announce": "Lingua cambiata in {locale}."
+    }
+  },
+  "localeSuggestion": {
+    "title": "Preferisci navigare in {locale}?",
+    "body": {
+      "cookie": "Di solito navighi Louhen in {locale}.",
+      "acceptLanguage": "La lingua del tuo browser è impostata su {locale}."
+    },
+    "action": "Passa a {locale}",
+    "dismiss": "Resta qui"
+  }
+}

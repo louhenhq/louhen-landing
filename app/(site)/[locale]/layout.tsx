@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { NextIntlClientProvider, type AbstractIntlMessages } from 'next-intl';
 import { loadMessages } from '@/lib/intl/loadMessages';
-import { locales, type SupportedLocale } from '@/next-intl.locales';
+import { defaultLocale, locales, type SupportedLocale } from '@/next-intl.locales';
 
 type Props = {
   children: ReactNode;
@@ -13,7 +13,7 @@ export function generateStaticParams() {
 }
 
 const SUPPORTED_LOCALES = new Set<SupportedLocale>(locales);
-const FALLBACK_LOCALE: SupportedLocale = 'en-de';
+const FALLBACK_LOCALE: SupportedLocale = defaultLocale;
 
 function isMessagesObject(value: unknown): value is AbstractIntlMessages {
   return typeof value === 'object' && value !== null && !Array.isArray(value);

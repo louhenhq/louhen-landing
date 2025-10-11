@@ -13,12 +13,12 @@ Testing follows the locked pyramid in [/CONTEXT/decision_log.md](decision_log.md
 - Security headers coverage lives in `tests/e2e/security/headers.e2e.ts`; it enforces CSP nonce wiring, checks that HSTS `max-age` stays ≥ 31,536,000 seconds (with `includeSubDomains`/`preload` asserted only on the canonical production host), and ensures `camera=()` plus at least one of `interest-cohort=()` or `browsing-topics=()` is present. The spec always evaluates the **final** HTML response (after locale redirects and caching) because middleware headers are attached post-routing.
 
 ## Selector Guidance
-- Use `data-ll="..."` attributes for all selectors referenced in Playwright or axe specs. Never rely on classes, DOM order, or localized text.
-- Align selector IDs with the entries in [/CONTEXT/rename_map.md](rename_map.md) and directory rules in [/CONTEXT/naming.md](naming.md) so future moves keep tests readable.
-- When adding a new selector, update the relevant feature table in `rename_map.md` and include the attribute in the component diff.
-- **Method selectors:** `method-hero`, `method-hero-cta`, `method-pillars`, `method-how`, `method-steps`, `method-trust`, `method-footer-cta`.
-- **Header nav selectors:** `nav-root`, `nav-locale-switcher`, `nav-waitlist-cta`, `nav-menu-button`.
-- **Footer selectors:** `footer-root`, `footer-privacy-link`, `footer-terms-link` (optional: `footer-imprint-link`, `footer-locale-switcher`, `footer-social-*`).
+- Follow the hierarchy in [/CONTEXT/tests.md](tests.md): prefer semantic roles (`getByRole`/`getByLabelText`), fall back to `data-testid="lh-..."` for locale-sensitive or non-semantic hooks, and avoid CSS selectors tied to layout.
+- `data-ll="..."` remains for analytics instrumentation; Playwright and axe specs should instead rely on the `lh-` namespace (`lh-{area}-{component}-{part}`) to keep selectors locale-agnostic.
+- Keep `rename_map.md` entries up to date when a component exposes a new `data-testid`, and mirror that attribute in feature diffs so reviewers can trace changes quickly.
+- **Method selectors:** `lh-hero-method-root`, `lh-hero-method-cta-primary`, `method-pillars`, `method-how`, `method-steps`, `method-trust`, `lh-method-footer-cta-primary`.
+- **Header nav selectors:** `lh-nav-root`, `lh-nav-lang-switcher-desktop`, `lh-nav-lang-switcher-mobile`, `lh-nav-cta-primary`, `lh-nav-menu-toggle`.
+- **Footer selectors:** `lh-footer-root`, `lh-footer-site-root`, plus contextual links (`footer-privacy-link`, `footer-terms-link`, etc.) where analytics still consumes `data-ll`.
 - **Waitlist selectors:** `wl-form`, `wl-email-input`, `wl-consent-checkbox`, `wl-submit`, `wl-success`, `wl-error`, `wl-consent-copy`, `wl-referral`, `wl-resend-form`, `wl-resend-email`, `wl-resend-submit`, `wl-resend-status` — legacy WaitlistForm was removed 2025-10-07; these map to the canonical hCaptcha form.
 
 ## Preview Workflow (Remote)

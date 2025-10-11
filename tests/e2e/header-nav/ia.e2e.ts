@@ -2,7 +2,7 @@ import { test, expect } from '@tests/fixtures/playwright';
 import AxeBuilder from '@axe-core/playwright';
 import { buildHeaderNavigation } from '@lib/nav/config';
 import type { SupportedLocale } from '@/next-intl.locales';
-import { getTestLocales, localeUrl } from '../_utils/url';
+import { getTestLocales, setLocaleCookie } from '../_utils/url';
 
 const SERIOUS_IMPACT = new Set(['serious', 'critical']);
 
@@ -10,10 +10,10 @@ const localesToTest = getTestLocales();
 
 test.describe('Header information architecture', () => {
   for (const locale of localesToTest) {
-    const path = getHomePath(locale as SupportedLocale);
-
     test(`${locale} primary nav links are localized and accessible`, async ({ page }) => {
-      await page.goto(path, { waitUntil: 'networkidle' });
+      await setLocaleCookie(page.context(), locale);
+      await page.goto('/', { waitUntil: 'domcontentloaded' });
+      await expect(page).toHaveURL(new RegExp(`/${locale}/?(?:[?#].*)?$`));
 
       const navigation = buildHeaderNavigation(locale as SupportedLocale);
 
@@ -39,7 +39,3 @@ test.describe('Header information architecture', () => {
     });
   }
 });
-
-function getHomePath(locale: SupportedLocale): string {
-  return localeUrl(undefined, { locale });
-}

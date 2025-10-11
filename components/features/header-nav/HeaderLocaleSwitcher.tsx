@@ -36,7 +36,8 @@ export default function HeaderLocaleSwitcher({ variant, analyticsContext, surfac
   const options = useMemo(() => locales.map((value) => ({ value, label: t(`locale.${value}` as const) })), [t]);
 
   const formAction = '/locale/switch';
-  const testId = variant === 'desktop' ? 'header-locale-select-desktop' : 'header-locale-select-mobile';
+  const containerTestId = variant === 'desktop' ? 'lh-nav-lang-switcher-desktop' : 'lh-nav-lang-switcher-mobile';
+  const selectTestId = `${containerTestId}-select`;
 
   function setLocaleCookie(locale: SupportedLocale) {
     const directives = [`Max-Age=${COOKIE_MAX_AGE}`, 'Path=/', 'SameSite=Lax'];
@@ -94,6 +95,7 @@ export default function HeaderLocaleSwitcher({ variant, analyticsContext, surfac
       action={formAction}
       method="post"
       className={containerClass}
+      data-testid={containerTestId}
       data-locale-switcher
       data-ll="nav-locale-switcher"
     >
@@ -108,7 +110,7 @@ export default function HeaderLocaleSwitcher({ variant, analyticsContext, surfac
         className={selectClass}
         defaultValue={currentLocale}
         onChange={handleChange}
-        data-testid={testId}
+        data-testid={selectTestId}
         aria-disabled={isPending ? 'true' : undefined}
         disabled={isPending}
         autoComplete="language"

@@ -154,7 +154,7 @@ Switch between modes via feature flags only; never infer from route alone. Provi
 - Drawer uses `focus-trap` pattern: first/last focusable cycling, closes on `Esc`, disables background scroll (`overflow: hidden` on `<body>`).
 - CTA buttons maintain ≥44×44px click area in all states. Ensure shrink state retains accessible name via `aria-label` when icon-only.
 - Use `prefers-reduced-motion` query to disable sticky shrink animations; header should snap instead of animate.
-- Add `data-testid` hooks: `data-testid="header-locale"`, `header-theme`, `header-consent`, `header-cta` for testing.
+- Add `data-testid` hooks aligned with the `lh-` namespace: `lh-nav-lang-switcher-*`, `lh-nav-theme-toggle-*`, `lh-nav-consent-button-*`, `lh-nav-cta-primary`, `lh-nav-menu-toggle`, and `lh-nav-logout-*`.
 
 ---
 

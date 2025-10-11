@@ -3,13 +3,15 @@ import * as React from 'react';
 type JsonLdProps = {
   schema: Record<string, unknown>;
   nonce?: string;
+  testId?: string;
 };
 
-function JsonLd({ schema, nonce }: JsonLdProps) {
+function JsonLd({ schema, nonce, testId }: JsonLdProps) {
   return (
     <script
       type="application/ld+json"
       nonce={nonce}
+      data-testid={testId}
       dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
     />
   );
@@ -34,6 +36,7 @@ export function OrganizationJsonLd({ name, url, logo, sameAs, nonce }: Organizat
         sameAs: sameAs?.length ? sameAs : undefined,
       }}
       nonce={nonce}
+      testId="lh-jsonld-organization"
     />
   );
 }
@@ -61,6 +64,7 @@ export function WebSiteJsonLd({ url, name, searchUrl, nonce }: WebSiteJsonLdProp
           : undefined,
       }}
       nonce={nonce}
+      testId="lh-jsonld-website"
     />
   );
 }
@@ -88,6 +92,7 @@ export function BreadcrumbJsonLd({ items, nonce }: BreadcrumbJsonLdProps & { non
         })),
       }}
       nonce={nonce}
+      testId="lh-jsonld-breadcrumb"
     />
   );
 }
@@ -103,5 +108,5 @@ type TechArticleJsonLdProps = {
 };
 
 export function TechArticleJsonLd({ schema, nonce }: TechArticleJsonLdProps) {
-  return <JsonLd schema={schema} nonce={nonce} />;
+  return <JsonLd schema={schema} nonce={nonce} testId="lh-jsonld-tech-article" />;
 }

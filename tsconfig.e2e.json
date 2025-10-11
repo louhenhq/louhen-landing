@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node", "@playwright/test"],
+    "paths": {
+      "vitest": ["__do_not_use__/vitest.d.ts"],
+      "@vitest/*": ["__do_not_use__/vitest.d.ts"],
+      "@testing-library/jest-dom": ["__do_not_use__/vitest.d.ts"]
+    }
+  },
+  "include": [
+    "playwright.config.*",
+    "tests/fixtures/**/*.ts",
+    "tests/e2e/**/*.ts",
+    "tests/axe/**/*.ts",
+    "tests/accessibility/**/*.ts"
+  ]
+}

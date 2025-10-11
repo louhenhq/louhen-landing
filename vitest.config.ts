@@ -27,7 +27,7 @@ export default defineConfig({
       ['tests/unit/**/*.spec.ts', 'jsdom'],
       ['tests/unit/**/*.unit.test.ts', 'jsdom'],
     ],
-    setupFiles: ['./tests/setup.server-mocks.ts', './vitest.setup.ts'],
+    setupFiles: ['./tests/unit/setup.server-mocks.ts', './tests/unit/vitest.setup.ts'],
     globals: true,
     coverage: {
       enabled: false,

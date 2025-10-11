@@ -12,11 +12,12 @@ async function activeElementInsideDrawer(page: Page) {
 
 test.describe('@mobile Header mobile drawer', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(localeUrl('?utm_source=drawer-spec'), { waitUntil: 'networkidle' });
+    await page.goto(localeUrl('?utm_source=drawer-spec'), { waitUntil: 'domcontentloaded' });
+    await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
   });
 
   test('opens with dialog semantics, traps focus, and closes on Escape', async ({ page }) => {
-    const trigger = page.locator('[data-ll="nav-menu-button"]');
+    const trigger = page.getByTestId('lh-nav-menu-toggle');
     await trigger.click();
 
     const drawer = page.locator('[data-nav-drawer]');
@@ -25,7 +26,7 @@ test.describe('@mobile Header mobile drawer', () => {
     await expect(drawer).toHaveAttribute('aria-modal', 'true');
 
     await expect(trigger).toHaveAttribute('aria-expanded', 'true');
-    await expect(page.getByTestId('header-drawer-heading')).toBeFocused();
+    await expect(page.getByTestId('lh-nav-drawer-heading')).toBeFocused();
 
     // Tab/Shift+Tab remain within drawer
     await page.keyboard.press('Tab');
@@ -46,7 +47,7 @@ test.describe('@mobile Header mobile drawer', () => {
   });
 
   test('backdrop click closes and unlocks scroll', async ({ page }) => {
-    const trigger = page.locator('[data-ll="nav-menu-button"]');
+    const trigger = page.getByTestId('lh-nav-menu-toggle');
     await trigger.click();
 
     const backdrop = page.locator('[data-drawer-dismiss="backdrop"]');
@@ -61,7 +62,7 @@ test.describe('@mobile Header mobile drawer', () => {
   test('reduced motion renders without transitions', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
 
-    const trigger = page.locator('[data-ll="nav-menu-button"]');
+    const trigger = page.getByTestId('lh-nav-menu-toggle');
     await trigger.click();
 
     const drawer = page.locator('[data-nav-drawer]');

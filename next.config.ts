@@ -13,7 +13,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [],
   },
   async redirects() {
-    const legacyLocaleRedirects = ['en', 'de'].flatMap((legacy) => {
+    const legacyLocaleRedirects = ['en', 'de', 'fr', 'nl', 'it'].flatMap((legacy) => {
       const target = SUPPORTED_LOCALES.find((value) => value.startsWith(`${legacy}-`));
       if (!target) return [];
       return [

@@ -183,4 +183,9 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
   - Adjust → `app/theme-client.ts` now has a single set of helpers sourced from `@/lib/theme/constants`, eliminating duplicate `getSavedTheme`/`setTheme` definitions.  
   - Notes → Home/locale root pages import `ReferralAttribution` via `@components/features/waitlist` to match the feature barrel; build no longer reports duplicate identifiers or missing modules.
 
+- **2025-10-10 — Default locale switch to de-de (Owner: Localization & SEO)**  
+  - Keep → Locale routing stays under `app/(site)/[locale]/…`, middleware negotiates via cookies/`Accept-Language`, and `buildPathForLocale` continues to handle prefixed navigation.  
+  - Adjust → `defaultLocale` now resolves to `de-de`; env defaults, Playwright helpers, sitemap generation, and SEO builders emit German canonicals (`/method`, `/legal/*`) with hreflang/x-default pointing to `de-de`. Additional markets (`fr-fr`, `nl-nl`, `it-it`) ship as alternates with English fallback until localized copy lands.  
+  - Notes → English for Germany (`en-de`) remains available for support/QA. Update localized content before removing `[[TODO-translate]]` markers and ensure campaign links honour the expanded locale list.
+
 ---

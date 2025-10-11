@@ -65,6 +65,15 @@ test.describe('SEO metadata', () => {
     expect(jsonLdContent.some((content) => content.includes('"@type":"WebSite"'))).toBeTruthy();
   });
 
+  test('default locale home emits canonical root', async ({ page }) => {
+    await page.goto('/de-de/');
+    const canonical = page.locator('link[rel="canonical"]');
+    const canonicalHref = await canonical.getAttribute('href');
+    const canonicalParts = getCanonicalParts(canonicalHref);
+    expect(canonicalParts.path).toBe('/');
+    expect(allowedHosts).toContain(canonicalParts.host);
+  });
+
   test('method page has canonical URL and structured data', async ({ page }) => {
     await page.goto('/en-de/method');
     await expect(page).toHaveURL(/\/en-de\/method\/?$/);
@@ -86,6 +95,24 @@ test.describe('SEO metadata', () => {
 
     expect(jsonLdContent.some((content) => content.includes('"@type":"BreadcrumbList"'))).toBeTruthy();
     expect(jsonLdContent.some((content) => content.includes('"@type":"TechArticle"'))).toBeTruthy();
+  });
+
+  test('default locale method page canonical + schema language', async ({ page }) => {
+    await page.goto('/de-de/method');
+    await expect(page).toHaveURL(/\/de-de\/method\/?$/);
+
+    const canonical = page.locator('link[rel="canonical"]');
+    const canonicalHref = await canonical.getAttribute('href');
+    const canonicalParts = getCanonicalParts(canonicalHref);
+    expect(canonicalParts.path).toBe('/method');
+    expect(allowedHosts).toContain(canonicalParts.host);
+
+    const jsonLdContent = await page
+      .locator('script[type="application/ld+json"]')
+      .evaluateAll((nodes) => nodes.map((node) => node.textContent || ''));
+
+    expect(jsonLdContent.some((content) => content.includes('"@type":"TechArticle"'))).toBeTruthy();
+    expect(jsonLdContent.some((content) => content.includes('"inLanguage":"de-DE"'))).toBeTruthy();
   });
 
   test('legacy method path preserves query params after redirect', async ({ page }) => {

@@ -19,7 +19,7 @@ test.describe('Twitter card metadata', () => {
     await page.context().addCookies([
       {
         name: 'NEXT_LOCALE',
-        value: testLocales[0] ?? 'en-de',
+        value: testLocales[0] ?? 'de-de',
         domain: hostname,
         path: '/',
       },
@@ -51,14 +51,14 @@ test.describe('Twitter card metadata', () => {
         await page.context().addCookies([
           {
             name: 'NEXT_LOCALE',
-            value: testLocales[0] ?? 'en-de',
+            value: testLocales[0] ?? 'de-de',
             domain: hostname,
             path: '/',
           },
         ]);
       }
 
-      await page.goto(target.path, { waitUntil: 'networkidle' });
+      await page.goto(target.path, { waitUntil: 'domcontentloaded' });
       const twitterCard = await page.getAttribute('meta[name="twitter:card"]', 'content');
       expect(twitterCard, `${target.name} should define twitter:card`).toBe('summary_large_image');
     }

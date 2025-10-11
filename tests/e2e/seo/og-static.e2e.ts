@@ -6,7 +6,7 @@ test.describe('OG static fallback (flag off)', () => {
     test.skip(process.env.OG_DYNAMIC_ENABLED !== 'false', 'Static fallback test only runs when OG dynamic is disabled.');
 
     const cacheBuster = `?static=${Date.now()}`;
-    await page.goto(`/waitlist${cacheBuster}`, { waitUntil: 'networkidle' });
+    await page.goto(`/waitlist${cacheBuster}`, { waitUntil: 'domcontentloaded' });
     const staticOg = await page.getAttribute('meta[property="og:image"]', 'content');
     expect(staticOg).toBeTruthy();
     expect(staticOg).not.toContain('/opengraph-image');

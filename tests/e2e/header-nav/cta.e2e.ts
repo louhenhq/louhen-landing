@@ -6,9 +6,10 @@ test.describe('Header CTA modes', () => {
     await page.addInitScript(() => {
       window.__LOUHEN_HEADER_PHASE__ = 'waitlist';
     });
-    await page.goto(localeUrl('?utm_source=cta-waitlist'), { waitUntil: 'networkidle' });
+    await page.goto(localeUrl('?utm_source=cta-waitlist'), { waitUntil: 'domcontentloaded' });
+    await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
 
-    const cta = page.locator('[data-ll="nav-waitlist-cta"]').first();
+    const cta = page.getByTestId('lh-nav-cta-primary');
     await expect(cta).toHaveText('Join the waitlist');
     await cta.click();
     await expect(page.locator('#waitlist-form')).toBeInViewport();
@@ -18,9 +19,11 @@ test.describe('Header CTA modes', () => {
     await page.addInitScript(() => {
       window.__LOUHEN_HEADER_PHASE__ = 'access';
     });
-    await page.goto(localeUrl(), { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
+    await expect(page).toHaveURL(/\/de-de\/?$/);
 
-    const cta = page.locator('[data-ll="nav-waitlist-cta"]').first();
+    const cta = page.getByTestId('lh-nav-cta-primary');
     await expect(cta).toHaveAttribute('href', /onboarding\/request-access\?utm_source=header/);
     await expect(cta).toHaveText('Request access');
   });
@@ -29,9 +32,11 @@ test.describe('Header CTA modes', () => {
     await page.addInitScript(() => {
       window.__LOUHEN_HEADER_PHASE__ = 'download';
     });
-    await page.goto(localeUrl(), { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
+    await expect(page).toHaveURL(/\/de-de\/?$/);
 
-    const cta = page.locator('[data-ll="nav-waitlist-cta"]').first();
+    const cta = page.getByTestId('lh-nav-cta-primary');
     await expect(cta).toHaveAttribute('href', /download\?utm_source=header/);
     await expect(cta).toHaveText('Download the app');
   });

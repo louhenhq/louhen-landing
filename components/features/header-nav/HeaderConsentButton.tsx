@@ -51,7 +51,7 @@ export default function HeaderConsentButton({ variant, analyticsContext, surface
         openManager();
       }}
       data-consent-state={state}
-      data-testid={variant === 'desktop' ? 'header-consent-button-desktop' : 'header-consent-button-mobile'}
+      data-testid={variant === 'desktop' ? 'lh-nav-consent-button-desktop' : 'lh-nav-consent-button-mobile'}
     >
       <span className="flex items-center gap-xs">
         <span className="inline-flex h-2.5 w-2.5 rounded-full"

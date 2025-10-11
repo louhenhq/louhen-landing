@@ -1,11 +1,14 @@
 import { getRequestConfig } from 'next-intl/server';
 
-const locales = ['en-de', 'de-de'];
-const defaultLocale = 'en-de';
+const locales = ['en-de', 'de-de', 'fr-fr', 'nl-nl', 'it-it'];
+const defaultLocale = 'de-de';
 
 const messageKeyByLocale = new Map([
   ['en-de', 'en'],
   ['de-de', 'de'],
+  ['fr-fr', 'fr'],
+  ['nl-nl', 'nl'],
+  ['it-it', 'it'],
 ]);
 
 function resolveLocale(locale) {

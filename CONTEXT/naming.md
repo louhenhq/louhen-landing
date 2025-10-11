@@ -57,7 +57,7 @@
 - Block: `components/blocks/FeatureGrid.tsx`.
 - Hook: `lib/shared/useMediaQuery.ts`.
 - Server util: `lib/server/adapters/adyen-client.server.ts`.
-- Route: `app/(site)/en-de/method/page.tsx`.
+- Route: `app/(marketing)/[locale]/method/page.tsx`.
 - API handler: `app/api/status/route.ts`.
 - Tests: `tests/e2e/method/hero.e2e.ts`, `tests/axe/method/hero.axe.ts`.
 

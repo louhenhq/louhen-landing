@@ -30,7 +30,7 @@ Reference checklist for implementing and testing the landing header. Augments th
 - When the header shrinks, do not collapse text-only buttons into icon-only unless `aria-label` and tooltip remain.
 - Mobile drawer trigger exposes `data-nav-drawer-trigger` with the translated text label from `header.drawer.open`; keep this structure so automated tests can assert visibility.
 - Theme toggle mirrors the locale switcher structure: visible label on mobile, SR-only label on desktop, and localized option text for each mode (`header.theme.modes.*`). Maintain keyboard focus order after the locale switcher.
-- CTA button remains a real `<button>` for scroll behaviour and `<a>` for link behaviour; ensure both variants include `data-testid` hooks (`header-cta`, `header-cta-mobile`) and accessible names from translations.
+- CTA button remains a real `<button>` for scroll behaviour and `<a>` for link behaviour; ensure both variants include `data-testid` hooks (`lh-nav-cta-primary`, `lh-nav-cta-primary-mobile`) and accessible names from translations.
 - Promo ribbon dismiss control uses a visible text label (no icon-only) and keeps focus within the ribbon when tabbing; reserving height avoids unexpected scroll jumps for keyboard users.
 
 ---

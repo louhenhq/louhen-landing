@@ -1,13 +1,14 @@
 import { expect, test } from '@tests/fixtures/playwright';
 import { runAxe } from '@tests/fixtures/axe';
-import { getDefaultLocale, localeUrl } from '@tests/e2e/_utils/url';
+import { getDefaultLocale, localeUrl, setLocaleCookie } from '@tests/e2e/_utils/url';
 
 const locale = getDefaultLocale();
 
 test.describe('Waitlist form — accessibility', () => {
   test('labels, error relationships, and axe', async ({ page }, testInfo) => {
     await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto(localeUrl('/waitlist', { locale }), { waitUntil: 'networkidle' });
+    await setLocaleCookie(page.context(), locale);
+    await page.goto(localeUrl('/waitlist', { locale }), { waitUntil: 'domcontentloaded' });
 
     const form = page.locator('[data-ll="wl-form"]').first();
     await expect(form).toBeVisible();
