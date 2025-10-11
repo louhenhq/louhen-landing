@@ -21,13 +21,15 @@ const ROUTES: RouteConfig[] = [
     name: 'home',
     path: '/',
     ready: async (page: Page) => {
-      await expect(page.locator('[data-ll="nav-root"]')).toBeVisible();
+      await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
+      await expect(page.getByTestId('lh-nav-root')).toBeVisible();
     },
   },
   {
     name: 'waitlist',
     path: '/waitlist',
     ready: async (page: Page) => {
+      await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
       await expect(page.locator('[data-ll="wl-form"]').first()).toBeVisible();
     },
   },
@@ -35,7 +37,8 @@ const ROUTES: RouteConfig[] = [
     name: 'method',
     path: '/method',
     ready: async (page: Page) => {
-      await expect(page.locator('[data-testid="method-hero"]').first()).toBeVisible();
+      await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
+      await expect(page.getByTestId('lh-hero-method-root')).toBeVisible();
     },
   },
 ];

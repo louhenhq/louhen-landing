@@ -22,9 +22,10 @@ async function seedAuthHintCookies(page: Page) {
 test.describe('Header user state awareness', () => {
   test('guest experience keeps waitlist CTA and hides logout link', async ({ page }) => {
     await page.goto(localeUrl('?utm_source=user-state-guest'), { waitUntil: 'domcontentloaded' });
+    await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
 
-    await expect(page.locator('[data-ll="nav-waitlist-cta"]').first()).toHaveText('Join the waitlist');
-    await expect(page.getByTestId('header-logout')).toHaveCount(0);
+    await expect(page.getByTestId('lh-nav-cta-primary')).toHaveText('Join the waitlist');
+    await expect(page.getByTestId('lh-nav-logout-desktop')).toHaveCount(0);
   });
 
   test('hinted state swaps CTA, shows logout, and annotates analytics with user_state', async ({ page }) => {
@@ -46,19 +47,20 @@ test.describe('Header user state awareness', () => {
     });
 
     await page.goto(localeUrl('?utm_source=user-state-hinted'), { waitUntil: 'domcontentloaded' });
+    await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
 
-    const dashboardCta = page.locator('[data-ll="nav-waitlist-cta"]').first();
+    const dashboardCta = page.getByTestId('lh-nav-cta-primary');
     await expect(dashboardCta).toHaveText('Dashboard');
 
-    const logoutLink = page.getByTestId('header-logout');
+    const logoutLink = page.getByTestId('lh-nav-logout-desktop');
     await expect(logoutLink).toBeVisible();
 
     await page.evaluate(() => {
-      const cta = document.querySelector('[data-ll="nav-waitlist-cta"]');
+      const cta = document.querySelector('[data-testid="lh-nav-cta-primary"]');
       if (cta instanceof HTMLAnchorElement) {
         cta.setAttribute('href', '#');
       }
-      const logout = document.querySelector('[data-testid="header-logout"]');
+      const logout = document.querySelector('[data-testid="lh-nav-logout-desktop"]');
       if (logout instanceof HTMLAnchorElement) {
         logout.setAttribute('href', '#');
       }

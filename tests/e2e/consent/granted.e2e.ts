@@ -1,5 +1,4 @@
 import { expect, test } from '@tests/fixtures/playwright';
-import { localeUrl } from '../_utils/url';
 
 type AnalyticsEvent = {
   name?: string;
@@ -27,6 +26,7 @@ test.describe('Consent (granted)', () => {
     });
 
     await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
     await expect(page).toHaveURL(/\/de-de\/?$/);
 
     await expect(page.getByRole('dialog', { name: /cookies/i })).toHaveCount(0);
@@ -35,8 +35,8 @@ test.describe('Consent (granted)', () => {
       .toBe(1);
     expect(analyticsEvents[0]?.name).toBe('page_view');
 
-    const headerCta = page.locator('[data-ll="nav-waitlist-cta"]').first();
-    await headerCta.waitFor();
+    const headerCta = page.getByTestId('lh-nav-cta-primary');
+    await expect(headerCta).toBeVisible();
     await headerCta.click({ force: true });
 
     await expect

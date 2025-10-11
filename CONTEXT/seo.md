@@ -63,6 +63,12 @@ Locked decisions: canonical host `https://www.louhen.app`, preview `https://stag
 - Track regressions in the Lighthouse artifact stored in CI; treat metadata drift as a launch blocker.
 - Playwright SEO add-ons (`tests/e2e/seo/`) enforce sitemap HTTP integrity and canonical uniqueness on every preview run. Adjust sampling thresholds via `SEO_SITEMAP_SAMPLE` if a temporary hotfix requires a smaller set.
 
+## Testing Expectations & Guardrails
+- Metadata specs must assert title, description, canonical, robots (`noindex` when `IS_PRELAUNCH`), OG/Twitter tags, and JSON-LD, using the deterministic ids exposed by `components/SeoJsonLd.tsx` (`lh-jsonld-organization`, `lh-jsonld-website`, `lh-jsonld-breadcrumb`, etc.).
+- Cover each route in the default locale (`de-de`) **and** at least one non-default locale, verifying `<html lang>`, `hreflang`, and `x-default` entries match the canonical host rules above.
+- Fail tests if any structured data references preview/staging hosts or missing locales. Attach header and metadata dumps to Playwright test info so CI artifacts surface the current values.
+- Lighthouse smoke runs enforce the budgets documented in [/CONTEXT/performance.md](performance.md). Temporary waivers require the `perf-waiver` label plus an entry in `/CONTEXT/decision_log.md` with an expiry date.
+
 ## Social Preview Strategy
 - OG/Twitter metadata must emit absolute URLs (no relative paths). `twitter:card` remains locked to `summary_large_image`; prefer mirroring OG titles/descriptions for parity.
 - OG images must come from the canonical host (`https://www.louhen.app`) or preview origin when running remote tests. Helpers append `?locale=<bcp47>&key=<surface>` with optional params (`ref`, `slug`) when the surface requires localized copy.

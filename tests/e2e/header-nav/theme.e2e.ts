@@ -5,8 +5,9 @@ test.describe('Header theme toggle', () => {
   test('desktop theme selection persists across reloads', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto(localeUrl('?utm_source=theme-desktop'), { waitUntil: 'domcontentloaded' });
+    await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
 
-    const themeSelect = page.getByTestId('header-theme-select-desktop');
+    const themeSelect = page.getByTestId('lh-nav-theme-toggle-desktop-select');
     await expect(themeSelect).toBeVisible();
 
     await themeSelect.selectOption('dark');
@@ -33,14 +34,15 @@ test.describe('Header theme toggle', () => {
     await page.goto(localeUrl('?utm_source=theme-mobile', { locale: 'de-de' }), {
       waitUntil: 'domcontentloaded',
     });
+    await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
 
-    const trigger = page.locator('[data-ll="nav-menu-button"]');
+    const trigger = page.getByTestId('lh-nav-menu-toggle');
     await trigger.click();
 
     const drawer = page.locator('[data-nav-drawer]');
     await expect(drawer).toBeVisible();
 
-    const themeSelect = page.getByTestId('header-theme-select-mobile');
+    const themeSelect = page.getByTestId('lh-nav-theme-toggle-mobile-select');
     await expect(themeSelect).toBeVisible();
 
     await themeSelect.selectOption('light');

@@ -26,6 +26,10 @@ test.describe('Security headers', () => {
     expect(navigationResponse, 'Expected a navigation response for the HTML page').toBeTruthy();
     // Always inspect the navigation response so we validate the exact HTML payload after redirects/caching.
     const headers = navigationResponse!.headers();
+    await test.info().attach('security-headers.json', {
+      body: JSON.stringify(headers, null, 2),
+      contentType: 'application/json',
+    });
 
     const hstsHeader = headers['strict-transport-security'];
     const canonicalProd =

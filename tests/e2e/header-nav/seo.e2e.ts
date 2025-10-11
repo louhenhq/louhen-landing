@@ -26,9 +26,10 @@ test.describe('Header SEO touchpoints', () => {
     });
 
     await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
     await expect(page).toHaveURL(/\/de-de\/?$/);
 
-    const cta = page.locator('[data-ll="nav-waitlist-cta"]').first();
+    const cta = page.getByTestId('lh-nav-cta-primary');
     const ctaHref = await cta.getAttribute('href');
     expect(ctaHref).toContain('utm_source=header');
     expect(ctaHref).toContain('utm_medium=cta');

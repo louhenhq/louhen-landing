@@ -6,6 +6,7 @@ import ThemeInit from '@/components/ThemeInit'
 import { ConsentProvider } from '@/components/ConsentProvider'
 import AnalyticsInit from '@/components/AnalyticsInit'
 import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/SeoJsonLd'
+import { PageReadySentinel } from '@/components/PageReadySentinel'
 import { SITE_NAME } from '@/constants/site'
 import { parseConsentFromCookie } from '@/lib/shared/consent/api'
 import { NonceProvider } from '@/lib/csp/nonce-context'
@@ -160,6 +161,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             {/* Apply theme/contrast on first paint + react to system changes */}
             <ThemeInit />
             <AnalyticsInit endpoint="/api/track" />
+            <PageReadySentinel />
+            <span
+              data-testid="lh-csp-nonce"
+              data-state={nonce ? 'present' : 'missing'}
+              aria-hidden="true"
+              style={{ position: 'fixed', inset: 'auto auto 0 0', width: 1, height: 1, overflow: 'hidden', pointerEvents: 'none', opacity: 0 }}
+            />
             {children}
           </ConsentProvider>
         </NonceProvider>

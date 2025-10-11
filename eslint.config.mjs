@@ -42,6 +42,20 @@ const arbitraryTailwindUtilitySelectors = [
 ];
 
 const eslintConfig = [
+  {
+    ignores: [
+      "artifacts/**",
+      "playwright-report/**",
+      "test-results/**",
+      "coverage/**",
+      ".next/**",
+      "dist/**",
+      "**/html/trace/**",
+      "**/*.bundle.js",
+      "**/*.min.js",
+      "public/tokens/**",
+    ],
+  },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
     rules: {
@@ -54,7 +68,6 @@ const eslintConfig = [
   {
     ignores: [
       "node_modules/**",
-      ".next/**",
       "out/**",
       "build/**",
       "packages/**",
@@ -133,6 +146,10 @@ const eslintConfig = [
       globals: {
         ...globals.node,
       },
+    },
+    rules: {
+      "react-hooks/rules-of-hooks": "off",
+      "react-hooks/exhaustive-deps": "off",
     },
   },
   {

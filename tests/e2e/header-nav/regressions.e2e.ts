@@ -27,6 +27,7 @@ async function setThemePreference(context: BrowserContext, theme: 'light' | 'dar
 
 async function gotoReady(page: Page, path: string) {
   await page.goto(localeUrl(path), { waitUntil: 'domcontentloaded' });
+  await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
 }
 
 test.describe('Header regression pack', () => {
@@ -39,7 +40,7 @@ test.describe('Header regression pack', () => {
 
   test('CTA width stays stable between guest and hinted states', async ({ page, context }) => {
     await gotoReady(page, '?utm_source=header-width');
-    const cta = page.locator('[data-ll="nav-waitlist-cta"]').first();
+    const cta = page.getByTestId('lh-nav-cta-primary');
     await expect(cta).toBeVisible();
 
     const guestWidth = await cta.evaluate((node) => node.getBoundingClientRect().width);
@@ -47,13 +48,13 @@ test.describe('Header regression pack', () => {
     await applyAuthHint(context);
     await page.reload({ waitUntil: 'domcontentloaded' });
 
-    const hintedCta = page.locator('[data-ll="nav-waitlist-cta"]').first();
+    const hintedCta = page.getByTestId('lh-nav-cta-primary');
     await expect(hintedCta).toHaveText('Dashboard');
     const hintedWidth = await hintedCta.evaluate((node) => node.getBoundingClientRect().width);
 
     expect(Math.abs(guestWidth - hintedWidth)).toBeLessThanOrEqual(4);
 
-    const logoutLink = page.getByTestId('header-logout');
+    const logoutLink = page.getByTestId('lh-nav-logout-desktop');
     await expect(logoutLink).toBeVisible();
     const logoutHeight = await logoutLink.evaluate((node) => node.getBoundingClientRect().height);
     expect(Math.round(logoutHeight)).toBeGreaterThanOrEqual(44);
@@ -62,10 +63,10 @@ test.describe('Header regression pack', () => {
   test('Primary nav uses intent prefetch and exposes focus ring', async ({ page }) => {
     await gotoReady(page, '?utm_source=header-nav');
 
-    const methodLink = page.locator('[data-nav-id="method"]');
+    const methodLink = page.getByTestId('lh-nav-item-method');
     await expect(methodLink).toHaveAttribute('data-prefetch-policy', 'intent');
 
-    const anchorLink = page.locator('[data-nav-id="how-it-works"]');
+    const anchorLink = page.getByTestId('lh-nav-item-how-it-works');
     await expect(anchorLink).not.toHaveAttribute('data-prefetch-policy', 'intent');
 
     await methodLink.focus();
@@ -83,10 +84,10 @@ test.describe('Header regression pack', () => {
     await page.setViewportSize({ width: 414, height: 896 });
     await gotoReady(page, '?utm_source=header-drawer');
 
-    const trigger = page.locator('[data-ll="nav-menu-button"]');
+    const trigger = page.getByTestId('lh-nav-menu-toggle');
     await trigger.click();
 
-    const drawerLink = page.locator('[data-nav-section="primary"] [data-nav-id="method"]').first();
+    const drawerLink = page.getByTestId('lh-nav-item-method-drawer');
     await expect(drawerLink).toHaveAttribute('data-surface', 'drawer');
     await expect(drawerLink).toBeVisible();
 

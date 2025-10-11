@@ -33,3 +33,4 @@ Budgets tighten post-launch; update this table as new routes ship. When a page i
 - Run Lighthouse locally (`npm run lhci -- collect --url http://localhost:3000`) before approving big UI changes.
 - For regressions >5% in any metric, open an issue and attach the artifact diff.
 - Confirm any structural changes place components/utilities in directories defined by [/CONTEXT/naming.md](naming.md); update [/CONTEXT/rename_map.md](rename_map.md) if new assets require budget tracking.
+- Temporary budget waivers require the `perf-waiver` label and an accompanying entry in `/CONTEXT/decision_log.md` with owner + expiry.

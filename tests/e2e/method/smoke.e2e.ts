@@ -6,7 +6,7 @@ import { getDefaultLocale, getTestLocales, localeUrl } from '../_utils/url';
 
 type MethodMessages = {
   seo: { title: string };
-  hero: { title: string };
+  hero: { title: string; subtitle?: string };
   pillars: { title: string };
   how: { title: string };
   trust: { headline: string };
@@ -24,16 +24,21 @@ test.describe('Method page smoke test', () => {
 
       const response = await page.goto(methodPath(locale), { waitUntil: 'domcontentloaded' });
       expect(response?.status()).toBe(200);
+      await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
 
       if (methodMessages.seo?.title) {
         await expect(page).toHaveTitle(methodMessages.seo.title);
       }
 
-      const hero = page.locator('[data-testid="method-hero"]');
+      const hero = page.getByTestId('lh-hero-method-root');
       await expect(hero).toBeVisible();
-      const heroHeading = hero.getByRole('heading', { level: 1 }).first();
+      const heroHeading = page.getByTestId('lh-hero-method-title');
       if (methodMessages.hero?.title) {
         await expect(heroHeading).toHaveText(methodMessages.hero.title);
+      }
+      const heroSubtitle = page.getByTestId('lh-hero-method-subtitle');
+      if (methodMessages.hero?.subtitle) {
+        await expect(heroSubtitle).toHaveText(methodMessages.hero.subtitle);
       }
 
       const pillars = page.locator('[data-ll="method-pillars"]');
@@ -54,7 +59,7 @@ test.describe('Method page smoke test', () => {
         await expect(trust.getByRole('heading', { level: 2 })).toHaveText(methodMessages.trust.headline);
       }
 
-      const cta = page.locator('[data-testid="method-hero-cta"]');
+      const cta = page.getByTestId('lh-hero-method-cta-primary');
       if (methodMessages.cta?.button) {
         await expect(cta).toBeVisible();
         await expect(cta).toHaveText(methodMessages.cta.button);
@@ -66,7 +71,8 @@ test.describe('Method page smoke test', () => {
 test.describe('@mobile method mobile smoke', () => {
   test('renders hero and CTA on mobile view', async ({ page }) => {
     await page.goto(localeUrl('/method', { locale: defaultLocale }), { waitUntil: 'domcontentloaded' });
-    await expect(page.locator('[data-testid="method-hero"]').first()).toBeVisible();
-    await expect(page.locator('[data-testid="method-hero-cta"]').first()).toBeVisible();
+    await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
+    await expect(page.getByTestId('lh-hero-method-root')).toBeVisible();
+    await expect(page.getByTestId('lh-hero-method-cta-primary')).toBeVisible();
   });
 });

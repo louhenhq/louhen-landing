@@ -14,6 +14,7 @@ test.describe('Landing analytics sentinel', () => {
     });
 
     await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
     await expect(page).toHaveURL(/\/de-de\/?$/);
 
     const analyticsReadyInitial = await page.evaluate(() => window.__LOUHEN_ANALYTICS_READY === true);
@@ -22,8 +23,8 @@ test.describe('Landing analytics sentinel', () => {
     const consentDialog = page.getByRole('dialog', { name: /cookies/i });
     await expect(consentDialog).toBeVisible();
 
-    const headerCta = page.getByTestId('header-cta');
-    await headerCta.waitFor();
+    const headerCta = page.getByTestId('lh-nav-cta-primary');
+    await expect(headerCta).toBeVisible();
     await headerCta.scrollIntoViewIfNeeded();
     await headerCta.click({ force: true });
     expect(trackCalls).toBe(0);

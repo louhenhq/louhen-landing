@@ -50,6 +50,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
+        shell: bash --noprofile --norc -eo pipefail {0}
         run: npm ci --include=dev
 
   lint-and-types:
@@ -69,12 +70,15 @@ jobs:
         run: npm ci --include=dev
 
       - name: Lint
+        shell: bash --noprofile --norc -eo pipefail {0}
         run: npm run lint
 
       - name: Type check
+        shell: bash --noprofile --norc -eo pipefail {0}
         run: npm run typecheck
 
       - name: Unit tests
+        shell: bash --noprofile --norc -eo pipefail {0}
         run: npm run test:unit
 
   build:
@@ -97,9 +101,11 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
+        shell: bash --noprofile --norc -eo pipefail {0}
         run: npm ci --include=dev
 
       - name: Build Next.js app
+        shell: bash --noprofile --norc -eo pipefail {0}
         run: npm run build
 
       - name: Detect Next build output
@@ -171,6 +177,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
+        shell: bash --noprofile --norc -eo pipefail {0}
         run: npm ci --include=dev
 
       - name: Report build artifact availability
@@ -188,6 +195,7 @@ jobs:
 
       - name: Local build fallback
         if: needs.build.outputs.has_next != 'true'
+        shell: bash --noprofile --norc -eo pipefail {0}
         run: |
           if [ ! -d node_modules ]; then
             npm ci --include=dev
@@ -199,6 +207,10 @@ jobs:
           echo "NEXT_BUILD_DIR=${NEXT_BUILD_DIR}"
           ls -la "${NEXT_BUILD_DIR}" || true
 
+      - name: Echo Playwright env snapshot
+        run: |
+          node -e "const snapshot = {}; const pick = (k) => { if (process.env[k] !== undefined) snapshot[k] = process.env[k]; }; ['APP_BASE_URL','BASE_URL','IS_PRELAUNCH','CSP_REPORT_ONLY','NEXT_PUBLIC_CSP_REPORT_ONLY','NEXT_PUBLIC_DEFAULT_LOCALE','NEXT_PUBLIC_ANALYTICS_ENABLED'].forEach(pick); if (!snapshot.CSP_REPORT_ONLY && snapshot.NEXT_PUBLIC_CSP_REPORT_ONLY) snapshot.CSP_MODE = snapshot.NEXT_PUBLIC_CSP_REPORT_ONLY; console.log('PLAYWRIGHT_ENV', JSON.stringify(snapshot));"
+
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:
@@ -209,31 +221,6 @@ jobs:
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
-
-      - name: Start Next.js server
-        run: |
-          npm run start:test &
-          SERVER_PID=$!
-          echo "SERVER_PID=$SERVER_PID" >> "$GITHUB_ENV"
-          started=0
-          for i in {1..120}; do
-            if curl -fsS "http://${HOST}:${PORT}${PW_HEALTH_PATH}" >/dev/null 2>&1; then
-              started=1
-              echo "Server is responding on http://${HOST}:${PORT}${PW_HEALTH_PATH}"
-              break
-            fi
-            if ! kill -0 "$SERVER_PID" >/dev/null 2>&1; then
-              echo "Server process exited early"
-              [[ -f "${NEXT_BUILD_DIR}/test-server.log" ]] && cat "${NEXT_BUILD_DIR}/test-server.log" || true
-              exit 1
-            fi
-            sleep 1
-          done
-          if [ "$started" -ne 1 ]; then
-            echo "Server failed to become healthy within 120 seconds"
-            [[ -f "${NEXT_BUILD_DIR}/test-server.log" ]] && tail -n 200 "${NEXT_BUILD_DIR}/test-server.log" || true
-            exit 1
-          fi
 
       - name: Verify environment wiring
         run: |
@@ -281,7 +268,12 @@ jobs:
             exit 1
           fi
 
+      - name: Echo Playwright env snapshot
+        run: |
+          node -e "const snapshot = {}; const pick = (k) => { if (process.env[k] !== undefined) snapshot[k] = process.env[k]; }; ['APP_BASE_URL','BASE_URL','IS_PRELAUNCH','CSP_REPORT_ONLY','NEXT_PUBLIC_CSP_REPORT_ONLY','NEXT_PUBLIC_DEFAULT_LOCALE','NEXT_PUBLIC_ANALYTICS_ENABLED'].forEach(pick); if (!snapshot.CSP_REPORT_ONLY && snapshot.NEXT_PUBLIC_CSP_REPORT_ONLY) snapshot.CSP_MODE = snapshot.NEXT_PUBLIC_CSP_REPORT_ONLY; console.log('PLAYWRIGHT_ENV', JSON.stringify(snapshot));"
+
       - name: Playwright tests
+        shell: bash --noprofile --norc -eo pipefail {0}
         env:
           DEBUG: pw:webserver,pw:api
         run: npm run test:e2e
@@ -306,14 +298,6 @@ jobs:
             playwright-report
             ${{ env.NEXT_BUILD_DIR }}/test-server.log
           if-no-files-found: warn
-
-      - name: Stop Next.js server
-        if: always()
-        run: |
-          if [ -n "${SERVER_PID:-}" ]; then
-            kill "${SERVER_PID}" || true
-            wait "${SERVER_PID}" 2>/dev/null || true
-          fi
 
   axe:
     name: axe
@@ -392,34 +376,10 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Start Next.js server
-        run: |
-          npm run start:test &
-          SERVER_PID=$!
-          echo "SERVER_PID=$SERVER_PID" >> "$GITHUB_ENV"
-          started=0
-          for i in {1..120}; do
-            if curl -fsS "http://${HOST}:${PORT}${PW_HEALTH_PATH}" >/dev/null 2>&1; then
-              started=1
-              echo "Server is responding on http://${HOST}:${PORT}${PW_HEALTH_PATH}"
-              break
-            fi
-            if ! kill -0 "$SERVER_PID" >/dev/null 2>&1; then
-              echo "Server process exited early"
-              [[ -f "${NEXT_BUILD_DIR}/test-server.log" ]] && cat "${NEXT_BUILD_DIR}/test-server.log" || true
-              exit 1
-            fi
-            sleep 1
-          done
-          if [ "$started" -ne 1 ]; then
-            echo "Server failed to become healthy within 120 seconds"
-            [[ -f "${NEXT_BUILD_DIR}/test-server.log" ]] && tail -n 200 "${NEXT_BUILD_DIR}/test-server.log" || true
-            exit 1
-          fi
-
       - name: Run accessibility suite (warn)
         id: axe
         continue-on-error: true
+        shell: bash --noprofile --norc -eo pipefail {0}
         run: npm run test:axe
 
       - name: Tail Next.js server log
@@ -448,14 +408,6 @@ jobs:
         if: steps.axe.outcome == 'failure'
         run: echo "::warning::Accessibility sweep reported issues. Review the uploaded artifacts."
 
-      - name: Stop Next.js server
-        if: always()
-        run: |
-          if [ -n "${SERVER_PID:-}" ]; then
-            kill "${SERVER_PID}" || true
-            wait "${SERVER_PID}" 2>/dev/null || true
-          fi
-
   lighthouse:
     name: lighthouse
     runs-on: ubuntu-latest
@@ -476,6 +428,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
+        shell: bash --noprofile --norc -eo pipefail {0}
         run: npm ci --include=dev
 
       - name: Report build artifact availability
@@ -493,6 +446,7 @@ jobs:
 
       - name: Local build fallback
         if: needs.build.outputs.has_next != 'true'
+        shell: bash --noprofile --norc -eo pipefail {0}
         run: |
           if [ ! -d node_modules ]; then
             npm ci --include=dev
@@ -507,6 +461,7 @@ jobs:
       - name: Run Lighthouse (warn)
         id: lhci
         continue-on-error: true
+        shell: bash --noprofile --norc -eo pipefail {0}
         run: npm run lighthouse
 
       - name: Upload Lighthouse artifacts

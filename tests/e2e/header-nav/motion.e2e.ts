@@ -5,8 +5,9 @@ test.describe('Header motion', () => {
   test('shrinks, hides on scroll down, and reveals on scroll up', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto(localeUrl('?utm_source=motion-desktop'), { waitUntil: 'domcontentloaded' });
+    await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
 
-    const header = page.locator('[data-ll="nav-root"]');
+    const header = page.getByTestId('lh-nav-root');
     await expect(header).toHaveAttribute('data-header-state', 'default');
 
     await page.evaluate(() => window.scrollTo(0, 70));
@@ -22,13 +23,14 @@ test.describe('Header motion', () => {
   test('focus within keeps header visible after hide', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto(localeUrl('?utm_source=motion-focus'), { waitUntil: 'domcontentloaded' });
+    await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
 
-    const header = page.locator('[data-ll="nav-root"]');
+    const header = page.getByTestId('lh-nav-root');
 
     await page.evaluate(() => window.scrollTo(0, 200));
     await expect.poll(async () => header.getAttribute('data-header-state')).toBe('hidden');
 
-    const drawerTrigger = page.locator('[data-ll="nav-menu-button"]');
+    const drawerTrigger = page.getByTestId('lh-nav-menu-toggle');
     await drawerTrigger.focus();
     await expect.poll(async () => header.getAttribute('data-header-state')).toBe('shrink');
 
@@ -42,8 +44,9 @@ test.describe('Header motion', () => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto(localeUrl('?utm_source=motion-reduced'), { waitUntil: 'domcontentloaded' });
+    await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
 
-    const header = page.locator('[data-ll="nav-root"]');
+    const header = page.getByTestId('lh-nav-root');
     await expect(header).toHaveAttribute('data-motion', 'disabled');
 
     await page.evaluate(() => window.scrollTo(0, 250));

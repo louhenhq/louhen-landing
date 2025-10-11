@@ -44,6 +44,7 @@ test.describe('Method page metadata', () => {
       expect(status).toBe(200);
 
       await page.goto(targetPath, { waitUntil: 'domcontentloaded' });
+      await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
 
       const expectedTitle =
         methodMessages.seo?.title ?? defaultMethodMessages.seo?.title ?? DEFAULT_METHOD_TITLE;

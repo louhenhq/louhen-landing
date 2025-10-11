@@ -82,9 +82,10 @@ test.describe('Header visual snapshots', () => {
 
       await page.setViewportSize(scenario.viewport);
       await page.goto(localeUrl(scenario.path, { locale: scenario.locale }), { waitUntil: 'domcontentloaded' });
+      await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
 
-      const header = page.locator('[data-ll="nav-root"]');
-      await header.waitFor({ state: 'visible' });
+      const header = page.getByTestId('lh-nav-root');
+      await expect(header).toBeVisible();
 
       await expect(header).toHaveScreenshot(`${scenario.name}.png`, {
         animations: 'disabled',

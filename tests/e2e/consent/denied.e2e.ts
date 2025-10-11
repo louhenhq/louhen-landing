@@ -16,21 +16,20 @@ test.describe('Consent (denied)', () => {
     });
 
     await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
     await expect(page).toHaveURL(/\/de-de\/?$/);
     await expect(page.getByRole('dialog', { name: /cookies/i })).toHaveCount(0);
 
-    await page.waitForTimeout(500);
-    expect(analyticsRequests).toHaveLength(0);
+    await expect.poll(() => analyticsRequests.length).toBe(0);
 
     await page.goto(localeUrl('/method'), { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(500);
-    expect(analyticsRequests).toHaveLength(0);
+    await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
+    await expect.poll(() => analyticsRequests.length).toBe(0);
 
-    const headerCta = page.locator('[data-ll="nav-waitlist-cta"]').first();
-    await headerCta.waitFor();
+    const headerCta = page.getByTestId('lh-nav-cta-primary');
+    await expect(headerCta).toBeVisible();
     await headerCta.click({ force: true });
-    await page.waitForTimeout(500);
-    expect(analyticsRequests).toHaveLength(0);
+    await expect.poll(() => analyticsRequests.length).toBe(0);
 
     await page.unroute('**/api/track');
   });

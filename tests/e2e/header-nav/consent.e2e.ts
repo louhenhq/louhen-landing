@@ -10,8 +10,9 @@ test.describe('Header consent controls', () => {
     });
 
     await page.goto(localeUrl('?utm_source=consent-header'), { waitUntil: 'domcontentloaded' });
+    await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
 
-    const consentButton = page.getByTestId('header-consent-button-desktop');
+    const consentButton = page.getByTestId('lh-nav-consent-button-desktop');
     await expect(consentButton).toBeVisible();
     await expect(consentButton).toHaveAttribute('data-consent-state', 'unset');
 
@@ -25,7 +26,7 @@ test.describe('Header consent controls', () => {
     await expect(dialog).toBeHidden();
 
     // Trigger header CTA before consent → no analytics call
-    await page.locator('[data-ll="nav-waitlist-cta"]').first().click();
+    await page.getByTestId('lh-nav-cta-primary').click();
     await expect.poll(() => trackRequests).toBe(0);
 
     // Accept consent
@@ -34,7 +35,7 @@ test.describe('Header consent controls', () => {
     await expect(consentButton).toHaveAttribute('data-consent-state', 'granted');
 
     // CTA should now enqueue analytics
-    await page.locator('[data-ll="nav-waitlist-cta"]').first().click();
+    await page.getByTestId('lh-nav-cta-primary').click();
     await expect.poll(() => trackRequests).toBeGreaterThan(0);
 
     // Revoke consent
@@ -44,7 +45,7 @@ test.describe('Header consent controls', () => {
     await expect(consentButton).toHaveAttribute('data-consent-state', 'denied');
 
     const priorRequests = trackRequests;
-    await page.locator('[data-ll="nav-waitlist-cta"]').first().click();
+    await page.getByTestId('lh-nav-cta-primary').click();
     await expect.poll(() => trackRequests).toBe(priorRequests);
   });
 });
