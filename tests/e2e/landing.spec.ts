@@ -1,11 +1,11 @@
 import { expect, test } from '@tests/fixtures/playwright';
-import { setLocaleCookie } from './_utils/url';
+import { getDefaultLocale } from './_utils/url';
 
 test.describe('Landing analytics sentinel', () => {
   test('consent gating blocks analytics until accepted @smoke', async ({ context, page }) => {
     await context.clearCookies();
-    await setLocaleCookie(context);
     await page.setViewportSize({ width: 1280, height: 900 });
+    const defaultLocale = getDefaultLocale();
 
     let trackCalls = 0;
     await page.route('**/api/track', async (route) => {
@@ -13,9 +13,9 @@ test.describe('Landing analytics sentinel', () => {
       await route.fulfill({ status: 204, body: '{}' });
     });
 
-    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.goto(`/${defaultLocale}`, { waitUntil: 'domcontentloaded' });
     await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
-    await expect(page).toHaveURL(/\/de-de\/?$/);
+    await expect(page).toHaveURL(new RegExp(`/${defaultLocale}/?(?:[?#].*)?$`));
 
     const analyticsReadyInitial = await page.evaluate(() => window.__LOUHEN_ANALYTICS_READY === true);
     expect(analyticsReadyInitial).toBe(false);

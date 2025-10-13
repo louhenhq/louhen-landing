@@ -16,8 +16,6 @@ type BlockedRequestMarker = {
  * Local network origins allowed during tests. Anything else is aborted.
  * Additional origins must be reviewed and documented alongside the testing policy.
  */
-const LOCAL_NETWORK_ALLOWLIST = ['http://127.0.0.1', 'http://localhost', 'http://0.0.0.0', 'http://[::1]'];
-
 type PageDiagnostics = {
   console: Array<{ type: string; text: string; location?: string }>;
   network: Array<{
@@ -29,58 +27,8 @@ type PageDiagnostics = {
   }>;
 };
 
-let allowedNetworkTargetsCache:
-  | {
-      origins: Set<string>;
-      hosts: Set<string>;
-    }
-  | null = null;
-
-function resolveAllowedNetworkTargets() {
-  if (allowedNetworkTargetsCache) {
-    return allowedNetworkTargetsCache;
-  }
-
-  const origins = new Set<string>();
-  const hosts = new Set<string>(['localhost', '127.0.0.1', '0.0.0.0', '::1']);
-  for (const origin of LOCAL_NETWORK_ALLOWLIST) {
-    try {
-      const parsed = new URL(origin);
-      origins.add(parsed.origin);
-      hosts.add(parsed.hostname);
-    } catch {
-      // ignore malformed allowlist entries
-    }
-  }
-  const port = process.env.PORT ?? '4311';
-  const candidates = [
-    process.env.BASE_URL,
-    process.env.APP_BASE_URL,
-    process.env.PREVIEW_BASE_URL,
-    process.env.NEXT_PUBLIC_SITE_URL,
-    `http://127.0.0.1:${port}`,
-    `http://localhost:${port}`,
-  ].filter((value): value is string => Boolean(value && value.trim().length));
-
-  for (const candidate of candidates) {
-    try {
-      const parsed = new URL(candidate);
-      origins.add(parsed.origin);
-      hosts.add(parsed.hostname);
-    } catch {
-      // ignore parse errors (relative paths/env placeholders)
-    }
-  }
-
-  allowedNetworkTargetsCache = { origins, hosts };
-  return allowedNetworkTargetsCache;
-}
-
 function isAllowedNetworkUrl(url: string): boolean {
-  if (url.startsWith('data:') || url.startsWith('blob:') || url === 'about:blank') {
-    return true;
-  }
-  if (url.startsWith('chrome-extension:') || url.startsWith('devtools:')) {
+  if (url === 'about:blank' || url.startsWith('data:') || url.startsWith('blob:')) {
     return true;
   }
 
@@ -96,13 +44,11 @@ function isAllowedNetworkUrl(url: string): boolean {
     return false;
   }
 
-  const targets = resolveAllowedNetworkTargets();
-  if (targets.origins.has(parsed.origin)) {
+  const host = parsed.hostname.toLowerCase();
+  if (host === 'localhost' || host === '127.0.0.1') {
     return true;
   }
-  if (targets.hosts.has(parsed.hostname)) {
-    return true;
-  }
+
   return false;
 }
 

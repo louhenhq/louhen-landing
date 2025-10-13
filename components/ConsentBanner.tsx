@@ -27,6 +27,7 @@ export default function ConsentBanner({ forceOpen = false, onClose, onLearnMoreH
   const containerRef = useRef<HTMLDivElement | null>(null);
   const firstButtonRef = useRef<HTMLButtonElement | null>(null);
   const lastActiveElement = useRef<Element | null>(null);
+  const accessibleLabelId = 'consent-manager-accessible-label';
   const [consentState, setConsentState] = useState<ConsentState>('unknown');
   const [internalOpen, setInternalOpen] = useState<boolean>(forceOpen);
 
@@ -128,11 +129,14 @@ export default function ConsentBanner({ forceOpen = false, onClose, onLearnMoreH
         ref={containerRef}
         role="dialog"
         aria-modal="true"
-        aria-labelledby="consent-manager-title"
+        aria-labelledby={`${accessibleLabelId} consent-manager-title`}
         aria-describedby="consent-manager-description"
         className="w-full max-w-lg rounded-3xl border border-border bg-bg shadow-card"
         onClick={(event) => event.stopPropagation()}
       >
+        <span id={accessibleLabelId} className="sr-only">
+          Cookies
+        </span>
         <div className="flex items-start justify-between gap-sm border-b border-border px-lg py-md">
           <div>
             <h2 id="consent-manager-title" className="text-lg font-semibold text-text">

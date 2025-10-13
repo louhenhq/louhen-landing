@@ -1,5 +1,5 @@
 import { expect, test } from '@tests/fixtures/playwright';
-import { getDefaultLocale, getTestLocales, localeUrl, setLocaleCookie } from '@tests/e2e/_utils/url';
+import { getDefaultLocale, getTestLocales, localeUrl } from '@tests/e2e/_utils/url';
 
 const locales = getTestLocales();
 const WAITLIST_API = '**/api/waitlist';
@@ -17,7 +17,6 @@ test.describe('Waitlist form (waitlist page)', () => {
       });
 
       try {
-        await setLocaleCookie(page.context(), locale);
         await page.goto(localeUrl('/waitlist', { locale }), { waitUntil: 'domcontentloaded' });
 
         const form = page.locator('[data-ll="wl-form"]').first();
@@ -56,7 +55,6 @@ test.describe('Waitlist form (waitlist page)', () => {
       });
 
       try {
-        await setLocaleCookie(page.context(), locale);
         await page.goto(localeUrl('/waitlist', { locale }), { waitUntil: 'domcontentloaded' });
 
         const emailInput = page.locator('[data-ll="wl-email-input"]').first();
@@ -81,8 +79,8 @@ test.describe('Waitlist form (waitlist page)', () => {
 
 test.describe('@mobile waitlist mobile smoke', () => {
   test('renders waitlist form on mobile view @smoke', async ({ page }) => {
-    await setLocaleCookie(page.context(), defaultLocale);
     await page.goto(localeUrl('/waitlist', { locale: defaultLocale }), { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('networkidle');
     await expect(page.locator('[data-ll="wl-form"]').first()).toBeVisible();
     await expect(page.locator('[data-ll="wl-submit"]').first()).toBeVisible();
   });
@@ -93,13 +91,11 @@ test.describe('Waitlist urgency badge flag', () => {
 
   test('toggles urgency badge via feature flag @extended', async ({ page, flags }) => {
     await flags.set({ BANNER_WAITLIST_URGENCY: false });
-    await setLocaleCookie(page.context(), defaultLocale);
     await page.goto(localeUrl('/waitlist', { locale: defaultLocale }), { waitUntil: 'domcontentloaded' });
     await expect(page.getByText(urgencyCopy, { exact: false })).toHaveCount(0);
 
     await flags.set({ BANNER_WAITLIST_URGENCY: true });
     const cacheBuster = `?t=${Date.now()}`;
-    await setLocaleCookie(page.context(), defaultLocale);
     await page.goto(localeUrl(`/waitlist${cacheBuster}`, { locale: defaultLocale }), { waitUntil: 'domcontentloaded' });
     await expect(page.getByText(urgencyCopy, { exact: false })).toBeVisible();
   });
