@@ -34,8 +34,8 @@ const targets: Target[] = [
   },
   {
     name: 'waitlist landing',
-    pathForLocale: () => waitlistLandingPath(),
-    hreflangPathBuilder: () => waitlistLandingPath(),
+    pathForLocale: (locale) => waitlistLandingPath(locale),
+    hreflangPathBuilder: (locale) => waitlistLandingPath(locale),
   },
   {
     name: 'waitlist confirm',

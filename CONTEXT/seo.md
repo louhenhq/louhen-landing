@@ -1,11 +1,11 @@
 # SEO Playbook — Louhen Landing
 
-Locked decisions: canonical host `https://www.louhen.app`, preview `https://staging.louhen.app`, BCP-47 locale routing under `app/(site)/[locale]/…` (see [/CONTEXT/naming.md](naming.md) and [/CONTEXT/rename_map.md](rename_map.md)). Default-locale routes must call `unstable_setRequestLocale` (documented in [/CONTEXT/i18n.md](i18n.md)) before rendering so canonical URLs and structured data stay stable.
+Locked decisions: canonical host `https://www.louhen.app`, preview `https://staging.louhen.app`, BCP-47 locale routing under `app/(site)/[locale]/…` (see [/CONTEXT/naming.md](naming.md) and [/CONTEXT/rename_map.md](rename_map.md)). Locale enforcement for all public pages is documented in [/CONTEXT/i18n.md#locale-scoped-routing-policy-2025-10-13](i18n.md#locale-scoped-routing-policy-2025-10-13). Default-locale routes must call `unstable_setRequestLocale` (documented in [/CONTEXT/i18n.md](i18n.md)) before rendering so canonical URLs and structured data stay stable.
 
 ## Canonical Host & Redirects
 - Production always resolves to `https://www.louhen.app`; apex `https://louhen.app` issues a permanent `301` to `https://www.louhen.app`.
 - Preview traffic stays on `https://staging.louhen.app` (and `*.staging.louhen.app`) with `noindex` enforced until GA.
-- Never emit canonical links to the apex or staging hosts; QA must verify `<link rel="canonical">` and `hreflang` entries point to `https://www.louhen.app/{locale}` (the default locale `de-de` may omit the prefix in canonical paths, e.g., `/method`).
+- Never emit canonical links to the apex or staging hosts; QA must verify `<link rel="canonical">` and `hreflang` entries point to `https://www.louhen.app/{locale}/…` for every locale.
 
 ## Pre-launch policy
 - `isPrelaunch()` (see `lib/env/prelaunch.ts`) toggles `<meta name="robots" content="noindex, nofollow">` across marketing pages (home, method, waitlist, confirm flows, legal). Leave the flag enabled in preview and staging until GA.
@@ -20,8 +20,8 @@ Locked decisions: canonical host `https://www.louhen.app`, preview `https://stag
 - Ensure every `<link rel="canonical">`, `hreflang`, and `x-default` entry resolves to `https://www.louhen.app/{locale}`; never reference the apex domain.
 
 - Supported locales: `en`, `de`, `fr`, `nl`, `it`, `en-de`, `de-de`, `fr-fr`, `nl-nl`, `it-it` (see [/CONTEXT/i18n.md](i18n.md)). All canonical pages expose a full hreflang set, including `x-default` mapping to the default locale (`de-de`).
-- `/sitemap.xml` now returns a sitemap index. It links to `/sitemaps/sitemap-<locale>.xml` files that list only the canonical URLs for that locale; the default-locale sitemap also includes `/waitlist`.
-- Shared metadata builders (`lib/seo/*Metadata.ts`) and page-level `generateMetadata()` helpers must call `hreflangMapFor` with the exact canonical path so alternates stay aligned (the waitlist page still uses `/waitlist` for every locale).
+- `/sitemap.xml` now returns a sitemap index. It links to `/sitemaps/sitemap-<locale>.xml` files that list only the canonical URLs for that locale.
+- Shared metadata builders (`lib/seo/*Metadata.ts`) and page-level `generateMetadata()` helpers must call `hreflangMapFor` with the exact canonical path so alternates stay aligned (e.g., waitlist pages call `hreflangMapFor((locale) => \`/${locale}/waitlist\`)`).
 - Default-locale routes (without a locale prefix) must call `unstable_setRequestLocale(defaultLocale)` so rendered metadata (canonical + hreflang) stays in sync with the locale-aware builders.
 
 ## Legal pages (Terms & Privacy)
@@ -36,8 +36,8 @@ Locked decisions: canonical host `https://www.louhen.app`, preview `https://stag
 - Consumers must pass the active locale and (for legal pages) the `terms`/`privacy` slug; page-level `generateMetadata()` implementations should delegate directly to these builders.
 - Default-locale routes (e.g., `/method`) must call `unstable_setRequestLocale(defaultLocale)` before rendering so next-intl receives locale context identical to `/${defaultLocale}/…` routes and does not emit `MISSING_MESSAGE` errors.
 - Locale landing (`/[locale]`) and waitlist pages also rely on `makeCanonical` + `hreflangMapFor`; any new marketing surface exposed in the header must do the same before QA adds links.
-- Waitlist stays on a single `/waitlist` path; its metadata now calls `hreflangMapFor(() => '/waitlist')` so canonical + alternate entries remain consistent across locales and still emit `x-default`.
-- Waitlist confirmation surfaces (`/[locale]/confirm`, `/[locale]/confirm-pending`, `/[locale]/imprint`) now emit canonical + hreflang maps via inline metadata helpers that mirror the shared routing helpers; the default-locale routes reuse the canonical `/waitlist/confirm` and `/waitlist/confirm-pending` paths.
+- Waitlist metadata builders rely on locale-aware helpers (`waitlistLandingPath(locale)`, `waitlistConfirmPath(locale)`) so canonical and alternate entries always resolve to `/{locale}/waitlist` (and related subroutes) for every market.
+- Waitlist confirmation surfaces (`/[locale]/confirm`, `/[locale]/confirm-pending`, `/[locale]/imprint`) emit locale-prefixed canonical and `hreflang` maps via the same helpers; no public endpoint renders without the locale segment.
 
 ## Header Navigation & Campaigns
 - Header navigation links must never append marketing UTM parameters when pointing to internal anchors (`#how`, `#faq`) or internal routes; keep canonical URLs untouched to avoid diluting analytics and hreflang metrics.

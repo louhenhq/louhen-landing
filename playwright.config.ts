@@ -7,7 +7,7 @@ import { defineConfig, devices } from '@playwright/test';
 const HOST = process.env.HOST ?? '127.0.0.1';
 const parsedPort = Number.parseInt(process.env.PORT ?? '4311', 10);
 const PORT = Number.isFinite(parsedPort) ? parsedPort : 4311;
-const HEALTH_PATH = process.env.PW_HEALTH_PATH ?? '/icon.svg';
+const HEALTH_PATH = process.env.PW_HEALTH_PATH ?? '/favicon.ico';
 const fallbackLocalURL = `http://127.0.0.1:${PORT}`;
 const shouldSkipWebServer = process.env.PLAYWRIGHT_SKIP === '1';
 const artifactsRoot = process.env.PLAYWRIGHT_ARTIFACTS_DIR ?? 'artifacts/playwright';
@@ -188,8 +188,8 @@ if (shouldSkipWebServer) {
   ];
   if (shouldStartWebServer) {
     config.webServer = {
-      command: 'npm run start:test',
-      url: `${fallbackLocalURL}${HEALTH_PATH}`,
+      command: 'npm run start:e2e',
+      url: `http://127.0.0.1:${PORT}${HEALTH_PATH}`,
       reuseExistingServer: true,
       timeout: 120_000,
       env: {

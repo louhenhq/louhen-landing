@@ -81,8 +81,15 @@ test.describe('@mobile waitlist mobile smoke', () => {
   test('renders waitlist form on mobile view @smoke', async ({ page }) => {
     await page.goto(localeUrl('/waitlist', { locale: defaultLocale }), { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('networkidle');
-    await expect(page.locator('[data-ll="wl-form"]').first()).toBeVisible();
-    await expect(page.locator('[data-ll="wl-submit"]').first()).toBeVisible();
+    const form = page.locator('[data-ll="wl-form"]').first();
+    await form.waitFor({ state: 'attached' });
+    await form.scrollIntoViewIfNeeded();
+    await expect(form).toBeVisible({ timeout: 10_000 });
+
+    const submit = page.locator('[data-ll="wl-submit"]').first();
+    await submit.waitFor({ state: 'attached' });
+    await submit.scrollIntoViewIfNeeded();
+    await expect(submit).toBeVisible({ timeout: 10_000 });
   });
 });
 

@@ -13,10 +13,14 @@ test.describe('Network policy', () => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
 
-    await page.evaluate(async () => {
-      await fetch('https://example.com/__np_probe', { mode: 'no-cors' }).catch(() => null);
-    });
-    const blocked = networkPolicy.getBlockedRequests();
-    expect(blocked.some((url) => url.includes('https://example.com'))).toBe(true);
+    const baseProbeUrl = 'https://example.com/__np_probe';
+    const probeUrl = `${baseProbeUrl}?t=${Date.now()}`;
+    await page.evaluate((url) => {
+      return fetch(url, { cache: 'no-store' }).catch(() => null);
+    }, probeUrl);
+
+    await expect
+      .poll(() => networkPolicy.getBlockedRequests().some((url) => url.includes('https://example.com')))
+      .toBeTruthy();
   });
 });

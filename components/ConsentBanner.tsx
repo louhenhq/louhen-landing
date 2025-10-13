@@ -132,6 +132,7 @@ export default function ConsentBanner({ forceOpen = false, onClose, onLearnMoreH
         aria-labelledby={`${accessibleLabelId} consent-manager-title`}
         aria-describedby="consent-manager-description"
         className="w-full max-w-lg rounded-3xl border border-border bg-bg shadow-card"
+        data-state={open ? 'open' : 'closed'}
         onClick={(event) => event.stopPropagation()}
       >
         <span id={accessibleLabelId} className="sr-only">
@@ -169,6 +170,8 @@ export default function ConsentBanner({ forceOpen = false, onClose, onLearnMoreH
               onClose?.();
             }}
             data-consent-accept
+            data-testid="lh-consent-accept-all"
+            aria-label="Accept all"
           >
             {t('accept')}
           </button>

@@ -20,7 +20,7 @@ test.describe('Header consent controls', () => {
     const dialog = page.getByRole('dialog', { name: 'Privacy choices' });
     await expect(dialog).toBeVisible();
 
-    const acceptButton = dialog.getByRole('button', { name: 'Accept all' });
+    const acceptButton = dialog.getByTestId('lh-consent-accept-all');
     await expect(acceptButton).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(dialog).toBeHidden();

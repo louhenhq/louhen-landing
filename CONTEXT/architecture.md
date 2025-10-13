@@ -7,7 +7,7 @@ High-level map of routes, data flow, environment setup, security, observability,
 ## 0) System Overview (Start Here)
 
 - **Structure:** `app/` (routes), `components/{ui,blocks,features/…}`, `lib/shared/` (isomorphic), `lib/server/` (server-only), `tests/{unit,e2e,axe}/`, `scripts/`, `content/`, `public/`, `CONTEXT/`, `.github/`. See [/CONTEXT/naming.md](naming.md) for enforced conventions and [/CONTEXT/rename_map.md](rename_map.md) for the migration roadmap.
-- **Route groups:** Marketing surfaces live under `app/(site)/[locale]/…` using lowercase BCP-47 segments; API handlers stay in `app/api/`. Default-locale pages must call `unstable_setRequestLocale` before rendering.
+- **Route groups:** Marketing surfaces live under `app/(site)/[locale]/…` using lowercase BCP-47 segments; API handlers stay in `app/api/`. Default-locale pages must call `unstable_setRequestLocale` before rendering. Policy details live in [/CONTEXT/i18n.md#locale-scoped-routing-policy-2025-10-13](i18n.md#locale-scoped-routing-policy-2025-10-13).
 - **Runtime split:** Place anything with secrets, Firestore, or Node-only APIs in `lib/server/`. Keep universal utilities, hooks, and analytics helpers in `lib/shared/` so they can execute on both client and server.
 - **Stack baseline:** Next.js 15 App Router, TypeScript strict mode, Tailwind + Style Dictionary tokens, consent-gated analytics, Firebase Admin, Resend, hCaptcha.
 - **TypeScript configs:** `tsconfig.json` (dev superset including tests, Playwright, scripts) and `tsconfig.build.json` (app build subset) share path aliases `@app/*`, `@components/*`, `@lib/*`, `@tests/*`.

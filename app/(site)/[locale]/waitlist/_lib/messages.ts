@@ -16,13 +16,12 @@ const WAITLIST_NAMESPACE: Record<WaitlistLocale, AbstractIntlMessages> = {
   de: waitlistDe as AbstractIntlMessages,
 };
 
-function isWaitlistLocale(locale: SupportedLocale): locale is WaitlistLocale {
-  return (WAITLIST_LOCALES as readonly string[]).includes(locale);
-}
-
-function selectWaitlistMessages(locale: SupportedLocale): AbstractIntlMessages {
-  const resolved = isWaitlistLocale(locale) ? locale : FALLBACK_LOCALE;
-  return WAITLIST_NAMESPACE[resolved];
+function resolveWaitlistMessagesLocale(locale: SupportedLocale): WaitlistLocale {
+  const [language] = locale.split('-');
+  if (WAITLIST_LOCALES.includes(language as WaitlistLocale)) {
+    return language as WaitlistLocale;
+  }
+  return FALLBACK_LOCALE;
 }
 
 export async function resolveWaitlistLocale(): Promise<SupportedLocale> {
@@ -41,7 +40,7 @@ export async function loadWaitlistMessages(locale?: SupportedLocale): Promise<{
 }> {
   const resolvedLocale = locale ?? (await resolveWaitlistLocale());
   const baseMessages = (await loadMessages(resolvedLocale)) as AbstractIntlMessages;
-  const waitlistMessages = selectWaitlistMessages(resolvedLocale);
+  const waitlistMessages = WAITLIST_NAMESPACE[resolveWaitlistMessagesLocale(resolvedLocale)];
   const mergedMessages = deepMerge(baseMessages, waitlistMessages);
 
   return {

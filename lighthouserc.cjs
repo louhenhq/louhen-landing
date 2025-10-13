@@ -4,7 +4,13 @@ const RAW_BASE = process.env.BASE_URL || 'http://127.0.0.1:4311';
 const BASE = RAW_BASE.replace(/\/$/, '');
 
 function localeUrl(locale, path) {
-  const normalizedPath = path === '/' ? '' : path;
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  if (normalizedPath === '/') {
+    return locale === defaultLocale ? `${BASE}/` : `${BASE}/${locale}/`;
+  }
+  if (normalizedPath.startsWith('/waitlist')) {
+    return `${BASE}/${locale}${normalizedPath}`;
+  }
   return locale === defaultLocale ? `${BASE}${normalizedPath}` : `${BASE}/${locale}${normalizedPath}`;
 }
 

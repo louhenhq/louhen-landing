@@ -7,7 +7,7 @@ import { SUPPORTED_LOCALES } from '@/lib/i18n/locales';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date().toISOString();
-  const localizedPaths = ['/', '/method/', '/privacy/', '/terms/', '/imprint/'];
+  const localizedPaths = ['/', '/method/', '/privacy/', '/terms/', '/imprint/', '/waitlist/'];
 
   return localizedPaths.flatMap((path) => {
     const languages = buildAlternateLanguageUrlMap(path);

@@ -2,7 +2,7 @@ import { localeHomePath, legalPath } from '@lib/shared/routing/legal-path';
 import { methodPath } from '@lib/shared/routing/method-path';
 import { imprintPath } from '@lib/shared/routing/imprint-path';
 import { waitlistLandingPath } from '@lib/shared/routing/waitlist-path';
-import { defaultLocale, locales, type SupportedLocale } from '@/next-intl.locales';
+import { locales, type SupportedLocale } from '@/next-intl.locales';
 
 export const SITEMAP_SLUG_PREFIX = 'sitemap-';
 
@@ -22,9 +22,7 @@ export function canonicalPathsForLocale(locale: SupportedLocale): string[] {
   entries.add(legalPath(locale, 'terms'));
   entries.add(imprintPath(locale));
 
-  if (locale === defaultLocale) {
-    entries.add(waitlistLandingPath());
-  }
+  entries.add(waitlistLandingPath(locale));
 
   return Array.from(entries);
 }

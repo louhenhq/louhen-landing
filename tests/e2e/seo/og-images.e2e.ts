@@ -22,7 +22,7 @@ const surfaces: Surface[] = [
   {
     name: 'waitlist',
     key: 'waitlist',
-    pathForLocale: () => waitlistLandingPath(),
+    pathForLocale: (locale) => waitlistLandingPath(locale),
     requiresLocaleCookie: true,
   },
   {

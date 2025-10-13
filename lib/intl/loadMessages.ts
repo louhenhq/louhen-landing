@@ -2,7 +2,6 @@ import type { AbstractIntlMessages } from 'next-intl';
 import type { SupportedLocale } from '@/next-intl.locales';
 
 type MessagesRecord = Record<string, unknown>;
-
 type LocaleImporter = () => Promise<MessagesRecord>;
 
 const IMPORTERS: Partial<Record<SupportedLocale, LocaleImporter>> = {
@@ -21,11 +20,11 @@ const IMPORTERS: Partial<Record<SupportedLocale, LocaleImporter>> = {
 const FALLBACK_CHAINS: Record<SupportedLocale, SupportedLocale[]> = {
   en: [],
   de: [],
-  'en-de': ['en'],
-  'de-de': ['de'],
   fr: ['en'],
   nl: ['en'],
   it: ['en'],
+  'en-de': ['en'],
+  'de-de': ['de'],
   'fr-fr': ['fr', 'en'],
   'nl-nl': ['nl', 'en'],
   'it-it': ['it', 'en'],
@@ -49,9 +48,7 @@ function deepMerge(target: MessagesRecord, source: MessagesRecord): MessagesReco
 
 async function loadLocaleMessages(locale: SupportedLocale): Promise<MessagesRecord | null> {
   const importer = IMPORTERS[locale];
-  if (!importer) {
-    return null;
-  }
+  if (!importer) return null;
   try {
     const mod = await importer();
     return isRecord(mod) ? mod : null;
@@ -61,16 +58,8 @@ async function loadLocaleMessages(locale: SupportedLocale): Promise<MessagesReco
 }
 
 export async function loadMessages(locale: SupportedLocale): Promise<AbstractIntlMessages> {
-  const fallbacks = FALLBACK_CHAINS[locale] ?? [];
-  const chain: SupportedLocale[] = [...fallbacks, locale];
-  const messagesList = await Promise.all(chain.map((entry) => loadLocaleMessages(entry)));
-
-  const merged = messagesList.reduce<MessagesRecord>((acc, current) => {
-    if (!current) {
-      return acc;
-    }
-    return deepMerge(acc, current);
-  }, {});
-
+  const chain: SupportedLocale[] = [...(FALLBACK_CHAINS[locale] ?? []), locale];
+  const list = await Promise.all(chain.map((loc) => loadLocaleMessages(loc)));
+  const merged = list.reduce<MessagesRecord>((acc, cur) => (cur ? deepMerge(acc, cur) : acc), {});
   return merged as AbstractIntlMessages;
 }

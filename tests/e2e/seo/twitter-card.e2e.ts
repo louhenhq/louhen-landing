@@ -25,12 +25,10 @@ test.describe('Twitter card metadata', () => {
       },
     ]);
 
-    const targets: Array<{ name: string; path: string; locale?: SupportedLocale }> = [
-      { name: 'home', path: '/' },
-      { name: 'waitlist', path: waitlistLandingPath() },
-    ];
+    const targets: Array<{ name: string; path: string; locale?: SupportedLocale }> = [{ name: 'home', path: '/' }];
 
     for (const locale of testLocales) {
+      targets.push({ name: `waitlist (${locale})`, path: waitlistLandingPath(locale), locale });
       targets.push(
         { name: `method (${locale})`, path: methodPath(locale), locale },
         { name: `imprint (${locale})`, path: imprintPath(locale), locale },

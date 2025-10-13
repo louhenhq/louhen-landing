@@ -7,9 +7,11 @@ const INTERCEPT_SYMBOL = Symbol('louhen-playwright-intercept');
 const CONSOLE_LOG_KEY = Symbol('louhen-playwright-console');
 const NETWORK_LOG_KEY = Symbol('louhen-playwright-network');
 const BLOCKED_REQUESTS_KEY = Symbol('louhen-playwright-blocked');
+const CONTEXT_ROUTE_KEY = Symbol('louhen-playwright-context-route');
 
-type BlockedRequestMarker = {
+type ContextMarker = {
   [BLOCKED_REQUESTS_KEY]?: string[];
+  [CONTEXT_ROUTE_KEY]?: boolean;
 };
 
 /**
@@ -40,7 +42,7 @@ function isAllowedNetworkUrl(url: string): boolean {
   }
 
   const protocol = parsed.protocol.toLowerCase();
-  if (!['http:', 'https:', 'ws:', 'wss:'].includes(protocol)) {
+  if (!['http:', 'https:'].includes(protocol)) {
     return false;
   }
 
@@ -50,6 +52,37 @@ function isAllowedNetworkUrl(url: string): boolean {
   }
 
   return false;
+}
+
+function getContextBlockedRequests(context: BrowserContext): string[] {
+  const marker = context as unknown as ContextMarker;
+  if (!marker[BLOCKED_REQUESTS_KEY]) {
+    marker[BLOCKED_REQUESTS_KEY] = [];
+  }
+  return marker[BLOCKED_REQUESTS_KEY]!;
+}
+
+async function ensureContextNetworkGuard(context: BrowserContext): Promise<void> {
+  const marker = context as unknown as ContextMarker;
+  if (marker[CONTEXT_ROUTE_KEY]) {
+    return;
+  }
+  const blocked = getContextBlockedRequests(context);
+  await context.route('**', async (route) => {
+    const requestUrl = route.request().url();
+    if (isAllowedNetworkUrl(requestUrl)) {
+      if (typeof route.fallback === 'function') {
+        await route.fallback();
+      } else {
+        await route.continue();
+      }
+      return;
+    }
+    console.error(`[playwright] Blocked external request: ${requestUrl}`);
+    blocked.push(requestUrl);
+    await route.abort();
+  });
+  marker[CONTEXT_ROUTE_KEY] = true;
 }
 
 const analyticsResponse = {
@@ -85,8 +118,6 @@ async function enableInterceptors(page: Page): Promise<() => Promise<void>> {
   };
   marker[CONSOLE_LOG_KEY] = diagnostics.console;
   marker[NETWORK_LOG_KEY] = diagnostics.network;
-  const blockedRequests: string[] = [];
-  marker[BLOCKED_REQUESTS_KEY] = blockedRequests;
 
   const consoleListener = (message: ConsoleMessage) => {
     const location = message.location();
@@ -144,23 +175,6 @@ async function enableInterceptors(page: Page): Promise<() => Promise<void>> {
   page.on('requestfailed', requestFailedListener);
 
   const intercepts: Array<{ url: string | RegExp; handler: Parameters<Page['route']>[1] }> = [];
-
-  const externalRequestBlocker: Parameters<Page['route']>[1] = async (route) => {
-    const requestUrl = route.request().url();
-    if (isAllowedNetworkUrl(requestUrl)) {
-      if (typeof route.fallback === 'function') {
-        await route.fallback();
-      } else {
-        await route.continue();
-      }
-      return;
-    }
-    console.error(`[playwright] Blocked external request: ${requestUrl}`);
-    blockedRequests.push(requestUrl);
-    await route.abort('failed');
-  };
-  await page.route('**/*', externalRequestBlocker);
-  intercepts.push({ url: '**/*', handler: externalRequestBlocker });
 
   const trackHandler: Parameters<Page['route']>[1] = async (route) => {
     await route.fulfill(analyticsResponse);
@@ -332,6 +346,9 @@ export const test = base.extend<{
     await detach();
   },
   context: async ({ context }, run) => {
+    await ensureContextNetworkGuard(context);
+    const blocked = getContextBlockedRequests(context);
+    blocked.length = 0;
     const cleanups = new Map<Page, () => Promise<void>>();
 
     const applyToPage = async (page: Page) => {
@@ -369,20 +386,17 @@ export const test = base.extend<{
     await provideFlagFixture(request, provide);
   },
   networkPolicy: async ({ page }, use) => {
-    const marker = page as unknown as BlockedRequestMarker;
-    const ensure = () => {
-      if (!marker[BLOCKED_REQUESTS_KEY]) {
-        marker[BLOCKED_REQUESTS_KEY] = [];
-      }
-      return marker[BLOCKED_REQUESTS_KEY]!;
-    };
+    const context = page.context();
+    await ensureContextNetworkGuard(context);
+    const blocked = getContextBlockedRequests(context);
+    blocked.length = 0;
     await use({
-      getBlockedRequests: () => [...ensure()],
+      getBlockedRequests: () => [...blocked],
       clearBlockedRequests: () => {
-        const blocked = ensure();
         blocked.length = 0;
       },
     });
+    blocked.length = 0;
   },
   consentGranted: async ({ page }, apply) => {
     await apply(async (target = page) => {
@@ -406,7 +420,7 @@ test.afterEach(async ({ page }, testInfo) => {
     return;
   }
 
-  const marker = page as unknown as Record<string | symbol, unknown> & BlockedRequestMarker;
+  const marker = page as unknown as Record<string | symbol, unknown>;
 
   const captureDom = async () => {
     try {
@@ -444,22 +458,20 @@ test.afterEach(async ({ page }, testInfo) => {
     await attachLogs();
   };
 
-  const blocked = marker[BLOCKED_REQUESTS_KEY];
-  if (blocked && blocked.length > 0) {
+  const blocked = getContextBlockedRequests(page.context());
+  if (blocked.length > 0) {
     await captureDiagnostics();
     await testInfo.attach('blocked-requests.json', {
       body: JSON.stringify(blocked, null, 2),
       contentType: 'application/json',
     });
     blocked.length = 0;
-    delete marker[BLOCKED_REQUESTS_KEY];
     delete marker[CONSOLE_LOG_KEY];
     delete marker[NETWORK_LOG_KEY];
     throw new Error('Blocked external network requests detected. See blocked-requests.json attachment for details.');
   }
 
   if (testInfo.status === testInfo.expectedStatus) {
-    delete marker[BLOCKED_REQUESTS_KEY];
     delete marker[CONSOLE_LOG_KEY];
     delete marker[NETWORK_LOG_KEY];
     return;
@@ -467,7 +479,6 @@ test.afterEach(async ({ page }, testInfo) => {
 
   await captureDiagnostics();
 
-  delete marker[BLOCKED_REQUESTS_KEY];
   delete marker[CONSOLE_LOG_KEY];
   delete marker[NETWORK_LOG_KEY];
 });
