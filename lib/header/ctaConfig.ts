@@ -36,7 +36,7 @@ type HeaderCtaConfig = {
 
 const DEFAULT_WAITLIST_TARGET = 'waitlist-form';
 const ACCESS_URL = process.env.NEXT_PUBLIC_ACCESS_REQUEST_URL?.trim() || '/onboarding/request-access';
-const DOWNLOAD_URL = process.env.NEXT_PUBLIC_APP_DOWNLOAD_URL?.trim() || '/download';
+const DOWNLOAD_URL = process.env.NEXT_PUBLIC_APP_DOWNLOAD_URL?.trim() || '/waitlist';
 
 function phaseToMode(phase: HeaderPhase): HeaderAnalyticsMode {
   switch (phase) {
@@ -127,8 +127,21 @@ export function buildHeaderCta(locale: SupportedLocale, options?: { userState?: 
     };
   }
 
-  const analyticsTarget = resolveAnalyticsTarget(DOWNLOAD_URL);
-  const href = appendUtmParams(DOWNLOAD_URL, {
+  const isExternalDownload = /^https?:\/\//.test(DOWNLOAD_URL);
+  let basePath: string;
+  if (isExternalDownload) {
+    basePath = DOWNLOAD_URL;
+  } else {
+    const normalized = DOWNLOAD_URL.startsWith('/') ? DOWNLOAD_URL : `/${DOWNLOAD_URL}`;
+    if (normalized.startsWith(`/${locale}/`) || normalized === `/${locale}`) {
+      basePath = normalized;
+    } else {
+      const suffix = normalized === '/' ? '' : normalized;
+      basePath = `/${locale}${suffix}`;
+    }
+  }
+  const analyticsTarget = resolveAnalyticsTarget(basePath);
+  const href = appendUtmParams(basePath, {
     source: 'header',
     medium: 'cta',
     campaign: locale === defaultLocale ? 'download-en' : `download-${locale}`,
@@ -142,7 +155,7 @@ export function buildHeaderCta(locale: SupportedLocale, options?: { userState?: 
     action: {
       type: 'link',
       href,
-      external: /^https?:\/\//.test(DOWNLOAD_URL),
+      external: isExternalDownload,
     },
   };
 }
