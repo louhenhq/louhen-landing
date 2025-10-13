@@ -1,3 +1,4 @@
+import type { Request } from '@playwright/test';
 import { expect, test } from '@tests/fixtures/playwright';
 import { getDefaultLocale } from './_utils/url';
 
@@ -32,10 +33,22 @@ test.describe('Landing analytics sentinel', () => {
     const headerCta = page.getByTestId('lh-nav-cta-primary');
     await expect(headerCta).toBeVisible();
     await headerCta.scrollIntoViewIfNeeded();
-    const trackRequest = await Promise.all([
-      page.waitForRequest((request) => request.url().includes('/api/track')),
-      headerCta.click({ noWaitAfter: true }),
-    ]).then(([req]) => req);
-    expect(trackRequest).toBeTruthy();
+
+    let resolveTrack: ((req: Request) => void) | undefined;
+    const trackSeen = new Promise<Request>((resolve) => {
+      resolveTrack = resolve;
+    });
+
+    await page.route('**/api/track', async (route) => {
+      resolveTrack?.(route.request());
+      await route.fulfill({ status: 204, body: '{}' });
+    });
+
+    await headerCta.click({ noWaitAfter: true });
+
+    const trackRequest = await trackSeen;
+    expect(trackRequest.url()).toContain('/api/track');
+
+    await page.unroute('**/api/track');
   });
 });
