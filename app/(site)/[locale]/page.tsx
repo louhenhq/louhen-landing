@@ -74,8 +74,9 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   };
 
   if (!sanitizedRef) {
+    const defaultTitle = heroHeadline ? `${heroHeadline} | ${SITE_NAME}` : SITE_NAME;
     return {
-      title: heroHeadline || SITE_NAME,
+      title: defaultTitle,
       robots,
       ...baseMetadata,
     };
