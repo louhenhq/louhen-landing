@@ -1,0 +1,208 @@
+{
+  "waitlist": {
+    "subtitle": "Join the waitlist to receive curated drops, styling guidance, and the LouhenFit guarantee before anyone else.",
+    "urgency": {
+      "badge": "Reserve your spot\u2014early drops go to the waitlist first."
+    },
+    "badge": {
+      "label": "Waitlist"
+    },
+    "trust": {
+      "louhenfit": "LouhenFit covers free returns on your first pair if the fit isn't perfect.",
+      "podiatrist": "Podiatrists review every recommendation so growing feet stay healthy."
+    },
+    "form": {
+      "title": "Join the waitlist",
+      "lead": "Add your email and we\u2019ll send a confirmation within seconds.",
+      "labels": {
+        "email": "Email",
+        "consent": "I agree to receive Louhen waitlist updates and accept the",
+        "captcha": "Security check"
+      },
+      "placeholders": {
+        "email": "you@example.com"
+      },
+      "submit": "Join waitlist",
+      "inflight": "Joining\u2026",
+      "privacyLinkLabel": "Privacy Policy",
+      "success": {
+        "title": "Check your inbox",
+        "body": "We just sent a confirmation email to finish your signup.",
+        "followUp": "Didn\u2019t get it? Look for \u201cLouhen\u201d in your spam or Promotions tab, then add us to your contacts.",
+        "resend": {
+          "cta": "Request another confirmation",
+          "hint": "Need a fresh link? Solve the captcha again and resubmit when you\u2019re ready."
+        }
+      },
+      "warnings": {
+        "captchaMissing": "hCaptcha is not configured. Set NEXT_PUBLIC_HCAPTCHA_SITE_KEY to enable confirmations."
+      },
+      "errors": {
+        "summaryTitle": "Please fix the highlighted details",
+        "emailRequired": "Enter your email address.",
+        "emailInvalid": "That email doesn\u2019t look quite right.",
+        "consent": "Please accept waitlist updates to continue.",
+        "captchaRequired": "Complete the captcha to confirm you\u2019re human.",
+        "captchaFailed": "Captcha verification failed. Please try again.",
+        "default": "Something went wrong. Please try again.",
+        "rateLimited": "You\u2019ve tried a few times. Please wait a minute and retry.",
+        "expired": "This confirmation link has expired. Please sign up again.",
+        "invalid": "We couldn\u2019t process that email. Check the spelling and try again.",
+        "network": "We couldn\u2019t reach the server. Check your connection and retry."
+      },
+      "reassurance": {
+        "title": "Why families join",
+        "items": [
+          "LouhenFit covers free returns on your first pair.",
+          "GDPR-first data: everything stays on EU servers.",
+          "Podiatrists review our sizing guidance so growing feet stay healthy."
+        ],
+        "podiatrist": {
+          "title": "Podiatrist approved",
+          "body": "Tap to see how our advisors keep each recommendation healthy.",
+          "aria": "Open podiatrist approval details"
+        }
+      }
+    },
+    "toast": {
+      "confirmed": {
+        "title": "You\u2019re confirmed!",
+        "body": "Thanks for joining Louhen. We\u2019ll drop early updates straight to your inbox.",
+        "dismiss": "Dismiss"
+      }
+    },
+    "index": {
+      "title": "Get early access with Louhen",
+      "body": "Join the waitlist to receive curated drops, styling guidance, and the LouhenFit guarantee before anyone else.",
+      "steps": [
+        "Share the email you check most.",
+        "Confirm the link we send right away.",
+        "Enjoy early product releases and tailored updates."
+      ],
+      "cta": {
+        "join": "Join the waitlist",
+        "privacy": "Privacy policy",
+        "faq": "Read the FAQ"
+      },
+      "meta": {
+        "title": "Louhen waitlist",
+        "description": "Discover how to join the Louhen waitlist and secure early access in minutes."
+      }
+    },
+    "success": {
+      "title": {
+        "pending": "Check your inbox \u2709\ufe0f",
+        "confirmed": "You\u2019re in! \ud83c\udf89"
+      },
+      "body": {
+        "pending": "Open the confirmation email we just sent to finish joining the waitlist.",
+        "confirmed": "Thanks for confirming. Your Louhen waitlist spot is saved\u2014watch your inbox for invites and styling updates."
+      },
+      "cta": {
+        "home": "Return home",
+        "preferences": "Manage email preferences"
+      },
+      "meta": {
+        "title": "Louhen waitlist \u2013 confirmation",
+        "description": "Your Louhen waitlist place is confirmed. Expect curated updates and early access soon."
+      }
+    },
+    "expired": {
+      "title": "Link expired",
+      "body": "The confirmation link you opened has expired. Request a new email below to finish signing up.",
+      "cta": {
+        "resend": "Back to waitlist"
+      },
+      "meta": {
+        "title": "Louhen waitlist \u2013 link expired",
+        "description": "Your Louhen waitlist link has expired. Request a new confirmation email in seconds."
+      }
+    },
+    "resend": {
+      "title": "Need another email?",
+      "description": "Enter your waitlist email and we\u2019ll send a fresh confirmation link right away.",
+      "email": {
+        "label": "Email address",
+        "placeholder": "you@example.com"
+      },
+      "submit": "Resend confirmation",
+      "success": "If that address is on the waitlist, a new confirmation email is already on its way.",
+      "error": "We couldn\u2019t resend the email just now. Please try again shortly.",
+      "rateLimited": "Too many requests. Please wait a moment before trying again.",
+      "invalid": "Please enter a valid email address."
+    },
+    "title": "Get early access with Louhen"
+  },
+  "confirm": {
+    "success": {
+      "title": "You\u2019re confirmed!",
+      "body": "Your spot is secured. We\u2019ll be in touch with next steps soon."
+    },
+    "expired": {
+      "title": "Confirmation link expired",
+      "body": "Request a new email below and finish joining the waitlist."
+    },
+    "already": {
+      "title": "Already confirmed",
+      "body": "This email is already part of the waitlist. See you soon!"
+    },
+    "invalid": {
+      "title": "We couldn\u2019t validate that link",
+      "body": "Check that you copied the full URL or request another confirmation email below."
+    },
+    "resend": {
+      "cta": "Resend confirmation",
+      "sent": "If that email exists, a new link is on its way.",
+      "error": "We couldn\u2019t send the email. Please try again later."
+    }
+  },
+  "confirmPending": {
+    "title": "Check your inbox",
+    "help": "Open the confirmation email to secure your place. Didn\u2019t get it?"
+  },
+  "share": {
+    "title": "Share & earn",
+    "subtitle": "Invite friends with your link and you\u2019ll both receive rewards when they place their first order.",
+    "linkLabel": "Referral link",
+    "codeLabel": "Referral code",
+    "copyLink": "Copy link",
+    "copyCode": "Copy code",
+    "copied": "Copied!",
+    "nativeShare": "Share",
+    "codePending": "Your referral code will appear here soon.",
+    "qr": "Show QR code",
+    "verificationPending": "Referral will be verified shortly.",
+    "assurance": "LouhenFit protects every invitee with free returns on their first pair."
+  },
+  "referral": {
+    "appliedToast": "Referral applied \u2014 thanks for supporting your friend!"
+  },
+  "preonboarding": {
+    "title": "Tell us more (optional)",
+    "subtitle": "Share a few details so we can tailor early access drops to your family.",
+    "parent": {
+      "firstName": {
+        "label": "Parent first name"
+      }
+    },
+    "child": {
+      "section": "Children",
+      "name": {
+        "label": "Child name"
+      },
+      "birthday": {
+        "label": "Birthday"
+      },
+      "weight": {
+        "label": "Weight"
+      },
+      "shoeSize": {
+        "label": "Shoe size"
+      }
+    },
+    "save": {
+      "cta": "Save and continue"
+    },
+    "comingSoon": "Coming next \u2014 we\u2019ll unlock this step soon."
+  }
+}

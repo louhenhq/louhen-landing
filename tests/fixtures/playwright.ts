@@ -243,26 +243,29 @@ type DomainTarget = {
 
 const resolverCache: DomainTarget[] = [];
 
+const LOOPBACK_HOST = '127.0.0.1';
+const LOOPBACK_ORIGIN = `http://${LOOPBACK_HOST}`;
+
 function resolveConsentDomains(): DomainTarget[] {
   if (resolverCache.length) {
     return resolverCache;
   }
 
   const targets = new Map<string, DomainTarget>();
-  const baseUrl = process.env.PREVIEW_BASE_URL ?? process.env.BASE_URL ?? 'http://localhost';
+  const baseUrl = process.env.PREVIEW_BASE_URL ?? process.env.BASE_URL ?? LOOPBACK_ORIGIN;
   try {
     const parsed = new URL(baseUrl);
-    targets.set(parsed.hostname, {
-      domain: parsed.hostname,
+    const normalizedHost = parsed.hostname.toLowerCase() === 'localhost' ? LOOPBACK_HOST : parsed.hostname;
+    targets.set(normalizedHost, {
+      domain: normalizedHost,
       secure: parsed.protocol === 'https:',
     });
   } catch {
-    targets.set('localhost', { domain: 'localhost', secure: false });
+    targets.set(LOOPBACK_HOST, { domain: LOOPBACK_HOST, secure: false });
   }
 
   // Always support local development fallbacks.
-  targets.set('localhost', { domain: 'localhost', secure: false });
-  targets.set('127.0.0.1', { domain: '127.0.0.1', secure: false });
+  targets.set(LOOPBACK_HOST, { domain: LOOPBACK_HOST, secure: false });
 
   resolverCache.push(...targets.values());
   return resolverCache;

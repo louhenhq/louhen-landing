@@ -10,7 +10,7 @@ type CapturedEvent = {
 
 async function seedAuthHintCookies(page: Page) {
   const consentValue = encodeURIComponent(`v1:granted`);
-  const hosts = ['localhost', '127.0.0.1'];
+  const hosts = ['127.0.0.1'];
   await page.context().addCookies(
     hosts.flatMap((domain) => [
       { name: 'LH_AUTH', value: '1', domain, path: '/' },

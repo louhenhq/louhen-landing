@@ -1,0 +1,180 @@
+{
+  "header": {
+    "logo": "Louhen",
+    "nav": {
+      "primary": {
+        "how": "How it works",
+        "story": "Founder story",
+        "faq": "FAQ",
+        "method": "Method"
+      },
+      "secondary": {
+        "privacy": "Privacy",
+        "terms": "Terms"
+      },
+      "primaryLabel": "Primary navigation",
+      "secondaryLabel": "Secondary navigation"
+    },
+    "cta": {
+      "waitlist": "Join the waitlist",
+      "access": "Request access",
+      "download": "Download the app",
+      "dashboard": "Dashboard"
+    },
+    "ctaPostlaunch": "Request access",
+    "system": {
+      "theme": "Appearance",
+      "consent": "Privacy choices"
+    },
+    "auth": {
+      "logout": "Log out"
+    },
+    "ribbon": {
+      "default": {
+        "title": "Limited launch",
+        "body": "Secure your spot before we open the doors wider.",
+        "cta": "Learn more",
+        "dismiss": "Dismiss"
+      }
+    },
+    "drawer": {
+      "title": "Menu",
+      "open": "Menu",
+      "close": "Close menu",
+      "navLabel": "Mobile navigation"
+    },
+    "locale": {
+      "label": "Language",
+      "en": "English",
+      "de": "Deutsch",
+      "fr": "Français",
+      "nl": "Nederlands",
+      "it": "Italiano",
+      "en-de": "English (Germany)",
+      "de-de": "German (Germany)",
+      "fr-fr": "French (France)",
+      "nl-nl": "Dutch (Netherlands)",
+      "it-it": "Italian (Italy)",
+      "submit": "Switch locale"
+    },
+    "theme": {
+      "label": "Theme",
+      "modes": {
+        "system": "System",
+        "light": "Light",
+        "dark": "Dark"
+      }
+    },
+    "consent": {
+      "label": "Privacy choices",
+      "state": {
+        "granted": "On",
+        "denied": "Off",
+        "unset": "Review"
+      },
+      "manager": {
+        "title": "Privacy choices",
+        "description": "We use essential cookies to run Louhen. Enable analytics if you want to help us improve the experience.",
+        "accept": "Accept all",
+        "reject": "Reject non-essential",
+        "settings": "View privacy policy",
+        "close": "Close"
+      }
+    },
+    "skipLink": "Skip to main content"
+  },
+  "layout": {
+    "skipToMain": "Skip to main content"
+  },
+  "footer": {
+    "trustEyebrow": "Why parents trust Louhen",
+    "trustHeadline": "Podiatrist-led sizing with privacy built in",
+    "trustBody": "LouhenFit keeps family data in the EU and follows GDPR so every profile stays protected.",
+    "legalNavLabel": "Legal links",
+    "legal": {
+      "heading": "Legal",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "imprint": "Imprint",
+      "preferences": "Cookie preferences"
+    },
+    "localeLabel": "Select language",
+    "dataResidency": "GDPR-compliant • EU data residency",
+    "rights": "All rights reserved"
+  },
+  "consent": {
+    "banner": {
+      "title": "We use cookies for analytics",
+      "body": "We’d like to measure how visitors use Louhen so we can improve the experience.",
+      "accept": "Accept analytics",
+      "decline": "Decline",
+      "manage": "Manage later"
+    },
+    "manage": {
+      "title": "Cookie preferences",
+      "description": "Enable analytics cookies to help us understand what’s working.",
+      "analytics": "Allow anonymous analytics",
+      "cancel": "Cancel",
+      "save": "Save",
+      "close": "Close"
+    }
+  },
+  "common": {
+    "learnMore": "Learn more",
+    "breadcrumb": {
+      "home": "Home"
+    }
+  },
+  "admin": {
+    "metrics": {
+      "title": "Metrics dashboard",
+      "intro": "Key waitlist metrics updated every 60 seconds.",
+      "totals": {
+        "signups": "Signups",
+        "confirmed": "Confirmed",
+        "conversion": "Conversion"
+      },
+      "topReferrers": "Top referrers",
+      "blocks": "Referral blocks",
+      "trend": "14-day trend",
+      "noReferrers": "No referral data yet.",
+      "noBlocks": "No blocked referrals recorded.",
+      "noTrend": "No events recorded in this window.",
+      "reason": "Reason",
+      "count": "Count",
+      "date": "Date",
+      "codeLabel": "Code",
+      "signupsLabel": "Signups",
+      "confirmedLabel": "Confirmed",
+      "sparkline": {
+        "signups": "14-day Signups",
+        "confirms": "14-day Confirmations"
+      }
+    }
+  },
+  "localeSuggestion": {
+    "title": "Prefer browsing in {locale}?",
+    "body": {
+      "cookie": "You usually browse Louhen in {locale}.",
+      "acceptLanguage": "Your browser language is set to {locale}."
+    },
+    "action": "Switch to {locale}",
+    "dismiss": "Stay here"
+  },
+  "trustCopy": {
+    "fitTitle": "LouhenFit",
+    "fitGuarantee": "Covered by LouhenFit — free returns, guaranteed.",
+    "fitDetail": "LouhenFit protects every order — free returns until it fits.",
+    "fitCard": "LouhenFit covers free returns on your first pair so we can fine-tune fit together.",
+    "gdprTitle": "GDPR & privacy",
+    "gdpr": "Your family’s data stays in the EU — GDPR compliant.",
+    "gdprDetail": "We store every profile on EU servers and never sell or share customer data.",
+    "payment": "Payments stay secure with Adyen’s bank-grade protection.",
+    "coverage": {
+      "coveredNamed": "{name} is covered by LouhenFit — free returns on the first pair to get the fit just right.",
+      "covered": "This profile is covered by LouhenFit — free returns on the first pair to get the fit just right.",
+      "notCoveredNamed": "{name} isn’t covered by LouhenFit yet. We’ll guide you with gentle fit tips until coverage expands.",
+      "notCovered": "LouhenFit isn’t available for this profile yet. We’ll guide you with gentle fit tips until coverage expands."
+    }
+  }
+}

@@ -5,6 +5,7 @@ import LandingExperience from '@/app/(site)/components/LandingExperience';
 import LocaleSuggestion from '@/app/(site)/components/LocaleSuggestion';
 import { ReferralAttribution } from '@components/features/waitlist';
 import { loadMessages } from '@/lib/intl/loadMessages';
+import { safeGetMessage } from '@/lib/intl/getMessage';
 import {
   DEFAULT_LOCALE,
   isSupportedLocale,
@@ -38,12 +39,14 @@ type MetadataArgs = {
 export async function generateMetadata({ searchParams }: MetadataArgs): Promise<Metadata> {
   const resolvedSearchParams = await searchParams;
   const messages = (await loadMessages(DEFAULT_LOCALE.value)) as Record<string, unknown>;
-  const heroMessages = (messages.hero ?? {}) as Record<string, unknown>;
-  const heroSubtitle = typeof heroMessages.sub === 'string'
-    ? heroMessages.sub
-    : 'Louhen pairs podiatrist-backed comfort with adaptive sizing to keep every step confident.';
-  const defaultTitle = `${SITE_NAME} — Personal style. Effortless fit.`;
-  const defaultDescription = heroSubtitle;
+  const heroHeadline = safeGetMessage(messages, 'hero.h1', {
+    locale: DEFAULT_LOCALE.value,
+    fallbackHint: 'home hero headline',
+  });
+  const defaultDescription = safeGetMessage(messages, 'hero.sub', {
+    locale: DEFAULT_LOCALE.value,
+    fallbackHint: 'home hero subhead',
+  });
   const baseUrl = resolveSiteBaseUrl();
   const canonicalPath = buildCanonicalPath(DEFAULT_LOCALE.value, '/');
   const canonicalUrl = buildCanonicalUrl(DEFAULT_LOCALE.value, '/');
@@ -52,28 +55,28 @@ export async function generateMetadata({ searchParams }: MetadataArgs): Promise<
   const baseOgImage = getOgImageEntry({
     locale: DEFAULT_LOCALE.value,
     key: 'home',
-    title: defaultTitle,
+    title: heroHeadline,
     description: defaultDescription,
   });
   const ref = firstParam(resolvedSearchParams.ref);
   const sanitizedRef = ref ? ref.trim().slice(0, 64) : null;
   if (!sanitizedRef) {
     return {
-      title: defaultTitle,
+      title: heroHeadline || SITE_NAME,
       description: defaultDescription,
       alternates: {
         canonical: canonicalPath,
         languages,
       },
       openGraph: {
-        title: defaultTitle,
+        title: heroHeadline,
         description: defaultDescription,
         url: canonicalUrl,
         images: [baseOgImage],
       },
       twitter: {
         card: 'summary_large_image',
-        title: defaultTitle,
+        title: heroHeadline,
         description: defaultDescription,
         images: [baseOgImage.url],
       },
@@ -82,31 +85,40 @@ export async function generateMetadata({ searchParams }: MetadataArgs): Promise<
 
   const sharePath = `${canonicalPath}?ref=${encodeURIComponent(sanitizedRef)}`;
   const fullUrl = `${baseUrl}${sharePath}`;
+  const invitedTitle = safeGetMessage(messages, 'og.invited.title', {
+    locale: DEFAULT_LOCALE.value,
+    fallbackHint: 'home invited og title',
+  });
+  const invitedDescription = safeGetMessage(messages, 'og.invited.description', {
+    locale: DEFAULT_LOCALE.value,
+    fallbackHint: 'home invited og description',
+  });
+
   const invitedOgImage = getOgImageEntry({
     locale: DEFAULT_LOCALE.value,
     key: 'home-invited',
-    title: defaultTitle,
-    description: defaultDescription,
+    title: invitedTitle,
+    description: invitedDescription,
     params: { ref: sanitizedRef },
   });
 
   return {
-    title: defaultTitle,
+    title: heroHeadline,
     description: defaultDescription,
     alternates: {
       canonical: canonicalPath,
       languages,
     },
     openGraph: {
-      title: defaultTitle,
-      description: defaultDescription,
+      title: heroHeadline,
+      description: invitedDescription,
       url: fullUrl,
       images: [invitedOgImage],
     },
     twitter: {
       card: 'summary_large_image',
-      title: defaultTitle,
-      description: defaultDescription,
+      title: invitedTitle,
+      description: invitedDescription,
       images: [invitedOgImage.url],
     },
   };
@@ -146,8 +158,10 @@ export default async function RootLandingPage({ searchParams }: RootPageProps) {
   const rawMessages = await loadMessages(DEFAULT_LOCALE.value);
   const messagesRecord = rawMessages as unknown as Record<string, unknown>;
   const resolvedSearchParams = await searchParams;
-  const referralToast = ((messagesRecord.referral ?? {}) as Record<string, unknown>).appliedToast;
-  const toastMessage = typeof referralToast === 'string' ? referralToast : null;
+  const toastMessage = safeGetMessage(messagesRecord, 'referral.appliedToast', {
+    locale: DEFAULT_LOCALE.value,
+    fallbackHint: 'home referral toast',
+  });
   const headerUserState = await getHeaderUserState();
 
   return (

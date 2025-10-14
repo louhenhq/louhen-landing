@@ -1,8 +1,36 @@
 const CANONICAL_ORIGIN = 'https://www.louhen.app';
 const PREVIEW_FALLBACK_ORIGIN = 'https://staging.louhen.app';
+const LOOPBACK_HOST = '127.0.0.1';
+
+function normalizeLoopbackHost(hostname: string): string {
+  const lower = hostname.toLowerCase();
+  if (lower === 'localhost' || lower === '0.0.0.0' || lower === '::1' || lower === '[::1]') {
+    return LOOPBACK_HOST;
+  }
+  return hostname;
+}
 
 function normalizeOrigin(raw: string): string {
-  return raw.replace(/\/+$/, '');
+  const trimmed = raw.trim();
+  if (!trimmed) {
+    return '';
+  }
+
+  const normalise = (value: string) => {
+    const url = new URL(value);
+    url.hostname = normalizeLoopbackHost(url.hostname);
+    return url.origin;
+  };
+
+  try {
+    return normalise(trimmed);
+  } catch {
+    try {
+      return normalise(`http://${trimmed}`);
+    } catch {
+      return trimmed.replace(/\/+$/, '');
+    }
+  }
 }
 
 /**

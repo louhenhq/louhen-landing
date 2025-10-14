@@ -1,0 +1,196 @@
+{
+  "waitlist": {
+    "form": {
+      "title": "Zur Warteliste",
+      "lead": "Trage deine E-Mail ein und wir schicken dir sofort eine Bestätigung.",
+      "labels": {
+        "email": "E-Mail-Adresse",
+        "consent": "Ich möchte Wartelisten-Updates von Louhen erhalten und akzeptiere die",
+        "captcha": "Sicherheitsprüfung"
+      },
+      "placeholders": {
+        "email": "du@example.com"
+      },
+      "submit": "Zur Warteliste",
+      "inflight": "Wird gesendet…",
+      "privacyLinkLabel": "Datenschutz",
+      "success": {
+        "title": "Posteingang prüfen",
+        "body": "Wir haben dir gerade eine Bestätigungs-E-Mail geschickt.",
+        "followUp": "Nicht erhalten? Suche nach „Louhen“ im Spam- oder Promotions-Ordner und füge uns zu deinen Kontakten hinzu.",
+        "resend": {
+          "cta": "Weitere Bestätigung anfordern",
+          "hint": "Brauchst du einen neuen Link? Löse die Captcha-Aufgabe erneut und sende das Formular noch einmal."
+        }
+      },
+      "warnings": {
+        "captchaMissing": "hCaptcha ist nicht konfiguriert. Setze NEXT_PUBLIC_HCAPTCHA_SITE_KEY, um Bestätigungen zu aktivieren."
+      },
+      "errors": {
+        "summaryTitle": "Bitte korrigiere die markierten Angaben",
+        "emailRequired": "Bitte gib deine E-Mail-Adresse ein.",
+        "emailInvalid": "Diese E-Mail-Adresse wirkt nicht gültig.",
+        "consent": "Bitte bestätige, dass du Wartelisten-Updates erhalten möchtest.",
+        "captchaRequired": "Bitte löse die Captcha-Aufgabe.",
+        "captchaFailed": "Captcha-Verifizierung fehlgeschlagen. Versuche es erneut.",
+        "default": "Etwas ist schiefgelaufen. Bitte versuche es noch einmal.",
+        "rateLimited": "Zu viele Versuche. Bitte warte einen Moment und probiere es erneut.",
+        "expired": "Dieser Bestätigungslink ist abgelaufen. Bitte melde dich erneut an.",
+        "invalid": "Wir konnten diese E-Mail nicht verarbeiten. Prüfe die Schreibweise und versuche es erneut.",
+        "network": "Keine Verbindung zum Server. Bitte überprüfe deine Internetverbindung."
+      },
+      "reassurance": {
+        "title": "Warum Eltern mitmachen",
+        "items": [
+          "LouhenFit übernimmt die erste Rücksendung kostenlos.",
+          "Alle Daten bleiben in der EU – strikt nach GDPR.",
+          "Podolog:innen prüfen jede Passformempfehlung."
+        ],
+        "podiatrist": {
+          "title": "Von Podolog:innen bestätigt",
+          "body": "Tippe, um zu erfahren, wie unsere Fachleute jede Empfehlung begleiten.",
+          "aria": "Details zur podologischen Freigabe öffnen"
+        }
+      }
+    },
+    "toast": {
+      "confirmed": {
+        "title": "Bestätigung erfolgreich!",
+        "body": "Danke, dass du Teil von Louhen bist. Wir versorgen dich bald mit Neuigkeiten.",
+        "dismiss": "Schließen"
+      }
+    },
+    "index": {
+      "title": "Frühen Zugang mit Louhen sichern",
+      "body": "Trage dich in die Warteliste ein und erhalte exklusive Drops, Stylingtipps und die LouhenFit-Garantie vor allen anderen.",
+      "steps": [
+        "Nutze die E-Mail-Adresse, die du regelmäßig liest.",
+        "Bestätige den Link, den wir dir sofort schicken.",
+        "Freue dich auf frühe Produktdrops und persönliche Updates."
+      ],
+      "cta": {
+        "join": "Zur Warteliste",
+        "privacy": "Datenschutz",
+        "faq": "FAQ lesen"
+      },
+      "meta": {
+        "title": "Louhen-Warteliste",
+        "description": "Erfahre, wie du die Louhen-Warteliste nutzt und dir in wenigen Minuten frühen Zugang sicherst."
+      }
+    },
+    "success": {
+      "title": {
+        "pending": "Prüfe deinen Posteingang ✉️",
+        "confirmed": "Du bist dabei! 🎉"
+      },
+      "body": {
+        "pending": "Öffne die Bestätigungs-E-Mail, die wir dir gerade gesendet haben, um deinen Platz zu sichern.",
+        "confirmed": "Danke für deine Bestätigung. Dein Louhen-Wartelistenplatz ist gesichert – wir melden uns mit neuen Drops und Styling-Updates."
+      },
+      "cta": {
+        "home": "Zur Startseite",
+        "preferences": "E-Mail-Einstellungen"
+      },
+      "meta": {
+        "title": "Louhen-Warteliste – Bestätigung",
+        "description": "Dein Platz auf der Louhen-Warteliste ist bestätigt. Freu dich auf frühe Einblicke und Updates."
+      }
+    },
+    "expired": {
+      "title": "Link abgelaufen",
+      "body": "Dieser Bestätigungslink ist nicht mehr gültig. Fordere unten eine neue E-Mail an, um dich erneut anzumelden.",
+      "cta": {
+        "resend": "Zur Warteliste"
+      },
+      "meta": {
+        "title": "Louhen-Warteliste – Link abgelaufen",
+        "description": "Dein Louhen-Bestätigungslink ist abgelaufen. Fordere in wenigen Sekunden eine neue E-Mail an."
+      }
+    },
+    "resend": {
+      "title": "Neue Bestätigung anfordern",
+      "description": "Gib deine Wartelisten-E-Mail ein und wir senden dir sofort einen frischen Bestätigungslink.",
+      "email": {
+        "label": "E-Mail-Adresse",
+        "placeholder": "du@example.com"
+      },
+      "submit": "Bestätigung erneut senden",
+      "success": "Wenn diese Adresse auf der Warteliste steht, ist eine neue Bestätigungs-E-Mail schon unterwegs.",
+      "error": "Die E-Mail konnte nicht gesendet werden. Bitte versuche es gleich noch einmal.",
+      "rateLimited": "Zu viele Anfragen. Bitte warte einen Moment und versuche es erneut.",
+      "invalid": "Bitte gib eine gültige E-Mail-Adresse ein."
+    }
+  },
+  "confirm": {
+    "success": {
+      "title": "Du bist bestätigt!",
+      "body": "Dein Platz ist gesichert. Wir melden uns bald mit den nächsten Schritten."
+    },
+    "expired": {
+      "title": "Bestätigungslink abgelaufen",
+      "body": "Fordere unten eine neue E-Mail an und schließe deine Anmeldung ab."
+    },
+    "already": {
+      "title": "Schon bestätigt",
+      "body": "Diese E-Mail steht bereits auf der Warteliste. Bis bald!"
+    },
+    "invalid": {
+      "title": "Link konnte nicht geprüft werden",
+      "body": "Bitte prüfe, ob du die vollständige URL kopiert hast, oder fordere unten eine neue Bestätigung an."
+    },
+    "resend": {
+      "cta": "Bestätigung erneut senden",
+      "sent": "Wenn diese Adresse auf der Warteliste steht, ist eine neue E-Mail bereits unterwegs.",
+      "error": "Die E-Mail konnte nicht gesendet werden. Bitte versuche es später erneut."
+    }
+  },
+  "confirmPending": {
+    "title": "Posteingang prüfen",
+    "help": "Öffne die Bestätigungs-E-Mail, um deinen Platz zu sichern. Nicht erhalten?"
+  },
+  "share": {
+    "title": "Teilen & belohnen",
+    "subtitle": "Lade Freund:innen mit deinem Link ein und ihr erhaltet beide eine Belohnung, sobald sie ihre erste Bestellung abschließen.",
+    "linkLabel": "Empfehlungslink",
+    "codeLabel": "Empfehlungscode",
+    "copyLink": "Link kopieren",
+    "copyCode": "Code kopieren",
+    "copied": "Kopiert!",
+    "nativeShare": "Teilen",
+    "codePending": "Dein Empfehlungscode erscheint in Kürze hier.",
+    "qr": "QR-Code anzeigen",
+    "verificationPending": "Empfehlung wird gerade geprüft.",
+    "assurance": "LouhenFit schützt jede eingeladene Person mit kostenlosen Rücksendungen beim ersten Paar."
+  },
+  "referral": {
+    "appliedToast": "Empfehlung aktiviert – danke fürs Weiterempfehlen!"
+  },
+  "preonboarding": {
+    "title": "Erzähl uns mehr (optional)",
+    "subtitle": "Mit ein paar Angaben können wir Frühzugänge besser auf deine Familie abstimmen.",
+    "parent": {
+      "firstName": {
+        "label": "Vorname Elternteil"
+      }
+    },
+    "child": {
+      "section": "Kinder",
+      "name": {
+        "label": "Name des Kindes"
+      },
+      "birthday": {
+        "label": "Geburtsdatum"
+      },
+      "weight": {
+        "label": "Gewicht"
+      },
+      "shoeSize": {
+        "label": "Schuhgröße"
+      }
+    },
+    "save": {
+      "cta": "Speichern und fortfahren"
+    },
+    "comingSoon": "Demnächst verfügbar – wir schalten diesen Schritt bald frei."
+  }
+}

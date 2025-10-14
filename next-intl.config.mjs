@@ -1,15 +1,5 @@
 import { getRequestConfig } from 'next-intl/server';
-
-const locales = ['en-de', 'de-de', 'fr-fr', 'nl-nl', 'it-it'];
-const defaultLocale = 'de-de';
-
-const messageKeyByLocale = new Map([
-  ['en-de', 'en'],
-  ['de-de', 'de'],
-  ['fr-fr', 'fr'],
-  ['nl-nl', 'nl'],
-  ['it-it', 'it'],
-]);
+import { locales, defaultLocale } from './next-intl.locales';
 
 function resolveLocale(locale) {
   if (typeof locale === 'string') {
@@ -21,14 +11,10 @@ function resolveLocale(locale) {
   return defaultLocale;
 }
 
-function resolveMessageKey(locale) {
-  return messageKeyByLocale.get(locale) ?? messageKeyByLocale.get(defaultLocale) ?? 'en';
-}
-
 export default getRequestConfig(async ({ locale }) => {
   const activeLocale = resolveLocale(locale);
-  const messageKey = resolveMessageKey(activeLocale);
-  const messages = (await import(`./messages/${messageKey}.json`)).default;
+  const { loadMessages } = await import('./lib/intl/loadMessages');
+  const messages = await loadMessages(activeLocale);
   return {
     locale: activeLocale,
     messages,

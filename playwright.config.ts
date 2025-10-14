@@ -189,7 +189,8 @@ if (shouldSkipWebServer) {
   if (shouldStartWebServer) {
     config.webServer = {
       command: 'npm run start:e2e',
-      url: `http://127.0.0.1:${PORT}${HEALTH_PATH}`,
+      // Intentionally using the base URL without HEALTH_PATH for reuseExistingServer detection
+      url: `http://127.0.0.1:${PORT}`,
       reuseExistingServer: true,
       timeout: 120_000,
       env: {

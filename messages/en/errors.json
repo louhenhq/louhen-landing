@@ -1,0 +1,9 @@
+{
+  "errors": {
+    "required": "This field is required.",
+    "email": {
+      "invalid": "Enter a valid email address."
+    },
+    "generic": "Something went wrong. Please try again."
+  }
+}

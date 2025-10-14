@@ -79,8 +79,8 @@ test.describe('Header regression pack', () => {
 
   test('Mobile drawer retains analytics surface metadata and focus', async ({ page, context }) => {
   await context.addCookies([
-      { name: 'll_consent', value: CONSENT_COOKIE_VALUE(), domain: 'localhost', path: '/' },
-    ]);
+    { name: 'll_consent', value: CONSENT_COOKIE_VALUE(), domain: COOKIE_DOMAIN, path: '/' },
+  ]);
     await page.setViewportSize({ width: 414, height: 896 });
     await gotoReady(page, '?utm_source=header-drawer');
 

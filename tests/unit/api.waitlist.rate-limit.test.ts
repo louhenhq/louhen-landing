@@ -145,7 +145,7 @@ describe('API waitlist rate limiting', () => {
     process.env.WAITLIST_RATE_SUBMITS_PER_HOUR_PER_IP = '1';
 
     const makeRequest = () =>
-      new Request('http://localhost/api/waitlist', {
+      new Request('http://127.0.0.1/api/waitlist', {
         method: 'POST',
         headers: {
           'content-type': 'application/json',
@@ -173,7 +173,7 @@ describe('API waitlist rate limiting', () => {
     process.env.WAITLIST_RATE_RESENDS_PER_30M_PER_EMAIL = '1';
 
     const makeRequest = () =>
-      new Request('http://localhost/api/waitlist/resend', {
+      new Request('http://127.0.0.1/api/waitlist/resend', {
         method: 'POST',
         headers: {
           'content-type': 'application/json',

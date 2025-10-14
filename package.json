@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "dev:tp": "next dev --turbopack",
-    "prebuild": "node scripts/check-fonts.mjs && npm run prebuild:design-tokens",
+    "prebuild": "node scripts/check-fonts.mjs && npm run prebuild:design-tokens && npm run i18n:check",
     "prebuild:design-tokens": "npm run -w @louhen/design-tokens build",
     "postinstall": "patch-package",
     "prepare": "husky",
@@ -18,6 +18,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "guard:hex": "node scripts/guard-hex.mjs",
     "ci:color-policy": "node scripts/guard-hex.mjs --ci --report ci-artifacts/color-policy-report.txt",
+    "lint-staged": "lint-staged",
     "test": "npm run test:unit",
     "test:unit": "vitest run --passWithNoTests",
     "test:unit:coverage": "cross-env COVERAGE=1 vitest run --coverage --passWithNoTests",
@@ -30,14 +31,15 @@
     "axe": "cross-env TS_NODE_PROJECT=tsconfig.e2e.json playwright test --grep @axe",
     "test:all": "npm run test:unit && npm run test:e2e",
     "i18n:check": "node scripts/check-i18n-placeholders.mjs",
+    "update:i18n-manifest": "node scripts/update-i18n-manifest.mjs",
     "qa:e2e": "cross-env TS_NODE_PROJECT=tsconfig.e2e.json npx playwright test",
     "qa:lh": "npm run lighthouse",
     "lighthouse": "node scripts/run-lighthouse.mjs",
-    "qa": "start-server-and-test start http://localhost:3000 'npm run qa:e2e && npm run qa:lh'",
+    "qa": "start-server-and-test start http://127.0.0.1:3000 'npm run qa:e2e && npm run qa:lh'",
     "email:preview": "tsx scripts/email-preview.ts",
     "email:headers": "tsx scripts/email-headers-preview.ts",
     "release": "semantic-release",
-    "e2e:local": "cross-env NODE_ENV=test APP_BASE_URL=http://localhost:4311 TEST_E2E_SHORTCIRCUIT=true TEST_E2E_BYPASS_TOKEN=e2e-mocked-token HCAPTCHA_SECRET=sk_dummy_for_e2e PLAYWRIGHT_ARTIFACTS_DIR=artifacts/playwright/local TS_NODE_PROJECT=tsconfig.e2e.json npx playwright test --workers=2",
+    "e2e:local": "cross-env NODE_ENV=test APP_BASE_URL=http://127.0.0.1:4311 TEST_E2E_SHORTCIRCUIT=true TEST_E2E_BYPASS_TOKEN=e2e-mocked-token HCAPTCHA_SECRET=sk_dummy_for_e2e PLAYWRIGHT_ARTIFACTS_DIR=artifacts/playwright/local TS_NODE_PROJECT=tsconfig.e2e.json npx playwright test --workers=2",
     "e2e:open": "npx playwright show-report",
     "pw:failures": "node scripts/summarize_playwright_failures.mjs",
     "lhci": "node scripts/run-lighthouse.mjs",
@@ -108,6 +110,9 @@
   "lint-staged": {
     "*.{ts,tsx,js,jsx,css,scss,md,mdx,html,json}": [
       "node scripts/guard-hex.mjs --"
+    ],
+    "messages/en/**/*.json": [
+      "node scripts/check-i18n-staged.mjs"
     ]
   },
   "workspaces": [

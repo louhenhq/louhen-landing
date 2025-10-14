@@ -10,8 +10,8 @@ export default async function globalSetup() {
     return;
   }
 
-  const base = process.env.BASE_URL ?? process.env.PREVIEW_BASE_URL ?? 'http://localhost:4311';
-  const url = new URL(base.startsWith('http') ? base : `http://localhost:4311/${base}`);
+  const base = process.env.BASE_URL ?? process.env.PREVIEW_BASE_URL ?? 'http://127.0.0.1:4311';
+  const url = new URL(base.startsWith('http') ? base : `http://127.0.0.1:4311/${base}`);
 
   const cookies = cookieEnv
     .split(';')

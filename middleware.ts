@@ -148,6 +148,20 @@ function isLoopbackOriginValue(value: string | null | undefined) {
   }
 }
 
+const LOOPBACK_CANONICAL_HOST = '127.0.0.1';
+
+function normalizeLoopbackUrl(url: URL) {
+  if (isLoopbackHost(url.hostname)) {
+    const port = url.port;
+    url.hostname = LOOPBACK_CANONICAL_HOST;
+    url.host = port ? `${LOOPBACK_CANONICAL_HOST}:${port}` : LOOPBACK_CANONICAL_HOST;
+  }
+}
+
+function cloneRequestUrl(request: NextRequest): URL {
+  return new URL(request.url);
+}
+
 function shouldBypassLocalization(pathname: string) {
   const normalised = pathname.toLowerCase();
   if (normalised.startsWith('/_next') || normalised.startsWith('/api')) {
@@ -209,9 +223,10 @@ function resolvePreferredLocale(
 }
 
 function buildRedirectUrl(request: NextRequest, locale: AppLocale) {
-  const url = request.nextUrl.clone();
+  const url = cloneRequestUrl(request);
   const pathname = request.nextUrl.pathname || '/';
   url.pathname = buildPathForLocale(locale, pathname);
+  normalizeLoopbackUrl(url);
   return url;
 }
 
@@ -275,6 +290,11 @@ export function middleware(request: NextRequest) {
 
   const hostname = getHostname(request);
   const isLocalhost = isLoopbackHost(hostname);
+  if (isLocalhost) {
+    const port = request.nextUrl.port;
+    const forwardedHost = port ? `${LOOPBACK_CANONICAL_HOST}:${port}` : LOOPBACK_CANONICAL_HOST;
+    request.headers.set('x-forwarded-host', forwardedHost);
+  }
   const shouldAllowIndex = allowIndexOverride || isLocalhost;
   if (shouldAllowIndex) {
     request.headers.set('x-allow-robots', 'true');
@@ -294,11 +314,38 @@ export function middleware(request: NextRequest) {
 
   const localizedMatch = pathname.match(ALREADY_LOCALIZED);
   if (localizedMatch) {
-    const locale = localizedMatch[1]?.toLowerCase() ?? '';
-    if (SUPPORTED_LOCALE_VALUES.has(locale)) {
+    const matchedLocale = localizedMatch[1] ?? '';
+    const normalizedLocale = matchedLocale.toLowerCase();
+    if (SUPPORTED_LOCALE_VALUES.has(normalizedLocale)) {
+      if (matchedLocale !== normalizedLocale) {
+        const normalizedUrl = cloneRequestUrl(request);
+        const remainder = pathname.slice(localizedMatch[0].length);
+        const suffix = remainder.length ? remainder : '';
+        normalizedUrl.pathname = `/${normalizedLocale}${suffix}`;
+        normalizeLoopbackUrl(normalizedUrl);
+        const redirectResponse = NextResponse.redirect(normalizedUrl, 308);
+        applyLocaleCookies(redirectResponse, normalizedLocale as AppLocale);
+        if (shouldAllowIndex) {
+          redirectResponse.headers.set('x-robots-tag', 'index, follow');
+        }
+        return applySecurityHeaders(request, redirectResponse, nonce);
+      }
+      const shouldSkipIntl = isLocalhost;
       const localizedResponse =
-        forceDefaultLocale && locale === ENV_DEFAULT_LOCALE ? NextResponse.next() : intlMiddleware(request);
-      applyLocaleCookies(localizedResponse, locale as AppLocale);
+        forceDefaultLocale && normalizedLocale === ENV_DEFAULT_LOCALE
+          ? NextResponse.next()
+          : shouldSkipIntl
+            ? NextResponse.next()
+            : intlMiddleware(request);
+      if (!shouldSkipIntl && isLocalhost) {
+        const rewriteTarget = localizedResponse.headers.get('x-middleware-rewrite');
+        if (rewriteTarget && rewriteTarget.includes('://localhost')) {
+          const adjusted = rewriteTarget.replace('://localhost', `://${LOOPBACK_CANONICAL_HOST}`);
+          localizedResponse.headers.delete('x-middleware-rewrite');
+          localizedResponse.headers.set('x-middleware-rewrite', adjusted);
+        }
+      }
+      applyLocaleCookies(localizedResponse, normalizedLocale as AppLocale);
       if (shouldAllowIndex) {
         localizedResponse.headers.set('x-robots-tag', 'index, follow');
       }
@@ -311,9 +358,10 @@ export function middleware(request: NextRequest) {
     const shortLocale = shortMatch[1]?.toLowerCase() ?? '';
     const canonical = SHORT_TO_FULL[shortLocale];
     if (canonical) {
-      const url = request.nextUrl.clone();
+      const url = cloneRequestUrl(request);
       const remainder = pathname.slice(shortMatch[0].length) || '/';
       url.pathname = `/${canonical}${remainder.startsWith('/') ? remainder : `/${remainder}`}`;
+      normalizeLoopbackUrl(url);
       const response = NextResponse.redirect(url, 308);
       if (shouldAllowIndex) {
         response.headers.set('x-robots-tag', 'index, follow');
@@ -326,9 +374,14 @@ export function middleware(request: NextRequest) {
   const redirectUrl = buildRedirectUrl(request, targetLocale);
 
   if (pathname === '/' && hasLocaleRedirectCookie) {
-    const rewriteUrl = request.nextUrl.clone();
+    const rewriteUrl = cloneRequestUrl(request);
     rewriteUrl.pathname = redirectUrl.pathname;
+    normalizeLoopbackUrl(rewriteUrl);
     const rewriteResponse = NextResponse.rewrite(rewriteUrl);
+    if (isLocalhost) {
+      rewriteResponse.headers.delete('x-middleware-rewrite');
+      rewriteResponse.headers.set('x-middleware-rewrite', rewriteUrl.toString());
+    }
     applyLocaleCookies(rewriteResponse, targetLocale);
     if (shouldAllowIndex) {
       rewriteResponse.headers.set('x-robots-tag', 'index, follow');
@@ -353,6 +406,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest.webmanifest).*)',
+    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest.webmanifest|icon.svg).*)',
   ],
 };

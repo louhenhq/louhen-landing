@@ -4,12 +4,15 @@ import { ReferralAttribution } from '@components/features/waitlist';
 import { SITE_NAME } from '@/constants/site';
 import { getHeaderUserState } from '@/lib/auth/userState.server';
 import { loadMessages } from '@/lib/intl/loadMessages';
+import { safeGetMessage } from '@/lib/intl/getMessage';
 import { localeHomePath } from '@lib/shared/routing/legal-path';
 import { isPrelaunch } from '@/lib/env/prelaunch';
 import { getSiteOrigin, hreflangMapFor, makeCanonical } from '@/lib/seo/shared';
 import { getOgImageEntry } from '@lib/shared/og/builder';
 import type { SupportedLocale } from '@/next-intl.locales';
 import { unstable_setRequestLocale } from 'next-intl/server';
+
+export const runtime = 'nodejs';
 
 type PageProps = {
   params: Promise<{ locale: SupportedLocale }>;
@@ -25,13 +28,14 @@ function firstParam(value: string | string[] | undefined): string | null {
 export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const [{ locale }, resolvedSearchParams] = await Promise.all([params, searchParams]);
   const messages = (await loadMessages(locale)) as Record<string, unknown>;
-  const heroMessages = (messages.hero ?? {}) as Record<string, unknown>;
-  const heroSubtitle =
-    typeof heroMessages.sub === 'string'
-      ? heroMessages.sub
-      : 'Louhen pairs podiatrist-backed comfort with adaptive sizing to keep every step confident.';
-  const defaultTitle = `${SITE_NAME} — Personal style. Effortless fit.`;
-  const defaultDescription = heroSubtitle;
+  const heroHeadline = safeGetMessage(messages, 'hero.h1', {
+    locale,
+    fallbackHint: 'home hero headline',
+  });
+  const defaultDescription = safeGetMessage(messages, 'hero.sub', {
+    locale,
+    fallbackHint: 'home hero subhead',
+  });
   const baseUrl = getSiteOrigin();
   const canonicalPath = localeHomePath(locale);
   const canonicalUrl = makeCanonical(canonicalPath, baseUrl);
@@ -44,7 +48,7 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   const baseOgImage = getOgImageEntry({
     locale,
     key: 'home',
-    title: defaultTitle,
+    title: heroHeadline,
     description: defaultDescription,
   });
 
@@ -55,7 +59,7 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
       languages: hreflang,
     },
     openGraph: {
-      title: defaultTitle,
+      title: heroHeadline,
       description: defaultDescription,
       url: canonicalUrl,
       locale,
@@ -63,7 +67,7 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
     },
     twitter: {
       card: 'summary_large_image' as const,
-      title: defaultTitle,
+      title: heroHeadline,
       description: defaultDescription,
       images: [baseOgImage.url],
     },
@@ -71,18 +75,20 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
 
   if (!sanitizedRef) {
     return {
-      title: defaultTitle,
+      title: heroHeadline || SITE_NAME,
       robots,
       ...baseMetadata,
     };
   }
 
-  const og = ((messages.og ?? {}) as Record<string, unknown>).invited as Record<string, unknown> | undefined;
-  const invitedTitle = typeof og?.title === 'string' ? og.title : 'A friend invited you to Louhen';
-  const invitedDescription =
-    typeof og?.description === 'string'
-      ? og.description
-      : 'Join through their link to unlock early rewards and smarter sizing for every outfit.';
+  const invitedTitle = safeGetMessage(messages, 'og.invited.title', {
+    locale,
+    fallbackHint: 'home invited og title',
+  });
+  const invitedDescription = safeGetMessage(messages, 'og.invited.description', {
+    locale,
+    fallbackHint: 'home invited og description',
+  });
   const sharePath = sanitizedRef ? `/${locale}?ref=${encodeURIComponent(sanitizedRef)}` : canonicalPath;
   const fullUrl = `${baseUrl}${sharePath}`;
   const invitedOgImage = getOgImageEntry({
@@ -118,8 +124,10 @@ export default async function LocaleLandingPage({ params, searchParams }: PagePr
   const [{ locale }, resolvedSearchParams] = await Promise.all([params, searchParams]);
   unstable_setRequestLocale(locale);
   const messages = (await loadMessages(locale)) as Record<string, unknown>;
-  const referralToast = ((messages.referral ?? {}) as Record<string, unknown>).appliedToast;
-  const toastMessage = typeof referralToast === 'string' ? referralToast : null;
+  const toastMessage = safeGetMessage(messages, 'referral.appliedToast', {
+    locale,
+    fallbackHint: 'home referral toast',
+  });
   const headerUserState = await getHeaderUserState();
 
   return (
