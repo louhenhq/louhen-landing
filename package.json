@@ -12,7 +12,7 @@
     "prepare": "husky",
     "build": "cross-env NEXT_DISABLE_FONT_DOWNLOADS=1 next build",
     "start": "next start",
-    "start:test": "mkdir -p .next && cross-env NODE_ENV=production PORT=${PORT:-4311} HOST=0.0.0.0 next start -p ${PORT:-4311} -H 0.0.0.0 | tee .next/test-server.log",
+    "start:test": "mkdir -p .next && cross-env NODE_ENV=production PORT=${PORT:-4311} HOST=${HOST:-127.0.0.1} next start -p ${PORT:-4311} -H ${HOST:-127.0.0.1} | tee .next/test-server.log",
     "start:e2e": "mkdir -p .next && cross-env NODE_ENV=production PORT=${PORT:-4311} HOST=127.0.0.1 next start -p ${PORT:-4311} -H 127.0.0.1",
     "lint": "npx eslint --cache --cache-location .eslintcache --max-warnings=0 'app/**/*.{ts,tsx,js,jsx}' 'components/**/*.{ts,tsx,js,jsx}' 'lib/**/*.{ts,tsx,js,jsx}' 'tests/**/*.{ts,tsx,js,jsx}'",
     "typecheck": "tsc -p tsconfig.json --noEmit",

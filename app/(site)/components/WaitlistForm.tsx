@@ -151,7 +151,8 @@ export default function WaitlistForm({
     }
   }
 
-  const disableSubmit = isSubmitting || !emailTrimmed || !emailIsValid || !consent;
+  const canSubmit = emailIsValid && consent && !isSubmitting;
+  const submitState = canSubmit ? 'enabled' : 'disabled';
 
   return (
     <Card
@@ -228,7 +229,14 @@ export default function WaitlistForm({
           </p>
         ) : null}
 
-        <Button type="submit" disabled={disableSubmit} loading={isSubmitting}>
+        <Button
+          type="submit"
+          disabled={!canSubmit}
+          aria-disabled={!canSubmit}
+          data-state={submitState}
+          data-ll="wl-submit"
+          loading={isSubmitting}
+        >
           {t('submit.cta')}
         </Button>
 

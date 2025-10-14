@@ -11,7 +11,11 @@ const require = createRequire(import.meta.url);
 const config = require('../lighthouserc.cjs');
 const { defaultLocale, targetLocales } = config;
 
-const BASE_URL = process.env.BASE_URL ?? 'http://127.0.0.1:4311';
+const HOST = process.env.HOST ?? '127.0.0.1';
+const parsedPort = Number.parseInt(process.env.PORT ?? '4311', 10);
+const PORT = Number.isFinite(parsedPort) ? parsedPort : 4311;
+const hostname = HOST.split('://').pop() ?? HOST;
+const BASE_URL = process.env.BASE_URL ?? `http://${hostname}:${PORT}`;
 const READINESS_PATH = process.env.LHCI_READINESS_PATH ?? '/';
 const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 const npxCmd = process.platform === 'win32' ? 'npx.cmd' : 'npx';
@@ -60,7 +64,7 @@ async function startServer() {
 
   serverProcess = spawn(npmCmd, ['run', 'start:test'], {
     stdio: 'inherit',
-    env: { ...process.env },
+    env: { ...process.env, HOST: hostname, PORT: String(PORT), BASE_URL },
     shell: false,
   });
 

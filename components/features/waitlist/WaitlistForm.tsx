@@ -92,7 +92,11 @@ export function WaitlistForm({
 
   const normalizedSource = useMemo(() => source?.trim() || null, [source]);
   const captchaRequired = captchaEnabled;
-  const disabled = status === 'loading';
+  const trimmedEmail = email.trim();
+  const emailIsValid = useMemo(() => (trimmedEmail ? isValidEmail(trimmedEmail) : false), [trimmedEmail]);
+  const canSubmit = emailIsValid && consent && status !== 'loading';
+  const submitDisabled = !canSubmit;
+  const submitState: 'enabled' | 'disabled' = canSubmit ? 'enabled' : 'disabled';
 
   useEffect(() => {
     setEmail(defaultEmail);
@@ -215,7 +219,7 @@ export function WaitlistForm({
   const handleSubmit = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
-      if (disabled) return;
+      if (submitDisabled) return;
 
       clearErrors();
 
@@ -319,7 +323,7 @@ export function WaitlistForm({
         resetCaptcha();
       }
     },
-    [captchaToken, clearErrors, disabled, email, locale, normalizedSource, onSuccess, resetCaptcha, t, validate]
+    [captchaToken, clearErrors, email, locale, normalizedSource, onSuccess, resetCaptcha, submitDisabled, t, validate]
   );
 
   const handlePrepareResend = useCallback(() => {
@@ -493,7 +497,9 @@ export function WaitlistForm({
               data-ll="wl-submit"
               loading={status === 'loading'}
               loadingLabel={t('inflight')}
-              disabled={disabled}
+              disabled={submitDisabled}
+              aria-disabled={submitDisabled}
+              data-state={submitState}
             >
               {t('submit')}
             </Button>

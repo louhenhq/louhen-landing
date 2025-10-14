@@ -1,15 +1,15 @@
 import { test, expect } from '@tests/fixtures/playwright';
 
-const LOCALE = 'en';
+const DEFAULT_LOCALE = process.env.DEFAULT_LOCALE || process.env.NEXT_PUBLIC_DEFAULT_LOCALE || 'de-de';
 const SHORT_CIRCUIT_ENABLED = process.env.TEST_E2E_SHORTCIRCUIT === 'true';
 const BYPASS_TOKEN = process.env.TEST_E2E_BYPASS_TOKEN || 'dev-bypass';
 
 function validWaitlistPayload() {
   return {
     email: `e2e+${Date.now()}@example.com`,
-    locale: LOCALE,
+    locale: DEFAULT_LOCALE,
     hcaptchaToken: BYPASS_TOKEN,
-    consent: true,
+    consent: { gdpr: true },
   };
 }
 
@@ -17,9 +17,9 @@ test.describe('API /api/waitlist', () => {
   test('400 on invalid payload (missing email) @extended', async ({ request }) => {
     const response = await request.post('/api/waitlist', {
       data: {
-        locale: LOCALE,
+        locale: DEFAULT_LOCALE,
         hcaptchaToken: BYPASS_TOKEN,
-        consent: true,
+        consent: { gdpr: true },
       },
       headers: { 'content-type': 'application/json' },
     });
@@ -47,9 +47,9 @@ test.describe('API /api/waitlist', () => {
     const response = await request.post('/api/waitlist', {
       data: {
         email: 'not-an-email',
-        locale: LOCALE,
+        locale: DEFAULT_LOCALE,
         hcaptchaToken: BYPASS_TOKEN,
-        consent: true,
+        consent: { gdpr: true },
       },
       headers: { 'content-type': 'application/json' },
     });

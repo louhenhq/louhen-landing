@@ -75,6 +75,63 @@ function rateLimitExceeded(decision: RateLimitDecision) {
   return response;
 }
 
+function toRecord(value: unknown): Record<string, unknown> {
+  if (value && typeof value === 'object') {
+    return value as Record<string, unknown>;
+  }
+  return {};
+}
+
+async function handleTestShortCircuit(
+  rawPayload: unknown,
+  deps: WaitlistSignupDependencies
+) {
+  const payload = toRecord(rawPayload);
+  const emailRaw = typeof payload.email === 'string' ? payload.email.trim() : '';
+  if (!emailRaw) {
+    throw new BadRequestError('invalid_payload', 'Invalid waitlist signup request', {
+      details: ['email'],
+    });
+  }
+  if (payload.consent !== true) {
+    throw new BadRequestError('invalid_payload', 'Invalid waitlist signup request', {
+      details: ['consent'],
+    });
+  }
+
+  const localeRaw = typeof payload.locale === 'string' ? payload.locale.trim() : null;
+  const refRaw = typeof payload.ref === 'string' ? payload.ref.trim() : null;
+  const ref = refRaw && refRaw.length ? refRaw.slice(0, 200) : null;
+
+  const confirmToken = generateToken();
+  const { hash, salt, lookupHash } = hashToken(confirmToken);
+  const expiresAt = getExpiryDate();
+
+  const upsertResult = await deps.repo.upsertPending(emailRaw, {
+    locale: localeRaw ?? null,
+    utm: undefined,
+    ref,
+    consent: true,
+    confirmExpiresAt: expiresAt,
+    confirmTokenHash: hash,
+    confirmTokenLookupHash: lookupHash,
+    confirmSalt: salt,
+  });
+
+  const statusCode = upsertResult.created ? 201 : 200;
+  return NextResponse.json(
+    {
+      ok: true,
+      shortCircuit: true,
+      token: confirmToken,
+      docId: upsertResult.docId,
+      lookupHash,
+      status: upsertResult.status,
+    },
+    { status: statusCode }
+  );
+}
+
 export function createWaitlistPostHandler(
   overrides: Partial<WaitlistSignupDependencies> = {}
 ) {
@@ -86,38 +143,46 @@ export function createWaitlistPostHandler(
 
   return async function POST(request: Request) {
     try {
-      const payload = parseSignupDTO(await readJson(request));
+      const isTestMode = process.env.TEST_MODE === '1';
+      const isShortCircuit = process.env.TEST_E2E_SHORTCIRCUIT === 'true';
+      const shouldIncludeTestPayload = isShortCircuit || isTestMode;
 
-      if (process.env.TEST_E2E_SHORTCIRCUIT === 'true') {
-        return NextResponse.json({ ok: true, shortCircuit: true }, { status: 200 });
+      const rawPayload = await readJson(request);
+
+      if (isShortCircuit) {
+        return handleTestShortCircuit(rawPayload, deps);
       }
 
-      const rule = deps.getRule();
-      const identifier = resolveRemoteIp(request) ?? 'anonymous';
-      const decision = await deps.rateLimiter(rule, identifier);
-      if (!decision.allowed) {
-        return rateLimitExceeded(decision);
-      }
+      const payload = parseSignupDTO(rawPayload);
 
-      const { captcha } = ensureWaitlistServerEnv();
-      const secret = process.env.HCAPTCHA_SECRET?.trim();
-      if (!secret || !captcha.hasSecret) {
-        throw new InternalServerError('Missing hCaptcha credentials');
-      }
+      if (!isShortCircuit) {
+        const rule = deps.getRule();
+        const identifier = resolveRemoteIp(request) ?? 'anonymous';
+        const decision = await deps.rateLimiter(rule, identifier);
+        if (!decision.allowed) {
+          return rateLimitExceeded(decision);
+        }
 
-      const isDevBypass = process.env.NODE_ENV !== 'production' && payload.hcaptchaToken === 'dev-bypass';
+        const { captcha } = ensureWaitlistServerEnv();
+        const secret = process.env.HCAPTCHA_SECRET?.trim();
+        if (!secret || !captcha.hasSecret) {
+          throw new InternalServerError('Missing hCaptcha credentials');
+        }
 
-      if (!isDevBypass) {
-        const verification = await verifyCaptchaToken({
-          token: payload.hcaptchaToken,
-          secret,
-          remoteIp: resolveRemoteIp(request),
-        });
+        const isDevBypass = process.env.NODE_ENV !== 'production' && payload.hcaptchaToken === 'dev-bypass';
 
-        if (!verification.success) {
-          throw new BadRequestError('captcha_invalid', 'Captcha verification failed', {
-            details: verification.errorCodes,
+        if (!isDevBypass) {
+          const verification = await verifyCaptchaToken({
+            token: payload.hcaptchaToken,
+            secret,
+            remoteIp: resolveRemoteIp(request),
           });
+
+          if (!verification.success) {
+            throw new BadRequestError('captcha_invalid', 'Captcha verification failed', {
+              details: verification.errorCodes,
+            });
+          }
         }
       }
 
@@ -136,6 +201,7 @@ export function createWaitlistPostHandler(
         confirmSalt: salt,
       });
 
+      const statusCode = 200;
       if (upsertResult.status === 'pending') {
         try {
           await sendWaitlistConfirmEmail({
@@ -151,7 +217,15 @@ export function createWaitlistPostHandler(
         }
       }
 
-      return NextResponse.json({ ok: true });
+      const responseBody: Record<string, unknown> = { ok: true };
+      if (shouldIncludeTestPayload) {
+        responseBody.token = confirmToken;
+        responseBody.docId = upsertResult.docId;
+        responseBody.lookupHash = lookupHash;
+        responseBody.status = upsertResult.status;
+      }
+
+      return NextResponse.json(responseBody, { status: statusCode });
     } catch (error) {
       if (error instanceof BadRequestError) {
         return errorResponse(error);
