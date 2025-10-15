@@ -4,11 +4,13 @@ import { mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { defineConfig, devices } from '@playwright/test';
 
-const HOST = process.env.HOST ?? '127.0.0.1';
-const parsedPort = Number.parseInt(process.env.PORT ?? '4311', 10);
-const PORT = Number.isFinite(parsedPort) ? parsedPort : 4311;
+const DEFAULT_LOOPBACK_HOST = '127.0.0.1';
+const DEFAULT_LOOPBACK_PORT = 4311;
+const HOST = process.env.HOST ?? DEFAULT_LOOPBACK_HOST;
+const parsedPort = Number.parseInt(process.env.PORT ?? String(DEFAULT_LOOPBACK_PORT), 10);
+const PORT = Number.isFinite(parsedPort) ? parsedPort : DEFAULT_LOOPBACK_PORT;
 const HEALTH_PATH = process.env.PW_HEALTH_PATH ?? '/favicon.ico';
-const fallbackLocalURL = `http://127.0.0.1:${PORT}`;
+const fallbackLocalURL = `http://${DEFAULT_LOOPBACK_HOST}:${PORT}`;
 const shouldSkipWebServer = process.env.PLAYWRIGHT_SKIP === '1';
 const artifactsRoot = process.env.PLAYWRIGHT_ARTIFACTS_DIR ?? 'artifacts/playwright';
 const playwrightResultsDir = path.join(artifactsRoot, 'results');
@@ -33,6 +35,25 @@ function isLoopbackOrigin(value: string): boolean {
     return LOOPBACK_HOSTS.has(parsed.hostname);
   } catch {
     return false;
+  }
+}
+
+function canonicalizeLoopbackOrigin(raw: string): string {
+  if (!raw) return raw;
+  try {
+    const candidate = raw.includes('://') ? raw : `http://${raw}`;
+    const parsed = new URL(candidate);
+    const hasPathOrQuery = parsed.pathname !== '/' || parsed.search || parsed.hash;
+    if (hasPathOrQuery) {
+      return raw;
+    }
+    if (parsed.hostname === 'localhost' || parsed.hostname === '0.0.0.0' || parsed.hostname === '::1' || parsed.hostname === '[::1]') {
+      parsed.hostname = DEFAULT_LOOPBACK_HOST;
+      return parsed.origin;
+    }
+    return raw;
+  } catch {
+    return raw;
   }
 }
 
@@ -71,13 +92,21 @@ const hasBaseOverride = baseOverride.length > 0;
 
 const defaultOrigin = isSandbox ? sandboxOrigin : FALLBACK_ORIGIN;
 const targetOrigin = hasBaseOverride ? baseOverride : defaultOrigin;
-const baseTestURL = withTrailingSlash(targetOrigin);
-const resolvedBaseURL = targetOrigin;
+const canonicalOrigin = canonicalizeLoopbackOrigin(targetOrigin);
+const baseTestURL = withTrailingSlash(canonicalOrigin);
+const resolvedBaseURL = canonicalOrigin;
+
+if (hasBaseOverride && canonicalOrigin !== targetOrigin && process.env.BASE_URL !== canonicalOrigin) {
+  process.env.BASE_URL = canonicalOrigin;
+  if (process.env.APP_BASE_URL !== undefined) {
+    process.env.APP_BASE_URL = canonicalOrigin;
+  }
+}
 
 // Keep test env flags explicit so local + CI runs share the same prelaunch gating.
 const testEnv = {
-  BASE_URL: targetOrigin,
-  APP_BASE_URL: targetOrigin,
+  BASE_URL: canonicalOrigin,
+  APP_BASE_URL: canonicalOrigin,
   TEST_MODE: '1',
   TEST_E2E_SHORTCIRCUIT: 'true',
   IS_PRELAUNCH: process.env.IS_PRELAUNCH ?? 'true',

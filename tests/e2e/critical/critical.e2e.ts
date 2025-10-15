@@ -56,14 +56,15 @@ test.describe('@critical release gate', () => {
     await context.route(WAITLIST_API_PATTERN, waitlistHandler);
 
     try {
-      await page.context().addCookies([
-        {
+      const consentDomains = ['127.0.0.1', 'localhost'];
+      await page.context().addCookies(
+        consentDomains.map((domain) => ({
           name: 'll_consent',
           value: 'v1:granted',
-          domain: '127.0.0.1',
+          domain,
           path: '/',
-        },
-      ]);
+        }))
+      );
 
       const response = await page.goto(localeUrl('/waitlist', { locale: defaultLocale }), { waitUntil: 'domcontentloaded' });
       expect(response?.status()).toBe(200);
@@ -77,12 +78,19 @@ test.describe('@critical release gate', () => {
       const submit = page.getByTestId(testIds.waitlist.submitButton);
       await expect(submit).toBeEnabled();
 
-      const requestPromise = page.waitForRequest(WAITLIST_API_PATTERN);
-      await submit.click();
-      const request = await requestPromise;
-      expect(request.method()).toBe('POST');
-      const submissionResponse = await request.response();
-      expect(submissionResponse?.ok()).toBeTruthy();
+      const [submissionResponse] = await Promise.all([
+        page.waitForResponse((candidate) => {
+          if (!isWaitlistApiUrl(candidate.url())) {
+            return false;
+          }
+          return candidate.request().method().toUpperCase() === 'POST';
+        }),
+        submit.click(),
+      ]);
+
+      const submissionRequest = submissionResponse.request();
+      expect(submissionRequest.method()).toBe('POST');
+      expect(submissionResponse.ok()).toBeTruthy();
 
       await expect(page.getByTestId(testIds.waitlist.successState)).toBeVisible();
       await expect(page.locator(byTestId(testIds.waitlist.serverError))).toHaveCount(0);
