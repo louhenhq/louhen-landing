@@ -1,6 +1,7 @@
 import { expect, test } from '@tests/fixtures/playwright';
 import type { Locator, Page } from '@playwright/test';
 import { localeUrl } from '../_utils/url';
+import { testIds } from '@tests/e2e/_utils/selectors';
 
 async function focusWithTab(page: Page, target: Locator): Promise<void> {
   for (let i = 0; i < 15; i += 1) {
@@ -19,9 +20,9 @@ test.describe('Waitlist form — keyboard errors', () => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto(localeUrl('/waitlist'), { waitUntil: 'domcontentloaded' });
 
-    const emailInput = page.getByTestId('wl-email-input');
-    const consentCheckbox = page.getByTestId('wl-consent-checkbox');
-    const submitButton = page.locator('[data-ll="wl-submit"]');
+    const emailInput = page.getByTestId(testIds.waitlist.emailInput);
+    const consentCheckbox = page.getByTestId(testIds.waitlist.consentCheckbox);
+    const submitButton = page.getByTestId(testIds.waitlist.submitButton);
 
     await focusWithTab(page, emailInput);
     await page.keyboard.press('Enter');
@@ -45,7 +46,7 @@ test.describe('Waitlist form — keyboard errors', () => {
     await focusWithTab(page, submitButton);
     await page.keyboard.press('Enter');
 
-    const success = page.locator('[data-ll="wl-success"]');
+    const success = page.getByTestId(testIds.waitlist.successState);
     if (await success.count()) {
       await expect(success).toBeVisible();
       return;
@@ -54,7 +55,7 @@ test.describe('Waitlist form — keyboard errors', () => {
     const captchaError = page.locator('#waitlist-captcha-error');
     if (await captchaError.count()) {
       await expect(captchaError).toBeVisible();
-      await expect(page.locator('[data-ll="wl-captcha"]')).toBeFocused();
+      await expect(page.getByTestId(testIds.waitlist.captchaContainer)).toBeFocused();
       return;
     }
 

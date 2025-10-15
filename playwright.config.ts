@@ -130,10 +130,11 @@ console.info('[playwright:env]', JSON.stringify(loggedEnv));
 const config: PlaywrightTestConfig = {
   testDir: 'tests',
   testIgnore: ['unit/**'],
-  timeout: process.env.CI ? 90_000 : 60_000,
-  retries: 0,
-  workers: process.env.CI ? 1 : 2,
+  timeout: 30_000,
+  retries: 1,
+  workers: 1,
   reporter: [
+    ['list'],
     ['html', { outputFolder: path.join(artifactsRoot, 'html'), open: 'never' }],
     ['json', { outputFile: path.join(artifactsRoot, 'report.json') }],
   ],
@@ -143,7 +144,7 @@ const config: PlaywrightTestConfig = {
   },
   use: {
     baseURL: baseTestURL,
-    trace: 'on',
+    trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
     testIdAttribute: 'data-testid',

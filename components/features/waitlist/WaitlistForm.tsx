@@ -17,6 +17,7 @@ import {
 import { cn } from '@/app/(site)/_lib/ui';
 import { usePrefersReducedMotion } from '@/app/(site)/_lib/usePrefersReducedMotion';
 import { Button, Card, Checkbox, Input } from '@/components/ui';
+import { legalPath } from '@lib/shared/routing/legal-path';
 import { track } from '@lib/clientAnalytics';
 
 type HCaptchaProps = {
@@ -58,7 +59,21 @@ export type WaitlistFormProps = {
 };
 
 const captchaSiteKey = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY?.trim() ?? '';
+const isTestMode = process.env.NEXT_PUBLIC_TEST_MODE === '1' || process.env.TEST_MODE === '1';
 const captchaEnabled = captchaSiteKey.length > 0;
+const TEST_CAPTCHA_TOKEN = 'e2e-mocked-token';
+
+const testIds = {
+  card: 'waitlist-form-card',
+  form: 'waitlist-form',
+  successContainer: 'waitlist-form-success',
+  errorSummary: 'waitlist-form-error-summary',
+  emailInput: 'waitlist-form-email',
+  consentCheckbox: 'waitlist-form-consent',
+  captchaContainer: 'waitlist-form-captcha',
+  submitButton: 'waitlist-form-submit',
+  serverError: 'waitlist-form-error',
+} as const;
 
 const isValidEmail = (value: string) => /\S+@\S+\.\S+/.test(value.trim());
 
@@ -91,7 +106,7 @@ export function WaitlistForm({
   const successHeadingRef = useRef<HTMLHeadingElement | null>(null);
 
   const normalizedSource = useMemo(() => source?.trim() || null, [source]);
-  const captchaRequired = captchaEnabled;
+  const captchaRequired = captchaEnabled && !isTestMode;
   const trimmedEmail = email.trim();
   const emailIsValid = useMemo(() => (trimmedEmail ? isValidEmail(trimmedEmail) : false), [trimmedEmail]);
   const canSubmit = emailIsValid && consent && status !== 'loading';
@@ -101,6 +116,13 @@ export function WaitlistForm({
   useEffect(() => {
     setEmail(defaultEmail);
   }, [defaultEmail]);
+
+  useEffect(() => {
+    if (isTestMode) {
+      // Playwright/CI bypass: inject a deterministic token so the mock API receives a captcha value.
+      setCaptchaToken(TEST_CAPTCHA_TOKEN);
+    }
+  }, [isTestMode]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -170,10 +192,10 @@ export function WaitlistForm({
   }, []);
 
   const resetCaptcha = useCallback(() => {
-    if (!captchaEnabled) return;
+    if (!captchaEnabled || isTestMode) return;
     captchaRef.current?.resetCaptcha();
     setCaptchaToken(null);
-  }, []);
+  }, [captchaEnabled, isTestMode]);
 
   const validate = useCallback(() => {
     const trimmedEmail = email.trim();
@@ -248,7 +270,7 @@ export function WaitlistForm({
             consent: true,
             locale,
             ref: normalizedSource ?? undefined,
-            hcaptchaToken: captchaToken ?? (captchaEnabled ? '' : 'dev-bypass'),
+            hcaptchaToken: captchaToken ?? (captchaRequired ? '' : 'dev-bypass'),
           }),
         });
 
@@ -323,7 +345,19 @@ export function WaitlistForm({
         resetCaptcha();
       }
     },
-    [captchaToken, clearErrors, email, locale, normalizedSource, onSuccess, resetCaptcha, submitDisabled, t, validate]
+    [
+      captchaRequired,
+      captchaToken,
+      clearErrors,
+      email,
+      locale,
+      normalizedSource,
+      onSuccess,
+      resetCaptcha,
+      submitDisabled,
+      t,
+      validate,
+    ]
   );
 
   const handlePrepareResend = useCallback(() => {
@@ -344,7 +378,7 @@ export function WaitlistForm({
   const cardClasses = cn('flex w-full flex-col gap-lg px-gutter py-2xl sm:px-2xl', className);
 
   return (
-    <Card data-ll="wl-card" data-testid="waitlist-form-card" className={cardClasses}>
+    <Card data-ll="wl-card" data-testid={testIds.card} className={cardClasses}>
       <header className="flex flex-col gap-xs">
         <h2 id={headingId} className="text-display-lg text-text">
           {t('title')}
@@ -353,7 +387,13 @@ export function WaitlistForm({
       </header>
 
       {status === 'success' ? (
-        <div className="flex flex-col gap-md" role="status" aria-live="assertive" data-ll="wl-success">
+        <div
+          className="flex flex-col gap-md"
+          role="status"
+          aria-live="assertive"
+          data-ll="wl-success"
+          data-testid={testIds.successContainer}
+        >
           <div className="flex flex-col gap-sm rounded-2xl border border-status-success bg-status-success/10 px-md py-sm text-status-success">
             <h3 ref={successHeadingRef} tabIndex={-1} className="text-h3 text-status-success">
               {t('success.title')}
@@ -375,6 +415,7 @@ export function WaitlistForm({
           aria-busy={status === 'loading'}
           aria-describedby={summaryErrors.length ? 'waitlist-error-summary' : undefined}
           data-ll="wl-form"
+          data-testid={testIds.form}
           className="flex flex-col gap-lg"
         >
           {summaryErrors.length > 0 ? (
@@ -385,6 +426,7 @@ export function WaitlistForm({
               role="alert"
               aria-live="assertive"
               className="rounded-2xl border border-feedback-error bg-feedback-error-surface px-md py-sm shadow-card"
+              data-testid={testIds.errorSummary}
             >
               <p className="text-label text-feedback-error">{t('errors.summaryTitle')}</p>
               <ul className="mt-xs list-disc space-y-1 pl-md text-body-sm text-feedback-error">
@@ -403,6 +445,7 @@ export function WaitlistForm({
               ref={emailInputRef}
               id="waitlist-email"
               data-ll="wl-email-input"
+              data-testid={testIds.emailInput}
               name="email"
               type="email"
               autoComplete="email"
@@ -433,6 +476,7 @@ export function WaitlistForm({
                 ref={consentRef}
                 id="waitlist-consent"
                 data-ll="wl-consent-checkbox"
+                data-testid={testIds.consentCheckbox}
                 name="consent"
                 checked={consent}
                 onChange={(event) => {
@@ -447,7 +491,7 @@ export function WaitlistForm({
               />
               <label htmlFor="waitlist-consent" className="text-body text-text-muted leading-relaxed">
                 {t('labels.consent')}{' '}
-                <Link prefetch={false} href={`/${locale}/privacy`} className="underline">
+                <Link prefetch={false} href={legalPath(locale, 'privacy')} className="underline">
                   {t('privacyLinkLabel')}
                 </Link>
                 .
@@ -460,7 +504,7 @@ export function WaitlistForm({
             ) : null}
           </div>
 
-          {captchaEnabled ? (
+          {captchaRequired ? (
             <div className="flex flex-col gap-xs" role="group" aria-labelledby="waitlist-captcha-label">
               <span id="waitlist-captcha-label" className="text-label text-text">
                 {t('labels.captcha')}
@@ -471,6 +515,7 @@ export function WaitlistForm({
                 tabIndex={-1}
                 aria-describedby={fieldErrors.captcha ? 'waitlist-captcha-error' : undefined}
                 data-ll="wl-captcha"
+                data-testid={testIds.captchaContainer}
                 style={{ minHeight: '180px' }}
               >
                 <HCaptcha
@@ -495,6 +540,7 @@ export function WaitlistForm({
               type="submit"
               className="w-full sm:w-auto"
               data-ll="wl-submit"
+              testId={testIds.submitButton}
               loading={status === 'loading'}
               loadingLabel={t('inflight')}
               disabled={submitDisabled}
@@ -504,7 +550,12 @@ export function WaitlistForm({
               {t('submit')}
             </Button>
             {serverHint ? (
-              <p className="text-body-sm text-feedback-error" role="alert" data-ll="wl-error">
+              <p
+                className="text-body-sm text-feedback-error"
+                role="alert"
+                data-ll="wl-error"
+                data-testid={testIds.serverError}
+              >
                 {serverHint}
               </p>
             ) : null}

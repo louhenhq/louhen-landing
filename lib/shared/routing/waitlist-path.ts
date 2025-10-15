@@ -1,13 +1,11 @@
-import type { SupportedLocale } from '@/next-intl.locales';
-
-export function waitlistLandingPath(locale: SupportedLocale): string {
+export function waitlistLandingPath(locale: string): string {
   return `/${locale}/waitlist`;
 }
 
-export function waitlistConfirmPath(locale: SupportedLocale): string {
+export function waitlistConfirmPath(locale: string): string {
   return `/${locale}/confirm`;
 }
 
-export function waitlistConfirmPendingPath(locale: SupportedLocale): string {
+export function waitlistConfirmPendingPath(locale: string): string {
   return `/${locale}/confirm-pending`;
 }

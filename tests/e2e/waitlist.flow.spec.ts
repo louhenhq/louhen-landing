@@ -7,7 +7,7 @@ function uniqueEmail(label: string) {
 }
 
 test.describe('Waitlist flows', () => {
-  test('happy path with pre-onboarding and already confirmed revisit @critical', async ({ page }) => {
+  test('happy path with pre-onboarding and already confirmed revisit', async ({ page }) => {
     const email = uniqueEmail('happy');
 
     const payload = await seedWaitlistUser(page.request, email);

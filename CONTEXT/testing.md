@@ -8,7 +8,7 @@ Testing follows the locked pyramid in [/CONTEXT/decision_log.md](decision_log.md
 | --- | --- | --- | --- |
 | Unit (`tests/unit/`) | Pure functions, hooks, server utilities (`lib/shared`, `lib/server`) | Vitest (JSDOM/Node) | Fast, deterministic, no network or timers. Snapshot only when meaningful. |
 | End-to-End (`tests/e2e/`) | Full user journeys: waitlist submit, method flow, header/nav, legal routes, status API | Playwright | Run against local server by default (`npx playwright test`). Remote, authenticated runs against preview happen via the `e2e:preview` GitHub Action leveraging the `PREVIEW_BYPASS_TOKEN` environment secret. |
-| Accessibility (`tests/axe/canonical.axe.ts`) | Axe-core audits for `/`, `/waitlist`, `/method` (default + secondary locale, desktop + mobile) | Playwright + `@axe-core/playwright` | Fail on serious/critical issues. Respect reduced-motion and theme toggles during scans. Remote coverage runs in the same preview workflow as E2E. |
+| Accessibility (`tests/axe/canonical.axe.ts`) | Axe-core audits for `/`, `/de-de/waitlist`, `/de-de/method` (desktop + mobile for default + secondary locale) | Playwright + `@axe-core/playwright` | Fail on serious/critical issues. Respect reduced-motion and theme toggles during scans. Remote coverage runs in the same preview workflow as E2E. |
 
 - Security headers coverage lives in `tests/e2e/security/headers.e2e.ts`; it enforces CSP nonce wiring, checks that HSTS `max-age` stays ≥ 31,536,000 seconds (with `includeSubDomains`/`preload` asserted only on the canonical production host), and ensures `camera=()` plus at least one of `interest-cohort=()` or `browsing-topics=()` is present. The spec always evaluates the **final** HTML response (after locale redirects and caching) because middleware headers are attached post-routing.
 
@@ -46,7 +46,7 @@ Testing follows the locked pyramid in [/CONTEXT/decision_log.md](decision_log.md
 ## SEO add-ons
 - `sitemap-http.e2e.ts` samples up to five URLs per locale sitemap (first, middle, last, plus newest additions when available). Override the sample via `SEO_SITEMAP_SAMPLE` if a hotfix needs tighter bounds.
 - HTTP expectations: prefer `200 OK`; allow `401`/`403` only when the preview environment legitimately enforces auth and the bypass header is unavailable (the test logs a warning annotation in that case).
-- OG image integrity: checks representative pages (`/method`, `/waitlist`, `/legal/privacy`) for live `og:image` / `twitter:image` assets returning `200`.
+- OG image integrity: checks representative pages (`/de-de/method`, `/de-de/waitlist`, `/de-de/legal/privacy`) for live `og:image` / `twitter:image` assets returning `200`.
 - `canonical-uniqueness.e2e.ts` asserts a single `<link rel="canonical">` per page, normalising hosts to lowercase and trimming trailing slashes before comparison.
 - Hreflang validation uses `hreflangMapFor(...)`; every supported locale plus `x-default` must match the canonical map even when the canonical URL is locale-invariant (e.g., `/waitlist`).
 

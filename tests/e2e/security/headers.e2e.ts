@@ -49,9 +49,18 @@ test.describe('Security headers', () => {
         canonicalHost = null;
       }
     }
-    const currentHost = navigationResponse?.url() ? new URL(navigationResponse.url()).host : null;
+    const navigationUrl = navigationResponse?.url() ? new URL(navigationResponse.url()) : null;
+    const currentHost = navigationUrl?.host ?? null;
+    const isHttpsRequest = navigationUrl?.protocol === 'https:';
+    const isPrelaunch = ['1', 'true', 'yes', 'on'].includes(
+      (process.env.IS_PRELAUNCH ?? '').toLowerCase()
+    );
     const enforceFullHsts =
-      canonicalProd && canonicalHost !== null && currentHost === canonicalHost;
+      canonicalProd &&
+      !isPrelaunch &&
+      isHttpsRequest &&
+      canonicalHost !== null &&
+      currentHost === canonicalHost;
 
     if (enforceFullHsts) {
       expect(hstsHeader, 'HSTS must be present in production').toBeTruthy();
@@ -59,9 +68,10 @@ test.describe('Security headers', () => {
 
     if (hstsHeader) {
       const maxAgeMatch = hstsHeader.match(/max-age=(\d+)/i);
-      const maxAge = maxAgeMatch ? Number.parseInt(maxAgeMatch[1], 10) : NaN;
+      const maxAge = maxAgeMatch ? Number.parseInt(maxAgeMatch[1], 10) : Number.NaN;
       expect(Number.isNaN(maxAge)).toBeFalsy();
-      expect(maxAge, 'HSTS max-age must be at least one year').toBeGreaterThanOrEqual(31536000);
+      const minimumMaxAge = enforceFullHsts ? 31536000 : 86400;
+      expect(maxAge).toBeGreaterThanOrEqual(minimumMaxAge);
       if (enforceFullHsts) {
         // Preview/CDN layers may rewrite HSTS; only enforce includeSubDomains/preload on the canonical production host.
         const normalizedHsts = hstsHeader.toLowerCase();

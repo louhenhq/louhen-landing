@@ -12,6 +12,7 @@ import {
   type AppLocale,
   DEFAULT_LOCALE,
 } from '@/lib/i18n/locales';
+import { legalPath } from '@lib/shared/routing/legal-path';
 
 type Props = {
   onboardingEnabled?: boolean;
@@ -34,14 +35,14 @@ export default function SiteHeader({ onboardingEnabled = false }: Props) {
         {/* Desktop nav */}
         <nav className="ml-auto hidden md:flex items-center gap-4">
           <Link
-            href={to('/privacy')}
+            href={legalPath(activeLocale, 'privacy')}
             prefetch={false}
             className="touch-target touch-padding inline-flex items-center justify-center text-label text-text hover:underline"
           >
             Privacy
           </Link>
           <Link
-            href={to('/terms')}
+            href={legalPath(activeLocale, 'terms')}
             prefetch={false}
             className="touch-target touch-padding inline-flex items-center justify-center text-label text-text hover:underline"
           >
@@ -91,14 +92,14 @@ export default function SiteHeader({ onboardingEnabled = false }: Props) {
       <div className="md:hidden border-t border-border">
         <nav className="px-4 py-3 flex flex-col gap-2">
           <Link
-            href={to('/privacy')}
+            href={legalPath(activeLocale, 'privacy')}
             prefetch={false}
             className="touch-target touch-padding inline-flex items-center justify-start text-label text-text underline"
           >
             Privacy
           </Link>
           <Link
-            href={to('/terms')}
+            href={legalPath(activeLocale, 'terms')}
             prefetch={false}
             className="touch-target touch-padding inline-flex items-center justify-start text-label text-text underline"
           >

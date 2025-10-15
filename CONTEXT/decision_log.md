@@ -29,6 +29,16 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
 
 ## History
 
+- **2025-10-11 — Method route locale-only**  
+  - Removed the prefixless `/method` alias; requests now 404 instead of redirecting.  
+  - Updated routing helpers, sitemap/SEO builders, Playwright suites, and documentation to reference `/{locale}/method` exclusively.  
+  - Added a CI guard (`npm run guard:prefixless`) that fails if new prefixless marketing pages are introduced.
+
+- **2025-10-11 — Legal shells locale-only**  
+  - Removed legacy `/privacy`, `/terms`, and `/imprint` pages; all legal/help content now lives under `/{locale}/legal/*` (or `/{locale}/imprint`).  
+  - Updated navigation, consent messaging, sitemap entries, and tests to use the locale-prefixed routes, and added @critical 404 assertions for the retired paths.  
+  - Added monitoring follow-up to flag any residual traffic to the removed paths so source updates can be coordinated promptly.  
+
 - **2025-10-09 — Feature flag & environment matrix blueprint (Slice 15)**  
   - Documented the flag catalog in `/CONTEXT/envs.md` with defaults/owners and clarified governance expectations.  
   - Updated architecture/testing/PR checklist guidance so future code reads flags via `lib/shared/flags.ts` helpers and CI covers both states before rollout.
@@ -185,7 +195,12 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
 
 - **2025-10-10 — Default locale switch to de-de (Owner: Localization & SEO)**  
   - Keep → Locale routing stays under `app/(site)/[locale]/…`, middleware negotiates via cookies/`Accept-Language`, and `buildPathForLocale` continues to handle prefixed navigation.  
-  - Adjust → `defaultLocale` now resolves to `de-de`; env defaults, Playwright helpers, sitemap generation, and SEO builders emit German canonicals (`/method`, `/legal/*`) with hreflang/x-default pointing to `de-de`. Additional markets (`fr-fr`, `nl-nl`, `it-it`) ship as alternates with English fallback until localized copy lands.  
+  - Adjust → `defaultLocale` now resolves to `de-de`; env defaults, Playwright helpers, sitemap generation, and SEO builders emit German canonicals (`/de-de/method`, `/de-de/legal/*`) with hreflang/x-default pointing to `de-de`. Additional markets (`fr-fr`, `nl-nl`, `it-it`) ship as alternates with English fallback until localized copy lands.  
   - Notes → English for Germany (`en-de`) remains available for support/QA. Update localized content before removing `[[TODO-translate]]` markers and ensure campaign links honour the expanded locale list.
+
+- **2025-10-11 — E2E Waitlist hCaptcha Bypass (Owner: QA & Infrastructure)**  
+  - Keep → Production/preview builds continue to render the live hCaptcha widget and require a real token before submitting the waitlist form.  
+  - Adjust → CI (and optional local test runs) export `HOST=127.0.0.1`, `PORT=4311`, `BASE_URL=http://127.0.0.1:4311`, `DEFAULT_LOCALE=de-de`, `CSP_REPORT_ONLY=0`, `ANALYTICS_ENABLED=0`, `NEXT_PUBLIC_TEST_MODE=1`, `TEST_MODE=1`, and `PLAYWRIGHT_BROWSERS_PATH=0`. When these variables are set, the form seeds a deterministic `e2e-mocked-token`, skips rendering `<HCaptcha>`, and Playwright waits on the outbound `POST` request via `WAITLIST_API_PATTERN` before asserting success. GitHub Actions now waits for the server, verifies the bypass via `curl`, uploads HTML/traces, and tears down the server at the end of the job.  
+  - Notes → Do **not** set the test-mode variables in Vercel environments. Rollback: remove `NEXT_PUBLIC_TEST_MODE`/`TEST_MODE` from CI env to restore the previous behaviour (tests will require the live captcha again).
 
 ---

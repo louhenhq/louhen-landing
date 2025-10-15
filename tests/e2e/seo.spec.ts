@@ -104,7 +104,7 @@ test.describe('SEO metadata', () => {
     const canonical = page.locator('link[rel="canonical"]');
     const canonicalHref = await canonical.getAttribute('href');
     const canonicalParts = getCanonicalParts(canonicalHref);
-    expect(canonicalParts.path).toBe('/method');
+    expect(canonicalParts.path).toBe('/de-de/method');
     expect(allowedHosts).toContain(canonicalParts.host);
 
     const jsonLdContent = await page
@@ -115,11 +115,8 @@ test.describe('SEO metadata', () => {
     expect(jsonLdContent.some((content) => content.includes('"inLanguage":"de-DE"'))).toBeTruthy();
   });
 
-  test('legacy method path preserves query params after redirect', async ({ page }) => {
-    await page.goto('/en-de/method?utm_source=test&utm_medium=playwright&foo=bar');
-    await expect(page).toHaveURL(/\/en-de\/method\/?\?(.+&)?utm_source=test(&|$)/);
-    const currentUrl = new URL(page.url());
-    expect(currentUrl.searchParams.get('foo')).toBe('bar');
-    expect(currentUrl.searchParams.get('utm_medium')).toBe('playwright');
+  test('prefixless method path responds 404', async ({ page }) => {
+    const response = await page.goto('/method', { waitUntil: 'domcontentloaded' });
+    expect(response?.status()).toBe(404);
   });
 });

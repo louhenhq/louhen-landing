@@ -14,10 +14,7 @@ function localeUrl(locale, path) {
   if (normalizedPath === '/') {
     return locale === defaultLocale ? `${BASE}/` : `${BASE}/${locale}/`;
   }
-  if (normalizedPath.startsWith('/waitlist')) {
-    return `${BASE}/${locale}${normalizedPath}`;
-  }
-  return locale === defaultLocale ? `${BASE}${normalizedPath}` : `${BASE}/${locale}${normalizedPath}`;
+  return `${BASE}/${locale}${normalizedPath}`;
 }
 
 const secondaryLocale = locales.find((locale) => locale !== defaultLocale) || defaultLocale;

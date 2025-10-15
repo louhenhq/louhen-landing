@@ -5,7 +5,7 @@ import { buildMethodTechArticleSchema } from '@lib/shared/method/article-schema'
 type MethodArticleInput = Parameters<typeof buildMethodTechArticleSchema>[0];
 
 const baseInput: MethodArticleInput = {
-  url: 'https://example.com/method',
+  url: 'https://example.com/de-de/method',
   headline: 'Fit intelligence that keeps up with growing feet.',
   description: 'Discover how Louhen blends kid-safe scanning with verified fit science.',
   locale: 'de-de',
@@ -27,7 +27,7 @@ describe('buildMethodTechArticleSchema', () => {
     expect(schema.inLanguage).toBe('de-DE');
     expect(schema.url).toBe(baseInput.url);
     expect(schema.mainEntityOfPage).toBe(baseInput.url);
-    expect(new URL(schema.url).pathname).toBe('/method');
+    expect(new URL(schema.url).pathname).toBe('/de-de/method');
     expect(schema.articleSection).toContain('Kid-safe scanning');
     expect(schema.keywords).toContain('Adaptive personalization');
     expect(schema.publisher).toMatchObject({

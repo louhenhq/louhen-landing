@@ -59,7 +59,7 @@ test.describe('API /api/waitlist', () => {
     expect(body).toMatch(/email/i);
   });
 
-  test('200/201 on valid payload when short-circuit enabled @critical', async ({ request }) => {
+  test('200/201 on valid payload when short-circuit enabled', async ({ request }) => {
     test.skip(!SHORT_CIRCUIT_ENABLED, 'Requires TEST_E2E_SHORTCIRCUIT to bypass external services.');
 
     const response = await request.post('/api/waitlist', {

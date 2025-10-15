@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { NextIntlClientProvider } from 'next-intl';
+import { unstable_setRequestLocale } from 'next-intl/server';
 import { ConsentProvider } from '@/components/ConsentProvider';
 import { loadMessages } from '@/lib/intl/loadMessages';
 import { type SupportedLocale } from '@/next-intl.locales';
@@ -27,6 +28,7 @@ export default async function LocaleLayout({ children, params }: Props) {
     notFound();
   }
   const locale = rawLocale as SupportedLocale;
+  unstable_setRequestLocale(locale);
   const messages = await loadMessages(locale);
   const requestHeaders = await headers();
   const consentState = parseConsentFromCookie(requestHeaders.get('cookie'));

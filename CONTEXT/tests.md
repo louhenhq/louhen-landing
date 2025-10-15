@@ -37,14 +37,15 @@ These principles sit alongside the [Selector Policy](#selector-policy) and are n
 4. **Flake control** — Ban arbitrary `waitForTimeout`. Gate on `expect(...).toBeVisible()` or the shared `lh-page-ready` sentinel. Mark intentional long-runners with `test.slow()`. Project-level retries stay at 0; enabling a transient retry requires an open issue and removal plan. Always keep traces/videos/screenshots on failure.
 5. **Accessibility (WCAG 2.2 AA)** — Automate axe scans for home, waitlist, and method routes. E2E specs must assert roles, names, focus traps, and visible focus rings for dialogs, navigation, and controls. Block merges on critical axe violations.
 6. **Internationalization** — Exercise each route in the default locale (`de-de`) and at least one non-default locale. Never assert localized marketing copy by literal text—use roles, labels, or `data-testid`. Verify `<html lang>` and `hreflang`/canonical wiring inside metadata specs.
-7. **SEO & metadata** — Assert title, description, canonical, robots (with prelaunch `noindex`), OG/Twitter tags, and JSON-LD presence using deterministic ids such as `lh-jsonld-organization`. Ensure no staging or preview URLs leak into structured data.
-8. **Performance budgets** — Lighthouse smoke checks guard `/`, `/waitlist`, and `/method` against the budgets in [/CONTEXT/performance.md](performance.md). Deviations require a temporary waiver label plus a `/CONTEXT/decision_log.md` entry.
-9. **Security headers & CSP** — E2E must check HSTS, Referrer-Policy, X-Content-Type-Options, Permissions-Policy, X-Frame-Options, COOP/CORP, and CSP nonce reuse. Fail if inline scripts lack nonces or if report-only leaks into production.
-10. **Analytics & consent** — Assert analytics bootstrap occurs only after consent is granted and that no third-party trackers load pre-consent. Email unit tests (where applicable) must cover required headers such as `List-Unsubscribe`.
-11. **Network & mocking policy** — Unit/integration suites mock all network IO. Playwright is restricted to the local app, `data:`, and `blob:` URLs; any new origin must be documented and allowed explicitly.
-12. **Snapshot discipline** — Limit snapshots to stable, semantic content (design tokens, small HTML fragments). Avoid large DOM or marketing copy snapshots. Visual diffs remain opt-in per route and require explicit reviewer sign-off.
-13. **Parallelism & isolation** — Specs must be parallel-safe: no shared ports, temporary files, or non-deterministic globals. Dev-protection headers are injected via Playwright `extraHTTPHeaders`; do not require manual toggles inside tests.
-14. **Failure observability** — On failure, CI must upload traces, videos, screenshots, console output, network logs, and the security header dump so selectors and regressions are diagnosable without rerunning.
+7. **Locale-only routing** — Navigate through locale-prefixed URLs (`/${locale}/…`) for marketing, legal, and help pages. Prefixless shells (except `/`) must return 404; the `guard:prefixless` CI check blocks new prefixless routes.
+8. **SEO & metadata** — Assert title, description, canonical, robots (with prelaunch `noindex`), OG/Twitter tags, and JSON-LD presence using deterministic ids such as `lh-jsonld-organization`. Ensure no staging or preview URLs leak into structured data.
+9. **Performance budgets** — Lighthouse smoke checks guard `/`, `/de-de/waitlist`, and `/de-de/method` against the budgets in [/CONTEXT/performance.md](performance.md). Deviations require a temporary waiver label plus a `/CONTEXT/decision_log.md` entry.
+10. **Security headers & CSP** — E2E must check HSTS, Referrer-Policy, X-Content-Type-Options, Permissions-Policy, X-Frame-Options, COOP/CORP, and CSP nonce reuse. Fail if inline scripts lack nonces or if report-only leaks into production.
+11. **Analytics & consent** — Assert analytics bootstrap occurs only after consent is granted and that no third-party trackers load pre-consent. Email unit tests (where applicable) must cover required headers such as `List-Unsubscribe`.
+12. **Network & mocking policy** — Unit/integration suites mock all network IO. Playwright is restricted to the local app, `data:`, and `blob:` URLs; any new origin must be documented and allowed explicitly.
+13. **Snapshot discipline** — Limit snapshots to stable, semantic content (design tokens, small HTML fragments). Avoid large DOM or marketing copy snapshots. Visual diffs remain opt-in per route and require explicit reviewer sign-off.
+14. **Parallelism & isolation** — Specs must be parallel-safe: no shared ports, temporary files, or non-deterministic globals. Dev-protection headers are injected via Playwright `extraHTTPHeaders`; do not require manual toggles inside tests.
+15. **Failure observability** — On failure, CI must upload traces, videos, screenshots, console output, network logs, and the security header dump so selectors and regressions are diagnosable without rerunning.
 
 ## Execution Environment
 - Playwright globally sets `testIdAttribute="data-testid"`; shared primitives expose deterministic ids so selectors never fall back to CSS.
@@ -118,6 +119,7 @@ These principles sit alongside the [Selector Policy](#selector-policy) and are n
   2. Fall back to `getByTestId` with `data-testid`.  
   3. Never couple specs to CSS selectors or marketing copy that can shift between locales.
 - **When to add `data-testid`:** non-semantic wrappers or icons, locale-sensitive headlines, universal page-ready sentinels, JSON-LD/CSP/SEO assertions, analytics beacons, and any control whose text varies across experiments.
+- **Selector map:** `tests/e2e/_utils/selectors.ts` is the single source of truth for Playwright `data-testid` values. Import `testIds` (and `byTestId` when a raw selector string is needed) instead of hand-typing attributes in specs.
 - **Naming convention:** `data-testid="lh-{area}-{component}-{part}"` (kebab case). Examples: `lh-nav-lang-switcher`, `lh-hero-title`, `lh-cta-join-waitlist`, `lh-jsonld-organization`, `lh-page-ready`.
 - **Writing tests:** always reach interactive UI via `getByRole` when the accessible name is stable; add parallel `data-testid`s to critical flows (waitlist, login, checkout) so specs stay resilient to copy tweaks; assert localized content through test ids instead of literal text; replace manual timeouts with locator expectations or by waiting on the shared page-ready sentinel.
 
@@ -131,11 +133,12 @@ These principles sit alongside the [Selector Policy](#selector-policy) and are n
 ### Playwright end-to-end
 - Location: `tests/e2e/**`; configuration in `playwright.config.ts` exposes `desktop-chromium` (default) and `mobile-chromium` (runs specs tagged `@mobile`, skips `@desktop-only`).
 - Commands:
-  - `npm run test:e2e:smoke` / `npm run test:e2e:critical` - PR parity.
+  - `npm run test:e2e:smoke` / `npm run test:e2e:critical` - PR parity (`@critical` runs the five-case gate only, with mocks and list reporter).
   - `npm run test:e2e:extended` - nightly/full regression.
   - `npm run e2e:local` - local debug with extra logging.
   - `npm run qa:e2e` / `npm run qa` - orchestration commands used in CI.
 - Key suites:
+  - Critical gate (`tests/e2e/critical/critical.e2e.ts`) - verifies home nav, mocked waitlist submit, default-locale method metadata at `/de-de/method`, confirms `/method`, `/privacy`, `/terms`, and `/imprint` return 404, exercises network policy, and runs a nav/main axe smoke via the shared selector map. Single-worker, retry=1 for determinism.
   - Analytics sentinel (`tests/e2e/landing.spec.ts`) - canonical example enforcing consent gating and tracked CTA payloads.
   - SEO metadata (`tests/e2e/seo/*.e2e.ts`) - covers Open Graph, canonical uniqueness, breadcrumbs.
   - Waitlist (`tests/e2e/waitlist/*.e2e.ts`) - form UX + API contract.
@@ -179,3 +182,8 @@ These principles sit alongside the [Selector Policy](#selector-policy) and are n
 - Axe helper: `tests/fixtures/axe.ts`.
 - Playwright fixture: `tests/fixtures/playwright.ts`.
 - Preview workflow mirror: `.github/workflows/e2e-preview.yml` (staging smoke matrix).
+
+### Test Mode (Playwright / CI)
+- CI and deterministic local runs export the following variables: `HOST=127.0.0.1`, `PORT=4311`, `BASE_URL=http://127.0.0.1:4311`, `DEFAULT_LOCALE=de-de`, `CSP_REPORT_ONLY=0`, `ANALYTICS_ENABLED=0`, `NEXT_PUBLIC_TEST_MODE=1`, `TEST_MODE=1`, `PLAYWRIGHT_BROWSERS_PATH=0`.
+- When `TEST_MODE===1`, the waitlist form seeds `hcaptchaToken` with `e2e-mocked-token` and hides the `<HCaptcha>` widget so Playwright never calls the real service. Production/preview builds must **not** set these variables.
+- The @critical waitlist spec (`tests/e2e/critical/critical.e2e.ts`) registers a context-level mock using `WAITLIST_API_PATTERN`, pre-grants consent via cookie, and waits for the outbound `POST` request (instead of the response) before asserting the success UI. This keeps the test resilient without altering the live behaviour.

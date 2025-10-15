@@ -1,5 +1,6 @@
 import { expect, test } from '@tests/fixtures/playwright';
 import { runAxe } from '@tests/fixtures/axe';
+import { testIds } from '@tests/e2e/_utils/selectors';
 import { getDefaultLocale, getTestLocales, localeUrl, setLocaleCookie } from '@tests/e2e/_utils/url';
 import type { Page } from '@playwright/test';
 
@@ -30,7 +31,7 @@ const ROUTES: RouteConfig[] = [
     path: '/waitlist',
     ready: async (page: Page) => {
       await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
-      await expect(page.locator('[data-ll="wl-form"]').first()).toBeVisible();
+      await expect(page.getByTestId(testIds.waitlist.form)).toBeVisible();
     },
   },
   {

@@ -22,7 +22,9 @@ Locked decisions: canonical host `https://www.louhen.app`, preview `https://stag
 - Supported locales: `en`, `de`, `fr`, `nl`, `it`, `en-de`, `de-de`, `fr-fr`, `nl-nl`, `it-it` (see [/CONTEXT/i18n.md](i18n.md)). All canonical pages expose a full hreflang set, including `x-default` mapping to the default locale (`de-de`).
 - `/sitemap.xml` now returns a sitemap index. It links to `/sitemaps/sitemap-<locale>.xml` files that list only the canonical URLs for that locale.
 - Shared metadata builders (`lib/seo/*Metadata.ts`) and page-level `generateMetadata()` helpers must call `hreflangMapFor` with the exact canonical path so alternates stay aligned (e.g., waitlist pages call `hreflangMapFor((locale) => \`/${locale}/waitlist\`)`).
-- Default-locale routes (without a locale prefix) must call `unstable_setRequestLocale(defaultLocale)` so rendered metadata (canonical + hreflang) stays in sync with the locale-aware builders.
+- Default-locale routes (without a locale prefix) must call `unstable_setRequestLocale(defaultLocale)` so rendered metadata (canonical + hreflang) stays in sync with the locale-aware builders. Today this applies to the homepage (`/`) and legacy utility shells only.
+- Method is locale-only: canonical, `hreflang`, and sitemap entries always use `https://www.louhen.app/{locale}/method`, and `/method` is expected to return 404 without redirect.
+- Legal/help pages are locale-only: `/privacy`, `/terms`, `/imprint`, etc., return 404 while `https://www.louhen.app/{locale}/legal/<slug>` (or `/ {locale}/imprint`) serve the canonical content.
 
 ## Legal pages (Terms & Privacy)
 - Post-launch, keep canonical URLs aligned with `routing.md` (`https://www.louhen.app/{locale}/legal/<slug>`).
@@ -33,8 +35,9 @@ Locked decisions: canonical host `https://www.louhen.app`, preview `https://stag
 - `lib/shared/seo/method-metadata.ts#buildMethodMetadata` and `lib/seo/legalMetadata.ts#buildLegalMetadata` generate the complete `Metadata` object for Method and Legal pages respectively.
 - Both helpers resolve titles/descriptions from the relevant translation namespace, produce absolute canonical URLs, and emit a full `hreflang` map (including `x-default`) for every locale listed in `next-intl.locales.ts`.
 - `isPrelaunch()` drives the robots policy inside each builder, keeping the pre-launch `noindex,nofollow` directive in sync with the global flag.
+- Enforce a single `<meta name="description">` per document. Page-level `generateMetadata()` functions own the description content; layouts must not inject generic descriptions for marketing routes.
 - Consumers must pass the active locale and (for legal pages) the `terms`/`privacy` slug; page-level `generateMetadata()` implementations should delegate directly to these builders.
-- Default-locale routes (e.g., `/method`) must call `unstable_setRequestLocale(defaultLocale)` before rendering so next-intl receives locale context identical to `/${defaultLocale}/…` routes and does not emit `MISSING_MESSAGE` errors.
+- Prefixless pages must call `unstable_setRequestLocale(defaultLocale)` before rendering so next-intl receives locale context identical to `/${defaultLocale}/…` routes and does not emit `MISSING_MESSAGE` errors.
 - Locale landing (`/[locale]`) and waitlist pages also rely on `makeCanonical` + `hreflangMapFor`; any new marketing surface exposed in the header must do the same before QA adds links.
 - Waitlist metadata builders rely on locale-aware helpers (`waitlistLandingPath(locale)`, `waitlistConfirmPath(locale)`) so canonical and alternate entries always resolve to `/{locale}/waitlist` (and related subroutes) for every market.
 - Waitlist confirmation surfaces (`/[locale]/confirm`, `/[locale]/confirm-pending`, `/[locale]/imprint`) emit locale-prefixed canonical and `hreflang` maps via the same helpers; no public endpoint renders without the locale segment.

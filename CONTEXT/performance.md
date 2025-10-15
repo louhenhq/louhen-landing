@@ -9,7 +9,7 @@ The marketing site must stay fast, stable, and accessible across locales and env
 | `/` (default locale) | Primary marketing & waitlist funnel | 90 / 95 / 95 / 95 | Run on every PR/merge. |
 | `/[locale]/` | Locale-specific hero & consent copy | 90 / 95 / 95 / 95 | Rotate locale under test weekly. |
 | `/[locale]/legal/privacy` | High-content page, hreflang critical | 85 / 95 / 95 / 95 | Ensures structured data & noindex alignment. |
-| `/method` (default locale) | Rich media and JSON-LD heavy | 88 / 95 / 95 / 95 | Watch CLS when campaigns change. |
+| `/de-de/method` | Rich media and JSON-LD heavy | 88 / 95 / 95 / 95 | Watch CLS when campaigns change. |
 | `/status` | Auth-gated diagnostics | n/a / 95 / 95 / 95 | Performance uncapped; focus on security headers. |
 
 Budgets tighten post-launch; update this table as new routes ship. When a page is below target, treat the regression as a release blocker.

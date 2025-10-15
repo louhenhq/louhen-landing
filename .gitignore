@@ -24,6 +24,7 @@ artifacts/
 
 # misc
 .DS_Store
+.eslintcache
 *.pem
 
 # debug

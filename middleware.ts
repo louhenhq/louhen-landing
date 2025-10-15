@@ -13,6 +13,9 @@ import { extractLocaleFromCookies } from '@/lib/intl/getLocale';
 import { getFlags, isProduction } from '@/lib/shared/flags';
 import { COOKIE_PATH, COOKIE_SAME_SITE, LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE } from '@/lib/theme/constants';
 
+const COOKIE_SAME_SITE_RESPONSE = COOKIE_SAME_SITE.toLowerCase() as 'lax' | 'strict' | 'none';
+const ROUTE_LOCALE_HEADER = 'x-route-locale';
+
 const intlMiddleware = createIntlMiddleware({
   ...intlRoutingConfig,
   localePrefix: 'as-needed',
@@ -233,12 +236,12 @@ function buildRedirectUrl(request: NextRequest, locale: AppLocale) {
 function applyLocaleCookies(response: NextResponse, locale: AppLocale) {
   response.cookies.set(LOCALE_COOKIE, locale, {
     path: COOKIE_PATH,
-    sameSite: COOKIE_SAME_SITE,
+    sameSite: COOKIE_SAME_SITE_RESPONSE,
     maxAge: LOCALE_COOKIE_MAX_AGE,
   });
   response.cookies.set(NEXT_LOCALE_COOKIE, locale, {
     path: COOKIE_PATH,
-    sameSite: COOKIE_SAME_SITE,
+    sameSite: COOKIE_SAME_SITE_RESPONSE,
     maxAge: LOCALE_COOKIE_MAX_AGE,
   });
 }
@@ -287,6 +290,7 @@ function applySecurityHeaders(request: NextRequest, response: NextResponse, nonc
 export function middleware(request: NextRequest) {
   const nonce = generateNonce();
   request.headers.set('x-csp-nonce', nonce);
+  request.headers.delete(ROUTE_LOCALE_HEADER);
 
   const hostname = getHostname(request);
   const isLocalhost = isLoopbackHost(hostname);
@@ -317,6 +321,7 @@ export function middleware(request: NextRequest) {
     const matchedLocale = localizedMatch[1] ?? '';
     const normalizedLocale = matchedLocale.toLowerCase();
     if (SUPPORTED_LOCALE_VALUES.has(normalizedLocale)) {
+      request.headers.set(ROUTE_LOCALE_HEADER, normalizedLocale);
       if (matchedLocale !== normalizedLocale) {
         const normalizedUrl = cloneRequestUrl(request);
         const remainder = pathname.slice(localizedMatch[0].length);
@@ -324,7 +329,7 @@ export function middleware(request: NextRequest) {
         normalizedUrl.pathname = `/${normalizedLocale}${suffix}`;
         normalizeLoopbackUrl(normalizedUrl);
         const redirectResponse = NextResponse.redirect(normalizedUrl, 308);
-        applyLocaleCookies(redirectResponse, normalizedLocale as AppLocale);
+        redirectResponse.headers.set(ROUTE_LOCALE_HEADER, normalizedLocale);
         if (shouldAllowIndex) {
           redirectResponse.headers.set('x-robots-tag', 'index, follow');
         }
@@ -345,7 +350,7 @@ export function middleware(request: NextRequest) {
           localizedResponse.headers.set('x-middleware-rewrite', adjusted);
         }
       }
-      applyLocaleCookies(localizedResponse, normalizedLocale as AppLocale);
+      localizedResponse.headers.set(ROUTE_LOCALE_HEADER, normalizedLocale);
       if (shouldAllowIndex) {
         localizedResponse.headers.set('x-robots-tag', 'index, follow');
       }
@@ -358,7 +363,7 @@ export function middleware(request: NextRequest) {
     const shortLocale = shortMatch[1]?.toLowerCase() ?? '';
     const canonical = SHORT_TO_FULL[shortLocale];
     if (canonical) {
-      const url = cloneRequestUrl(request);
+      const url = new URL(request.url);
       const remainder = pathname.slice(shortMatch[0].length) || '/';
       url.pathname = `/${canonical}${remainder.startsWith('/') ? remainder : `/${remainder}`}`;
       normalizeLoopbackUrl(url);
@@ -370,10 +375,15 @@ export function middleware(request: NextRequest) {
     }
   }
 
+  if (pathname !== '/') {
+    const nextResponse = NextResponse.next();
+    return applySecurityHeaders(request, nextResponse, nonce);
+  }
+
   const targetLocale = resolvePreferredLocale(request, { forceDefault: forceDefaultLocale });
   const redirectUrl = buildRedirectUrl(request, targetLocale);
 
-  if (pathname === '/' && hasLocaleRedirectCookie) {
+  if (hasLocaleRedirectCookie) {
     const rewriteUrl = cloneRequestUrl(request);
     rewriteUrl.pathname = redirectUrl.pathname;
     normalizeLoopbackUrl(rewriteUrl);
@@ -390,18 +400,16 @@ export function middleware(request: NextRequest) {
   }
 
   const response = NextResponse.redirect(redirectUrl, 308);
-  if (pathname === '/') {
-    response.cookies.set(LOCALE_REDIRECT_COOKIE, '1', {
-      path: '/',
-      maxAge: LOCALE_REDIRECT_MAX_AGE,
-      sameSite: COOKIE_SAME_SITE,
-    });
-  }
+  response.cookies.set(LOCALE_REDIRECT_COOKIE, '1', {
+    path: '/',
+    maxAge: LOCALE_REDIRECT_MAX_AGE,
+    sameSite: COOKIE_SAME_SITE_RESPONSE,
+  });
   applyLocaleCookies(response, targetLocale);
   if (shouldAllowIndex) {
     response.headers.set('x-robots-tag', 'index, follow');
   }
-  return response;
+  return applySecurityHeaders(request, response, nonce);
 }
 
 export const config = {

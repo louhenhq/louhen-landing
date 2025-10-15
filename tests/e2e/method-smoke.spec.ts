@@ -39,7 +39,7 @@ test.describe('/en-de/method page smoke test', () => {
     await expect(page.getByRole('region', { name: /See the science/i })).toBeVisible();
 
     await Promise.all([
-      page.waitForURL(/\/en-de\/privacy\/?$/),
+      page.waitForURL(/\/en-de\/legal\/privacy\/?$/),
       page.getByRole('link', { name: /privacy policy/i }).click(),
     ]);
 
@@ -65,9 +65,9 @@ test.describe('/de-de/method page smoke test', () => {
     await page.goBack();
     await page.waitForURL(/\/de-de\/method\/?$/);
 
-    const privacyLink = page.locator('a[href*="/privacy"]').first();
+    const privacyLink = page.locator('a[href*="/legal/privacy"]').first();
     await Promise.all([
-      page.waitForURL(/\/de-de\/privacy\/?$/),
+      page.waitForURL(/\/de-de\/legal\/privacy\/?$/),
       privacyLink.click(),
     ]);
   });

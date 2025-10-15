@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState, useId, type KeyboardEvent } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { cn, layout, text } from '@/app/(site)/_lib/ui';
+import { legalPath } from '@lib/shared/routing/legal-path';
 import { Button, Card } from '@/components/ui';
 
 type Pillar = {
@@ -82,7 +83,7 @@ export default function MethodPillars() {
     privacyNote: t.rich('engine.scienceDisclosure.privacyNote', {
       privacyLink: (chunks) => (
         <Link
-          href={`/${locale}/privacy`}
+          href={legalPath(locale, 'privacy')}
           className="font-semibold text-brand-primary underline-offset-2 hover:underline focus-visible:underline"
         >
           {chunks}

@@ -2,16 +2,19 @@ import { test as base } from '@playwright/test';
 import type { APIRequestContext, BrowserContext, Page, ConsoleMessage, Request } from '@playwright/test';
 import type { FeatureFlags } from '@/lib/shared/flags';
 import { setLocaleCookie } from '@tests/e2e/_utils/url';
+import { ALLOW_BLOCKED_REQUESTS_ANNOTATION } from '@tests/e2e/_utils/annotations';
 
 const INTERCEPT_SYMBOL = Symbol('louhen-playwright-intercept');
 const CONSOLE_LOG_KEY = Symbol('louhen-playwright-console');
 const NETWORK_LOG_KEY = Symbol('louhen-playwright-network');
 const BLOCKED_REQUESTS_KEY = Symbol('louhen-playwright-blocked');
 const CONTEXT_ROUTE_KEY = Symbol('louhen-playwright-context-route');
+const ALLOW_BLOCKED_REQUESTS_KEY = Symbol('louhen-playwright-allow-blocked-requests');
 
 type ContextMarker = {
   [BLOCKED_REQUESTS_KEY]?: string[];
   [CONTEXT_ROUTE_KEY]?: boolean;
+  [ALLOW_BLOCKED_REQUESTS_KEY]?: boolean;
 };
 
 /**
@@ -62,6 +65,16 @@ function getContextBlockedRequests(context: BrowserContext): string[] {
   return marker[BLOCKED_REQUESTS_KEY]!;
 }
 
+function isBlockedRequestsAllowed(context: BrowserContext): boolean {
+  const marker = context as unknown as ContextMarker;
+  return Boolean(marker[ALLOW_BLOCKED_REQUESTS_KEY]);
+}
+
+function setBlockedRequestsAllowed(context: BrowserContext, allowed: boolean): void {
+  const marker = context as unknown as ContextMarker;
+  marker[ALLOW_BLOCKED_REQUESTS_KEY] = allowed;
+}
+
 async function ensureContextNetworkGuard(context: BrowserContext): Promise<void> {
   const marker = context as unknown as ContextMarker;
   if (marker[CONTEXT_ROUTE_KEY]) {
@@ -83,6 +96,9 @@ async function ensureContextNetworkGuard(context: BrowserContext): Promise<void>
     await route.abort();
   });
   marker[CONTEXT_ROUTE_KEY] = true;
+  if (typeof marker[ALLOW_BLOCKED_REQUESTS_KEY] !== 'boolean') {
+    marker[ALLOW_BLOCKED_REQUESTS_KEY] = false;
+  }
 }
 
 const analyticsResponse = {
@@ -388,11 +404,15 @@ export const test = base.extend<{
   flags: async ({ request }, provide) => {
     await provideFlagFixture(request, provide);
   },
-  networkPolicy: async ({ page }, use) => {
+  networkPolicy: async ({ page }, use, testInfo) => {
     const context = page.context();
     await ensureContextNetworkGuard(context);
     const blocked = getContextBlockedRequests(context);
     blocked.length = 0;
+    const allowForTest = testInfo.annotations.some(
+      (annotation) => annotation.type === ALLOW_BLOCKED_REQUESTS_ANNOTATION
+    );
+    setBlockedRequestsAllowed(context, allowForTest);
     await use({
       getBlockedRequests: () => [...blocked],
       clearBlockedRequests: () => {
@@ -461,17 +481,27 @@ test.afterEach(async ({ page }, testInfo) => {
     await attachLogs();
   };
 
-  const blocked = getContextBlockedRequests(page.context());
+  const context = page.context();
+  const blocked = getContextBlockedRequests(context);
+  const allowBlocked = testInfo.annotations.some(
+    (annotation) => annotation.type === ALLOW_BLOCKED_REQUESTS_ANNOTATION
+  );
+  setBlockedRequestsAllowed(context, false);
+
   if (blocked.length > 0) {
-    await captureDiagnostics();
-    await testInfo.attach('blocked-requests.json', {
-      body: JSON.stringify(blocked, null, 2),
-      contentType: 'application/json',
-    });
-    blocked.length = 0;
-    delete marker[CONSOLE_LOG_KEY];
-    delete marker[NETWORK_LOG_KEY];
-    throw new Error('Blocked external network requests detected. See blocked-requests.json attachment for details.');
+    if (allowBlocked) {
+      blocked.length = 0;
+    } else {
+      await captureDiagnostics();
+      await testInfo.attach('blocked-requests.json', {
+        body: JSON.stringify(blocked, null, 2),
+        contentType: 'application/json',
+      });
+      blocked.length = 0;
+      delete marker[CONSOLE_LOG_KEY];
+      delete marker[NETWORK_LOG_KEY];
+      throw new Error('Blocked external network requests detected. See blocked-requests.json attachment for details.');
+    }
   }
 
   if (testInfo.status === testInfo.expectedStatus) {

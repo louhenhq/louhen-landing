@@ -8,10 +8,10 @@ import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/SeoJsonLd'
 import { PageReadySentinel } from '@/components/PageReadySentinel'
 import { SITE_NAME } from '@/constants/site'
 import { NonceProvider } from '@/lib/csp/nonce-context'
-import { CONTRAST_COOKIE_NAME, THEME_COOKIE_NAME } from '@/lib/theme/constants'
+import { CONTRAST_COOKIE_NAME, LOCALE_COOKIE, THEME_COOKIE_NAME } from '@/lib/theme/constants'
 import tokens from '@louhen/design-tokens/build/web/tokens.json' assert { type: 'json' }
 import { THEME_INIT_SNIPPET } from '@/lib/theme/init-snippet'
-import { DEFAULT_LOCALE } from '@/lib/i18n/locales'
+import { DEFAULT_LOCALE, normalizeLocale } from '@/lib/i18n/locales'
 import { buildAlternateLanguageMap } from '@/lib/i18n/metadata'
 import { getOgImageEntry } from '@lib/shared/og/builder'
 
@@ -54,6 +54,7 @@ const ogImage = getOgImageEntry({
   description: defaultDescription,
 })
 const themeScript = THEME_INIT_SNIPPET
+const ROUTE_LOCALE_HEADER = 'x-route-locale'
 
 function getCookieValue(header: string | null | undefined, name: string): string | null {
   if (!header) return null;
@@ -67,7 +68,6 @@ export const metadata: Metadata = {
     default: defaultTitle,
     template: '%s — Louhen',
   },
-  description: defaultDescription,
   applicationName: SITE_NAME,
   alternates: {
     canonical: '/',
@@ -83,7 +83,6 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     title: defaultTitle,
-    description: defaultDescription,
     url: '/',
     siteName: SITE_NAME,
     images: [ogImage],
@@ -93,7 +92,6 @@ export const metadata: Metadata = {
     site: '@louhenhq',
     creator: '@louhenhq',
     title: defaultTitle,
-    description: defaultDescription,
     images: [ogImage.url],
   },
 }
@@ -107,10 +105,14 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const consentHeaders = await headers();
+  const routeLocale = consentHeaders.get(ROUTE_LOCALE_HEADER);
   const nonce = consentHeaders.get('x-csp-nonce') ?? undefined;
   const cookieHeader = consentHeaders.get('cookie');
   const cookieTheme = getCookieValue(cookieHeader, THEME_COOKIE_NAME);
   const cookieContrast = getCookieValue(cookieHeader, CONTRAST_COOKIE_NAME);
+  const cookieLocaleRaw = getCookieValue(cookieHeader, LOCALE_COOKIE);
+  const cookieLocale = cookieLocaleRaw ? normalizeLocale(cookieLocaleRaw) : null;
+  const htmlLang = routeLocale && routeLocale.length > 0 ? routeLocale : cookieLocale ?? DEFAULT_LOCALE.value;
   const initialThemeAttr = cookieTheme === 'light' || cookieTheme === 'dark' ? cookieTheme : undefined;
   const initialContrastAttr = cookieContrast === 'more' ? 'more' : undefined;
   const shouldNoIndex = typeof process.env.VERCEL_ENV === 'string' && process.env.VERCEL_ENV !== 'production'
@@ -122,7 +124,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const searchActionUrl = `${baseUrl}/search?q={search_term_string}`
 
   return (
-    <html lang="en" data-theme={initialThemeAttr} data-contrast={initialContrastAttr ?? undefined}>
+    <html lang={htmlLang} data-theme={initialThemeAttr} data-contrast={initialContrastAttr ?? undefined}>
       <head>
         {/* iOS PWA / status bar styling */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -130,7 +132,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <meta name="theme-color" content={THEME_COLOR_LIGHT} media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content={THEME_COLOR_DARK} media="(prefers-color-scheme: dark)" />
         <meta name="color-scheme" content="light dark" />
-        <meta name="description" content={defaultDescription} key="global-description" />
         {shouldNoIndex ? <meta name="robots" content="noindex,nofollow" /> : null}
         {!shouldNoIndex && allowIndexOverride ? <meta name="robots" content="index,follow" /> : null}
         <script

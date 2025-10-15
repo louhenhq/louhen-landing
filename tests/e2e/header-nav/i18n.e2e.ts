@@ -1,7 +1,8 @@
 import { test, expect } from '@tests/fixtures/playwright';
-import { localeUrl } from '../_utils/url';
+import { getDefaultLocale, localeUrl } from '../_utils/url';
 
 const EXPECTED_HREFLANGS = ['en-de', 'de-de', 'fr-fr', 'nl-nl', 'it-it', 'x-default'] as const;
+const defaultLocale = getDefaultLocale();
 
 test.describe('Header locale switcher', () => {
   test('desktop switch preserves path, query, and metadata', async ({ page }) => {
@@ -15,15 +16,17 @@ test.describe('Header locale switcher', () => {
     await expect(page).toHaveURL(/\/de-de\/method\?utm_source=playwright/);
 
     const canonical = await page.locator('link[rel="canonical"]').first().getAttribute('href');
-    expect(canonical).toContain('/method');
+    expect(canonical).toContain('/de-de/method');
 
     const hreflang = page.locator('link[rel="alternate"][hreflang="de-de"]').first();
-    await expect(hreflang).toHaveAttribute('href', expect.stringContaining('/method'));
+    await expect(hreflang).toHaveAttribute('href', expect.stringContaining('/de-de/method'));
 
     for (const hreflangValue of EXPECTED_HREFLANGS) {
-      const href = await page.locator(`link[rel="alternate"][hreflang="${hreflangValue}"]`).first().getAttribute('href');
+      const link = page.locator(`link[rel="alternate"][hreflang="${hreflangValue}"]`).first();
+      const href = await link.getAttribute('href');
       expect(href).toBeTruthy();
-      expect(href as string).toContain('/method');
+      const expectedLocale = hreflangValue === 'x-default' ? defaultLocale : hreflangValue;
+      expect(href as string).toContain(`/${expectedLocale}/method`);
     }
   });
 
