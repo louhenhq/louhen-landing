@@ -171,6 +171,22 @@ To get started locally:
    - Release PRs promote `staging` -> `production` (`enforce-release-source`, `Enforce Release PR Checklist` join the required checks).
    - Merge to `production` triggers semantic-release with the GitHub-provided `GITHUB_TOKEN`.
 
+### Run E2E locally (test mode)
+
+The Playwright suites can run against a production build with the same deterministic hCaptcha bypass used in CI:
+
+```bash
+export NEXT_PUBLIC_TEST_MODE=1 TEST_MODE=1
+npm run build
+HOST=127.0.0.1 PORT=4311 npm run start:e2e &
+SERVER_PID=$!
+sleep 2
+npx playwright test --grep "@critical" --workers=1
+kill "$SERVER_PID"
+```
+
+> ❗ Never set `NEXT_PUBLIC_TEST_MODE` or `TEST_MODE` in Vercel preview/production environments. They are intended for CI/local automation only.
+
 ### Install Policy & Determinism
 
 - **CI:** `npm ci --include=dev`
@@ -311,6 +327,8 @@ Need to point at a different preview? Override the default with `PREVIEW_BASE_UR
 - [ ] Fonts load from /fonts/** only; no Google Fonts requests.
 
 ### CI on demand
+
+CI runtime configuration (loopback host, port, test-mode flags) is managed via GitHub Actions -> Variables; see [CONTEXT/ci_cd.md](CONTEXT/ci_cd.md). Do not edit the workflow for these defaults unless you need a temporary override.
 
 - GitHub UI: Actions -> **Run Tests** -> choose `unit`, `e2e`, `axe`, `lighthouse`, or `all`.
 - CLI: `gh workflow run run-tests.yml -f suites=all`

@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/production' }}
 
 env:
-  TEST_MODE: '1'
+  TEST_MODE: ${{ vars.TEST_MODE }}
   TEST_E2E_SHORTCIRCUIT: 'true'
   IS_PRELAUNCH: 'true'
   EMAIL_TRANSPORT: noop
@@ -152,11 +152,17 @@ jobs:
     env:
       CI: true
       NODE_ENV: production
-      HOST: 127.0.0.1
-      PORT: '4311'
-      APP_BASE_URL: http://127.0.0.1:4311
-      NEXT_PUBLIC_SITE_URL: http://127.0.0.1:4311
-      BASE_URL: http://127.0.0.1:4311
+      HOST: ${{ vars.HOST }}
+      PORT: ${{ vars.PORT }}
+      APP_BASE_URL: ${{ vars.BASE_URL }}
+      NEXT_PUBLIC_SITE_URL: ${{ vars.BASE_URL }}
+      BASE_URL: ${{ vars.BASE_URL }}
+      DEFAULT_LOCALE: ${{ vars.DEFAULT_LOCALE }}
+      CSP_REPORT_ONLY: ${{ vars.CSP_REPORT_ONLY }}
+      ANALYTICS_ENABLED: ${{ vars.ANALYTICS_ENABLED }}
+      NEXT_PUBLIC_TEST_MODE: ${{ vars.NEXT_PUBLIC_TEST_MODE }}
+      TEST_MODE: ${{ vars.TEST_MODE }}
+      PLAYWRIGHT_BROWSERS_PATH: ${{ vars.PLAYWRIGHT_BROWSERS_PATH }}
       WAITLIST_CONFIRM_TTL_DAYS: '7'
       HCAPTCHA_SECRET: ${{ secrets.CI_HCAPTCHA_SECRET }}
       FIREBASE_PROJECT_ID: ${{ secrets.CI_FIREBASE_PROJECT_ID }}
@@ -226,12 +232,9 @@ jobs:
           restore-keys: |
             playwright-${{ runner.os }}-
 
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
-
       - name: Verify environment wiring
         run: |
-          required_envs=(NEXT_PUBLIC_ANALYTICS_DISABLED NEXT_PUBLIC_ANALYTICS_DEBUG NEXT_PUBLIC_ENV NEXT_PUBLIC_SITE_URL NEXT_PUBLIC_HCAPTCHA_SITE_KEY NEXT_PUBLIC_WAITLIST_URGENCY NEXT_PUBLIC_COMMIT_SHA NEXT_PUBLIC_LOCALES NEXT_PUBLIC_DEFAULT_LOCALE NEXT_PUBLIC_ALLOW_INDEXING APP_BASE_URL FIREBASE_PROJECT_ID FIREBASE_DB_REGION FIREBASE_ADMIN_SA_B64 RESEND_API_KEY RESEND_FROM RESEND_REPLY_TO HCAPTCHA_SECRET WAITLIST_CONFIRM_TTL_DAYS STATUS_USER STATUS_PASS SUPPRESSION_SALT EMAIL_TRANSPORT ANALYTICS_STORE_IP IS_PRELAUNCH TEST_MODE)
+          required_envs=(NEXT_PUBLIC_ANALYTICS_DISABLED NEXT_PUBLIC_ANALYTICS_DEBUG NEXT_PUBLIC_ENV NEXT_PUBLIC_SITE_URL NEXT_PUBLIC_HCAPTCHA_SITE_KEY NEXT_PUBLIC_WAITLIST_URGENCY NEXT_PUBLIC_COMMIT_SHA NEXT_PUBLIC_LOCALES NEXT_PUBLIC_DEFAULT_LOCALE NEXT_PUBLIC_ALLOW_INDEXING NEXT_PUBLIC_TEST_MODE DEFAULT_LOCALE APP_BASE_URL FIREBASE_PROJECT_ID FIREBASE_DB_REGION FIREBASE_ADMIN_SA_B64 RESEND_API_KEY RESEND_FROM RESEND_REPLY_TO HCAPTCHA_SECRET WAITLIST_CONFIRM_TTL_DAYS STATUS_USER STATUS_PASS SUPPRESSION_SALT EMAIL_TRANSPORT ANALYTICS_STORE_IP IS_PRELAUNCH TEST_MODE CSP_REPORT_ONLY ANALYTICS_ENABLED PLAYWRIGHT_BROWSERS_PATH)
           missing=0
           for key in "${required_envs[@]}"; do
             if [ -z "${!key+x}" ]; then
@@ -279,6 +282,36 @@ jobs:
         run: |
           node -e "const snapshot = {}; const pick = (k) => { if (process.env[k] !== undefined) snapshot[k] = process.env[k]; }; ['APP_BASE_URL','BASE_URL','IS_PRELAUNCH','CSP_REPORT_ONLY','NEXT_PUBLIC_CSP_REPORT_ONLY','NEXT_PUBLIC_DEFAULT_LOCALE','NEXT_PUBLIC_ANALYTICS_ENABLED'].forEach(pick); if (!snapshot.CSP_REPORT_ONLY && snapshot.NEXT_PUBLIC_CSP_REPORT_ONLY) snapshot.CSP_MODE = snapshot.NEXT_PUBLIC_CSP_REPORT_ONLY; console.log('PLAYWRIGHT_ENV', JSON.stringify(snapshot));"
 
+      - name: Start Next.js server
+        # prevent Homebrew profile sourcing in CI
+        shell: bash --noprofile --norc -eo pipefail {0}
+        run: |
+          npm run start:e2e > "${NEXT_BUILD_DIR}/test-server.log" 2>&1 &
+          echo $! > /tmp/e2e-server.pid
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Wait for app to respond
+        shell: bash --noprofile --norc -eo pipefail {0}
+        run: |
+          for i in {1..40}; do
+            if curl -sSf "$BASE_URL/" >/dev/null 2>&1; then
+              echo "App reachable at $BASE_URL"
+              break
+            fi
+            echo "Waiting for app..."
+            sleep 0.5
+          done
+          curl -sSf "$BASE_URL/" >/dev/null || (echo "Server failed to respond" && exit 1)
+
+      - name: Verify test-mode captcha bypass
+        shell: bash --noprofile --norc -eo pipefail {0}
+        run: |
+          COUNT=$(curl -s "$BASE_URL/${DEFAULT_LOCALE}/waitlist" | grep -o 'data-testid="waitlist-form-captcha"' | wc -l)
+          echo "Captcha markup count: $COUNT"
+          test "$COUNT" -eq 0
+
       - name: Playwright smoke suite
         # prevent Homebrew profile sourcing in CI
         shell: bash --noprofile --norc -eo pipefail {0}
@@ -303,16 +336,25 @@ jobs:
             echo 'No server log found'
           fi
 
-      - name: Upload Playwright artifacts
+      - name: Upload Playwright HTML report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-e2e
-          path: |
-            artifacts/playwright
-            playwright-report
-            ${{ env.NEXT_BUILD_DIR }}/test-server.log
+          name: playwright-html
+          path: artifacts/playwright/html
           if-no-files-found: warn
+
+      - name: Upload Playwright traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: artifacts/playwright/results/**/trace.zip
+          if-no-files-found: warn
+
+      - name: Stop server
+        if: always()
+        run: kill "$(cat /tmp/e2e-server.pid)" 2>/dev/null || true
 
   axe:
     name: axe
@@ -322,11 +364,11 @@ jobs:
     env:
       CI: true
       NODE_ENV: production
-      HOST: 127.0.0.1
-      PORT: '4311'
-      APP_BASE_URL: http://127.0.0.1:4311
-      NEXT_PUBLIC_SITE_URL: http://127.0.0.1:4311
-      BASE_URL: http://127.0.0.1:4311
+      HOST: ${{ vars.HOST }}
+      PORT: ${{ vars.PORT }}
+      APP_BASE_URL: ${{ vars.BASE_URL }}
+      NEXT_PUBLIC_SITE_URL: ${{ vars.BASE_URL }}
+      BASE_URL: ${{ vars.BASE_URL }}
       WAITLIST_CONFIRM_TTL_DAYS: '7'
       HCAPTCHA_SECRET: ${{ secrets.CI_HCAPTCHA_SECRET }}
       FIREBASE_PROJECT_ID: ${{ secrets.CI_FIREBASE_PROJECT_ID }}
@@ -435,11 +477,11 @@ jobs:
     env:
       CI: true
       NODE_ENV: production
-      HOST: 127.0.0.1
-      PORT: '4311'
-      APP_BASE_URL: http://127.0.0.1:4311
-      NEXT_PUBLIC_SITE_URL: http://127.0.0.1:4311
-      BASE_URL: http://127.0.0.1:4311
+      HOST: ${{ vars.HOST }}
+      PORT: ${{ vars.PORT }}
+      APP_BASE_URL: ${{ vars.BASE_URL }}
+      NEXT_PUBLIC_SITE_URL: ${{ vars.BASE_URL }}
+      BASE_URL: ${{ vars.BASE_URL }}
       WAITLIST_CONFIRM_TTL_DAYS: '7'
       HCAPTCHA_SECRET: ${{ secrets.CI_HCAPTCHA_SECRET }}
       FIREBASE_PROJECT_ID: ${{ secrets.CI_FIREBASE_PROJECT_ID }}
@@ -538,7 +580,7 @@ jobs:
     env:
       CI: true
       NODE_ENV: production
-      BASE_URL: http://127.0.0.1:4311
+      BASE_URL: ${{ vars.BASE_URL }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -738,6 +780,9 @@ jobs:
             }
           }
           NODE
+
+      - name: Prefixless marketing guard
+        run: npm run guard:prefixless
 
       - name: Secret hygiene guard (warn)
         run: |
