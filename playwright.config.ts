@@ -135,6 +135,7 @@ const testEnv = {
   EMAIL_TRANSPORT: process.env.EMAIL_TRANSPORT ?? 'noop',
   STATUS_USER: statusUser,
   STATUS_PASS: statusPass,
+  CSP_MODE: process.env.CSP_MODE ?? 'report-only',
 } as const;
 
 for (const [key, value] of Object.entries(testEnv)) {
@@ -146,7 +147,7 @@ for (const [key, value] of Object.entries(testEnv)) {
 const loggedEnv = {
   baseURL: baseTestURL,
   IS_PRELAUNCH: process.env.IS_PRELAUNCH,
-  CSP_REPORT_ONLY: process.env.CSP_REPORT_ONLY ?? process.env.NEXT_PUBLIC_CSP_REPORT_ONLY ?? '0',
+  CSP_MODE: process.env.CSP_MODE ?? 'report-only',
   DEFAULT_LOCALE: process.env.NEXT_PUBLIC_DEFAULT_LOCALE ?? 'de-de',
   ANALYTICS_ENABLED: process.env.NEXT_PUBLIC_ANALYTICS_ENABLED ?? '0',
 };

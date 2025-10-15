@@ -44,7 +44,7 @@ Loopback CI settings live under **Settings → Secrets and variables → Actions
 | `PORT` | Port exposed for curl health checks and Playwright. | `4311` |
 | `BASE_URL` | Canonical base URL used by curl, Playwright, and Lighthouse. | `http://127.0.0.1:4311` |
 | `DEFAULT_LOCALE` | Default locale injected into E2E runs. | `de-de` |
-| `CSP_REPORT_ONLY` | Enables report-only CSP headers in CI. | `0` |
+| `CSP_MODE` | Controls CSP enforcement (`report-only` in CI, `strict` in production release jobs). | `report-only` |
 | `ANALYTICS_ENABLED` | Toggles analytics pipeline during tests. | `0` |
 | `NEXT_PUBLIC_TEST_MODE` | Front-end switch for test-mode UI shortcuts. | `1` |
 | `TEST_MODE` | Back-end switch for mock integrations and bypasses. | `1` |

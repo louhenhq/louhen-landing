@@ -48,7 +48,7 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
   - Added preview-only `/api/test/flags` overrides, Playwright `flags.set/clear` fixtures, and a static OG fallback CI job so preview workflows exercise both flag states without redeploying.
 
 - **2025-10-09 — Feature flag defaults finalised (Vercel alignment)**  
-  - Locked Preview defaults (analytics off, CSP report-only, dynamic OG on) and Production defaults (analytics on, CSP enforced, dynamic OG on) for `NEXT_PUBLIC_ANALYTICS_ENABLED`, `NEXT_PUBLIC_BANNER_WAITLIST_URGENCY`, `OG_DYNAMIC_ENABLED`, and `SECURITY_REPORT_ONLY`.  
+  - Locked Preview defaults (analytics off, CSP report-only, dynamic OG on) and Production defaults (analytics on, CSP enforced, dynamic OG on) for `NEXT_PUBLIC_ANALYTICS_ENABLED`, `NEXT_PUBLIC_BANNER_WAITLIST_URGENCY`, `OG_DYNAMIC_ENABLED`, and `CSP_MODE`.  
   - Values are synced in Vercel environment settings and mirrored in `/CONTEXT/envs.md`; CI overrides them only for targeted fallback tests.
 
 - **2025-10-09 — Zustand onboarding store typing alignment**  
@@ -200,7 +200,7 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
 
 - **2025-10-11 — E2E Waitlist hCaptcha Bypass (Owner: QA & Infrastructure)**  
   - Keep → Production/preview builds continue to render the live hCaptcha widget and require a real token before submitting the waitlist form.  
-  - Adjust → CI (and optional local test runs) export `HOST=127.0.0.1`, `PORT=4311`, `BASE_URL=http://127.0.0.1:4311`, `DEFAULT_LOCALE=de-de`, `CSP_REPORT_ONLY=0`, `ANALYTICS_ENABLED=0`, `NEXT_PUBLIC_TEST_MODE=1`, `TEST_MODE=1`, and `PLAYWRIGHT_BROWSERS_PATH=0`. When these variables are set, the form seeds a deterministic `e2e-mocked-token`, skips rendering `<HCaptcha>`, and Playwright waits on the outbound `POST` request via `WAITLIST_API_PATTERN` before asserting success. GitHub Actions now waits for the server, verifies the bypass via `curl`, uploads HTML/traces, and tears down the server at the end of the job.  
+  - Adjust → CI (and optional local test runs) export `HOST=127.0.0.1`, `PORT=4311`, `BASE_URL=http://127.0.0.1:4311`, `DEFAULT_LOCALE=de-de`, `CSP_MODE=report-only`, `ANALYTICS_ENABLED=0`, `NEXT_PUBLIC_TEST_MODE=1`, `TEST_MODE=1`, and `PLAYWRIGHT_BROWSERS_PATH=0`. When these variables are set, the form seeds a deterministic `e2e-mocked-token`, skips rendering `<HCaptcha>`, and Playwright synchronises with the mocked `POST` response (`Promise.all` + `waitForResponse`) before asserting success. GitHub Actions now waits for the server, verifies the bypass via `curl`, uploads HTML/traces, and tears down the server at the end of the job.  
   - Notes → Do **not** set the test-mode variables in Vercel environments. Rollback: remove `NEXT_PUBLIC_TEST_MODE`/`TEST_MODE` from CI env to restore the previous behaviour (tests will require the live captcha again).
 
 ---

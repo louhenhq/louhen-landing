@@ -92,6 +92,7 @@ test.describe('Security headers', () => {
     expect(headers['x-frame-options']).toBe('DENY');
     expect(headers['cross-origin-opener-policy']).toBe('same-origin');
     expect(headers['cross-origin-resource-policy']).toBe('same-site');
+    expect(headers['cross-origin-embedder-policy']).toBe('require-corp');
 
     const cspHeader =
       headers['content-security-policy'] ?? headers['content-security-policy-report-only'];
@@ -101,6 +102,8 @@ test.describe('Security headers', () => {
 
     const scriptSources = (getDirective(cspHeader!, 'script-src') ?? '').split(/\s+/);
     expect(scriptSources).toContain("'self'");
+    expect(scriptSources).toContain('https:');
+    expect(scriptSources.some((source) => source.replace(/'/g, '') === 'strict-dynamic')).toBeTruthy();
     const nonce = extractScriptNonce(cspHeader!);
     expect(nonce).toBeTruthy();
     expect(headers['x-csp-nonce']).toBeTruthy();
@@ -125,6 +128,26 @@ test.describe('Security headers', () => {
       return nonces.every((value) => value && value.length > 0) && new Set(nonces).size === 1;
     });
     expect(jsonLdNoncesMatch).toBeTruthy();
+
+    const reportUriDirective = getDirective(cspHeader!, 'report-uri');
+    expect(reportUriDirective).toBeTruthy();
+    expect(reportUriDirective).toContain('/api/security/csp-report');
+
+    const reportToDirective = getDirective(cspHeader!, 'report-to');
+    expect(reportToDirective).toBeTruthy();
+    expect(reportToDirective).toContain('csp-endpoint');
+
+    const reportToHeader = headers['report-to'];
+    expect(reportToHeader, 'Report-To header should propagate CSP reporting endpoint').toBeTruthy();
+    if (reportToHeader) {
+      let parsed: { group?: string; endpoints?: Array<{ url?: string }> } | null = null;
+      expect(() => {
+        parsed = JSON.parse(reportToHeader);
+      }).not.toThrow();
+      expect(parsed?.group).toBe('csp-endpoint');
+      const firstEndpoint = parsed?.endpoints?.[0]?.url ?? '';
+      expect(firstEndpoint).toContain('/api/security/csp-report');
+    }
 
     const inlineScriptExecuted = await page.evaluate(() => {
       delete (window as Window & { __cspInlineTest?: boolean }).__cspInlineTest;

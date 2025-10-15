@@ -5,7 +5,6 @@ type VercelEnv = 'development' | 'preview' | 'production' | (string & {});
 export type FeatureFlags = {
   OG_DYNAMIC_ENABLED: boolean;
   ANALYTICS_ENABLED: boolean;
-  SECURITY_REPORT_ONLY: boolean;
   BANNER_WAITLIST_URGENCY: boolean;
 };
 
@@ -52,9 +51,8 @@ const PUBLIC_FLAG_ENV_MAP: Record<PublicFlagKey, { primary: string; fallback?: s
   },
 };
 
-const SERVER_FLAG_DEFAULTS: Pick<FeatureFlags, 'OG_DYNAMIC_ENABLED' | 'SECURITY_REPORT_ONLY'> = {
+const SERVER_FLAG_DEFAULTS: Pick<FeatureFlags, 'OG_DYNAMIC_ENABLED'> = {
   OG_DYNAMIC_ENABLED: true,
-  SECURITY_REPORT_ONLY: true,
 };
 
 function normalizeEnvBoolean(raw: string | null | undefined): boolean | null {
@@ -102,19 +100,10 @@ function readOgDynamicFlag(): boolean {
   return SERVER_FLAG_DEFAULTS.OG_DYNAMIC_ENABLED;
 }
 
-function readSecurityReportOnlyFlag(): boolean {
-  const explicit = normalizeEnvBoolean(process.env.SECURITY_REPORT_ONLY);
-  if (explicit !== null) {
-    return explicit;
-  }
-  return isPreview() ? SERVER_FLAG_DEFAULTS.SECURITY_REPORT_ONLY : false;
-}
-
 function computeBaseFlags(): FeatureFlags {
   return {
     OG_DYNAMIC_ENABLED: readOgDynamicFlag(),
     ANALYTICS_ENABLED: readPublicFlag('ANALYTICS_ENABLED'),
-    SECURITY_REPORT_ONLY: readSecurityReportOnlyFlag(),
     BANNER_WAITLIST_URGENCY: readPublicFlag('BANNER_WAITLIST_URGENCY'),
   };
 }

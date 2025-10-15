@@ -10,7 +10,9 @@ import {
   type AppLocale,
 } from '@/lib/i18n/locales';
 import { extractLocaleFromCookies } from '@/lib/intl/getLocale';
-import { getFlags, isProduction } from '@/lib/shared/flags';
+import { isProduction } from '@/lib/shared/flags';
+import { buildCspHeader, resolveCspMode } from '@/lib/security/csp';
+import { buildSecurityHeaders } from '@/lib/security/headers';
 import { COOKIE_PATH, COOKIE_SAME_SITE, LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE } from '@/lib/theme/constants';
 
 const COOKIE_SAME_SITE_RESPONSE = COOKIE_SAME_SITE.toLowerCase() as 'lax' | 'strict' | 'none';
@@ -37,40 +39,8 @@ const STATIC_PATH_EXACT = new Set([
 ]);
 const EXTENSION_PATTERN = /\.[a-z0-9]+$/i;
 
-const HSTS_MAX_AGE_SECONDS = 60 * 60 * 24 * 730; // 2 years
 function generateNonce() {
   return crypto.randomUUID().replace(/-/g, '');
-}
-
-type BuildCspOptions = {
-  nonce: string;
-  isDev: boolean;
-};
-
-function buildCsp({ nonce, isDev }: BuildCspOptions) {
-  const directives: Record<string, Set<string>> = {
-    'default-src': new Set(["'self'"]),
-    'script-src': new Set(["'self'", `'nonce-${nonce}'`]),
-    'style-src': new Set(["'self'", "'unsafe-inline'"]),
-    'img-src': new Set(["'self'", 'data:']),
-    'font-src': new Set(["'self'"]),
-    'connect-src': new Set(["'self'"]),
-    'frame-ancestors': new Set(["'none'"]),
-    'base-uri': new Set(["'self'"]),
-    'form-action': new Set(["'self'"]),
-  };
-
-  if (isDev) {
-    directives['script-src'].add("'unsafe-eval'");
-    directives['connect-src'].add('ws:');
-    directives['connect-src'].add('wss:');
-    directives['connect-src'].add('http://localhost:*');
-    directives['connect-src'].add('https://localhost:*');
-  }
-
-  return Object.entries(directives)
-    .map(([directive, values]) => `${directive} ${Array.from(values).join(' ')}`)
-    .join('; ');
 }
 
 function shouldApplySecurityHeaders(request: NextRequest) {
@@ -94,33 +64,6 @@ function shouldAttachCsp(request: NextRequest, response: NextResponse) {
   }
   const contentType = response.headers.get('content-type') ?? '';
   return contentType.includes('text/html');
-}
-
-function buildPermissionsPolicy() {
-  return [
-    'accelerometer=()',
-    'autoplay=()',
-    'camera=()',
-    'clipboard-read=()',
-    'clipboard-write=()',
-    'display-capture=()',
-    'document-domain=()',
-    'encrypted-media=()',
-    'fullscreen=()',
-    'geolocation=()',
-    'gyroscope=()',
-    'magnetometer=()',
-    'microphone=()',
-    'midi=()',
-    'payment=()',
-    'screen-wake-lock=()',
-    'sync-xhr=()',
-    'usb=()',
-    'xr-spatial-tracking=()',
-    // Keep both legacy FLoC and modern Topics API opt-outs; unknown directives are ignored so this redundancy is safe.
-    'interest-cohort=()',
-    'browsing-topics=()',
-  ].join(', ');
 }
 
 function getHostname(request: NextRequest) {
@@ -251,38 +194,53 @@ function applySecurityHeaders(request: NextRequest, response: NextResponse, nonc
     return response;
   }
 
-  const flags = getFlags({ request });
-  const enforceCsp = !flags.SECURITY_REPORT_ONLY;
+  const mode = resolveCspMode();
   const isProdLike = isProduction();
-  const isDev = !isProdLike;
   const hostname = request.nextUrl.hostname;
   const isLocalhost = isLoopbackHost(hostname);
+  const allowDevSources = !isProdLike || isLocalhost;
+  const attachCsp = shouldAttachCsp(request, response) && mode !== 'off';
+  const requestUrl = cloneRequestUrl(request);
 
-  const shouldSetCsp = shouldAttachCsp(request, response);
-  if (shouldSetCsp) {
-    const csp = buildCsp({ nonce, isDev });
-    const headerName = enforceCsp ? 'Content-Security-Policy' : 'Content-Security-Policy-Report-Only';
-    response.headers.set(headerName, csp);
-    if (!enforceCsp) {
-      response.headers.delete('Content-Security-Policy');
-    }
-    response.headers.set('x-csp-nonce', nonce);
+  const cspHeader = attachCsp
+    ? buildCspHeader({
+        nonce,
+        mode,
+        requestUrl,
+        allowDevSources,
+      })
+    : null;
+
+  const headers = buildSecurityHeaders({
+    cspHeader,
+    nonce,
+    mode,
+    isProductionLike: isProdLike,
+    isLoopbackHost: isLocalhost,
+  });
+
+  for (const [key, value] of Object.entries(headers)) {
+    response.headers.set(key, value);
   }
 
-  if (isProdLike && !isLocalhost) {
-    response.headers.set(
-      'Strict-Transport-Security',
-      `max-age=${HSTS_MAX_AGE_SECONDS}; includeSubDomains; preload`
-    );
+  if (!cspHeader) {
+    response.headers.delete('Content-Security-Policy');
+    response.headers.delete('Content-Security-Policy-Report-Only');
+    response.headers.delete('Report-To');
+  }
+
+  if (cspHeader) {
+    const headerName = cspHeader.name.toLowerCase();
+    request.headers.set(headerName, cspHeader.value);
+    const opposite =
+      cspHeader.name === 'Content-Security-Policy'
+        ? 'content-security-policy-report-only'
+        : 'content-security-policy';
+    request.headers.delete(opposite);
   } else {
-    response.headers.delete('Strict-Transport-Security');
+    request.headers.delete('content-security-policy');
+    request.headers.delete('content-security-policy-report-only');
   }
-  response.headers.set('X-Content-Type-Options', 'nosniff');
-  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-  response.headers.set('Permissions-Policy', buildPermissionsPolicy());
-  response.headers.set('X-Frame-Options', 'DENY');
-  response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
-  response.headers.set('Cross-Origin-Resource-Policy', 'same-site');
 
   return response;
 }

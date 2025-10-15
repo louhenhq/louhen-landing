@@ -202,7 +202,7 @@ kill "$SERVER_PID"
   PORT=4311 npm run start:test
   ```
   then inspect headers via `curl -I http://127.0.0.1:4311/en` or run the Playwright check with `npm run test:e2e -- tests/e2e/security/headers.e2e.ts`.
-- Preview environments can temporarily serve `Content-Security-Policy-Report-Only` by exporting `CSP_REPORT_ONLY=1`; production ignores this flag and always enforces.
+- Preview environments can temporarily serve `Content-Security-Policy-Report-Only` by setting `CSP_MODE=report-only`; production pins `CSP_MODE=strict`.
 
 ## Structure (quick)
 

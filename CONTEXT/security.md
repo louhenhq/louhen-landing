@@ -9,7 +9,9 @@ This repo follows the locked decisions in [/CONTEXT/decision_log.md](decision_lo
 - `Permissions-Policy: accelerometer=(), autoplay=(), camera=(), clipboard-read=(), clipboard-write=(), display-capture=(), document-domain=(), encrypted-media=(), fullscreen=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), screen-wake-lock=(), sync-xhr=(), usb=(), xr-spatial-tracking=(), interest-cohort=(), browsing-topics=()` — explicitly deny unused sensors/APIs. Both `interest-cohort=()` (legacy FLoC opt-out) and `browsing-topics=()` (Topics API opt-out) are sent; unknown directives are ignored by browsers, making this redundancy safe. The security E2E suite asserts that at least one of these tracking opt-outs is present.
 - `X-Frame-Options: DENY` (mirrors CSP `frame-ancestors 'none'`).
 - `Cross-Origin-Opener-Policy: same-origin`.
+- `Cross-Origin-Embedder-Policy: require-corp`.
 - `Cross-Origin-Resource-Policy: same-site`.
+- `Report-To: {"group":"csp-endpoint", ...}` — points at `/api/security/csp-report` so CSP violations surface in observability pipelines.
 - `Cache-Control` varies by route (`no-store` for auth/status, `public, max-age=0` for marketing pages); any change must mirror the existing pattern in middleware or route handlers.
 
 ### Network Policy for Tests
@@ -19,23 +21,23 @@ This repo follows the locked decisions in [/CONTEXT/decision_log.md](decision_lo
 - ESLint ignores generated Playwright artifacts (trace bundles, reports) so linting stays focused on authored code; see [/CONTEXT/tests.md](tests.md#shell-agnostic-execution) for tooling scope.
 
 ## Content Security Policy Lifecycle
-- `middleware.ts` generates a single nonce per request, forwards it via the incoming request header (`x-csp-nonce`) and injects it into the rendered response. Downstream layouts call `headers().get('x-csp-nonce')` and hydrate the React `NonceProvider`, which freezes the first SSR nonce so client re-renders cannot mutate it. Client components call `useNonce()` for inline scripts.
-- **Production / preview defaults**:
+- `middleware.ts` generates a single nonce (`crypto.randomUUID`) per request, mirrors it on the request (`content-security-policy(*)` + `x-csp-nonce`) and response, and delegates directive construction to `lib/security/csp.ts`. This keeps Next.js’ server renderer aligned with the nonce: `render.js` extracts it from the incoming CSP header so all framework scripts inherit the same value. Downstream layouts call `headers().get('x-csp-nonce')` and hydrate the React `NonceProvider`, which freezes the first SSR nonce so client re-renders cannot mutate it. Client components call `useNonce()` for inline scripts.
+- `lib/security/csp.ts` centralises directive assembly. Defaults for strict/preview flows:
   - `default-src 'self'`.
-  - `script-src 'self' 'nonce-<value>'` (no `unsafe-inline` or remote CDNs).
-  - `style-src 'self' 'unsafe-inline'` (Tailwind runtime injection; revisit once hashed styles are viable).
-  - `img-src 'self' data:`.
-  - `font-src 'self'`.
-- `connect-src 'self'` (add domains only when servers are self-hosted or consented).
+  - `script-src 'self' 'nonce-<value>' 'strict-dynamic' https:` (no `unsafe-inline`; chained scripts must inherit trust from the nonce-bearing bootstrap).
+  - `style-src 'self' 'unsafe-inline' https:` (Tailwind runtime injection; revisit once hashed styles are viable).
+  - `img-src 'self' data: https:`.
+  - `font-src 'self' https: data:`.
+  - `connect-src 'self' https:` (dev/test inject loopback + ws/wss allowances).
   - `frame-ancestors 'none'`.
   - `base-uri 'self'`.
   - `form-action 'self'`.
-- **Development-only relaxations** (scoped by `NODE_ENV !== 'production'`):
-  - `script-src` gains `'unsafe-eval'` for Next.js fast refresh.
-  - `connect-src` allows `ws:`, `wss:`, and `http(s)://localhost:*` for dev servers.
-  - No additional origins are permitted without updating this doc and the middleware.
-- **Report Only toggle**: set `CSP_REPORT_ONLY=1` (or `NEXT_PUBLIC_CSP_REPORT_ONLY=1`) in preview to serve `Content-Security-Policy-Report-Only`. Production always enforces.
-- Updating CSP allowances requires a `/CONTEXT/decision_log.md` entry and security/infra approval. Prefer adding a nonce or self-hosting assets over widening directives.
+  - `report-to csp-endpoint` and `report-uri /api/security/csp-report`.
+- `lib/security/headers.ts` applies the resolved CSP header, attaches `Report-To`, HSTS (strict in production only), COOP/COEP/CORP, and the shared Permissions-Policy. No other module should set or mutate these headers directly.
+- **Environment switch**: `CSP_MODE=strict|report-only|off` controls enforcement. `resolveCspMode()` defaults to `strict` whenever `VERCEL_ENV=production`, otherwise `report-only`. Set `CSP_MODE=report-only` for E2E/preview diagnostics; `off` is an emergency-only escape hatch and requires security sign-off.
+- **Development relaxations** (applicable when `allowDevSources` is true: loopback host or non-production): `connect-src` adds loopback + ws/wss endpoints, while client-side Fast Refresh still requires `'unsafe-eval'`. No other origins are permitted without updating this doc, `lib/security/csp.ts`, and the middleware.
+- `/app/api/security/csp-report/route.ts` accepts CSP violation samples (`application/csp-report` or JSON), strips query fragments, logs a redacted payload, and retains a capped in-memory buffer (`getStoredCspReports()`) for observability.
+- Updating CSP allowances or changing the directive set requires a `/CONTEXT/decision_log.md` entry and security/infra approval. Prefer adding a nonce, using `'strict-dynamic'`, or self-hosting assets over widening directives.
 - Analytics endpoints follow runtime opt-in: `connect-src` stays `'self'` until consent is `granted`, at which point a nonced helper widens the directive (e.g., appending `https://analytics.louhen.app`) for the active session only.
 
 ## Consent-First Analytics

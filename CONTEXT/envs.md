@@ -48,7 +48,7 @@ Codify flags in code via `lib/shared/flags.ts`. Every addition/modification must
 | `NEXT_PUBLIC_ANALYTICS_ENABLED` | Public | boolean | `false` | `true` | Privacy & Analytics | Enables analytics bootstrapping after consent; disabled in Preview to avoid noisy telemetry. |
 | `NEXT_PUBLIC_BANNER_WAITLIST_URGENCY` | Public | boolean | `true` | `true` | Growth Ops | Controls urgency badge visibility on the waitlist experience. |
 | `OG_DYNAMIC_ENABLED` | Server | boolean | `true` (CI toggles to `false` for OG fallback validation) | `true` | Platform | Gates dynamic OG image rendering; static assets serve when disabled. |
-| `SECURITY_REPORT_ONLY` | Server | boolean | `true` | `false` | Security | Runs CSP in report-only mode on Preview for safe experimentation; production enforces. |
+| `CSP_MODE` | Server | string (`strict` \| `report-only` \| `off`) | `report-only` | `strict` | Security | Controls CSP enforcement: Preview/tests default to `report-only`, production must run `strict`; `off` only for emergency debugging with security approval. |
 
 ## Operational Notes
 - CI enforces secret hygiene (`jobs.policy-guards`) via a regex scanner and fails any run that finds suspicious secret-like literals outside `.env.example`.

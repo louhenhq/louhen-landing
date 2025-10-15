@@ -52,7 +52,7 @@ These principles sit alongside the [Selector Policy](#selector-policy) and are n
 - E2E runs against local preview by default (`BASE_URL` → `http://127.0.0.1:4311`), preserving the localhost-only network policy. CI sets this `BASE_URL` explicitly. Local E2E starts from the localized entry (e.g., `/de-de`) to avoid redirect timing; middleware performs one-shot locale redirect with loop guards.
 - Artifact policy: `trace='on'`, `video='retain-on-failure'`, and `screenshot='only-on-failure'`. CI uploads `artifacts/playwright/**` so every failure ships with trace/video/screenshot bundles.
 - Network policy: only loopback origins (`http://127.0.0.1`, `http://localhost`, `http://0.0.0.0`, `http://[::1]`) and fixture-derived ports are allowed. All other requests abort and fail the spec; see [/CONTEXT/security.md](security.md#network-policy-for-tests) before expanding the allowlist.
-- Environment echo: Playwright logs a single-line JSON containing `baseURL`, `IS_PRELAUNCH`, `CSP_REPORT_ONLY`, `DEFAULT_LOCALE`, and `ANALYTICS_ENABLED`. CI repeats the same keys up front so developers can spot drift between local and remote runs.
+- Environment echo: Playwright logs a single-line JSON containing `baseURL`, `IS_PRELAUNCH`, `CSP_MODE`, `DEFAULT_LOCALE`, and `ANALYTICS_ENABLED`. CI repeats the same keys up front so developers can spot drift between local and remote runs.
 - Accessibility coverage runs via the `axe` project (`npm run test:axe`) across `/`, `/waitlist`, and `/method` (default + secondary locale). Treat any serious/critical violation as a merge blocker.
 
 ### Suite Tiers & Tags
@@ -184,6 +184,6 @@ These principles sit alongside the [Selector Policy](#selector-policy) and are n
 - Preview workflow mirror: `.github/workflows/e2e-preview.yml` (staging smoke matrix).
 
 ### Test Mode (Playwright / CI)
-- CI and deterministic local runs export the following variables: `HOST=127.0.0.1`, `PORT=4311`, `BASE_URL=http://127.0.0.1:4311`, `DEFAULT_LOCALE=de-de`, `CSP_REPORT_ONLY=0`, `ANALYTICS_ENABLED=0`, `NEXT_PUBLIC_TEST_MODE=1`, `TEST_MODE=1`, `PLAYWRIGHT_BROWSERS_PATH=0`.
+- CI and deterministic local runs export the following variables: `HOST=127.0.0.1`, `PORT=4311`, `BASE_URL=http://127.0.0.1:4311`, `DEFAULT_LOCALE=de-de`, `CSP_MODE=report-only`, `ANALYTICS_ENABLED=0`, `NEXT_PUBLIC_TEST_MODE=1`, `TEST_MODE=1`, `PLAYWRIGHT_BROWSERS_PATH=0`.
 - When `TEST_MODE===1`, the waitlist form seeds `hcaptchaToken` with `e2e-mocked-token` and hides the `<HCaptcha>` widget so Playwright never calls the real service. Production/preview builds must **not** set these variables.
-- The @critical waitlist spec (`tests/e2e/critical/critical.e2e.ts`) registers a context-level mock using `WAITLIST_API_PATTERN`, pre-grants consent via cookie, and waits for the outbound `POST` request (instead of the response) before asserting the success UI. This keeps the test resilient without altering the live behaviour.
+- The @critical waitlist spec (`tests/e2e/critical/critical.e2e.ts`) registers a context-level mock using `WAITLIST_API_PATTERN`, pre-grants consent via cookie, and synchronises on the mocked `POST` response (Promise.all + `waitForResponse`) before asserting the success UI. This keeps the test resilient without altering the live behaviour.
