@@ -116,6 +116,8 @@ export async function POST(request: Request) {
 }
 
 export async function GET() {
+  if (process.env.NODE_ENV !== 'production' || process.env.TEST_MODE === '1') {
+    return NextResponse.json({ reports: getStoredCspReports() }, { status: 200 });
+  }
   return NextResponse.json({ error: 'Method Not Allowed' }, { status: 405 });
 }
-

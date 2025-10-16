@@ -1,4 +1,5 @@
-import React from 'react';
+'use client';
+
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { cn, layout, text } from '@/app/(site)/_lib/ui';

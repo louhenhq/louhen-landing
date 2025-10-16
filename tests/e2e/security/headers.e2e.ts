@@ -36,6 +36,7 @@ test.describe('Security headers', () => {
       process.env.VERCEL_ENV === 'production' ||
       (process.env.VERCEL_ENV === undefined && process.env.NODE_ENV === 'production');
     const canonicalHostEnv =
+      process.env.CANONICAL_HOST ??
       process.env.NEXT_PUBLIC_CANONICAL_HOST ??
       process.env.NEXT_PUBLIC_SITE_URL ??
       process.env.APP_BASE_URL ??
@@ -94,17 +95,29 @@ test.describe('Security headers', () => {
     expect(headers['cross-origin-resource-policy']).toBe('same-site');
     expect(headers['cross-origin-embedder-policy']).toBe('require-corp');
 
-    const cspHeader =
-      headers['content-security-policy'] ?? headers['content-security-policy-report-only'];
-    expect(cspHeader, 'CSP header must exist').toBeTruthy();
-    expect(cspHeader).toContain("default-src 'self'");
-    expect(containsUnsafeInline(cspHeader!)).toBeFalsy();
+    const rawMode = (process.env.CSP_MODE ?? '').toLowerCase();
+    const cspMode = rawMode === 'strict' ? 'strict' : rawMode === 'off' ? 'off' : 'report-only';
+    test.skip(cspMode === 'off', 'CSP_MODE=off disables enforcement; skip header assertions during debugging.');
 
-    const scriptSources = (getDirective(cspHeader!, 'script-src') ?? '').split(/\s+/);
+    const enforcedHeader = headers['content-security-policy'];
+    const reportOnlyHeader = headers['content-security-policy-report-only'];
+    if (cspMode === 'strict') {
+      expect(enforcedHeader, 'Expected Content-Security-Policy header when CSP_MODE=strict').toBeTruthy();
+      expect(reportOnlyHeader, 'Report-Only header should be absent when enforcing').toBeFalsy();
+    } else {
+      expect(reportOnlyHeader, 'Expected Content-Security-Policy-Report-Only header when CSP_MODE=report-only').toBeTruthy();
+      expect(enforcedHeader, 'Enforced CSP header should be absent in report-only mode').toBeFalsy();
+    }
+
+    const cspHeader = cspMode === 'strict' ? enforcedHeader! : reportOnlyHeader!;
+    expect(cspHeader).toContain("default-src 'self'");
+    expect(containsUnsafeInline(cspHeader)).toBeFalsy();
+
+    const scriptSources = (getDirective(cspHeader, 'script-src') ?? '').split(/\s+/);
     expect(scriptSources).toContain("'self'");
     expect(scriptSources).toContain('https:');
     expect(scriptSources.some((source) => source.replace(/'/g, '') === 'strict-dynamic')).toBeTruthy();
-    const nonce = extractScriptNonce(cspHeader!);
+    const nonce = extractScriptNonce(cspHeader);
     expect(nonce).toBeTruthy();
     expect(headers['x-csp-nonce']).toBeTruthy();
     expect(nonce).toBe(headers['x-csp-nonce']);
@@ -129,11 +142,11 @@ test.describe('Security headers', () => {
     });
     expect(jsonLdNoncesMatch).toBeTruthy();
 
-    const reportUriDirective = getDirective(cspHeader!, 'report-uri');
+    const reportUriDirective = getDirective(cspHeader, 'report-uri');
     expect(reportUriDirective).toBeTruthy();
     expect(reportUriDirective).toContain('/api/security/csp-report');
 
-    const reportToDirective = getDirective(cspHeader!, 'report-to');
+    const reportToDirective = getDirective(cspHeader, 'report-to');
     expect(reportToDirective).toBeTruthy();
     expect(reportToDirective).toContain('csp-endpoint');
 
@@ -156,6 +169,10 @@ test.describe('Security headers', () => {
       document.body.appendChild(script);
       return Boolean((window as Window & { __cspInlineTest?: boolean }).__cspInlineTest);
     });
-    expect(inlineScriptExecuted).toBeFalsy();
+    if (cspMode === 'strict') {
+      expect(inlineScriptExecuted).toBeFalsy();
+    } else {
+      expect(inlineScriptExecuted).toBeTruthy();
+    }
   });
 });

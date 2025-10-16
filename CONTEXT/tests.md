@@ -12,7 +12,7 @@ Single source of truth for automated coverage, environments, and CI wiring. Ever
 | Route | Locale focus | Device targets | Automated checks | Notes |
 | --- | --- | --- | --- | --- |
 | `/[locale]/` (home) | `de-de` (x-default) + alternate (`en-de`) | Desktop Playwright + mobile Lighthouse | `tests/e2e/landing.spec.ts` (analytics sentinel), `tests/e2e/header-nav/*`, `tests/axe/canonical.axe.ts`, `tests/e2e/seo/home.meta.e2e.ts`, Lighthouse mobile audit | Sentinel enforces consent gating and CTA instrumentation. Header-nav suite covers desktop and mobile drawer UX; visual baselines also cover `fr-fr`, `nl-nl`, `it-it`. |
-| `/[locale]/waitlist` | Same locale pair | Desktop Playwright + mobile Lighthouse | `tests/e2e/waitlist/landing.e2e.ts`, `tests/e2e/waitlist/api.e2e.ts`, `tests/axe/canonical.axe.ts`, Lighthouse mobile audit (`/waitlist`) | API suite runs under `TEST_E2E_SHORTCIRCUIT=true` so no external services fire. |
+| `/[locale]/waitlist` | Same locale pair | Desktop Playwright + mobile Lighthouse | `tests/e2e/waitlist/landing.e2e.ts`, `tests/e2e/waitlist/api.e2e.ts`, `tests/axe/canonical.axe.ts`, Lighthouse mobile audit (`/waitlist`) | API suite runs under `TEST_E2E_SHORTCIRCUIT=1` so no external services fire. |
 | `/[locale]/method` | Same locale pair | Desktop Playwright + mobile Lighthouse | `tests/e2e/method/smoke.e2e.ts`, `tests/e2e/method/method.meta.e2e.ts`, `tests/e2e/seo/canonical-uniqueness.e2e.ts`, `tests/axe/canonical.axe.ts`, Lighthouse mobile audit | Metadata spec enforces breadcrumb JSON-LD and canonical uniqueness across locales; JSON-LD asserts `de-DE` as the default language code. |
 
 Other routes (legal, security headers, status API, unsubscribe) are covered by targeted suites listed later, but the three surfaces above define the locked marketing funnel.
@@ -65,7 +65,7 @@ These principles sit alongside the [Selector Policy](#selector-policy) and are n
 - Run lint/test commands via `npx` or direct package binaries—never source user profiles or Homebrew shellenv inside npm scripts.
 - CI invokes all npm/Playwright steps with `bash --noprofile --norc -eo pipefail {0}`. Mirror this locally when debugging sandbox issues.
 - Avoid `/bin/ps`, `pkill`, or other process-inspection helpers in scripts. Playwright `webServer` owns lifecycle management (`reuseExistingServer: true`).
-- Local and CI shims share the same entrypoints: `npm run lint`, `npm run test:e2e:smoke`, `npm run test:e2e:critical`, `npm run test:axe`, and `npm run test:unit:coverage`.
+- Local and CI shims share the same entrypoints: `npm run lint`, `npm run lint:deps`, `npm run test:e2e:smoke`, `npm run test:e2e:critical`, `npm run test:axe`, and `npm run test:unit:coverage`.
 - If a sandboxed shell still auto-sources Homebrew, use `bash --noprofile --norc` or grant Full Disk Access to your terminal; do not update repo scripts to depend on Homebrew.
 - ESLint ignore globs live in `eslint.config.mjs` (`ignores` block). We intentionally exclude generated outputs (artifacts/, trace bundles, public/tokens, etc.) and lint only authored application + test sources.
 
@@ -156,7 +156,7 @@ These principles sit alongside the [Selector Policy](#selector-policy) and are n
 - Results live under `artifacts/playwright/<run>/` next to the e2e report (`axe/html/index.html`, JSON summary).
 
 ### API smoke & utilities
-- Request-context tests (e.g. `tests/e2e/waitlist/api.e2e.ts`, `tests/e2e/unsubscribe.spec.ts`) exercise API contracts under `TEST_E2E_SHORTCIRCUIT=true` so external services remain stubbed.
+- Request-context tests (e.g. `tests/e2e/waitlist/api.e2e.ts`, `tests/e2e/unsubscribe.spec.ts`) exercise API contracts under `TEST_E2E_SHORTCIRCUIT=1` so external services remain stubbed.
 - Status endpoint coverage lives in `tests/e2e/status.spec.ts` and relies on `STATUS_USER/PASS`.
 
 ### Lighthouse (performance/SEO)
@@ -170,6 +170,7 @@ These principles sit alongside the [Selector Policy](#selector-policy) and are n
 - Axe violations: `artifacts/playwright/<suite>/axe/` (one JSON per locale/device).
 - Lighthouse summary: `artifacts/lighthouse/summary.md` (plus `*.html` and `*.json` for raw runs).
 - Server traces: `.next/test-server.log` (uploaded as artifact when present) plus `server.log` emitted by Lighthouse.
+- Strict CSP job: `ci-artifacts/csp/reports.json` captures the latest `/api/security/csp-report` payload so failures surface the directive + URL combo immediately.
 - Common pitfalls:
   - Missing `BASE_URL` / server not healthy -> ensure `npm run validate:local` finished the build and health check; confirm port 4311 available.
   - Analytics sentinel failures -> ensure consent dialog is rendered; check `window.__LOUHEN_ANALYTICS_READY` remains false pre-consent.
@@ -184,6 +185,16 @@ These principles sit alongside the [Selector Policy](#selector-policy) and are n
 - Preview workflow mirror: `.github/workflows/e2e-preview.yml` (staging smoke matrix).
 
 ### Test Mode (Playwright / CI)
-- CI and deterministic local runs export the following variables: `HOST=127.0.0.1`, `PORT=4311`, `BASE_URL=http://127.0.0.1:4311`, `DEFAULT_LOCALE=de-de`, `CSP_MODE=report-only`, `ANALYTICS_ENABLED=0`, `NEXT_PUBLIC_TEST_MODE=1`, `TEST_MODE=1`, `PLAYWRIGHT_BROWSERS_PATH=0`.
+- **CSP modes in coverage:** Playwright e2e, axe, and Lighthouse runs inherit `CSP_MODE` from the GitHub repo variable. When the variable is missing (local shells), `playwright.config.ts` falls back to `report-only` so the server still boots.
+- **Report-only default:** `report-only` keeps violations observable without blocking page execution. Expect `Content-Security-Policy-Report-Only` with `script-src 'nonce-…' 'strict-dynamic' https:` and the server mirroring the nonce through `x-csp-nonce`.
+- **Strict gate:** CI now runs a `csp=strict` matrix leg (`npm run test:e2e:strict-csp`) alongside the default report-only smoke. The strict leg sets `CSP_MODE=strict`, reuses the production server build, exercises the security headers spec + `@critical` smoke, and uploads `/api/security/csp-report` samples as artifacts. Keep the spec adaptive to whichever mode is active.
+- **Troubleshooting:** If inline scripts fail or Playwright reports missing directives, confirm the current mode (`npx envinfo | grep CSP_MODE` or inspect `PLAYWRIGHT_ENV` logs) and ensure middleware is passing the nonce through layouts.
+- **BASE_URL contract:** `BASE_URL` feeds Playwright’s `use.baseURL` and Lighthouse targets. When unset, the config falls back to `http://127.0.0.1:4311`, matching the repo variable used in CI.
+- **Prelaunch defaults:** CI pins `IS_PRELAUNCH=true` so robots/noindex and waitlist CTAs render consistently with staging. Tests that inspect metadata should branch on `isPrelaunch()` rather than hard-coding strings.
+- **Short-circuit hooks:** `TEST_E2E_SHORTCIRCUIT=1` enables mocked integrations (waitlist bypass, hCaptcha stub). Specs that depend on live services must explicitly skip or override this flag.
+- **Nonce entropy:** `CSP_NONCE_BYTES=16` governs middleware nonce length. Tests must only assert “nonce present and matches header” rather than expecting specific lengths.
+- **Diagnostics tip:** If a waitlist submission makes no network call, confirm `TEST_E2E_SHORTCIRCUIT=1`, `CSP_MODE=report-only`, and `IS_PRELAUNCH=true` in the job logs.
+- CI and deterministic local runs export the following variables: `HOST=127.0.0.1`, `PORT=4311`, `BASE_URL=http://127.0.0.1:4311`, `DEFAULT_LOCALE=de-de`, `IS_PRELAUNCH=true`, `CSP_MODE=report-only`, `CSP_NONCE_BYTES=16`, `TEST_E2E_SHORTCIRCUIT=1`, `TEST_MODE=1`, `ANALYTICS_ENABLED=0`, `NEXT_PUBLIC_TEST_MODE=1`, `PLAYWRIGHT_BROWSERS_PATH=0`.
 - When `TEST_MODE===1`, the waitlist form seeds `hcaptchaToken` with `e2e-mocked-token` and hides the `<HCaptcha>` widget so Playwright never calls the real service. Production/preview builds must **not** set these variables.
+- Crypto helpers (`lib/email/tokens`, `lib/status/auth`, `lib/rate/limiter`, etc.) are server-only. Playwright and unit tests exercise them through server routes or direct imports within Node contexts; never stub them from `use client` fixtures.
 - The @critical waitlist spec (`tests/e2e/critical/critical.e2e.ts`) registers a context-level mock using `WAITLIST_API_PATTERN`, pre-grants consent via cookie, and synchronises on the mocked `POST` response (Promise.all + `waitForResponse`) before asserting the success UI. This keeps the test resilient without altering the live behaviour.

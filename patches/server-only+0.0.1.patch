@@ -1,0 +1,9 @@
+diff --git a/node_modules/server-only/index.js b/node_modules/server-only/index.js
+index e480b5c..0275ac7 100644
+--- a/node_modules/server-only/index.js
++++ b/node_modules/server-only/index.js
+@@ -1,3 +1,4 @@
++if (typeof window !== "undefined") { try { console.error("[server-only] imported in a Client Component. Stack:"); console.trace(); } catch(e) { console.error(e); } }
+ throw new Error(
+   "This module cannot be imported from a Client Component module. " +
+     "It should only be used from a Server Component."

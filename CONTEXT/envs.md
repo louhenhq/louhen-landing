@@ -4,10 +4,12 @@ Canonical reference for environment configuration across stages. Update this mat
 
 | Variable | Local (`.env.local`) | Vercel (Preview / Production) | GitHub Actions (var / secret) | Owner | Notes |
 | --- | --- | --- | --- | --- | --- |
-| **APP_BASE_URL** | `http://localhost:3000` | Preview: `https://staging.louhen.app`<br>Production: `https://www.louhen.app` | workflow env (`ci.yml` -> `http://localhost:4311`) | Platform | Must mirror `NEXT_PUBLIC_SITE_URL`; Playwright overrides to loopback for determinism. |
+| **APP_BASE_URL** | `http://localhost:3000` | Preview: `https://staging.louhen.app`<br>Production: `https://www.louhen.app` | workflow env (`ci.yml` -> `http://127.0.0.1:4311`) | Platform | Must mirror `NEXT_PUBLIC_SITE_URL`; Playwright overrides to loopback for determinism. |
+| **BASE_URL** | `http://127.0.0.1:4311` (used by Playwright/LHCI) | Derived from request host; leave unset in Vercel | repo variable `BASE_URL` (`http://127.0.0.1:4311`) | Platform | Drives server health checks, Playwright `baseURL`, and Lighthouse targets in CI. |
+| **CANONICAL_HOST** | `www.louhen.app` (optional for local metadata parity) | Preview: unset<br>Production: `www.louhen.app` | repo variable mirrors Vercel (`www.louhen.app`) | SEO | Server-side canonical origin; `getSiteOrigin()` falls back to this once BASE_URL/app overrides are absent. |
 | **NEXT_PUBLIC_SITE_URL** | `http://localhost:3000` | Preview: `https://staging.louhen.app`<br>Production: `https://www.louhen.app` | workflow env (`ci.yml`) | Platform | Keep in sync with `APP_BASE_URL` to avoid canonical/link drift. |
 | **NEXT_PUBLIC_ENV** | `development` | Preview: `preview` | workflow env (`ci.yml` -> `ci`) | Platform | Drives runtime guard rails; production is set to `production` via Vercel. |
-| **IS_PRELAUNCH** | `true` for local QA | Preview: `true` | workflow env (`ci.yml`) | Platform | Forces noindex + staging copy in CI/preview; set `false` only in production. |
+| **IS_PRELAUNCH** | `true` for local QA | Preview: `true`<br>Production: `false` | workflow env (`ci.yml` -> `true`) | Platform | Controls robots/launch copy; production flips to `false` once public launch is live. |
 | **NEXT_PUBLIC_ALLOW_INDEXING** | `false` | Preview: `false` | workflow env (`ci.yml`) | Platform | Production flips to `true` once public launch is approved. Guard enforced by CI. |
 | **EMAIL_TRANSPORT** | `noop` | Preview: `noop` | workflow env (`ci.yml`) | Platform | Production switches to `resend`; CI guard rejects accidental upgrades. |
 | **ANALYTICS_STORE_IP** | `false` | Preview: `false` | workflow env (`ci.yml`) | Platform | Production toggles to `true` only if privacy review approves. |
@@ -18,6 +20,8 @@ Canonical reference for environment configuration across stages. Update this mat
 | **FIREBASE_ADMIN_SA_B64** | Dev service account (Base64) | Preview: preview SA | secret: `CI_FIREBASE_ADMIN_SA_B64` | Platform | Rotate via Google IAM; never commit JSON. |
 | **FIREBASE_PROJECT_ID** | `louhen-dev` | Preview: `louhen-staging` | secret: `CI_FIREBASE_PROJECT_ID` | Platform | Ensure ID aligns with the active service account. |
 | **FIREBASE_DB_REGION** | `eur3` | Preview: `eur3` | secret: `CI_FIREBASE_DB_REGION` | Platform | Region locked; update only with a migration plan. |
+| **CSP_MODE** | `report-only` (toggle to `off` only for short-lived nonce debugging; revert before committing) | Preview: `report-only`<br>Development: `report-only`<br>Production: `strict` | repo variable `CSP_MODE` (default `report-only`; matrix/nightly jobs may opt into `strict`) | Security | Production enforces CSP blocking; preview/dev/CI stay report-only so Playwright can surface violations without breaking flows. |
+| **CSP_NONCE_BYTES** | `16` | Preview: `16`<br>Development: `16`<br>Production: `16` | repo variable `CSP_NONCE_BYTES` (`16`) | Security | Controls entropy for CSP nonces generated in `middleware.ts`. Increase only with performance review; keep values ≤64. |
 | **RESEND_API_KEY** | Optional dev key (omit to stay noop) | Preview: preview key | secret: `CI_RESEND_API_KEY` | Platform | Production key held in Vercel; rotate quarterly. |
 | **RESEND_FROM** | `no-reply@louhen.app` | Same as local | workflow env (`ci.yml`) | Growth Ops | Sender identity is fixed; update DNS before changing. |
 | **RESEND_REPLY_TO** | `hello@louhen.app` | Same as local | workflow env (`ci.yml`) | Growth Ops | Customer-facing reply channel; coordinate with support before edits. |
@@ -27,6 +31,9 @@ Canonical reference for environment configuration across stages. Update this mat
 | **STATUS_USER / STATUS_PASS** | `status-ops` / `status-secret` | Preview: strong random | secret: `CI_STATUS_USER` / `CI_STATUS_PASS` | Platform | Used by `/status`; rotate with every credential change. |
 | **PREVIEW_BYPASS_TOKEN** | - (set via GitHub secret only) | Vercel Protection Token | secret: `PREVIEW_BYPASS_TOKEN` | Platform | Required for preview Playwright runs; never echo in logs. |
 | **NEXT_PUBLIC_LOCALES / NEXT_PUBLIC_DEFAULT_LOCALE** | `en-de,de-de,fr-fr,nl-nl,it-it` / `de-de` | Preview: same as production | workflow env (`ci.yml`) | Localization | Update alongside locale additions in `next-intl`. |
+| **TEST_E2E_SHORTCIRCUIT** | `1` during automated tests (unset or `0` for manual live-service runs) | Preview/Production: unset (`0`) | repo variable `TEST_E2E_SHORTCIRCUIT` (`1`) | QA | Enables mocked waitlist flows and bypasses third-party services; CI requires it to remain truthy. |
+
+**Precedence:** Vercel Project variables (Production/Preview/Development) → GitHub Actions repository variables → workflow/job `env` overrides → `.env.*` files. Keep repo variables authoritative so CI, preview, and local runs stay aligned.
 
 ## Required Environment Variables
 
@@ -36,7 +43,7 @@ Canonical reference for environment configuration across stages. Update this mat
 | `NEXT_PUBLIC_DEFAULT_LOCALE` | `de-de` | Default locale for Germany; drives SSR locale negotiation, canonical URLs, `hreflang`, and JSON-LD language codes. | Same parity + change control rules as `NEXT_PUBLIC_LOCALES`. |
 | **NEXT_PUBLIC_WAITLIST_URGENCY** | `true` default | Preview: experiment-specific | workflow env (`ci.yml`) | Growth Ops | Legacy toggle; superseded by `NEXT_PUBLIC_BANNER_WAITLIST_URGENCY` when Slice 15 lands. Document interim changes in release notes. |
 | **TEST_MODE** | `0` (set manually for local unit tests) | Preview: `0` | workflow env (`ci.yml` -> `1`) | Platform | CI forces `1` to stub external integrations. |
-| **TEST_E2E_SHORTCIRCUIT** | `true` | Preview: `true` | workflow env (`ci.yml`) | Platform | Ensures Playwright bypasses third-party services. |
+| **TEST_E2E_SHORTCIRCUIT** | `1` | Preview: `0` (unset) | workflow env (`ci.yml` -> `1`) | Platform | Ensures Playwright bypasses third-party services; disable locally when exercising live integrations. |
 | **NEXT_PUBLIC_ALLOW_INDEXING** | `false` | Preview: `false` | workflow env (`ci.yml`) | Platform | Production toggles to `true`; CI guard prevents accidental enablement. |
 
 ## Feature Flags

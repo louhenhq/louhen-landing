@@ -20,8 +20,20 @@ This repo follows the locked decisions in [/CONTEXT/decision_log.md](decision_lo
 - Blocked requests cause the spec to fail and attach `blocked-requests.json` so CI surfaces the offending URL immediately.
 - ESLint ignores generated Playwright artifacts (trace bundles, reports) so linting stays focused on authored code; see [/CONTEXT/tests.md](tests.md#shell-agnostic-execution) for tooling scope.
 
+## CSP Modes & Nonce Lifecycle
+- `CSP_MODE` is the canonical switch: production (or any run with `VERCEL_ENV=production`) must set `strict`, while preview, CI, and local development default to `report-only` so regressions surface as reports without blocking smoke tests. Nightly/label-triggered gates may opt into `strict` to enforce the policy under test conditions.
+- `CSP_NONCE_BYTES` governs nonce entropy (default `16`). Middleware reads the value for every request and base64-encodes random bytes; increase only with security approval (upper bound 64) and update tests/docs alongside the change.
+- The nonce is minted once per request in `middleware.ts`, echoed via `x-csp-nonce`, and consumed by layouts/components through the server-only `NonceProvider` (`@server/csp/nonce-context.server`) and the client hook (`@/lib/csp/nonce-context.client`). Both `Content-Security-Policy` and `Content-Security-Policy-Report-Only` include `'strict-dynamic'` and the same nonce so bootstrap scripts can safely chain.
+- Reporting flows through both `report-to csp-endpoint` and `report-uri /api/security/csp-report`. The handler normalises payloads, keeps the last 50 (`getStoredCspReports()`), and emits `[security:csp-report]` log lines. Vercel log drains forward those records to the security SIEM for triage, while local/CI runs (non-production or `TEST_MODE=1`) can `GET /api/security/csp-report` to retrieve the buffered payloads for artifacts.
+- React context primitives (`createContext`, `useContext`) live exclusively in the client module (`lib/csp/nonce-context.client.tsx`). Server wrappers do not import React beyond types; they simply read headers and render the client provider to enforce the server/client split.
+
+### Server-only Crypto Usage
+- Node crypto must never leak into client/RSC bundles. Any module that imports from `'crypto'` (HMAC, hash, tokens, status auth, rate limiting, waitlist stores) must start with `import 'server-only';` so Next.js enforces server-only bundling.
+- When randomness is required in middleware or other Edge-compatible surfaces, rely on Web Crypto (`globalThis.crypto.getRandomValues` / `crypto.randomUUID`) instead of Node primitives.
+- Client components needing randomness must use Web APIs (`window.crypto`) and keep entropy confined to the browser. Do not import server crypto helpers, as guards will throw at build time.
+
 ## Content Security Policy Lifecycle
-- `middleware.ts` generates a single nonce (`crypto.randomUUID`) per request, mirrors it on the request (`content-security-policy(*)` + `x-csp-nonce`) and response, and delegates directive construction to `lib/security/csp.ts`. This keeps Next.js’ server renderer aligned with the nonce: `render.js` extracts it from the incoming CSP header so all framework scripts inherit the same value. Downstream layouts call `headers().get('x-csp-nonce')` and hydrate the React `NonceProvider`, which freezes the first SSR nonce so client re-renders cannot mutate it. Client components call `useNonce()` for inline scripts.
+- `middleware.ts` generates a single nonce (base64 from `randomBytes(CSP_NONCE_BYTES)`) per request, mirrors it on the request (`content-security-policy(*)` + `x-csp-nonce`) and response, and delegates directive construction to `lib/security/csp.ts`. This keeps Next.js’ server renderer aligned with the nonce: `render.js` extracts it from the incoming CSP header so all framework scripts inherit the same value. Downstream layouts call `headers().get('x-csp-nonce')` and hydrate the server `NonceProvider`, which asserts `typeof window === 'undefined'` and freezes the first SSR nonce so client re-renders cannot mutate it. Client components call `useNonce()` for inline scripts; the hook memoises the first non-empty nonce and tolerates `null` when a provider is missing to keep hydration resilient.
 - `lib/security/csp.ts` centralises directive assembly. Defaults for strict/preview flows:
   - `default-src 'self'`.
   - `script-src 'self' 'nonce-<value>' 'strict-dynamic' https:` (no `unsafe-inline`; chained scripts must inherit trust from the nonce-bearing bootstrap).
@@ -51,6 +63,7 @@ This repo follows the locked decisions in [/CONTEXT/decision_log.md](decision_lo
 - Block merges if:
   - New inline script omits the nonce prop or skips `useNonce`.
   - CSP relaxations were added without rationale + link to this doc.
+  - The server/client dependency guard fails (`npm run lint` / `npm run lint:deps`) or a PR re-exports server modules into shared/client namespaces.
   - `NEXT_PUBLIC_*` secrets creep into client code (lint rule + manual review).
   - Consent bypass is introduced (analytics firing prior to consent).
 
@@ -68,4 +81,5 @@ Keep this reference aligned with naming/structure docs ([naming.md](naming.md), 
   - `lh-csp-nonce` + JSON-LD nonces exist and match the server-provided value.
   - No inline script executes without a nonce and CSP forbids `'unsafe-inline'`.
   - Analytics bootstrap remains blocked until consent rewrites `connect-src`.
+- CI uploads `csp-reports.json` during the strict CSP job; inspect it whenever strict mode fails to confirm which directive tripped.
 - When CSP relaxations or new hosts are introduced, update the security tests + this doc in the same PR and link the `/CONTEXT/decision_log.md` entry.

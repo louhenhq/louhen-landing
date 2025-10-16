@@ -1,5 +1,8 @@
+import 'server-only';
+
 import { cookies } from 'next/headers';
-import { HEADER_AUTH_HINT_COOKIE, type HeaderUserState } from './userState';
+
+import { HEADER_AUTH_HINT_COOKIE, type HeaderUserState } from '@shared/auth/user-state';
 
 type HeaderHintResult = {
   userState: HeaderUserState;

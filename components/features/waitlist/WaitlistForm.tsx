@@ -122,7 +122,7 @@ export function WaitlistForm({
       // Playwright/CI bypass: inject a deterministic token so the mock API receives a captcha value.
       setCaptchaToken(TEST_CAPTCHA_TOKEN);
     }
-  }, [isTestMode]);
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -195,7 +195,7 @@ export function WaitlistForm({
     if (!captchaEnabled || isTestMode) return;
     captchaRef.current?.resetCaptcha();
     setCaptchaToken(null);
-  }, [captchaEnabled, isTestMode]);
+  }, []);
 
   const validate = useCallback(() => {
     const trimmedEmail = email.trim();

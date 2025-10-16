@@ -144,7 +144,9 @@ export function createWaitlistPostHandler(
   return async function POST(request: Request) {
     try {
       const isTestMode = process.env.TEST_MODE === '1';
-      const isShortCircuit = process.env.TEST_E2E_SHORTCIRCUIT === 'true';
+      const shortCircuitValue = process.env.TEST_E2E_SHORTCIRCUIT ?? '';
+      const normalizedShortCircuit = shortCircuitValue.trim().toLowerCase();
+      const isShortCircuit = normalizedShortCircuit === 'true' || normalizedShortCircuit === '1';
       const shouldIncludeTestPayload = isShortCircuit || isTestMode;
 
       const rawPayload = await readJson(request);

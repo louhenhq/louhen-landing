@@ -1,7 +1,11 @@
 import { test, expect } from '@tests/fixtures/playwright';
 
 const DEFAULT_LOCALE = process.env.DEFAULT_LOCALE || process.env.NEXT_PUBLIC_DEFAULT_LOCALE || 'de-de';
-const SHORT_CIRCUIT_ENABLED = process.env.TEST_E2E_SHORTCIRCUIT === 'true';
+const SHORT_CIRCUIT_ENABLED = (() => {
+  const raw = process.env.TEST_E2E_SHORTCIRCUIT ?? '';
+  const normalized = raw.trim().toLowerCase();
+  return normalized === 'true' || normalized === '1';
+})();
 const BYPASS_TOKEN = process.env.TEST_E2E_BYPASS_TOKEN || 'dev-bypass';
 
 function validWaitlistPayload() {

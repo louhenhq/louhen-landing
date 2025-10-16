@@ -21,7 +21,7 @@ import {
 import { getOgImageEntry } from '@lib/shared/og/builder';
 import { LOCALE_COOKIE } from '@/lib/theme/constants';
 import { SITE_NAME } from '@/constants/site';
-import { getHeaderUserState } from '@/lib/auth/userState.server';
+import { getHeaderUserState } from '@server/auth/user-state.server';
 const BOT_REGEX = /(bot|crawler|spider|bingpreview|facebookexternalhit|pinterest|embedly|quora link preview)/i;
 
 type RootSearchParams = Promise<Record<string, string | string[] | undefined>>;

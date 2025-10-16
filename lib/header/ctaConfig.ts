@@ -1,7 +1,7 @@
 import { appendUtmParams, type UtmParams } from '@/lib/url/appendUtmParams';
 import { resolveAnalyticsTarget } from '@/lib/url/analyticsTarget';
 import type { HeaderAnalyticsMode, HeaderCtaId } from '@/lib/analytics.schema';
-import { resolveDashboardUrl, type HeaderUserState } from '@/lib/auth/userState';
+import { resolveDashboardUrl, type HeaderUserState } from '@shared/auth/user-state';
 import { isPrelaunch } from '@/lib/env/prelaunch';
 import { defaultLocale, type SupportedLocale } from '@/next-intl.locales';
 

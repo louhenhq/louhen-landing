@@ -3,7 +3,7 @@
 Contract tests ensure structured outputs remain stable as the app evolves. Follow these rules whenever you introduce or update an internal API, metadata builder, or structured JSON/HTML fragment.
 
 ## What Requires a Contract Test?
-- JSON-LD builders (`components/SeoJsonLd.tsx`, metadata helpers).
+- JSON-LD builders (`lib/shared/seo/json-ld.tsx`, metadata helpers).
 - API responses served from `/api/*` when consumed by the frontend.
 - Structured HTML fragments reused across pages (e.g., canonical header/footer snippets).
 - Serialization helpers that fan-out to third-party integrations (email payloads, analytics events).

@@ -10,7 +10,7 @@ import HeaderLocaleSwitcher from './HeaderLocaleSwitcher';
 import HeaderThemeToggle from './HeaderThemeToggle';
 import HeaderConsentButton from './HeaderConsentButton';
 import PromoRibbon from './PromoRibbon';
-import { resolveLogoutUrl, type HeaderUserState } from '@lib/auth/userState';
+import { resolveLogoutUrl, type HeaderUserState } from '@shared/auth/user-state';
 import { buildHeaderCta, type HeaderCtaConfig } from '@lib/header/ctaConfig';
 import { recordHeaderEvent, type HeaderEventContext } from '@lib/analytics/header';
 import { buildHeaderNavigation, type NavItemResolved } from '@lib/nav/config';

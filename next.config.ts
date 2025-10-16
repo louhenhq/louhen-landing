@@ -1,8 +1,6 @@
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
-import { defaultLocale, locales } from './next-intl.locales';
-
-const DEFAULT_LOCALE = defaultLocale;
+import { locales } from './next-intl.locales';
 const SUPPORTED_LOCALES = locales;
 
 const withNextIntl = createNextIntlPlugin('./i18n/request.ts');

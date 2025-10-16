@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 type JsonLdProps = {
   schema: Record<string, unknown>;
   nonce?: string;

@@ -146,7 +146,7 @@ _Tables sorted by `Current Path`; `Status=DECIDE` rows include the follow-up nee
 | app/robots.ts | route | app/robots.ts | same | no | SKIP | Robots handler remains root-level per Next requirements. |
 | app/sitemap.ts | route | app/sitemap.ts | same | no | SKIP | Keep sitemap at root; update imports to alias after moves. |
 | components/FaqTwinsVoucherSchema.tsx | feature-comp | components/features/seo/FaqTwinsVoucherSchema.tsx | same | no | OK | Schema component stays server-safe; add named export. |
-| components/SeoJsonLd.tsx | feature-comp | components/features/seo/SeoJsonLd.tsx | same | no | OK | Convert default export to named per exports policy. |
+| components/SeoJsonLd.tsx | feature-comp | lib/shared/seo/json-ld.tsx | json-ld.tsx | no | OK | Moved into shared runtime to keep helpers isomorphic; keep named exports and continue to pass CSP nonce from layouts. |
 | components/TrustSchema.tsx | feature-comp | components/features/seo/TrustSchema.tsx | same | no | OK | Shared trust schema between home + method. |
 | lib/seo/legalMetadata.ts | util | lib/shared/seo/legal-metadata.ts | legal-metadata.ts | no | OK | Kebab-case util; ensure named export. |
 | lib/seo/shared.ts | util | lib/shared/seo/shared.ts | same | no | OK | Houses helpers consumed by metadata builders. |

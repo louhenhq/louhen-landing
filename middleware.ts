@@ -39,8 +39,42 @@ const STATIC_PATH_EXACT = new Set([
 ]);
 const EXTENSION_PATTERN = /\.[a-z0-9]+$/i;
 
+const DEFAULT_CSP_NONCE_BYTES = 16;
+const MAX_CSP_NONCE_BYTES = 64;
+
+function resolveNonceByteLength(): number {
+  const raw = process.env.CSP_NONCE_BYTES?.trim();
+  if (!raw) {
+    return DEFAULT_CSP_NONCE_BYTES;
+  }
+  const parsed = Number.parseInt(raw, 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return DEFAULT_CSP_NONCE_BYTES;
+  }
+  return Math.min(parsed, MAX_CSP_NONCE_BYTES);
+}
+
 function generateNonce() {
-  return crypto.randomUUID().replace(/-/g, '');
+  const byteLength = resolveNonceByteLength();
+  if (typeof crypto === 'undefined' || typeof crypto.getRandomValues !== 'function') {
+    throw new Error('crypto.getRandomValues is not available in this runtime.');
+  }
+  const bytes = new Uint8Array(byteLength);
+  crypto.getRandomValues(bytes);
+  let base64: string;
+  if (typeof Buffer !== 'undefined') {
+    base64 = Buffer.from(bytes).toString('base64');
+  } else {
+    let binary = '';
+    for (const byte of bytes) {
+      binary += String.fromCharCode(byte);
+    }
+    if (typeof btoa !== 'function') {
+      throw new Error('btoa is not available to encode nonce bytes.');
+    }
+    base64 = btoa(binary);
+  }
+  return base64;
 }
 
 function shouldApplySecurityHeaders(request: NextRequest) {

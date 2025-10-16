@@ -54,6 +54,18 @@ export function getSiteOrigin(): string {
     return normalizeOrigin(publicSite);
   }
 
+  const canonicalHost = process.env.CANONICAL_HOST?.trim();
+  if (canonicalHost) {
+    const origin = canonicalHost.includes('://') ? canonicalHost : `https://${canonicalHost}`;
+    return normalizeOrigin(origin);
+  }
+
+  const publicCanonical = process.env.NEXT_PUBLIC_CANONICAL_HOST?.trim();
+  if (publicCanonical) {
+    const origin = publicCanonical.includes('://') ? publicCanonical : `https://${publicCanonical}`;
+    return normalizeOrigin(origin);
+  }
+
   const vercelEnv = process.env.VERCEL_ENV?.trim().toLowerCase();
   if (vercelEnv && vercelEnv !== 'production') {
     return PREVIEW_FALLBACK_ORIGIN;

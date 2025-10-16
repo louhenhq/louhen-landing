@@ -65,11 +65,6 @@ function getContextBlockedRequests(context: BrowserContext): string[] {
   return marker[BLOCKED_REQUESTS_KEY]!;
 }
 
-function isBlockedRequestsAllowed(context: BrowserContext): boolean {
-  const marker = context as unknown as ContextMarker;
-  return Boolean(marker[ALLOW_BLOCKED_REQUESTS_KEY]);
-}
-
 function setBlockedRequestsAllowed(context: BrowserContext, allowed: boolean): void {
   const marker = context as unknown as ContextMarker;
   marker[ALLOW_BLOCKED_REQUESTS_KEY] = allowed;

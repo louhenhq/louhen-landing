@@ -44,18 +44,6 @@ function isRecord(value) {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function hasPath(record, keyPath) {
-  let current = record;
-  for (const segment of keyPath.split('.')) {
-    if (isRecord(current) && segment in current) {
-      current = current[segment];
-    } else {
-      return false;
-    }
-  }
-  return true;
-}
-
 async function main() {
   const files = [];
   for (const dir of SOURCE_DIRS) {

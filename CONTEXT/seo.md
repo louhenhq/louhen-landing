@@ -52,7 +52,7 @@ Locked decisions: canonical host `https://www.louhen.app`, preview `https://stag
 - When the logged-in hint renders the Dashboard CTA + Logout link, the CTA points to `NEXT_PUBLIC_DASHBOARD_URL` (fallback `/dashboard`) and should remain a non-indexed destination (app shell / authenticated route). Logout links should target marketing/app handoff endpoints that already emit `noindex` and must not introduce new canonical entries.
 - Locale switcher must redirect to the locale-specific path while preserving query parameters so canonical + hreflang mappings stay consistent. Spot-check `link[rel="canonical"]` and `link[rel="alternate"][hreflang]` after switching locales during QA.
 - Header navigation/CTA/ribbon urls all pass through `lib/url/appendUtmParams.ts`; never hand-roll `?utm_*` strings. When adding a new header surface, supply `{ source: 'header', medium: 'cta' | 'promo-ribbon', campaign: <locale-aware> }` and let the helper serialise consistently.
-- Method and legal pages publish `BreadcrumbJsonLd` alongside `OrganizationJsonLd`/`WebSiteJsonLd`. Reuse the shared component (`components/SeoJsonLd.tsx`) and always provide the CSP nonce from `headers()`.
+- Method and legal pages publish `BreadcrumbJsonLd` alongside `OrganizationJsonLd`/`WebSiteJsonLd`. Reuse the shared component (`lib/shared/seo/json-ld.tsx`) and always provide the CSP nonce from `headers()`.
 - Internal tooling surfaces (e.g., `/tokens`) remain `noindex, nofollow` and are excluded from the sitemap. Enable them via env flags only when QA needs to access the playground; they must never ship as public marketing content.
 
 
@@ -67,7 +67,7 @@ Locked decisions: canonical host `https://www.louhen.app`, preview `https://stag
 - Playwright SEO add-ons (`tests/e2e/seo/`) enforce sitemap HTTP integrity and canonical uniqueness on every preview run. Adjust sampling thresholds via `SEO_SITEMAP_SAMPLE` if a temporary hotfix requires a smaller set.
 
 ## Testing Expectations & Guardrails
-- Metadata specs must assert title, description, canonical, robots (`noindex` when `IS_PRELAUNCH`), OG/Twitter tags, and JSON-LD, using the deterministic ids exposed by `components/SeoJsonLd.tsx` (`lh-jsonld-organization`, `lh-jsonld-website`, `lh-jsonld-breadcrumb`, etc.).
+- Metadata specs must assert title, description, canonical, robots (`noindex` when `IS_PRELAUNCH`), OG/Twitter tags, and JSON-LD, using the deterministic ids exposed by `lib/shared/seo/json-ld.tsx` (`lh-jsonld-organization`, `lh-jsonld-website`, `lh-jsonld-breadcrumb`, etc.).
 - Cover each route in the default locale (`de-de`) **and** at least one non-default locale, verifying `<html lang>`, `hreflang`, and `x-default` entries match the canonical host rules above.
 - Fail tests if any structured data references preview/staging hosts or missing locales. Attach header and metadata dumps to Playwright test info so CI artifacts surface the current values.
 - Lighthouse smoke runs enforce the budgets documented in [/CONTEXT/performance.md](performance.md). Temporary waivers require the `perf-waiver` label plus an entry in `/CONTEXT/decision_log.md` with an expiry date.

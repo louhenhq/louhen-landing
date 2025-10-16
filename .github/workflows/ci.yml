@@ -13,7 +13,7 @@ concurrency:
 
 env:
   TEST_MODE: ${{ vars.TEST_MODE }}
-  TEST_E2E_SHORTCIRCUIT: 'true'
+  TEST_E2E_SHORTCIRCUIT: '1'
   IS_PRELAUNCH: 'true'
   EMAIL_TRANSPORT: noop
   ANALYTICS_STORE_IP: 'false'
@@ -25,6 +25,8 @@ env:
   NEXT_PUBLIC_ALLOW_INDEXING: 'false'
   NEXT_PUBLIC_HCAPTCHA_SITE_KEY: '10000000-ffff-ffff-ffff-000000000001'
   NEXT_PUBLIC_WAITLIST_URGENCY: 'true'
+  CSP_MODE: ${{ vars.CSP_MODE }}
+  CSP_NONCE_BYTES: ${{ vars.CSP_NONCE_BYTES }}
   COMMIT_SHA: ${{ github.sha }}
   NEXT_PUBLIC_COMMIT_SHA: ${{ github.sha }}
   NEXT_BUILD_DIR: .next
@@ -79,6 +81,10 @@ jobs:
         # prevent Homebrew profile sourcing in CI
         shell: bash --noprofile --norc -eo pipefail {0}
         run: npm run typecheck
+
+      - name: Dependency graph policy
+        shell: bash --noprofile --norc -eo pipefail {0}
+        run: npm run lint:deps
 
       - name: Unit tests
         # prevent Homebrew profile sourcing in CI
@@ -145,7 +151,13 @@ jobs:
           include-hidden-files: true
 
   e2e:
-    name: e2e
+    name: e2e (csp=${{ matrix.csp_mode }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - csp_mode: report-only
+          - csp_mode: strict
     runs-on: ubuntu-latest
     needs: build
     timeout-minutes: 45
@@ -158,7 +170,7 @@ jobs:
       NEXT_PUBLIC_SITE_URL: ${{ vars.BASE_URL }}
       BASE_URL: ${{ vars.BASE_URL }}
       DEFAULT_LOCALE: ${{ vars.DEFAULT_LOCALE }}
-      CSP_REPORT_ONLY: ${{ vars.CSP_REPORT_ONLY }}
+      CSP_MODE: ${{ matrix.csp_mode == 'strict' && 'strict' || vars.CSP_MODE }}
       ANALYTICS_ENABLED: ${{ vars.ANALYTICS_ENABLED }}
       NEXT_PUBLIC_TEST_MODE: ${{ vars.NEXT_PUBLIC_TEST_MODE }}
       TEST_MODE: ${{ vars.TEST_MODE }}
@@ -222,7 +234,7 @@ jobs:
 
       - name: Echo Playwright env snapshot
         run: |
-          node -e "const snapshot = {}; const pick = (k) => { if (process.env[k] !== undefined) snapshot[k] = process.env[k]; }; ['APP_BASE_URL','BASE_URL','IS_PRELAUNCH','CSP_REPORT_ONLY','NEXT_PUBLIC_CSP_REPORT_ONLY','NEXT_PUBLIC_DEFAULT_LOCALE','NEXT_PUBLIC_ANALYTICS_ENABLED'].forEach(pick); if (!snapshot.CSP_REPORT_ONLY && snapshot.NEXT_PUBLIC_CSP_REPORT_ONLY) snapshot.CSP_MODE = snapshot.NEXT_PUBLIC_CSP_REPORT_ONLY; console.log('PLAYWRIGHT_ENV', JSON.stringify(snapshot));"
+          node -e "const snapshot = {}; const pick = (k) => { if (process.env[k] !== undefined) snapshot[k] = process.env[k]; }; ['APP_BASE_URL','BASE_URL','IS_PRELAUNCH','CSP_MODE','TEST_E2E_SHORTCIRCUIT','CSP_NONCE_BYTES','DEFAULT_LOCALE','NEXT_PUBLIC_DEFAULT_LOCALE','NEXT_PUBLIC_ANALYTICS_ENABLED'].forEach(pick); console.log('PLAYWRIGHT_ENV', JSON.stringify(snapshot));"
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -234,7 +246,7 @@ jobs:
 
       - name: Verify environment wiring
         run: |
-          required_envs=(NEXT_PUBLIC_ANALYTICS_DISABLED NEXT_PUBLIC_ANALYTICS_DEBUG NEXT_PUBLIC_ENV NEXT_PUBLIC_SITE_URL NEXT_PUBLIC_HCAPTCHA_SITE_KEY NEXT_PUBLIC_WAITLIST_URGENCY NEXT_PUBLIC_COMMIT_SHA NEXT_PUBLIC_LOCALES NEXT_PUBLIC_DEFAULT_LOCALE NEXT_PUBLIC_ALLOW_INDEXING NEXT_PUBLIC_TEST_MODE DEFAULT_LOCALE APP_BASE_URL FIREBASE_PROJECT_ID FIREBASE_DB_REGION FIREBASE_ADMIN_SA_B64 RESEND_API_KEY RESEND_FROM RESEND_REPLY_TO HCAPTCHA_SECRET WAITLIST_CONFIRM_TTL_DAYS STATUS_USER STATUS_PASS SUPPRESSION_SALT EMAIL_TRANSPORT ANALYTICS_STORE_IP IS_PRELAUNCH TEST_MODE CSP_REPORT_ONLY ANALYTICS_ENABLED PLAYWRIGHT_BROWSERS_PATH)
+          required_envs=(NEXT_PUBLIC_ANALYTICS_DISABLED NEXT_PUBLIC_ANALYTICS_DEBUG NEXT_PUBLIC_ENV NEXT_PUBLIC_SITE_URL NEXT_PUBLIC_HCAPTCHA_SITE_KEY NEXT_PUBLIC_WAITLIST_URGENCY NEXT_PUBLIC_COMMIT_SHA NEXT_PUBLIC_LOCALES NEXT_PUBLIC_DEFAULT_LOCALE NEXT_PUBLIC_ALLOW_INDEXING NEXT_PUBLIC_TEST_MODE DEFAULT_LOCALE APP_BASE_URL FIREBASE_PROJECT_ID FIREBASE_DB_REGION FIREBASE_ADMIN_SA_B64 RESEND_API_KEY RESEND_FROM RESEND_REPLY_TO HCAPTCHA_SECRET WAITLIST_CONFIRM_TTL_DAYS STATUS_USER STATUS_PASS SUPPRESSION_SALT EMAIL_TRANSPORT ANALYTICS_STORE_IP IS_PRELAUNCH TEST_MODE TEST_E2E_SHORTCIRCUIT CSP_MODE CSP_NONCE_BYTES ANALYTICS_ENABLED PLAYWRIGHT_BROWSERS_PATH)
           missing=0
           for key in "${required_envs[@]}"; do
             if [ -z "${!key+x}" ]; then
@@ -274,13 +286,25 @@ jobs:
             echo "::error::TEST_MODE must be '1' in CI (found '${TEST_MODE}')"
             missing=1
           fi
+          case "${TEST_E2E_SHORTCIRCUIT,,}" in
+            1|true)
+              ;;
+            *)
+              echo "::error::TEST_E2E_SHORTCIRCUIT must be truthy (expected '1'); found '${TEST_E2E_SHORTCIRCUIT}'"
+              missing=1
+              ;;
+          esac
+          if ! [[ "$CSP_NONCE_BYTES" =~ ^[0-9]+$ ]]; then
+            echo "::error::CSP_NONCE_BYTES must be numeric (found '${CSP_NONCE_BYTES}')"
+            missing=1
+          fi
           if [ "$missing" -ne 0 ]; then
             exit 1
           fi
 
       - name: Echo Playwright env snapshot
         run: |
-          node -e "const snapshot = {}; const pick = (k) => { if (process.env[k] !== undefined) snapshot[k] = process.env[k]; }; ['APP_BASE_URL','BASE_URL','IS_PRELAUNCH','CSP_REPORT_ONLY','NEXT_PUBLIC_CSP_REPORT_ONLY','NEXT_PUBLIC_DEFAULT_LOCALE','NEXT_PUBLIC_ANALYTICS_ENABLED'].forEach(pick); if (!snapshot.CSP_REPORT_ONLY && snapshot.NEXT_PUBLIC_CSP_REPORT_ONLY) snapshot.CSP_MODE = snapshot.NEXT_PUBLIC_CSP_REPORT_ONLY; console.log('PLAYWRIGHT_ENV', JSON.stringify(snapshot));"
+          node -e "const snapshot = {}; const pick = (k) => { if (process.env[k] !== undefined) snapshot[k] = process.env[k]; }; ['APP_BASE_URL','BASE_URL','IS_PRELAUNCH','CSP_MODE','TEST_E2E_SHORTCIRCUIT','CSP_NONCE_BYTES','DEFAULT_LOCALE','NEXT_PUBLIC_DEFAULT_LOCALE','NEXT_PUBLIC_ANALYTICS_ENABLED'].forEach(pick); console.log('PLAYWRIGHT_ENV', JSON.stringify(snapshot));"
 
       - name: Start Next.js server
         # prevent Homebrew profile sourcing in CI
@@ -296,14 +320,15 @@ jobs:
         shell: bash --noprofile --norc -eo pipefail {0}
         run: |
           for i in {1..40}; do
-            if curl -sSf "$BASE_URL/" >/dev/null 2>&1; then
-              echo "App reachable at $BASE_URL"
+            if curl -sSf "$BASE_URL/${DEFAULT_LOCALE}/waitlist" >/dev/null 2>&1; then
+              echo "Waitlist reachable at $BASE_URL/${DEFAULT_LOCALE}/waitlist"
               break
             fi
             echo "Waiting for app..."
             sleep 0.5
           done
-          curl -sSf "$BASE_URL/" >/dev/null || (echo "Server failed to respond" && exit 1)
+          curl -sSf "$BASE_URL/${DEFAULT_LOCALE}/waitlist" >/dev/null || (echo "Waitlist route failed readiness check" && exit 1)
+          curl -sSf "$BASE_URL/" >/dev/null || echo "::warning::Root route not ready; continuing because waitlist succeeded."
 
       - name: Verify test-mode captcha bypass
         shell: bash --noprofile --norc -eo pipefail {0}
@@ -313,6 +338,7 @@ jobs:
           test "$COUNT" -eq 0
 
       - name: Playwright smoke suite
+        if: matrix.csp_mode == 'report-only'
         # prevent Homebrew profile sourcing in CI
         shell: bash --noprofile --norc -eo pipefail {0}
         env:
@@ -320,11 +346,36 @@ jobs:
         run: npm run test:e2e:smoke
 
       - name: Playwright critical suite
+        if: matrix.csp_mode == 'report-only'
         # prevent Homebrew profile sourcing in CI
         shell: bash --noprofile --norc -eo pipefail {0}
         env:
           DEBUG: pw:webserver,pw:api
         run: npm run test:e2e:critical
+
+      - name: Strict CSP smoke suite
+        if: matrix.csp_mode == 'strict'
+        shell: bash --noprofile --norc -eo pipefail {0}
+        env:
+          DEBUG: pw:webserver,pw:api
+        run: npm run test:e2e:strict-csp
+
+      - name: Collect strict CSP reports
+        if: matrix.csp_mode == 'strict'
+        shell: bash --noprofile --norc -eo pipefail {0}
+        run: |
+          mkdir -p ci-artifacts/csp
+          if ! curl -sSf "$BASE_URL/api/security/csp-report" -o ci-artifacts/csp/reports.json; then
+            echo '{"reports":[]}' > ci-artifacts/csp/reports.json
+          fi
+
+      - name: Upload strict CSP reports
+        if: matrix.csp_mode == 'strict'
+        uses: actions/upload-artifact@v4
+        with:
+          name: csp-reports
+          path: ci-artifacts/csp/reports.json
+          if-no-files-found: warn
 
       - name: Tail Next.js server log
         if: always()

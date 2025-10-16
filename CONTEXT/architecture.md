@@ -8,9 +8,28 @@ High-level map of routes, data flow, environment setup, security, observability,
 
 - **Structure:** `app/` (routes), `components/{ui,blocks,features/…}`, `lib/shared/` (isomorphic), `lib/server/` (server-only), `tests/{unit,e2e,axe}/`, `scripts/`, `content/`, `public/`, `CONTEXT/`, `.github/`. See [/CONTEXT/naming.md](naming.md) for enforced conventions and [/CONTEXT/rename_map.md](rename_map.md) for the migration roadmap.
 - **Route groups:** Marketing surfaces live under `app/(site)/[locale]/…` using lowercase BCP-47 segments; API handlers stay in `app/api/`. Default-locale pages must call `unstable_setRequestLocale` before rendering. Policy details live in [/CONTEXT/i18n.md#locale-scoped-routing-policy-2025-10-13](i18n.md#locale-scoped-routing-policy-2025-10-13).
-- **Runtime split:** Place anything with secrets, Firestore, or Node-only APIs in `lib/server/`. Keep universal utilities, hooks, and analytics helpers in `lib/shared/` so they can execute on both client and server.
+- **Runtime split:** Place anything with secrets, Firestore, or Node-only APIs in `lib/server/`. Keep universal utilities, hooks, and analytics helpers in `lib/shared/` so they can execute on both client and server. Client-only helpers/components live under `lib/client/` or `components/**` and must start with the `'use client'` directive. Every module that touches Node-only primitives (e.g., `crypto`, `fs`) must begin with `import 'server-only';` and import Node packages via the standard specifier (`import { randomBytes } from 'crypto'`). ESLint and dependency-cruiser enforce these boundaries so client bundles can never pull server code (or Node built-ins) transitively.
 - **Stack baseline:** Next.js 15 App Router, TypeScript strict mode, Tailwind + Style Dictionary tokens, consent-gated analytics, Firebase Admin, Resend, hCaptcha.
-- **TypeScript configs:** `tsconfig.json` (dev superset including tests, Playwright, scripts) and `tsconfig.build.json` (app build subset) share path aliases `@app/*`, `@components/*`, `@lib/*`, `@tests/*`.
+- **TypeScript configs:** `tsconfig.json` (dev superset including tests, Playwright, scripts) and `tsconfig.build.json` (app build subset) share path aliases `@app/*`, `@components/*`, `@lib/*`, `@tests/*`, plus the runtime-specific helpers `@server/*`, `@client/*`, and `@shared/*`.
+
+### Server/Client Module Boundaries
+- **Folders:**
+  - `lib/server/**` → server-only modules. Every file begins with `import 'server-only';` and may depend on secrets, Firestore Admin, or Node built-ins.
+  - `lib/client/**` → client-only utilities. React modules here (and anywhere under `components/**` or `app/**/components/**`) must start with `'use client'`.
+  - `lib/shared/**` → isomorphic helpers that stay free of Node primitives (`crypto`, `fs`, `next/headers`, etc.).
+- **Suffix rules:** Any file ending in `*.server.ts(x)` is treated as server-only; `*.client.ts(x)` is always client-only. ESLint blocks `@server/*`, `@/lib/server/**`, or `*.server.*` imports inside client/shared trees.
+- **Path aliases:**
+  - `@server/*` → `lib/server/*`
+  - `@client/*` → `lib/client/*`
+  - `@shared/*` → `lib/shared/*`
+  Use `@shared/*` whenever a helper must remain isomorphic. Client trees must never import from `@server/*`.
+- **Allowed graph:**
+  - Server ➜ Shared ✅
+  - Client ➜ Shared ✅
+  - Client ➜ Server ❌
+  - Shared ➜ Server ❌
+  Dependency-cruiser (`npm run lint:deps`) enforces this graph in CI, and ESLint mirrors it locally.
+- **CSP nonce context:** `lib/csp/nonce-context.server.tsx` (server-only wrapper that reads `x-csp-nonce` and renders the client provider) ➜ `lib/csp/nonce-context.client.tsx` (owns the React context + `useNonce()` hook). No shared module imports `react`, avoiding the server build error caused by `createContext` in server bundles.
 
 ### Consent-First Analytics Modules
 - `lib/shared/analytics/client.ts` — client-side queue + flush abstraction; no vendor SDK code or network calls execute until consent is `granted`.
@@ -173,7 +192,7 @@ export function OgRoute() {
 
 ## 6) CSP & Inline Scripts
 
-- Middleware issues a strict CSP with per-request nonces. All inline scripts **must** set `nonce={nonce}` from the request headers and render via helpers like `SeoJsonLd`.
+- Middleware issues a strict CSP with per-request nonces. All inline scripts **must** set `nonce={nonce}` from the request headers and render via helpers like `@shared/seo/json-ld`.
 - Do not add raw `<script>` tags or inline event handlers; encapsulate logic in React components or external modules so the nonce is applied automatically.
 - JSON-LD helpers (`OrganizationJsonLd`, `BreadcrumbJsonLd`, `TechArticleJsonLd`, etc.) already inject the correct nonce — reuse them instead of hand-writing `<script>` blocks.
 

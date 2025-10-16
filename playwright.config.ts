@@ -9,7 +9,6 @@ const DEFAULT_LOOPBACK_PORT = 4311;
 const HOST = process.env.HOST ?? DEFAULT_LOOPBACK_HOST;
 const parsedPort = Number.parseInt(process.env.PORT ?? String(DEFAULT_LOOPBACK_PORT), 10);
 const PORT = Number.isFinite(parsedPort) ? parsedPort : DEFAULT_LOOPBACK_PORT;
-const HEALTH_PATH = process.env.PW_HEALTH_PATH ?? '/favicon.ico';
 const fallbackLocalURL = `http://${DEFAULT_LOOPBACK_HOST}:${PORT}`;
 const shouldSkipWebServer = process.env.PLAYWRIGHT_SKIP === '1';
 const artifactsRoot = process.env.PLAYWRIGHT_ARTIFACTS_DIR ?? 'artifacts/playwright';
@@ -108,7 +107,7 @@ const testEnv = {
   BASE_URL: canonicalOrigin,
   APP_BASE_URL: canonicalOrigin,
   TEST_MODE: '1',
-  TEST_E2E_SHORTCIRCUIT: 'true',
+  TEST_E2E_SHORTCIRCUIT: process.env.TEST_E2E_SHORTCIRCUIT ?? '1',
   IS_PRELAUNCH: process.env.IS_PRELAUNCH ?? 'true',
   TEST_E2E_BYPASS_TOKEN: 'e2e-mocked-token',
   NEXT_PUBLIC_ENV: process.env.NEXT_PUBLIC_ENV ?? 'ci',
@@ -136,6 +135,7 @@ const testEnv = {
   STATUS_USER: statusUser,
   STATUS_PASS: statusPass,
   CSP_MODE: process.env.CSP_MODE ?? 'report-only',
+  CSP_NONCE_BYTES: process.env.CSP_NONCE_BYTES ?? '16',
 } as const;
 
 for (const [key, value] of Object.entries(testEnv)) {
@@ -149,6 +149,8 @@ const loggedEnv = {
   IS_PRELAUNCH: process.env.IS_PRELAUNCH,
   CSP_MODE: process.env.CSP_MODE ?? 'report-only',
   DEFAULT_LOCALE: process.env.NEXT_PUBLIC_DEFAULT_LOCALE ?? 'de-de',
+  TEST_E2E_SHORTCIRCUIT: process.env.TEST_E2E_SHORTCIRCUIT ?? '1',
+  CSP_NONCE_BYTES: process.env.CSP_NONCE_BYTES ?? '16',
   ANALYTICS_ENABLED: process.env.NEXT_PUBLIC_ANALYTICS_ENABLED ?? '0',
 };
 console.info('[playwright:env]', JSON.stringify(loggedEnv, null, 2));
@@ -220,7 +222,7 @@ if (shouldSkipWebServer) {
   if (shouldStartWebServer) {
     config.webServer = {
       command: 'npm run start:e2e',
-      // Intentionally using the base URL without HEALTH_PATH for reuseExistingServer detection
+      // Intentionally using the base URL without an additional health path for reuseExistingServer detection
       url: `http://127.0.0.1:${PORT}`,
       reuseExistingServer: true,
       timeout: 120_000,

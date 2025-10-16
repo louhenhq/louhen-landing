@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import LandingExperience from '@/app/(site)/components/LandingExperience';
 import { ReferralAttribution } from '@components/features/waitlist';
 import { SITE_NAME } from '@/constants/site';
-import { getHeaderUserState } from '@/lib/auth/userState.server';
+import { getHeaderUserState } from '@server/auth/user-state.server';
 import { loadMessages } from '@/lib/intl/loadMessages';
 import { safeGetMessage } from '@/lib/intl/getMessage';
 import { localeHomePath } from '@lib/shared/routing/legal-path';

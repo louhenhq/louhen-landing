@@ -29,6 +29,24 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
 
 ## History
 
+- **2025-10-13 — Harden server/client boundaries (Owner: Security & Platform)**  
+  - Split the CSP nonce utilities into `lib/csp/nonce-context.server.tsx` (server-only wrapper with runtime guard) and `lib/csp/nonce-context.client.tsx` (sole owner of the React context/hook). Removing the shared `createContext` fixed the Next.js build error and keeps React imports out of server bundles. Moved JSON-LD helpers to `lib/shared/seo/json-ld.tsx` so server layouts reuse them without leaking client code.  
+  - Introduced `@server/*`, `@client/*`, and `@shared/*` path aliases; added ESLint rules that force `import 'server-only';` in `lib/server/**`, require `'use client'` in client trees, and block barrels that re-export server modules into shared/client namespaces.  
+  - Added `dependency-cruiser` guard (`npm run lint:deps`) + CI step to block Client→Server/Node-crypto edges and Shared→Server edges. Updated the `ci.yml` e2e job to run a `csp=strict` matrix leg that exercises security headers smoke and uploads `/api/security/csp-report` samples.  
+  - Residual risk: shared files can still call server side effects unless reviews keep enforcing the policy; dependency graph guard must stay aligned with new aliases.
+- **2025-10-12 — Finalise Step-1 environment contract (Owner: Platform & QA)**  
+  - Locked canonical env defaults: `CANONICAL_HOST=www.louhen.app` (production only), `BASE_URL=http://127.0.0.1:4311` for CI/Playwright, `IS_PRELAUNCH=false` in production (true elsewhere), `CSP_NONCE_BYTES=16`, and `TEST_E2E_SHORTCIRCUIT=1` for automated test harnesses.  
+  - Updated middleware to honour `CSP_NONCE_BYTES`, ensured Playwright/CI inherit repo variables without hard-coded overrides, and documented the precedence chain (Vercel → GitHub repo vars → workflow job env → `.env.*`).  
+  - Rollback: adjust the corresponding Vercel/Repo variables (or unset them) and revert middleware/playwright changes if entropy requirements change.
+- **2025-10-12 — Secure crypto imports (Owner: Security)**  
+  - Replaced `node:crypto` specifiers with standard `'crypto'`, added `import 'server-only';` guards to every server crypto module, and updated middleware to rely on Web Crypto for nonce generation.  
+  - Prevented Next.js build failures (`UnhandledSchemeError: node:crypto`) and ensured Playwright/CI inherit the guarded modules.  
+  - Rollback: revert the imports or remove the `server-only` guard (not recommended); the build error will return if `node:` specifiers are reintroduced.
+
+- **2025-10-12 — Adopt CSP_MODE policy (Owner: Security & QA)**  
+  - Lock `CSP_MODE=strict` for production while keeping preview, development, CI, and default Playwright/Lighthouse runs on `report-only`. Added repo-variable wiring so GitHub Actions exports the mode into job environments and the test server inherits it automatically.  
+  - Updated documentation (envs/tests/ci_cd/security) and security headers spec to adapt assertions based on the active mode, ensuring report-only flows still assert nonce + `strict-dynamic`.  
+  - Rollback: set `CSP_MODE` repo variable to the desired global value (e.g., `strict`) and remove the adaptive assertions; update docs to reflect the reverted policy.
 - **2025-10-11 — Method route locale-only**  
   - Removed the prefixless `/method` alias; requests now 404 instead of redirecting.  
   - Updated routing helpers, sitemap/SEO builders, Playwright suites, and documentation to reference `/{locale}/method` exclusively.  
@@ -137,7 +155,7 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
   - Notes → `/tokens` remains dynamic/noindex; long-term static export requires refactoring the root layout’s header/cookie access.  
 
 - **2025-10-06 — Header Slice 9 SEO 2025 Audit**  
-  - Keep → `lib/seo/shared.ts`, `lib/shared/seo/method-metadata.ts`, and `lib/seo/legalMetadata.ts` already generate locale-aware canonical + hreflang maps; `components/SeoJsonLd.tsx` stays the nonce-aware JSON-LD helper; `lib/header/ctaConfig.ts`, `lib/header/ribbonConfig.ts`, and `lib/nav/config.ts` consistently route header links through `appendUtmParams`.
+  - Keep → `lib/seo/shared.ts`, `lib/shared/seo/method-metadata.ts`, and `lib/seo/legalMetadata.ts` already generate locale-aware canonical + hreflang maps; `lib/shared/seo/json-ld.tsx` stays the nonce-aware JSON-LD helper; `lib/header/ctaConfig.ts`, `lib/header/ribbonConfig.ts`, and `lib/nav/config.ts` consistently route header links through `appendUtmParams`.
   - Adjust → `components/features/header-nav/Header.tsx` needs the brand link to reuse `localeHomePath` so locale switching preserves the path; `app/(site)/waitlist/page.tsx` should call `hreflangMapFor(() => '/waitlist')` to keep alternates aligned with the shared helper.  
   - Delete → None.  
   - Notes → Verified header surfaces share analytics targets and promo ribbon preserves nonce-safe structured data context.  

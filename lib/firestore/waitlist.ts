@@ -1,4 +1,5 @@
-import { randomUUID } from 'node:crypto';
+import 'server-only';
+import { randomUUID } from 'crypto';
 import { getDb } from '@/lib/firebaseAdmin';
 import { isTestMode } from '@/lib/testMode';
 import { createTokenLookupHash } from '@/lib/security/tokens';

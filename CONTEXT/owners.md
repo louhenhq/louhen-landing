@@ -9,7 +9,7 @@ Use this map when triaging failures or planning new coverage. Tag the owning squ
 | Footer & legal surfaces | `components/features/footer/**`, `/[locale]/legal/*` | Legal & Compliance | #louhen-legal |
 | Waitlist funnel | `/[locale]/waitlist`, `/api/waitlist/*`, pre-onboarding flows | Growth | #louhen-growth |
 | Method experience | `/[locale]/method`, method hero/trust/testimonials | Product Experience | #louhen-product |
-| SEO / JSON-LD / Metadata | `components/SeoJsonLd.tsx`, metadata builders, sitemap | SEO & Platform | #louhen-seo |
+| SEO / JSON-LD / Metadata | `lib/shared/seo/json-ld.tsx`, metadata builders, sitemap | SEO & Platform | #louhen-seo |
 | Security headers & CSP | Middleware, security policy config, Playwright header specs | Security Engineering | #louhen-security |
 | Consent & analytics | Consent provider, banner, analytics bootstrap | Privacy & Analytics | #louhen-privacy |
 
