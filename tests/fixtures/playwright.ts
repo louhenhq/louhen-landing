@@ -1,8 +1,100 @@
 import { test as base } from '@playwright/test';
-import type { BrowserContext, Page } from '@playwright/test';
+import type { APIRequestContext, BrowserContext, Page, ConsoleMessage, Request } from '@playwright/test';
 import type { FeatureFlags } from '@/lib/shared/flags';
+import { setLocaleCookie } from '@tests/e2e/_utils/url';
+import { ALLOW_BLOCKED_REQUESTS_ANNOTATION } from '@tests/e2e/_utils/annotations';
 
 const INTERCEPT_SYMBOL = Symbol('louhen-playwright-intercept');
+const CONSOLE_LOG_KEY = Symbol('louhen-playwright-console');
+const NETWORK_LOG_KEY = Symbol('louhen-playwright-network');
+const BLOCKED_REQUESTS_KEY = Symbol('louhen-playwright-blocked');
+const CONTEXT_ROUTE_KEY = Symbol('louhen-playwright-context-route');
+const ALLOW_BLOCKED_REQUESTS_KEY = Symbol('louhen-playwright-allow-blocked-requests');
+
+type ContextMarker = {
+  [BLOCKED_REQUESTS_KEY]?: string[];
+  [CONTEXT_ROUTE_KEY]?: boolean;
+  [ALLOW_BLOCKED_REQUESTS_KEY]?: boolean;
+};
+
+/**
+ * Local network origins allowed during tests. Anything else is aborted.
+ * Additional origins must be reviewed and documented alongside the testing policy.
+ */
+type PageDiagnostics = {
+  console: Array<{ type: string; text: string; location?: string }>;
+  network: Array<{
+    url: string;
+    method: string;
+    resourceType: string;
+    status?: number;
+    failure?: string;
+  }>;
+};
+
+function isAllowedNetworkUrl(url: string): boolean {
+  if (url === 'about:blank' || url.startsWith('data:') || url.startsWith('blob:')) {
+    return true;
+  }
+
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return false;
+  }
+
+  const protocol = parsed.protocol.toLowerCase();
+  if (!['http:', 'https:'].includes(protocol)) {
+    return false;
+  }
+
+  const host = parsed.hostname.toLowerCase();
+  if (host === 'localhost' || host === '127.0.0.1') {
+    return true;
+  }
+
+  return false;
+}
+
+function getContextBlockedRequests(context: BrowserContext): string[] {
+  const marker = context as unknown as ContextMarker;
+  if (!marker[BLOCKED_REQUESTS_KEY]) {
+    marker[BLOCKED_REQUESTS_KEY] = [];
+  }
+  return marker[BLOCKED_REQUESTS_KEY]!;
+}
+
+function setBlockedRequestsAllowed(context: BrowserContext, allowed: boolean): void {
+  const marker = context as unknown as ContextMarker;
+  marker[ALLOW_BLOCKED_REQUESTS_KEY] = allowed;
+}
+
+async function ensureContextNetworkGuard(context: BrowserContext): Promise<void> {
+  const marker = context as unknown as ContextMarker;
+  if (marker[CONTEXT_ROUTE_KEY]) {
+    return;
+  }
+  const blocked = getContextBlockedRequests(context);
+  await context.route('**', async (route) => {
+    const requestUrl = route.request().url();
+    if (isAllowedNetworkUrl(requestUrl)) {
+      if (typeof route.fallback === 'function') {
+        await route.fallback();
+      } else {
+        await route.continue();
+      }
+      return;
+    }
+    console.error(`[playwright] Blocked external request: ${requestUrl}`);
+    blocked.push(requestUrl);
+    await route.abort();
+  });
+  marker[CONTEXT_ROUTE_KEY] = true;
+  if (typeof marker[ALLOW_BLOCKED_REQUESTS_KEY] !== 'boolean') {
+    marker[ALLOW_BLOCKED_REQUESTS_KEY] = false;
+  }
+}
 
 const analyticsResponse = {
   status: 204,
@@ -30,6 +122,68 @@ async function enableInterceptors(page: Page): Promise<() => Promise<void>> {
     return async () => Promise.resolve();
   }
   marker[INTERCEPT_SYMBOL] = true;
+
+  const diagnostics: PageDiagnostics = {
+    console: [],
+    network: [],
+  };
+  marker[CONSOLE_LOG_KEY] = diagnostics.console;
+  marker[NETWORK_LOG_KEY] = diagnostics.network;
+
+  const consoleListener = (message: ConsoleMessage) => {
+    const location = message.location();
+    const entry = {
+      type: message.type(),
+      text: message.text(),
+      location: location?.url
+        ? `${location.url}:${location.lineNumber ?? 0}:${location.columnNumber ?? 0}`
+        : undefined,
+    };
+    diagnostics.console.push(entry);
+    if (diagnostics.console.length > 200) {
+      diagnostics.console.shift();
+    }
+  };
+  page.on('console', consoleListener);
+
+  const requestFinishedListener = (request: Request) => {
+    const entry = {
+      url: request.url(),
+      method: request.method(),
+      resourceType: request.resourceType(),
+    } as PageDiagnostics['network'][number];
+    diagnostics.network.push(entry);
+    if (diagnostics.network.length > 200) {
+      diagnostics.network.shift();
+    }
+    void request
+      .response()
+      .then((response) => {
+        if (response) {
+          entry.status = response.status();
+        }
+      })
+      .catch(() => {
+        // ignore missing responses (e.g., aborted requests)
+      });
+  };
+
+  const requestFailedListener = (request: Request) => {
+    const failure = request.failure();
+    const entry: PageDiagnostics['network'][number] = {
+      url: request.url(),
+      method: request.method(),
+      resourceType: request.resourceType(),
+      failure: failure?.errorText ?? 'unknown',
+    };
+    diagnostics.network.push(entry);
+    if (diagnostics.network.length > 200) {
+      diagnostics.network.shift();
+    }
+  };
+
+  page.on('requestfinished', requestFinishedListener);
+  page.on('requestfailed', requestFailedListener);
 
   const intercepts: Array<{ url: string | RegExp; handler: Parameters<Page['route']>[1] }> = [];
 
@@ -70,7 +224,12 @@ async function enableInterceptors(page: Page): Promise<() => Promise<void>> {
   });
 
   return async () => {
-    await Promise.all(intercepts.map(({ url, handler }) => page.unroute(url, handler)));
+    if (!page.isClosed()) {
+      await Promise.all(intercepts.map(({ url, handler }) => page.unroute(url, handler)));
+    }
+    page.off('console', consoleListener);
+    page.off('requestfinished', requestFinishedListener);
+    page.off('requestfailed', requestFailedListener);
     delete marker[INTERCEPT_SYMBOL];
   };
 }
@@ -95,26 +254,29 @@ type DomainTarget = {
 
 const resolverCache: DomainTarget[] = [];
 
+const LOOPBACK_HOST = '127.0.0.1';
+const LOOPBACK_ORIGIN = `http://${LOOPBACK_HOST}`;
+
 function resolveConsentDomains(): DomainTarget[] {
   if (resolverCache.length) {
     return resolverCache;
   }
 
   const targets = new Map<string, DomainTarget>();
-  const baseUrl = process.env.PREVIEW_BASE_URL ?? process.env.BASE_URL ?? 'http://localhost';
+  const baseUrl = process.env.PREVIEW_BASE_URL ?? process.env.BASE_URL ?? LOOPBACK_ORIGIN;
   try {
     const parsed = new URL(baseUrl);
-    targets.set(parsed.hostname, {
-      domain: parsed.hostname,
+    const normalizedHost = parsed.hostname.toLowerCase() === 'localhost' ? LOOPBACK_HOST : parsed.hostname;
+    targets.set(normalizedHost, {
+      domain: normalizedHost,
       secure: parsed.protocol === 'https:',
     });
   } catch {
-    targets.set('localhost', { domain: 'localhost', secure: false });
+    targets.set(LOOPBACK_HOST, { domain: LOOPBACK_HOST, secure: false });
   }
 
   // Always support local development fallbacks.
-  targets.set('localhost', { domain: 'localhost', secure: false });
-  targets.set('127.0.0.1', { domain: '127.0.0.1', secure: false });
+  targets.set(LOOPBACK_HOST, { domain: LOOPBACK_HOST, secure: false });
 
   resolverCache.push(...targets.values());
   return resolverCache;
@@ -187,6 +349,10 @@ export const test = base.extend<{
     set: (overrides: PublicFlagOverrides) => Promise<void>;
     clear: () => Promise<void>;
   };
+  networkPolicy: {
+    getBlockedRequests: () => string[];
+    clearBlockedRequests: () => void;
+  };
 }>({
   page: async ({ page }, run) => {
     const detach = await enableInterceptors(page);
@@ -194,6 +360,9 @@ export const test = base.extend<{
     await detach();
   },
   context: async ({ context }, run) => {
+    await ensureContextNetworkGuard(context);
+    const blocked = getContextBlockedRequests(context);
+    blocked.length = 0;
     const cleanups = new Map<Page, () => Promise<void>>();
 
     const applyToPage = async (page: Page) => {
@@ -215,6 +384,8 @@ export const test = base.extend<{
 
     await Promise.all(context.pages().map((page) => applyToPage(page)));
 
+    await setLocaleCookie(context);
+
     const listener = (page: Page) => {
       void applyToPage(page);
     };
@@ -225,15 +396,25 @@ export const test = base.extend<{
     context.off('page', listener);
     await Promise.all([...cleanups.values()].map((fn) => fn()));
   },
-  flags: async ({ request }, use) => {
-    const clear = async () => {
-      await request.post('/api/test/flags', { data: {} });
-    };
-    const set = async (overrides: PublicFlagOverrides) => {
-      await request.post('/api/test/flags', { data: overrides });
-    };
-    await use({ set, clear });
-    await clear();
+  flags: async ({ request }, provide) => {
+    await provideFlagFixture(request, provide);
+  },
+  networkPolicy: async ({ page }, use, testInfo) => {
+    const context = page.context();
+    await ensureContextNetworkGuard(context);
+    const blocked = getContextBlockedRequests(context);
+    blocked.length = 0;
+    const allowForTest = testInfo.annotations.some(
+      (annotation) => annotation.type === ALLOW_BLOCKED_REQUESTS_ANNOTATION
+    );
+    setBlockedRequestsAllowed(context, allowForTest);
+    await use({
+      getBlockedRequests: () => [...blocked],
+      clearBlockedRequests: () => {
+        blocked.length = 0;
+      },
+    });
+    blocked.length = 0;
   },
   consentGranted: async ({ page }, apply) => {
     await apply(async (target = page) => {
@@ -252,4 +433,96 @@ export const test = base.extend<{
   },
 });
 
+test.afterEach(async ({ page }, testInfo) => {
+  if (!page) {
+    return;
+  }
+
+  const marker = page as unknown as Record<string | symbol, unknown>;
+
+  const captureDom = async () => {
+    try {
+      const dom = await page.content();
+      await testInfo.attach('dom-snapshot.html', {
+        body: dom,
+        contentType: 'text/html',
+      });
+    } catch {
+      // ignore DOM capture failures
+    }
+  };
+
+  const consoleLogs = marker[CONSOLE_LOG_KEY] as PageDiagnostics['console'] | undefined;
+  const networkLogs = marker[NETWORK_LOG_KEY] as PageDiagnostics['network'] | undefined;
+
+  const attachLogs = async () => {
+    if (consoleLogs && consoleLogs.length > 0) {
+      await testInfo.attach('console.logs.json', {
+        body: JSON.stringify(consoleLogs, null, 2),
+        contentType: 'application/json',
+      });
+    }
+
+    if (networkLogs && networkLogs.length > 0) {
+      await testInfo.attach('network.logs.json', {
+        body: JSON.stringify(networkLogs, null, 2),
+        contentType: 'application/json',
+      });
+    }
+  };
+
+  const captureDiagnostics = async () => {
+    await captureDom();
+    await attachLogs();
+  };
+
+  const context = page.context();
+  const blocked = getContextBlockedRequests(context);
+  const allowBlocked = testInfo.annotations.some(
+    (annotation) => annotation.type === ALLOW_BLOCKED_REQUESTS_ANNOTATION
+  );
+  setBlockedRequestsAllowed(context, false);
+
+  if (blocked.length > 0) {
+    if (allowBlocked) {
+      blocked.length = 0;
+    } else {
+      await captureDiagnostics();
+      await testInfo.attach('blocked-requests.json', {
+        body: JSON.stringify(blocked, null, 2),
+        contentType: 'application/json',
+      });
+      blocked.length = 0;
+      delete marker[CONSOLE_LOG_KEY];
+      delete marker[NETWORK_LOG_KEY];
+      throw new Error('Blocked external network requests detected. See blocked-requests.json attachment for details.');
+    }
+  }
+
+  if (testInfo.status === testInfo.expectedStatus) {
+    delete marker[CONSOLE_LOG_KEY];
+    delete marker[NETWORK_LOG_KEY];
+    return;
+  }
+
+  await captureDiagnostics();
+
+  delete marker[CONSOLE_LOG_KEY];
+  delete marker[NETWORK_LOG_KEY];
+});
+
 export const expect = test.expect;
+
+async function provideFlagFixture(
+  request: APIRequestContext,
+  provide: (helpers: { set: (overrides: PublicFlagOverrides) => Promise<void>; clear: () => Promise<void> }) => Promise<void>,
+) {
+  const clear = async () => {
+    await request.post('/api/test/flags', { data: {} });
+  };
+  const set = async (overrides: PublicFlagOverrides) => {
+    await request.post('/api/test/flags', { data: overrides });
+  };
+  await provide({ set, clear });
+  await clear();
+}

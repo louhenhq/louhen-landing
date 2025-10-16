@@ -32,7 +32,7 @@ Louhen Landing is the official marketing site for Louhen, designed to provide a 
 
 ## Adding a locale
 
-> Current production locales: `/en-de/*` (default, English content for the German market) and `/de-de/*` (German copy). Short segments (`/en`, `/de`) are auto-redirected to the canonical variant, and loopback hosts bypass HTTPS/HSTS to keep automation green.
+> Current production locales: `/de-de/*` (default, German copy), `/en-de/*` (English for Germany), `/fr-fr/*`, `/nl-nl/*`, and `/it-it/*`. Short segments (`/de`, `/en`, `/fr`, `/nl`, `/it`) are auto-redirected to the canonical variant, and loopback hosts bypass HTTPS/HSTS to keep automation green.
 
 1. Register the locale in `lib/i18n/locales.ts` with its BCP-47 code, native label, region, and `hrefLang` (use lowercase `language-region`).
 2. Add the translation bundle under `messages/{locale}.json` and fill any route-specific namespaces (`i18n/{language}/**` for waitlist flows). Use placeholder markers (`[FR]`) until copy is confirmed.
@@ -171,6 +171,22 @@ To get started locally:
    - Release PRs promote `staging` -> `production` (`enforce-release-source`, `Enforce Release PR Checklist` join the required checks).
    - Merge to `production` triggers semantic-release with the GitHub-provided `GITHUB_TOKEN`.
 
+### Run E2E locally (test mode)
+
+The Playwright suites can run against a production build with the same deterministic hCaptcha bypass used in CI:
+
+```bash
+export NEXT_PUBLIC_TEST_MODE=1 TEST_MODE=1
+npm run build
+HOST=127.0.0.1 PORT=4311 npm run start:e2e &
+SERVER_PID=$!
+sleep 2
+npx playwright test --grep "@critical" --workers=1
+kill "$SERVER_PID"
+```
+
+> ❗ Never set `NEXT_PUBLIC_TEST_MODE` or `TEST_MODE` in Vercel preview/production environments. They are intended for CI/local automation only.
+
 ### Install Policy & Determinism
 
 - **CI:** `npm ci --include=dev`
@@ -186,7 +202,7 @@ To get started locally:
   PORT=4311 npm run start:test
   ```
   then inspect headers via `curl -I http://127.0.0.1:4311/en` or run the Playwright check with `npm run test:e2e -- tests/e2e/security/headers.e2e.ts`.
-- Preview environments can temporarily serve `Content-Security-Policy-Report-Only` by exporting `CSP_REPORT_ONLY=1`; production ignores this flag and always enforces.
+- Preview environments can temporarily serve `Content-Security-Policy-Report-Only` by setting `CSP_MODE=report-only`; production pins `CSP_MODE=strict`.
 
 ## Structure (quick)
 
@@ -257,9 +273,9 @@ npm run lighthouse
 `npm run lighthouse` expects a production server to be listening on `http://localhost:4311`.
 Start it in another terminal with `PORT=4311 NODE_ENV=production npx next start -p 4311` and
 then run the command above. The helper script waits until the chosen URL responds with `200`
-before launching LHCI. By default it targets `http://localhost:4311/en-de/method`; override the
+before launching LHCI. By default it targets `http://localhost:4311/de-de/method`; override the
 target with `LHCI_URL=http://localhost:4311/de-de/method npm run lighthouse` when you need the
-alternate locale. Routing runs with `localePrefix = "always"`, so `/en-de/*` remains the canonical
+alternate locale. Routing runs with `localePrefix = "always"`, so `/de-de/*` remains the canonical
 segment even for the default locale. Middleware bypasses HTTPS/HSTS enforcement on loopback hosts,
 so there are no Chrome interstitials during local audits. The script sets `LH_ALLOW_INDEX=true`
 for its child process so preview-era `noindex` directives are lifted (middleware + robots.txt allow
@@ -271,7 +287,7 @@ headers (falling back to `BASE_URL` or `http://localhost:4311`), so Lighthouse s
 
 #### Playwright run modes
 - **Local webServer mode** (default): in one terminal run `npm run serve:prod` (the script first frees port 4311 via `kill -9 $(lsof -tiTCP:4311)` on macOS, then launches `next start`). With `BASE_URL` unset, run `npm run test:e2e` and Playwright will boot the local server for you when needed.
-- **External target mode**: when the environment cannot bind to port 4311, point Playwright at an already-running deployment with `BASE_URL=http://localhost:4311/en-de/ npm run test:e2e:external`. Any fully-qualified origin works (preview URLs, staging hosts, etc.) as long as it already serves the `/en-de/*` routes.
+- **External target mode**: when the environment cannot bind to port 4311, point Playwright at an already-running deployment with `BASE_URL=http://localhost:4311/de-de/ npm run test:e2e:external`. Any fully-qualified origin works (preview URLs, staging hosts, etc.) as long as it already serves the `/de-de/*` routes.
 
 For manual local smoke testing you can still hit `npm run serve:prod` directly; the kill-and-restart line keeps the experience idempotent.
 
@@ -305,12 +321,14 @@ Need to point at a different preview? Override the default with `PREVIEW_BASE_UR
 ### Reviewer checklist
 - [ ] Playwright supports BASE_URL external mode (no webServer spawn when set).
 - [ ] Local mode passes: serve:prod + test:e2e green.
-- [ ] Lighthouse runs on /en-de/method (or LHCI_URL override), no interstitials.
+- [ ] Lighthouse runs on /de-de/method (or LHCI_URL override), no interstitials.
 - [ ] Docs updated for the two modes and port-free one-liner.
 - [ ] E2E tests and SEO/unit specs assume full-locale prefixes only.
 - [ ] Fonts load from /fonts/** only; no Google Fonts requests.
 
 ### CI on demand
+
+CI runtime configuration (loopback host, port, test-mode flags) is managed via GitHub Actions -> Variables; see [CONTEXT/ci_cd.md](CONTEXT/ci_cd.md). Do not edit the workflow for these defaults unless you need a temporary override.
 
 - GitHub UI: Actions -> **Run Tests** -> choose `unit`, `e2e`, `axe`, `lighthouse`, or `all`.
 - CLI: `gh workflow run run-tests.yml -f suites=all`

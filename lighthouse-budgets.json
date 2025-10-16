@@ -35,7 +35,7 @@
     ]
   },
   {
-    "path": "/waitlist",
+    "path": "/de-de/waitlist",
     "resourceSizes": [
       {
         "resourceType": "total",
@@ -70,7 +70,7 @@
     ]
   },
   {
-    "path": "/method",
+    "path": "/de-de/method",
     "resourceSizes": [
       {
         "resourceType": "total",

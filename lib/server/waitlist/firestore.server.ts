@@ -1,4 +1,5 @@
-import { randomUUID } from 'node:crypto';
+import 'server-only';
+import { randomUUID } from 'crypto';
 import { getDb } from '@lib/firebaseAdmin';
 
 export type WaitlistUtm = {
@@ -118,8 +119,8 @@ export async function upsertPending(email: string, input: WaitlistUpsertInput): 
   const db = getDb();
   const collection = db.collection(COLLECTION);
   const normalizedEmail = normalizeEmail(email);
-  const existingDoc = await findDocByField('emailNormalized', normalizedEmail);
   const now = new Date();
+  const existingDoc = await findDocByField('emailNormalized', normalizedEmail);
 
   if (!existingDoc) {
     const docRef = collection.doc(randomUUID());
@@ -152,7 +153,15 @@ export async function upsertPending(email: string, input: WaitlistUpsertInput): 
 
   const data = existingDoc.data() as Record<string, unknown> | undefined;
   const currentStatus = (typeof data?.status === 'string' ? data.status : 'pending') as WaitlistDoc['status'];
-  const shouldUpdateToken = currentStatus !== 'confirmed';
+  if (currentStatus === 'confirmed') {
+    console.log('[GUARD][service]', { email, statusBefore: currentStatus });
+    return {
+      created: false,
+      status: currentStatus,
+      docId: existingDoc.id,
+      locale: (typeof data?.locale === 'string' ? data.locale : null) ?? null,
+    };
+  }
 
   const updatePayload: Record<string, unknown> = {
     updatedAt: now,
@@ -168,18 +177,17 @@ export async function upsertPending(email: string, input: WaitlistUpsertInput): 
     updatePayload.utm = input.utm;
   }
 
-  if (shouldUpdateToken) {
-    updatePayload.status = 'pending';
-    updatePayload.consent = {
-      gdpr: Boolean(input.consent),
-      at: now,
-    };
-    updatePayload.confirmTokenHash = input.confirmTokenHash;
-    updatePayload.confirmTokenLookupHash = input.confirmTokenLookupHash;
-    updatePayload.confirmSalt = input.confirmSalt;
-    updatePayload.confirmExpiresAt = input.confirmExpiresAt;
-    updatePayload.confirmedAt = null;
-  }
+  console.log('[WRITE][service][pending]', { email, statusBefore: currentStatus });
+  updatePayload.status = 'pending';
+  updatePayload.consent = {
+    gdpr: Boolean(input.consent),
+    at: now,
+  };
+  updatePayload.confirmTokenHash = input.confirmTokenHash;
+  updatePayload.confirmTokenLookupHash = input.confirmTokenLookupHash;
+  updatePayload.confirmSalt = input.confirmSalt;
+  updatePayload.confirmExpiresAt = input.confirmExpiresAt;
+  updatePayload.confirmedAt = null;
 
   await existingDoc.ref.set(updatePayload, { merge: true });
 
@@ -189,7 +197,7 @@ export async function upsertPending(email: string, input: WaitlistUpsertInput): 
 
   return {
     created: false,
-    status: shouldUpdateToken ? 'pending' : currentStatus,
+    status: 'pending',
     docId: existingDoc.id,
     locale: resolvedLocale ?? null,
   };

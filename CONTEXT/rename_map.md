@@ -146,7 +146,7 @@ _Tables sorted by `Current Path`; `Status=DECIDE` rows include the follow-up nee
 | app/robots.ts | route | app/robots.ts | same | no | SKIP | Robots handler remains root-level per Next requirements. |
 | app/sitemap.ts | route | app/sitemap.ts | same | no | SKIP | Keep sitemap at root; update imports to alias after moves. |
 | components/FaqTwinsVoucherSchema.tsx | feature-comp | components/features/seo/FaqTwinsVoucherSchema.tsx | same | no | OK | Schema component stays server-safe; add named export. |
-| components/SeoJsonLd.tsx | feature-comp | components/features/seo/SeoJsonLd.tsx | same | no | OK | Convert default export to named per exports policy. |
+| components/SeoJsonLd.tsx | feature-comp | lib/shared/seo/json-ld.tsx | json-ld.tsx | no | OK | Moved into shared runtime to keep helpers isomorphic; keep named exports and continue to pass CSP nonce from layouts. |
 | components/TrustSchema.tsx | feature-comp | components/features/seo/TrustSchema.tsx | same | no | OK | Shared trust schema between home + method. |
 | lib/seo/legalMetadata.ts | util | lib/shared/seo/legal-metadata.ts | legal-metadata.ts | no | OK | Kebab-case util; ensure named export. |
 | lib/seo/shared.ts | util | lib/shared/seo/shared.ts | same | no | OK | Houses helpers consumed by metadata builders. |
@@ -319,7 +319,7 @@ _Tables sorted by `Current Path`; `Status=DECIDE` rows include the follow-up nee
 | scripts/summarize_playwright_failures.mjs | util | scripts/qa/summarize-playwright-failures.mjs | summarize-playwright-failures.mjs | no | OK | Works with new config/playwright location. |
 | tailwind.config.ts | util | config/tailwind.config.ts | tailwind.config.ts | no | OK | Update build scripts to new config path. |
 | vitest.config.ts | util | config/vitest.config.ts | vitest.config.ts | no | OK | Ensure `vitest` CLI picks relocated config. |
-| vitest.setup.ts | util | tests/setup/vitest.setup.ts | vitest.setup.ts | no | OK | Lives alongside test setup helpers. |
+| vitest.setup.ts | util | tests/unit/vitest.setup.ts | vitest.setup.ts | no | OK | Lives alongside unit test setup helpers. |
 
 ### Feature: types-constants
 
@@ -335,7 +335,7 @@ _Tables sorted by `Current Path`; `Status=DECIDE` rows include the follow-up nee
 | --- | --- | --- | --- | --- | --- | --- |
 | tests/e2e/__skip__.spec.ts | test:e2e | tests/e2e/_legacy/__skip__.spec.ts | __skip__.spec.ts | no | DECIDE | Retire skip spec or keep as legacy reference? |
 | tests/e2e/_utils/url.ts | util | tests/e2e/utils/url.ts | url.ts | no | OK | Move helper under utils folder; adjust imports. |
-| tests/setup.server-mocks.ts | util | tests/setup/server-mocks.ts | server-mocks.ts | no | OK | Align setup helper with new folder structure. |
+| tests/setup.server-mocks.ts | util | tests/unit/setup.server-mocks.ts | setup.server-mocks.ts | no | OK | Align unit test helper with new folder structure. |
 
 ### Feature: design-tokens
 
@@ -354,7 +354,7 @@ Pending moves use new `tests/{unit,e2e,axe}/<feature>/` layout; selectors noted 
 | method | `tests/e2e/method.meta.spec.ts`, `tests/e2e/method-smoke.spec.ts`, `tests/unit/method-jsonld.test.ts` | `tests/e2e/method/*.e2e.ts`, `tests/unit/method/method-jsonld.spec.ts` | Ensure hero/CTA/trust selectors exist (`method-hero`, `method-cta`, `method-trust`). |
 | waitlist | `e2e/waitlist.spec.ts`, `tests/e2e/waitlist.api.spec.ts`, `tests/unit/waitlist*.test.ts`, `tests/unit/referral.unit.test.ts`, `tests/unit/validation.waitlist.test.ts` | `tests/e2e/waitlist/*.e2e.ts`, `tests/unit/waitlist/*.spec.ts` | Add `data-ll="waitlist-form"`, `data-ll="waitlist-resend-form"`, `data-ll="waitlist-referral"`. |
 | forms | Reuses waitlist specs above | Same as waitlist | Same selectors as waitlist features; ensure legacy form flagged if retained. |
-| header-nav | `tests/e2e/header.*.spec.ts` (12 specs) | `tests/e2e/header/*.e2e.ts` | Provide `data-ll` for `header-shell`, `header-cta`, `header-consent`, `header-drawer`, `header-locale`, `header-theme-toggle`. |
+| header-nav | `tests/e2e/header.*.spec.ts` (12 specs) | `tests/e2e/header/*.e2e.ts` | Provide `data-ll` for analytics + `data-testid="lh-nav-*"` (root, CTA, consent, drawer, locale, theme). |
 | footer / routing | `tests/e2e/legal.spec.ts`, `tests/e2e/unsubscribe.spec.ts` | `tests/e2e/legal/legal.e2e.ts`, `tests/e2e/unsubscribe/unsubscribe.e2e.ts` | Add `data-ll="footer-shell"`, `data-testid="unsubscribe-root"`, and ensure canonical axe coverage remains in `tests/axe/canonical.axe.ts`. |
 | seo-jsonld | `tests/e2e/seo/home.meta.e2e.ts`, `tests/e2e/seo/canonical-uniqueness.e2e.ts`, `tests/e2e/method/method.meta.e2e.ts`, `tests/unit/metadata.ref.test.ts` | `tests/e2e/seo/*.e2e.ts`, `tests/unit/seo/metadata-ref.spec.ts` | JSON-LD assertions now split across modular specs; no additional selectors required. |
 | i18n-core | `tests/unit/i18n.keys.test.ts` | `tests/unit/i18n/keys.spec.ts` | No selectors; update imports to `content/i18n`. |

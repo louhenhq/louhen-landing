@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useNonce } from '@/lib/csp/nonce-context';
+import { useNonce } from '@/lib/csp/nonce-context.client';
 
 const schema = {
   '@context': 'https://schema.org',

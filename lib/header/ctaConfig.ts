@@ -1,7 +1,7 @@
 import { appendUtmParams, type UtmParams } from '@/lib/url/appendUtmParams';
 import { resolveAnalyticsTarget } from '@/lib/url/analyticsTarget';
 import type { HeaderAnalyticsMode, HeaderCtaId } from '@/lib/analytics.schema';
-import { resolveDashboardUrl, type HeaderUserState } from '@/lib/auth/userState';
+import { resolveDashboardUrl, type HeaderUserState } from '@shared/auth/user-state';
 import { isPrelaunch } from '@/lib/env/prelaunch';
 import { defaultLocale, type SupportedLocale } from '@/next-intl.locales';
 
@@ -36,7 +36,7 @@ type HeaderCtaConfig = {
 
 const DEFAULT_WAITLIST_TARGET = 'waitlist-form';
 const ACCESS_URL = process.env.NEXT_PUBLIC_ACCESS_REQUEST_URL?.trim() || '/onboarding/request-access';
-const DOWNLOAD_URL = process.env.NEXT_PUBLIC_APP_DOWNLOAD_URL?.trim() || '/download';
+const DOWNLOAD_URL = process.env.NEXT_PUBLIC_APP_DOWNLOAD_URL?.trim() || '/waitlist';
 
 function phaseToMode(phase: HeaderPhase): HeaderAnalyticsMode {
   switch (phase) {
@@ -77,7 +77,7 @@ function resolveDashboardConfig(): HeaderCtaConfig {
   return {
     id: 'dashboard',
     mode: 'authenticated',
-    labelKey: 'header.cta.dashboard',
+    labelKey: 'cta.dashboard',
     analyticsTarget,
     action: {
       type: 'link',
@@ -99,7 +99,7 @@ export function buildHeaderCta(locale: SupportedLocale, options?: { userState?: 
     return {
       id: 'waitlist',
       mode,
-      labelKey: 'header.cta.waitlist',
+      labelKey: 'cta.waitlist',
       analyticsTarget: `#${DEFAULT_WAITLIST_TARGET}`,
       action: {
         type: 'scroll',
@@ -118,7 +118,7 @@ export function buildHeaderCta(locale: SupportedLocale, options?: { userState?: 
     return {
       id: 'access',
       mode,
-      labelKey: 'header.cta.access',
+      labelKey: 'cta.access',
       analyticsTarget,
       action: {
         type: 'link',
@@ -127,8 +127,21 @@ export function buildHeaderCta(locale: SupportedLocale, options?: { userState?: 
     };
   }
 
-  const analyticsTarget = resolveAnalyticsTarget(DOWNLOAD_URL);
-  const href = appendUtmParams(DOWNLOAD_URL, {
+  const isExternalDownload = /^https?:\/\//.test(DOWNLOAD_URL);
+  let basePath: string;
+  if (isExternalDownload) {
+    basePath = DOWNLOAD_URL;
+  } else {
+    const normalized = DOWNLOAD_URL.startsWith('/') ? DOWNLOAD_URL : `/${DOWNLOAD_URL}`;
+    if (normalized.startsWith(`/${locale}/`) || normalized === `/${locale}`) {
+      basePath = normalized;
+    } else {
+      const suffix = normalized === '/' ? '' : normalized;
+      basePath = `/${locale}${suffix}`;
+    }
+  }
+  const analyticsTarget = resolveAnalyticsTarget(basePath);
+  const href = appendUtmParams(basePath, {
     source: 'header',
     medium: 'cta',
     campaign: locale === defaultLocale ? 'download-en' : `download-${locale}`,
@@ -137,12 +150,12 @@ export function buildHeaderCta(locale: SupportedLocale, options?: { userState?: 
   return {
     id: 'download',
     mode,
-    labelKey: 'header.cta.download',
+    labelKey: 'cta.download',
     analyticsTarget,
     action: {
       type: 'link',
       href,
-      external: /^https?:\/\//.test(DOWNLOAD_URL),
+      external: isExternalDownload,
     },
   };
 }

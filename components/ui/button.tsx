@@ -21,6 +21,7 @@ type BaseButtonProps = {
   rightIcon?: ReactNode;
   className?: string;
   disabled?: boolean;
+  testId?: string;
 };
 
 type ButtonAsButton = BaseButtonProps &
@@ -74,6 +75,7 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
     className,
     children,
     disabled,
+    testId,
     ...rest
   },
   forwardedRef
@@ -128,6 +130,7 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
         aria-busy={loading || undefined}
         aria-disabled={anchorDisabled || undefined}
         data-loading={loading ? 'true' : undefined}
+        data-testid={testId}
         role={role ?? (anchorProps.href ? undefined : 'button')}
         tabIndex={anchorDisabled ? -1 : tabIndex}
         onClick={handleClick}
@@ -149,6 +152,7 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
       aria-busy={loading || undefined}
       aria-disabled={isDisabled || undefined}
       data-loading={loading ? 'true' : undefined}
+      data-testid={testId}
       {...buttonRest}
     >
       {content}

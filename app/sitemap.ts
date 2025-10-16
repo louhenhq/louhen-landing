@@ -1,27 +1,56 @@
 import type { MetadataRoute } from 'next';
-import {
-  buildAlternateLanguageUrlMap,
-  buildCanonicalUrl,
-} from '@/lib/i18n/metadata';
 import { SUPPORTED_LOCALES } from '@/lib/i18n/locales';
+import { localeHomePath, legalPath, type LegalSlug } from '@lib/shared/routing/legal-path';
+import { methodPath } from '@lib/shared/routing/method-path';
+import { waitlistLandingPath } from '@lib/shared/routing/waitlist-path';
+import { imprintPath } from '@lib/shared/routing/imprint-path';
+import { hreflangMapFor, makeCanonical } from '@/lib/seo/shared';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date().toISOString();
-  const localizedPaths = ['/', '/method/', '/privacy/', '/terms/', '/imprint/'];
+  const routes: Array<{
+    buildPath: (locale: string) => string;
+    changeFrequency: MetadataRoute.Sitemap[number]['changeFrequency'];
+    priority: MetadataRoute.Sitemap[number]['priority'];
+  }> = [
+    {
+      buildPath: localeHomePath,
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
+      buildPath: methodPath,
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    },
+    {
+      buildPath: waitlistLandingPath,
+      changeFrequency: 'weekly',
+      priority: 0.6,
+    },
+    ...(['privacy', 'terms'] as LegalSlug[]).map((slug) => ({
+      buildPath: (locale: string) => legalPath(locale, slug),
+      changeFrequency: 'monthly' as const,
+      priority: 0.4 as const,
+    })),
+    {
+      buildPath: imprintPath,
+      changeFrequency: 'monthly',
+      priority: 0.3,
+    },
+  ];
 
-  return localizedPaths.flatMap((path) => {
-    const languages = buildAlternateLanguageUrlMap(path);
+  return routes.flatMap(({ buildPath, changeFrequency, priority }) => {
+    const languages = hreflangMapFor(buildPath);
 
-    return SUPPORTED_LOCALES.map(({ value: locale }) => {
-      return {
-        url: buildCanonicalUrl(locale, path),
-        lastModified: now,
-        changeFrequency: path.includes('method') ? 'monthly' : 'weekly',
-        priority: path === '/' ? 0.8 : path.includes('method') ? 0.6 : 0.5,
-        alternates: {
-          languages,
-        },
-      } satisfies MetadataRoute.Sitemap[number];
-    });
+    return SUPPORTED_LOCALES.map(({ value: locale }) => ({
+      url: makeCanonical(buildPath(locale)),
+      lastModified: now,
+      changeFrequency,
+      priority,
+      alternates: {
+        languages,
+      },
+    }));
   });
 }

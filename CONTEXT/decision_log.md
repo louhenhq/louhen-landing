@@ -29,6 +29,34 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
 
 ## History
 
+- **2025-10-13 — Harden server/client boundaries (Owner: Security & Platform)**  
+  - Split the CSP nonce utilities into `lib/csp/nonce-context.server.tsx` (server-only wrapper with runtime guard) and `lib/csp/nonce-context.client.tsx` (sole owner of the React context/hook). Removing the shared `createContext` fixed the Next.js build error and keeps React imports out of server bundles. Moved JSON-LD helpers to `lib/shared/seo/json-ld.tsx` so server layouts reuse them without leaking client code.  
+  - Introduced `@server/*`, `@client/*`, and `@shared/*` path aliases; added ESLint rules that force `import 'server-only';` in `lib/server/**`, require `'use client'` in client trees, and block barrels that re-export server modules into shared/client namespaces.  
+  - Added `dependency-cruiser` guard (`npm run lint:deps`) + CI step to block Client→Server/Node-crypto edges and Shared→Server edges. Updated the `ci.yml` e2e job to run a `csp=strict` matrix leg that exercises security headers smoke and uploads `/api/security/csp-report` samples.  
+  - Residual risk: shared files can still call server side effects unless reviews keep enforcing the policy; dependency graph guard must stay aligned with new aliases.
+- **2025-10-12 — Finalise Step-1 environment contract (Owner: Platform & QA)**  
+  - Locked canonical env defaults: `CANONICAL_HOST=www.louhen.app` (production only), `BASE_URL=http://127.0.0.1:4311` for CI/Playwright, `IS_PRELAUNCH=false` in production (true elsewhere), `CSP_NONCE_BYTES=16`, and `TEST_E2E_SHORTCIRCUIT=1` for automated test harnesses.  
+  - Updated middleware to honour `CSP_NONCE_BYTES`, ensured Playwright/CI inherit repo variables without hard-coded overrides, and documented the precedence chain (Vercel → GitHub repo vars → workflow job env → `.env.*`).  
+  - Rollback: adjust the corresponding Vercel/Repo variables (or unset them) and revert middleware/playwright changes if entropy requirements change.
+- **2025-10-12 — Secure crypto imports (Owner: Security)**  
+  - Replaced `node:crypto` specifiers with standard `'crypto'`, added `import 'server-only';` guards to every server crypto module, and updated middleware to rely on Web Crypto for nonce generation.  
+  - Prevented Next.js build failures (`UnhandledSchemeError: node:crypto`) and ensured Playwright/CI inherit the guarded modules.  
+  - Rollback: revert the imports or remove the `server-only` guard (not recommended); the build error will return if `node:` specifiers are reintroduced.
+
+- **2025-10-12 — Adopt CSP_MODE policy (Owner: Security & QA)**  
+  - Lock `CSP_MODE=strict` for production while keeping preview, development, CI, and default Playwright/Lighthouse runs on `report-only`. Added repo-variable wiring so GitHub Actions exports the mode into job environments and the test server inherits it automatically.  
+  - Updated documentation (envs/tests/ci_cd/security) and security headers spec to adapt assertions based on the active mode, ensuring report-only flows still assert nonce + `strict-dynamic`.  
+  - Rollback: set `CSP_MODE` repo variable to the desired global value (e.g., `strict`) and remove the adaptive assertions; update docs to reflect the reverted policy.
+- **2025-10-11 — Method route locale-only**  
+  - Removed the prefixless `/method` alias; requests now 404 instead of redirecting.  
+  - Updated routing helpers, sitemap/SEO builders, Playwright suites, and documentation to reference `/{locale}/method` exclusively.  
+  - Added a CI guard (`npm run guard:prefixless`) that fails if new prefixless marketing pages are introduced.
+
+- **2025-10-11 — Legal shells locale-only**  
+  - Removed legacy `/privacy`, `/terms`, and `/imprint` pages; all legal/help content now lives under `/{locale}/legal/*` (or `/{locale}/imprint`).  
+  - Updated navigation, consent messaging, sitemap entries, and tests to use the locale-prefixed routes, and added @critical 404 assertions for the retired paths.  
+  - Added monitoring follow-up to flag any residual traffic to the removed paths so source updates can be coordinated promptly.  
+
 - **2025-10-09 — Feature flag & environment matrix blueprint (Slice 15)**  
   - Documented the flag catalog in `/CONTEXT/envs.md` with defaults/owners and clarified governance expectations.  
   - Updated architecture/testing/PR checklist guidance so future code reads flags via `lib/shared/flags.ts` helpers and CI covers both states before rollout.
@@ -38,7 +66,7 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
   - Added preview-only `/api/test/flags` overrides, Playwright `flags.set/clear` fixtures, and a static OG fallback CI job so preview workflows exercise both flag states without redeploying.
 
 - **2025-10-09 — Feature flag defaults finalised (Vercel alignment)**  
-  - Locked Preview defaults (analytics off, CSP report-only, dynamic OG on) and Production defaults (analytics on, CSP enforced, dynamic OG on) for `NEXT_PUBLIC_ANALYTICS_ENABLED`, `NEXT_PUBLIC_BANNER_WAITLIST_URGENCY`, `OG_DYNAMIC_ENABLED`, and `SECURITY_REPORT_ONLY`.  
+  - Locked Preview defaults (analytics off, CSP report-only, dynamic OG on) and Production defaults (analytics on, CSP enforced, dynamic OG on) for `NEXT_PUBLIC_ANALYTICS_ENABLED`, `NEXT_PUBLIC_BANNER_WAITLIST_URGENCY`, `OG_DYNAMIC_ENABLED`, and `CSP_MODE`.  
   - Values are synced in Vercel environment settings and mirrored in `/CONTEXT/envs.md`; CI overrides them only for targeted fallback tests.
 
 - **2025-10-09 — Zustand onboarding store typing alignment**  
@@ -127,7 +155,7 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
   - Notes → `/tokens` remains dynamic/noindex; long-term static export requires refactoring the root layout’s header/cookie access.  
 
 - **2025-10-06 — Header Slice 9 SEO 2025 Audit**  
-  - Keep → `lib/seo/shared.ts`, `lib/shared/seo/method-metadata.ts`, and `lib/seo/legalMetadata.ts` already generate locale-aware canonical + hreflang maps; `components/SeoJsonLd.tsx` stays the nonce-aware JSON-LD helper; `lib/header/ctaConfig.ts`, `lib/header/ribbonConfig.ts`, and `lib/nav/config.ts` consistently route header links through `appendUtmParams`.
+  - Keep → `lib/seo/shared.ts`, `lib/shared/seo/method-metadata.ts`, and `lib/seo/legalMetadata.ts` already generate locale-aware canonical + hreflang maps; `lib/shared/seo/json-ld.tsx` stays the nonce-aware JSON-LD helper; `lib/header/ctaConfig.ts`, `lib/header/ribbonConfig.ts`, and `lib/nav/config.ts` consistently route header links through `appendUtmParams`.
   - Adjust → `components/features/header-nav/Header.tsx` needs the brand link to reuse `localeHomePath` so locale switching preserves the path; `app/(site)/waitlist/page.tsx` should call `hreflangMapFor(() => '/waitlist')` to keep alternates aligned with the shared helper.  
   - Delete → None.  
   - Notes → Verified header surfaces share analytics targets and promo ribbon preserves nonce-safe structured data context.  
@@ -182,5 +210,15 @@ It ensures Codex and contributors never undo critical choices or repeat past dis
   - Adjust → Legacy GET handler moved to `app/api/waitlist/confirm/route.ts` with tests pointing to the new API path; `rename_map.md` notes the relocation.  
   - Adjust → `app/theme-client.ts` now has a single set of helpers sourced from `@/lib/theme/constants`, eliminating duplicate `getSavedTheme`/`setTheme` definitions.  
   - Notes → Home/locale root pages import `ReferralAttribution` via `@components/features/waitlist` to match the feature barrel; build no longer reports duplicate identifiers or missing modules.
+
+- **2025-10-10 — Default locale switch to de-de (Owner: Localization & SEO)**  
+  - Keep → Locale routing stays under `app/(site)/[locale]/…`, middleware negotiates via cookies/`Accept-Language`, and `buildPathForLocale` continues to handle prefixed navigation.  
+  - Adjust → `defaultLocale` now resolves to `de-de`; env defaults, Playwright helpers, sitemap generation, and SEO builders emit German canonicals (`/de-de/method`, `/de-de/legal/*`) with hreflang/x-default pointing to `de-de`. Additional markets (`fr-fr`, `nl-nl`, `it-it`) ship as alternates with English fallback until localized copy lands.  
+  - Notes → English for Germany (`en-de`) remains available for support/QA. Update localized content before removing `[[TODO-translate]]` markers and ensure campaign links honour the expanded locale list.
+
+- **2025-10-11 — E2E Waitlist hCaptcha Bypass (Owner: QA & Infrastructure)**  
+  - Keep → Production/preview builds continue to render the live hCaptcha widget and require a real token before submitting the waitlist form.  
+  - Adjust → CI (and optional local test runs) export `HOST=127.0.0.1`, `PORT=4311`, `BASE_URL=http://127.0.0.1:4311`, `DEFAULT_LOCALE=de-de`, `CSP_MODE=report-only`, `ANALYTICS_ENABLED=0`, `NEXT_PUBLIC_TEST_MODE=1`, `TEST_MODE=1`, and `PLAYWRIGHT_BROWSERS_PATH=0`. When these variables are set, the form seeds a deterministic `e2e-mocked-token`, skips rendering `<HCaptcha>`, and Playwright synchronises with the mocked `POST` response (`Promise.all` + `waitForResponse`) before asserting success. GitHub Actions now waits for the server, verifies the bypass via `curl`, uploads HTML/traces, and tears down the server at the end of the job.  
+  - Notes → Do **not** set the test-mode variables in Vercel environments. Rollback: remove `NEXT_PUBLIC_TEST_MODE`/`TEST_MODE` from CI env to restore the previous behaviour (tests will require the live captcha again).
 
 ---

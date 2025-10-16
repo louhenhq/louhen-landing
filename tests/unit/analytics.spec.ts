@@ -6,7 +6,7 @@ const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 function setLocation(url: string) {
   if (typeof window === 'undefined') return;
-  const base = window.location.origin || 'http://localhost';
+  const base = window.location.origin || 'http://127.0.0.1';
   const target = new URL(url, base);
   window.history.replaceState({}, '', `${target.pathname}${target.search}${target.hash}`);
 }
@@ -29,6 +29,7 @@ beforeEach(async () => {
 
   const consentApi = await import('@/lib/shared/consent/api');
   consentApi.clearConsent();
+  consentApi.setConsent('granted');
 });
 
 describe('client analytics', () => {

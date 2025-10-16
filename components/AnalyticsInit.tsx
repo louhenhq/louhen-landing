@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useNonce } from '@/lib/csp/nonce-context';
+import { useNonce } from '@/lib/csp/nonce-context.client';
 import { flush, init, track } from '@/lib/shared/analytics/client';
 import { getConsent, onConsentChange, type ConsentState } from '@/lib/shared/consent/api';
 

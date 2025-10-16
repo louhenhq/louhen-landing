@@ -5,7 +5,7 @@ function isLoopbackHost(hostname: string) {
 }
 
 export function GET(request: NextRequest) {
-  const fallbackOrigin = (process.env.BASE_URL?.trim() || 'http://localhost:4311').replace(/\/$/, '');
+  const fallbackOrigin = (process.env.BASE_URL?.trim() || 'http://127.0.0.1:4311').replace(/\/$/, '');
 
   const forwardedHost = request.headers.get('x-forwarded-host');
   const hostHeader = request.headers.get('host');

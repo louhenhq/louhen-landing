@@ -5,10 +5,11 @@ import { cn, focusRing } from '@/app/(site)/_lib/ui';
 
 export type CheckboxProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> & {
   invalid?: boolean;
+  testId?: string;
 };
 
 export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(function Checkbox(
-  { className, invalid = false, disabled, ...rest },
+  { className, invalid = false, disabled, testId, ...rest },
   ref
 ) {
   return (
@@ -18,6 +19,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(function Che
       disabled={disabled}
       data-invalid={invalid ? 'true' : undefined}
       aria-invalid={invalid || undefined}
+      data-testid={testId}
       className={cn(
         'relative h-5 w-5 shrink-0 cursor-pointer appearance-none rounded-md border border-border bg-bg transition-[background-color,border-color,box-shadow] duration-200 ease-out motion-reduce:duration-150',
         focusRing,

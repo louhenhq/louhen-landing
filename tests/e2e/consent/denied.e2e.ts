@@ -1,5 +1,9 @@
 import { expect, test } from '@tests/fixtures/playwright';
+import { defaultLocale } from '@/next-intl.locales';
 import { localeUrl } from '../_utils/url';
+
+const localizedHome = `/${defaultLocale}`;
+const localizedMethod = localeUrl('/method', { locale: defaultLocale });
 
 test.describe('Consent (denied)', () => {
   test('keeps analytics suppressed across navigation', async ({ consentDenied, page }) => {
@@ -15,21 +19,23 @@ test.describe('Consent (denied)', () => {
       await route.continue();
     });
 
-    await page.goto(localeUrl(), { waitUntil: 'networkidle' });
+    await page.goto(localizedHome, { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('networkidle');
+    await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
+    await expect(page).toHaveURL(new RegExp(`/${defaultLocale}/?(?:[?#].*)?$`));
     await expect(page.getByRole('dialog', { name: /cookies/i })).toHaveCount(0);
 
-    await page.waitForTimeout(500);
-    expect(analyticsRequests).toHaveLength(0);
+    await expect.poll(() => analyticsRequests.length).toBe(0);
 
-    await page.goto(localeUrl('/method'), { waitUntil: 'networkidle' });
-    await page.waitForTimeout(500);
-    expect(analyticsRequests).toHaveLength(0);
+    await page.goto(localizedMethod, { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('networkidle');
+    await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
+    await expect.poll(() => analyticsRequests.length).toBe(0);
 
-    const headerCta = page.locator('[data-ll="nav-waitlist-cta"]').first();
-    await headerCta.waitFor();
+    const headerCta = page.getByTestId('lh-nav-cta-primary');
+    await expect(headerCta).toBeVisible();
     await headerCta.click({ force: true });
-    await page.waitForTimeout(500);
-    expect(analyticsRequests).toHaveLength(0);
+    await expect.poll(() => analyticsRequests.length).toBe(0);
 
     await page.unroute('**/api/track');
   });

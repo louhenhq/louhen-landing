@@ -110,48 +110,49 @@ export default function HowItWorks() {
           {subtitle ? <p className={cn(text.subheading, 'max-w-prose')}>{subtitle}</p> : null}
         </div>
         <div className="md:col-span-12">
-          <ol className="grid gap-lg sm:grid-cols-2 xl:grid-cols-3" role="list">
+          <ol className="grid list-none gap-lg sm:grid-cols-2 xl:grid-cols-3">
             {steps.map((step, index) => {
               const headingId = `how-step-${step.id}-title`;
               return (
-                <Card
-                  key={step.id}
-                  className={cn(
-                    'flex h-full flex-col gap-md p-lg transition-all duration-700 ease-out',
-                    isAnimated ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-                  )}
-                  style={{ transitionDelay: prefersReducedMotion ? undefined : `${index * 80}ms` }}
-                  aria-labelledby={headingId}
-                >
-                  <div
-                    aria-hidden
-                    className="relative flex w-full items-center justify-center overflow-hidden rounded-xl border border-border bg-bg"
-                    style={{ aspectRatio: '4 / 3' }}
+                <li key={step.id} className="h-full">
+                  <Card
+                    className={cn(
+                      'flex h-full flex-col gap-md p-lg transition-all duration-700 ease-out',
+                      isAnimated ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+                    )}
+                    style={{ transitionDelay: prefersReducedMotion ? undefined : `${index * 80}ms` }}
+                    aria-labelledby={headingId}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-br from-border/40 via-transparent to-border/20" />
-                    <div className="relative flex h-16 w-16 items-center justify-center rounded-full border border-dashed border-border text-label text-text-muted">
-                      {String(index + 1).padStart(2, '0')}
+                    <div
+                      aria-hidden
+                      className="relative flex w-full items-center justify-center overflow-hidden rounded-xl border border-border bg-bg"
+                      style={{ aspectRatio: '4 / 3' }}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-br from-border/40 via-transparent to-border/20" />
+                      <div className="relative flex h-16 w-16 items-center justify-center rounded-full border border-dashed border-border text-label text-text-muted">
+                        {String(index + 1).padStart(2, '0')}
+                      </div>
                     </div>
-                  </div>
-                  {step.illustrationLabel ? <span className="sr-only">{step.illustrationLabel}</span> : null}
-                  <div className="flex flex-col gap-sm">
-                    <h3 id={headingId} className="text-h3 text-text">
-                      {step.title}
-                    </h3>
-                    <p className={cn(text.bodyMuted, 'text-balance')}>{step.body}</p>
-                    {step.link ? (
-                      <Button
-                        as="a"
-                        variant="secondary"
-                        size="sm"
-                        href={step.link.href}
-                        className="w-fit"
-                      >
-                        {step.link.label}
-                      </Button>
-                    ) : null}
-                  </div>
-                </Card>
+                    {step.illustrationLabel ? <span className="sr-only">{step.illustrationLabel}</span> : null}
+                    <div className="flex flex-col gap-sm">
+                      <h3 id={headingId} className="text-h3 text-text">
+                        {step.title}
+                      </h3>
+                      <p className={cn(text.bodyMuted, 'text-balance')}>{step.body}</p>
+                      {step.link ? (
+                        <Button
+                          as="a"
+                          variant="secondary"
+                          size="sm"
+                          href={step.link.href}
+                          className="w-fit"
+                        >
+                          {step.link.label}
+                        </Button>
+                      ) : null}
+                    </div>
+                  </Card>
+                </li>
               );
             })}
           </ol>

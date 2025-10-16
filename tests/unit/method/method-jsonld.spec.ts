@@ -5,14 +5,14 @@ import { buildMethodTechArticleSchema } from '@lib/shared/method/article-schema'
 type MethodArticleInput = Parameters<typeof buildMethodTechArticleSchema>[0];
 
 const baseInput: MethodArticleInput = {
-  url: 'https://example.com/en/method',
+  url: 'https://example.com/de-de/method',
   headline: 'Fit intelligence that keeps up with growing feet.',
   description: 'Discover how Louhen blends kid-safe scanning with verified fit science.',
-  locale: 'en-de',
+  locale: 'de-de',
   sections: ['Kid-safe scanning', 'Verified fit science', 'Adaptive personalization'],
   baseUrl: 'https://example.com',
   brandName: 'Louhen',
-  image: 'https://example.com/opengraph-image?locale=en-de&surface=method',
+  image: 'https://example.com/opengraph-image?locale=de-de&surface=method',
   datePublished: '2025-01-15T00:00:00.000Z',
   dateModified: '2025-01-15T00:00:00.000Z',
 };
@@ -24,9 +24,10 @@ describe('buildMethodTechArticleSchema', () => {
     expect(schema['@type']).toBe('TechArticle');
     expect(schema.headline).toBe(baseInput.headline);
     expect(schema.description).toBe(baseInput.description);
+    expect(schema.inLanguage).toBe('de-DE');
     expect(schema.url).toBe(baseInput.url);
     expect(schema.mainEntityOfPage).toBe(baseInput.url);
-    expect(new URL(schema.url).pathname).toBe('/en-de/method');
+    expect(new URL(schema.url).pathname).toBe('/de-de/method');
     expect(schema.articleSection).toContain('Kid-safe scanning');
     expect(schema.keywords).toContain('Adaptive personalization');
     expect(schema.publisher).toMatchObject({

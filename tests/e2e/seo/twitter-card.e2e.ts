@@ -19,18 +19,16 @@ test.describe('Twitter card metadata', () => {
     await page.context().addCookies([
       {
         name: 'NEXT_LOCALE',
-        value: testLocales[0] ?? 'en-de',
+        value: testLocales[0] ?? 'de-de',
         domain: hostname,
         path: '/',
       },
     ]);
 
-    const targets: Array<{ name: string; path: string; locale?: SupportedLocale }> = [
-      { name: 'home', path: '/' },
-      { name: 'waitlist', path: waitlistLandingPath() },
-    ];
+    const targets: Array<{ name: string; path: string; locale?: SupportedLocale }> = [{ name: 'home', path: '/' }];
 
     for (const locale of testLocales) {
+      targets.push({ name: `waitlist (${locale})`, path: waitlistLandingPath(locale), locale });
       targets.push(
         { name: `method (${locale})`, path: methodPath(locale), locale },
         { name: `imprint (${locale})`, path: imprintPath(locale), locale },
@@ -51,14 +49,14 @@ test.describe('Twitter card metadata', () => {
         await page.context().addCookies([
           {
             name: 'NEXT_LOCALE',
-            value: testLocales[0] ?? 'en-de',
+            value: testLocales[0] ?? 'de-de',
             domain: hostname,
             path: '/',
           },
         ]);
       }
 
-      await page.goto(target.path, { waitUntil: 'networkidle' });
+      await page.goto(target.path, { waitUntil: 'domcontentloaded' });
       const twitterCard = await page.getAttribute('meta[name="twitter:card"]', 'content');
       expect(twitterCard, `${target.name} should define twitter:card`).toBe('summary_large_image');
     }

@@ -70,8 +70,10 @@ export default function HeaderThemeToggle({ variant, analyticsContext, surface, 
     onThemeChange?.();
   };
 
+  const baseTestId = variant === 'desktop' ? 'lh-nav-theme-toggle-desktop' : 'lh-nav-theme-toggle-mobile';
+
   return (
-    <div className={containerClass} data-theme-switcher>
+    <div className={containerClass} data-theme-switcher data-testid={baseTestId}>
       <label htmlFor={selectId} className={labelClass}>
         {t('theme.label')}
       </label>
@@ -80,7 +82,7 @@ export default function HeaderThemeToggle({ variant, analyticsContext, surface, 
         className={selectClass}
         value={theme}
         onChange={handleChange}
-        data-testid={variant === 'desktop' ? 'header-theme-select-desktop' : 'header-theme-select-mobile'}
+        data-testid={`${baseTestId}-select`}
       >
         {options.map(({ value, label }) => (
           <option key={value} value={value}>

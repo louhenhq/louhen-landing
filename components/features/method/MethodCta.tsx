@@ -34,6 +34,7 @@ export default function MethodCta({ locale }: MethodCtaProps) {
           prefetch={false}
           onClick={handleClick}
           data-ll="method-hero-cta"
+          testId="lh-method-footer-cta-primary"
         >
           {t('final')}
         </Button>

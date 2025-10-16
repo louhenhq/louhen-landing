@@ -139,7 +139,7 @@ Add guard clauses for missing envs (fail fast with clear, friendly errors).
 - **Targeted commands:**
   - `npm run test:e2e` - full Playwright suite (desktop + tagged mobile).
   - `npm run test:axe` - axe scans on the canonical desktop viewport.
-  - `npm run lhci` - Lighthouse CI thresholds (`/`, `/waitlist`, `/method`).
+  - `npm run lhci` - Lighthouse CI thresholds (`/`, `/de-de/waitlist`, `/de-de/method`).
 - Accessibility checks live in `tests/axe/canonical.axe.ts`; update the canonical matrix instead of creating new axe suites.
 - **Negative paths:** Always cover at least one failing case for forms/APIs (invalid email, captcha failure, etc.).
 - **Budgets:** Lighthouse thresholds stay Performance >= 90, Accessibility >= 95, SEO >= 95, Best Practices >= 95.

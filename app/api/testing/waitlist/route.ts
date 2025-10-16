@@ -5,7 +5,10 @@ import { markExpiredByTokenHash, upsertPending } from '@/lib/firestore/waitlist'
 import { createTokenLookupHash } from '@/lib/security/tokens';
 
 export async function POST(request: Request) {
-  if (process.env.NODE_ENV !== 'test' && process.env.TEST_E2E_SHORTCIRCUIT !== 'true') {
+  const rawShortCircuit = process.env.TEST_E2E_SHORTCIRCUIT ?? '';
+  const normalizedShortCircuit = rawShortCircuit.trim().toLowerCase();
+  const isShortCircuitEnabled = normalizedShortCircuit === 'true' || normalizedShortCircuit === '1';
+  if (process.env.NODE_ENV !== 'test' && !isShortCircuitEnabled) {
     return NextResponse.json({ ok: false }, { status: 404 });
   }
 

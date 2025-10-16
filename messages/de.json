@@ -48,9 +48,14 @@
       "label": "Sprache",
       "en": "English",
       "de": "Deutsch",
+      "fr": "Französisch",
+      "nl": "Niederländisch",
+      "it": "Italienisch",
       "en-de": "Englisch (Deutschland)",
       "de-de": "Deutsch (Deutschland)",
-      "de-at": "Deutsch (Österreich)",
+      "fr-fr": "Französisch (Frankreich)",
+      "nl-nl": "Niederländisch (Niederlande)",
+      "it-it": "Italienisch (Italien)",
       "submit": "Sprache wechseln"
     },
     "theme": {

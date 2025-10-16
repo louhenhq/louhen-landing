@@ -1,5 +1,3 @@
-import { defaultLocale, type SupportedLocale } from '@/next-intl.locales';
-
-export function methodPath(locale: SupportedLocale): string {
-  return locale === defaultLocale ? '/method' : `/${locale}/method`;
+export function methodPath(locale: string): string {
+  return `/${locale}/method`;
 }

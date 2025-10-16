@@ -27,9 +27,10 @@ const sharedEnv = {
   BASE_URL: baseUrl,
   APP_BASE_URL: baseUrl,
   IS_PRELAUNCH: process.env.IS_PRELAUNCH ?? 'true',
-  TEST_E2E_SHORTCIRCUIT: process.env.TEST_E2E_SHORTCIRCUIT ?? 'true',
+  TEST_E2E_SHORTCIRCUIT: process.env.TEST_E2E_SHORTCIRCUIT ?? '1',
   TEST_E2E_BYPASS_TOKEN: process.env.TEST_E2E_BYPASS_TOKEN ?? 'e2e-mocked-token',
   HCAPTCHA_SECRET: process.env.HCAPTCHA_SECRET ?? 'test_secret',
+  CSP_NONCE_BYTES: process.env.CSP_NONCE_BYTES ?? '16',
 };
 
 const serverEnv = {

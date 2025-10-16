@@ -10,7 +10,7 @@ import HeaderLocaleSwitcher from './HeaderLocaleSwitcher';
 import HeaderThemeToggle from './HeaderThemeToggle';
 import HeaderConsentButton from './HeaderConsentButton';
 import PromoRibbon from './PromoRibbon';
-import { resolveLogoutUrl, type HeaderUserState } from '@lib/auth/userState';
+import { resolveLogoutUrl, type HeaderUserState } from '@shared/auth/user-state';
 import { buildHeaderCta, type HeaderCtaConfig } from '@lib/header/ctaConfig';
 import { recordHeaderEvent, type HeaderEventContext } from '@lib/analytics/header';
 import { buildHeaderNavigation, type NavItemResolved } from '@lib/nav/config';
@@ -140,7 +140,8 @@ export default function Header({ onCta, userState: userStateProp }: HeaderProps)
   const drawerCloseLabel = t('drawer.close');
   const menuButtonLabel = t('drawer.open');
 
-  const ctaLabel = t(ctaConfig.labelKey as Parameters<typeof t>[0]);
+  const ctaKey = (ctaConfig.labelKey ?? '').replace(/^header\./, '') as Parameters<typeof t>[0];
+  const ctaLabel = t(ctaKey);
   const skipLinkLabel = t('skipLink');
   const showAuthLinks = userState === 'hinted';
   const logoutHref = useMemo(() => resolveLogoutUrl(), []);
@@ -155,6 +156,7 @@ export default function Header({ onCta, userState: userStateProp }: HeaderProps)
       data-header-state={headerState}
       data-motion={motionEnabled ? 'enabled' : 'disabled'}
       data-ll="nav-root"
+      data-testid="lh-nav-root"
       className={cn(
         'group/header sticky top-0 z-header border-b border-border/60 bg-bg/90 backdrop-blur translate-y-0 transform-gpu transition-transform duration-base',
         'data-[header-state=hidden]:-translate-y-full',
@@ -166,7 +168,7 @@ export default function Header({ onCta, userState: userStateProp }: HeaderProps)
       <a
         href="#main-content"
         className="sr-only focus-visible:not-sr-only focus-visible:absolute focus-visible:left-1/2 focus-visible:top-sm focus-visible:-translate-x-1/2 focus-visible:inline-flex focus-visible:items-center focus-visible:rounded-pill focus-visible:border focus-visible:border-border focus-visible:bg-bg focus-visible:px-sm focus-visible:py-xs focus-visible:text-sm focus-visible:text-text focus-visible:shadow-card focus-visible:transition focus-visible:z-header focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
-        data-testid="header-skip-link"
+        data-testid="lh-nav-skip-link"
       >
         {skipLinkLabel}
       </a>
@@ -204,6 +206,7 @@ export default function Header({ onCta, userState: userStateProp }: HeaderProps)
           )}
           role="navigation"
           aria-label={t('nav.primaryLabel')}
+          data-testid="lh-nav-primary"
         >
           {primaryNavItems.map(({ item, label }) => (
             <HeaderNavLink
@@ -267,6 +270,7 @@ export default function Header({ onCta, userState: userStateProp }: HeaderProps)
             data-nav-drawer-trigger
             data-surface="drawer-trigger"
             data-ll="nav-menu-button"
+            data-testid="lh-nav-menu-toggle"
           >
             {menuButtonLabel}
           </button>
@@ -278,6 +282,7 @@ export default function Header({ onCta, userState: userStateProp }: HeaderProps)
           className="hidden border-t border-border/60 bg-bg px-gutter py-xs lg:block"
           role="navigation"
           aria-label={t('nav.secondaryLabel')}
+          data-testid="lh-nav-secondary"
         >
           <ul className="mx-auto flex max-w-6xl items-center gap-md text-xs text-text-muted">
             {secondaryNavItems.map(({ item, label }) => (
@@ -403,6 +408,7 @@ function HeaderNavLink({ item, label, subtle, analyticsContext, surface }: Heade
   const dataAttributes = {
     'data-nav-id': item.id,
     'data-analytics-event': item.analyticsEvent ?? undefined,
+    'data-testid': `lh-nav-item-${item.id}`,
   } as const;
   const isAnchor = item.href.startsWith('#');
   const enableIntentPrefetch = !item.isExternal && !isAnchor;
@@ -495,7 +501,7 @@ function HeaderCtaButton({ variant, config, label, onScrollTarget, analyticsCont
     : cn(buttons.primary, 'h-11 w-full justify-center');
 
   const dataAttrs: Record<string, string | undefined> = {
-    'data-testid': variant === 'desktop' ? 'header-cta' : 'header-cta-mobile',
+    'data-testid': variant === 'desktop' ? 'lh-nav-cta-primary' : 'lh-nav-cta-primary-mobile',
     'data-cta-mode': config.id,
     'data-ll': variant === 'desktop' ? 'nav-waitlist-cta' : undefined,
   };
@@ -593,10 +599,10 @@ function HeaderLogoutLink({ variant, href, label, analyticsContext, surface, onN
     : 'w-full';
 
   const testId = variant === 'desktop'
-    ? 'header-logout'
+    ? 'lh-nav-logout-desktop'
     : variant === 'drawer'
-      ? 'header-logout-drawer'
-      : 'header-logout-mobile';
+      ? 'lh-nav-logout-drawer'
+      : 'lh-nav-logout-mobile';
 
   const handleClick = (event: ReactMouseEvent<HTMLAnchorElement>) => {
     const trigger = resolveInteractionTrigger(event);

@@ -1,4 +1,5 @@
-import { createHmac, timingSafeEqual } from 'node:crypto';
+import 'server-only';
+import { createHmac, timingSafeEqual } from 'crypto';
 
 import { normalizeEmail } from '@/lib/email/suppress';
 import { DEFAULT_LOCALE } from '@/lib/i18n/locales';

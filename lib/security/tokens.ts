@@ -1,4 +1,5 @@
-import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
+import 'server-only';
+import { createHash, randomBytes, timingSafeEqual } from 'crypto';
 
 const TOKEN_LENGTH_BYTES = 32;
 const SALT_LENGTH_BYTES = 16;

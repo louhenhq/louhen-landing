@@ -28,7 +28,7 @@ const localesToTest = getTestLocales() as SupportedLocale[];
 
 test.describe('Method page metadata', () => {
   for (const locale of localesToTest) {
-    test(`${locale} metadata reflects localized copy and canonical policy`, async ({ page }) => {
+    test(`${locale} metadata reflects localized copy and canonical policy @extended`, async ({ page }) => {
       const messages = (await loadMessages(locale)) as { method?: MethodMessages };
       const methodMessages = messages.method ?? {};
       const defaultMethodMessages =
@@ -43,7 +43,8 @@ test.describe('Method page metadata', () => {
       }
       expect(status).toBe(200);
 
-      await page.goto(targetPath, { waitUntil: 'networkidle' });
+      await page.goto(targetPath, { waitUntil: 'domcontentloaded' });
+      await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
 
       const expectedTitle =
         methodMessages.seo?.title ?? defaultMethodMessages.seo?.title ?? DEFAULT_METHOD_TITLE;

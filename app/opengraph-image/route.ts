@@ -2,13 +2,14 @@ import { createElement } from 'react';
 import { ImageResponse } from 'next/og';
 import { SITE_NAME, LEGAL_ENTITY } from '@/constants/site';
 import { loadMessages } from '@/lib/intl/loadMessages';
+import { safeGetMessage } from '@/lib/intl/getMessage';
 import { OG_IMAGE_HEIGHT, OG_IMAGE_WIDTH } from '@/lib/shared/og/builder';
 import { getStaticOg } from '@/lib/shared/og/fallback';
 import { getFlags } from '@/lib/shared/flags';
 import { defaultLocale, locales, type SupportedLocale } from '@/next-intl.locales';
 import tokens from '@louhen/design-tokens/build/web/tokens.json' assert { type: 'json' };
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 export const size = { width: OG_IMAGE_WIDTH, height: OG_IMAGE_HEIGHT } as const;
 export const contentType = 'image/png';
 
@@ -91,13 +92,29 @@ async function resolveCopy(
 ): Promise<OgCopy> {
   try {
     const messages = (await loadMessages(locale)) as Record<string, unknown>;
-    const og = (messages.og ?? {}) as Record<string, unknown>;
-    const variantKey = variant === 'invited' ? 'invited' : 'default';
-    const block = (og[variantKey] ?? og.default) as Record<string, unknown> | undefined;
-
-    const title = typeof block?.title === 'string' ? block.title : fallbackTitle;
-    const description = typeof block?.description === 'string' ? block.description : fallbackDescription;
-    return { title, description };
+    const baseTitle = safeGetMessage(messages, 'og.default.title', {
+      locale,
+      fallbackHint: 'og default title',
+    }) || fallbackTitle;
+    const baseDescription = safeGetMessage(messages, 'og.default.description', {
+      locale,
+      fallbackHint: 'og default description',
+    }) || fallbackDescription;
+    if (variant === 'invited') {
+      return {
+        title:
+          safeGetMessage(messages, 'og.invited.title', {
+            locale,
+            fallbackHint: 'og invited title',
+          }) || baseTitle,
+        description:
+          safeGetMessage(messages, 'og.invited.description', {
+            locale,
+            fallbackHint: 'og invited description',
+          }) || baseDescription,
+      };
+    }
+    return { title: baseTitle, description: baseDescription };
   } catch {
     return { title: fallbackTitle, description: fallbackDescription };
   }
