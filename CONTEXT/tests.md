@@ -133,12 +133,12 @@ These principles sit alongside the [Selector Policy](#selector-policy) and are n
 ### Playwright end-to-end
 - Location: `tests/e2e/**`; configuration in `playwright.config.ts` exposes `desktop-chromium` (default) and `mobile-chromium` (runs specs tagged `@mobile`, skips `@desktop-only`).
 - Commands:
-  - `npm run test:e2e:smoke` / `npm run test:e2e:critical` - PR parity (`@critical` runs the five-case gate only, with mocks and list reporter).
+  - `npm run test:e2e:smoke` / `npm run test:e2e:critical` - PR parity (`@critical` ring covers six deterministic cases across four specs, exercised with mocks and the list reporter).
   - `npm run test:e2e:extended` - nightly/full regression.
   - `npm run e2e:local` - local debug with extra logging.
   - `npm run qa:e2e` / `npm run qa` - orchestration commands used in CI.
 - Key suites:
-  - Critical gate (`tests/e2e/critical/critical.e2e.ts`) - verifies home nav, mocked waitlist submit, default-locale method metadata at `/de-de/method`, confirms `/method`, `/privacy`, `/terms`, and `/imprint` return 404, exercises network policy, and runs a nav/main axe smoke via the shared selector map. Single-worker, retry=1 for determinism.
+  - Critical gate (`tests/e2e/security/csp.e2e.ts`, `tests/e2e/security/network-policy.e2e.ts`, `tests/e2e/core/consent.e2e.ts`, `tests/e2e/core/waitlist-happy.e2e.ts`) — six @critical cases spanning CSP enforcement, network guard, consent UX, and mocked waitlist submission (locale-paired). These specs run single-worker with retry=1 for determinism.
   - Analytics sentinel (`tests/e2e/landing.spec.ts`) - canonical example enforcing consent gating and tracked CTA payloads.
   - SEO metadata (`tests/e2e/seo/*.e2e.ts`) - covers Open Graph, canonical uniqueness, breadcrumbs.
   - Waitlist (`tests/e2e/waitlist/*.e2e.ts`) - form UX + API contract.
@@ -197,4 +197,4 @@ These principles sit alongside the [Selector Policy](#selector-policy) and are n
 - CI and deterministic local runs export the following variables: `HOST=127.0.0.1`, `PORT=4311`, `BASE_URL=http://127.0.0.1:4311`, `DEFAULT_LOCALE=de-de`, `IS_PRELAUNCH=true`, `CSP_MODE=report-only`, `CSP_NONCE_BYTES=16`, `TEST_E2E_SHORTCIRCUIT=1`, `TEST_MODE=1`, `ANALYTICS_ENABLED=0`, `NEXT_PUBLIC_TEST_MODE=1`, `PLAYWRIGHT_BROWSERS_PATH=0`.
 - When `TEST_MODE===1`, the waitlist form seeds `hcaptchaToken` with `e2e-mocked-token` and hides the `<HCaptcha>` widget so Playwright never calls the real service. Production/preview builds must **not** set these variables.
 - Crypto helpers (`lib/email/tokens`, `lib/status/auth`, `lib/rate/limiter`, etc.) are server-only. Playwright and unit tests exercise them through server routes or direct imports within Node contexts; never stub them from `use client` fixtures.
-- The @critical waitlist spec (`tests/e2e/critical/critical.e2e.ts`) registers a context-level mock using `WAITLIST_API_PATTERN`, pre-grants consent via cookie, and synchronises on the mocked `POST` response (Promise.all + `waitForResponse`) before asserting the success UI. This keeps the test resilient without altering the live behaviour.
+- The @critical waitlist happy-path spec (`tests/e2e/core/waitlist-happy.e2e.ts`) registers a regex-driven mock for `/api/(testing/)?waitlist`, pre-grants consent via fixture, and races the mocked fulfilment with the UI status region before asserting the success UI. This keeps the test resilient without altering live behaviour.
