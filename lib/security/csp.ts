@@ -100,7 +100,10 @@ export function buildCspHeader(
 
   addDirectiveValue(directives, 'default-src', "'self'");
 
-  const scriptSources = new Set(["'self'", `'nonce-${nonce}'`, "'strict-dynamic'", 'https:']);
+  const scriptSources =
+    options.mode === 'strict'
+      ? new Set<string>([`'nonce-${nonce}'`, "'strict-dynamic'", 'https:', 'http:'])
+      : new Set<string>(["'self'", `'nonce-${nonce}'`, "'strict-dynamic'", 'https:']);
   directives.set('script-src', scriptSources);
 
   const styleSources = new Set(["'self'", "'unsafe-inline'", 'https:']);

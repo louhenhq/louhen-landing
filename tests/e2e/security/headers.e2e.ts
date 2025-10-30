@@ -113,10 +113,15 @@ test.describe('Security headers', () => {
     expect(cspHeader).toContain("default-src 'self'");
     expect(containsUnsafeInline(cspHeader)).toBeFalsy();
 
-    const scriptSources = (getDirective(cspHeader, 'script-src') ?? '').split(/\s+/);
-    expect(scriptSources).toContain("'self'");
-    expect(scriptSources).toContain('https:');
+    const scriptSources = (getDirective(cspHeader, 'script-src') ?? '').split(/\s+/).filter(Boolean);
     expect(scriptSources.some((source) => source.replace(/'/g, '') === 'strict-dynamic')).toBeTruthy();
+    expect(scriptSources).toContain('https:');
+    if (cspMode === 'strict') {
+      expect(scriptSources).toContain('http:');
+      expect(scriptSources).not.toContain("'self'");
+    } else {
+      expect(scriptSources).toContain("'self'");
+    }
     const nonce = extractScriptNonce(cspHeader);
     expect(nonce).toBeTruthy();
     expect(headers['x-csp-nonce']).toBeTruthy();
@@ -149,6 +154,22 @@ test.describe('Security headers', () => {
     const reportToDirective = getDirective(cspHeader, 'report-to');
     expect(reportToDirective).toBeTruthy();
     expect(reportToDirective).toContain('csp-endpoint');
+
+    const objectSrcDirective = getDirective(cspHeader, 'object-src');
+    expect(objectSrcDirective).toBeTruthy();
+    if (objectSrcDirective) {
+      expect(objectSrcDirective.split(/\s+/)).toContain("'none'");
+    }
+    const baseUriDirective = getDirective(cspHeader, 'base-uri');
+    expect(baseUriDirective).toBeTruthy();
+    if (baseUriDirective) {
+      expect(baseUriDirective.split(/\s+/)).toContain("'self'");
+    }
+    const formActionDirective = getDirective(cspHeader, 'form-action');
+    expect(formActionDirective).toBeTruthy();
+    if (formActionDirective) {
+      expect(formActionDirective.split(/\s+/)).toContain("'self'");
+    }
 
     const reportToHeader = headers['report-to'];
     expect(reportToHeader, 'Report-To header should propagate CSP reporting endpoint').toBeTruthy();
