@@ -14,11 +14,22 @@ test.describe('@critical consent experience', () => {
 
     const banner = page.getByTestId(testIds.consent.banner);
     await expect(banner, 'Consent banner should appear for unknown state').toBeVisible();
+    await banner.waitFor({ state: 'attached' });
 
     const acceptButton = banner.locator('[data-consent-accept]');
     await expect(acceptButton).toBeVisible();
-    await acceptButton.focus();
-    await expect(acceptButton).toBeFocused();
+    await acceptButton.scrollIntoViewIfNeeded();
+    await acceptButton.evaluate((element: HTMLElement) => {
+      element.scrollIntoView({ block: 'center' });
+      element.focus();
+    });
+
+    await expect
+      .poll(
+        () => page.evaluate(() => document.activeElement?.getAttribute('data-consent-accept')),
+        { message: 'accept button should own focus' }
+      )
+      .toBe('true');
 
     await page.keyboard.press('Enter');
     await expect(banner).toHaveCount(0);
