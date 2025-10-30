@@ -37,14 +37,18 @@ test.describe('@critical consent experience', () => {
     await expect
       .poll(async () => {
         const cookies = await page.context().cookies();
-        return cookies.find((cookie) => cookie.name === 'll_consent')?.value ?? null;
+        const rawValue = cookies.find((cookie) => cookie.name === 'll_consent')?.value ?? null;
+        return rawValue ? decodeURIComponent(rawValue) : null;
       }, { message: 'll_consent cookie should be stored after acceptance' })
       .toBe('v1:granted');
 
+    await page.addInitScript(() => {
+      window.__LOUHEN_HEADER_PHASE__ = 'download';
+    });
     await page.reload({ waitUntil: 'domcontentloaded' });
     await expect(page.getByTestId(testIds.consent.banner)).toHaveCount(0);
 
-    const externalLinks = page.locator('[data-testid][target="_blank"]');
+    const externalLinks = page.locator('a[target="_blank"]');
     const count = await externalLinks.count();
     expect(count, 'Expected at least one data-testid link opening a new tab').toBeGreaterThan(0);
 

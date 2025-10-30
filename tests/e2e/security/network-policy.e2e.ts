@@ -12,6 +12,10 @@ test.describe('@critical network policy', () => {
   });
 
   test('blocks cross-origin navigation attempts @critical', async ({ page, networkPolicy }, testInfo) => {
+    testInfo.annotations.push({
+      type: ALLOW_BLOCKED_REQUESTS_ANNOTATION,
+      description: 'Intentional cross-origin probe to validate network guard behaviour.',
+    });
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     networkPolicy.clearBlockedRequests();
 

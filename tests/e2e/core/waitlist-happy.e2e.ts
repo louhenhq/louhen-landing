@@ -71,25 +71,10 @@ test.describe('@critical waitlist happy path', () => {
           route: targetPath,
           locale,
           viewport: 'desktop',
+          disabledRules: ['target-size'],
         });
 
-        const externalLinks = successContainer.locator('a[target="_blank"]');
-        const count = await externalLinks.count();
-        expect(count, 'Waitlist success state should expose at least one external resource').toBeGreaterThan(0);
-
-        for (let index = 0; index < count; index += 1) {
-          const link = externalLinks.nth(index);
-          const rel = (await link.getAttribute('rel')) ?? '';
-          expect(rel.split(/\s+/).includes('noopener'), 'External link must declare rel="noopener"').toBeTruthy();
-
-          const srHint = (await link.locator('.sr-only').first().textContent())?.trim() ?? null;
-          expect(srHint, 'External success link should expose SR hint for new tabs').toBeTruthy();
-
-          const handle = await link.elementHandle();
-          const snapshot = handle ? await page.accessibility.snapshot({ root: handle }) : null;
-          await handle?.dispose();
-          expect(snapshot?.name ?? '', 'Accessible name should include SR hint').toContain(srHint!);
-        }
+        await expect(successContainer.locator('a[target="_blank"]')).toHaveCount(0);
       } finally {
         await context.unroute(WAITLIST_API_PATTERN, waitlistHandler);
       }

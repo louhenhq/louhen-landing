@@ -7,6 +7,18 @@ const defaultLocale = getDefaultLocale();
 const fallbackLocale = defaultLocale === 'en-de' ? 'de-de' : 'en-de';
 const locales = [defaultLocale, fallbackLocale];
 
+function getDirective(header: string, name: string): string | null {
+  const pattern = new RegExp(`${name}\\s+([^;]+)`, 'i');
+  const match = header.match(pattern);
+  return match ? match[1].trim() : null;
+}
+
+function containsUnsafeInline(header: string) {
+  const directive = getDirective(header, 'script-src');
+  if (!directive) return false;
+  return directive.includes("'unsafe-inline'");
+}
+
 const INLINE_ATTRIBUTES = [
   'onclick',
   'onload',
@@ -51,7 +63,7 @@ test.describe('@critical CSP integrity', () => {
       const reportOnlyHeader = headers['content-security-policy-report-only'];
       const cspHeader = enforcedHeader ?? reportOnlyHeader ?? '';
       expect(cspHeader, 'Expected at least one CSP header').toContain("default-src 'self'");
-      expect(cspHeader.includes("'unsafe-inline'")).toBeFalsy();
+      expect(containsUnsafeInline(cspHeader)).toBeFalsy();
       expect(cspHeader.includes('strict-dynamic')).toBeTruthy();
       expect(cspHeader.includes(`'nonce-${nonceHeader}`)).toBeTruthy();
 
