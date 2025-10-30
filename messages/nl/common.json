@@ -1,0 +1,22 @@
+{
+  "header": {
+    "locale": {
+      "label": "Taal",
+      "announce": "Taal gewijzigd naar {locale}."
+    }
+  },
+  "localeSuggestion": {
+    "title": "Wil je {locale} gebruiken?",
+    "body": {
+      "cookie": "Je gebruikt Louhen meestal in {locale}.",
+      "acceptLanguage": "Je browsertaal staat ingesteld op {locale}."
+    },
+    "action": "Overschakelen naar {locale}",
+    "dismiss": "Hier blijven"
+  },
+  "common": {
+    "accessibility": {
+      "opensInNewTab": "opent in een nieuw tabblad"
+    }
+  }
+}

@@ -1,10 +1,10 @@
 import { expect, test } from '@tests/fixtures/playwright';
 import type { BrowserContext, Page } from '@playwright/test';
-import { localeUrl } from '../_utils/url';
+import { localeUrl, setLocaleCookie, getCookieDomain } from '../_utils/url';
 
 const CONSENT_COOKIE_VALUE = () => encodeURIComponent('v1:granted');
 
-const COOKIE_DOMAIN = new URL(localeUrl()).hostname;
+const COOKIE_DOMAIN = getCookieDomain();
 
 async function seedConsent(context: BrowserContext) {
   await context.addCookies([
@@ -21,38 +21,40 @@ async function applyAuthHint(context: BrowserContext) {
 async function setThemePreference(context: BrowserContext, theme: 'light' | 'dark' | 'system') {
   if (theme === 'system') return;
   await context.addCookies([
-    { name: 'lh_theme_pref', value: theme, domain: 'localhost', path: '/' },
+    { name: 'lh_theme_pref', value: theme, domain: COOKIE_DOMAIN, path: '/' },
   ]);
 }
 
 async function gotoReady(page: Page, path: string) {
-  await page.goto(localeUrl(path), { waitUntil: 'networkidle' });
+  await page.goto(localeUrl(path), { waitUntil: 'domcontentloaded' });
+  await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
 }
 
 test.describe('Header regression pack', () => {
   test.beforeEach(async ({ context }) => {
     await context.clearCookies();
+    await setLocaleCookie(context);
     await seedConsent(context);
     await setThemePreference(context, 'light');
   });
 
   test('CTA width stays stable between guest and hinted states', async ({ page, context }) => {
     await gotoReady(page, '?utm_source=header-width');
-    const cta = page.locator('[data-ll="nav-waitlist-cta"]').first();
+    const cta = page.getByTestId('lh-nav-cta-primary');
     await expect(cta).toBeVisible();
 
     const guestWidth = await cta.evaluate((node) => node.getBoundingClientRect().width);
 
     await applyAuthHint(context);
-    await page.reload({ waitUntil: 'networkidle' });
+    await page.reload({ waitUntil: 'domcontentloaded' });
 
-    const hintedCta = page.locator('[data-ll="nav-waitlist-cta"]').first();
+    const hintedCta = page.getByTestId('lh-nav-cta-primary');
     await expect(hintedCta).toHaveText('Dashboard');
     const hintedWidth = await hintedCta.evaluate((node) => node.getBoundingClientRect().width);
 
     expect(Math.abs(guestWidth - hintedWidth)).toBeLessThanOrEqual(4);
 
-    const logoutLink = page.getByTestId('header-logout');
+    const logoutLink = page.getByTestId('lh-nav-logout-desktop');
     await expect(logoutLink).toBeVisible();
     const logoutHeight = await logoutLink.evaluate((node) => node.getBoundingClientRect().height);
     expect(Math.round(logoutHeight)).toBeGreaterThanOrEqual(44);
@@ -61,10 +63,10 @@ test.describe('Header regression pack', () => {
   test('Primary nav uses intent prefetch and exposes focus ring', async ({ page }) => {
     await gotoReady(page, '?utm_source=header-nav');
 
-    const methodLink = page.locator('[data-nav-id="method"]');
+    const methodLink = page.getByTestId('lh-nav-item-method');
     await expect(methodLink).toHaveAttribute('data-prefetch-policy', 'intent');
 
-    const anchorLink = page.locator('[data-nav-id="how-it-works"]');
+    const anchorLink = page.getByTestId('lh-nav-item-how-it-works');
     await expect(anchorLink).not.toHaveAttribute('data-prefetch-policy', 'intent');
 
     await methodLink.focus();
@@ -77,15 +79,15 @@ test.describe('Header regression pack', () => {
 
   test('Mobile drawer retains analytics surface metadata and focus', async ({ page, context }) => {
   await context.addCookies([
-      { name: 'll_consent', value: CONSENT_COOKIE_VALUE(), domain: 'localhost', path: '/' },
-    ]);
+    { name: 'll_consent', value: CONSENT_COOKIE_VALUE(), domain: COOKIE_DOMAIN, path: '/' },
+  ]);
     await page.setViewportSize({ width: 414, height: 896 });
     await gotoReady(page, '?utm_source=header-drawer');
 
-    const trigger = page.locator('[data-ll="nav-menu-button"]');
+    const trigger = page.getByTestId('lh-nav-menu-toggle');
     await trigger.click();
 
-    const drawerLink = page.locator('[data-nav-section="primary"] [data-nav-id="method"]').first();
+    const drawerLink = page.getByTestId('lh-nav-item-method-drawer');
     await expect(drawerLink).toHaveAttribute('data-surface', 'drawer');
     await expect(drawerLink).toBeVisible();
 

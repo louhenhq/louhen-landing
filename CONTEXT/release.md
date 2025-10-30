@@ -60,7 +60,7 @@ These checks are marked **Required** on `staging` (first two) and `production` (
 3. **Redeploy & monitor**  
    - Merge the revert PR once green; the push triggers the same pipeline and semantic-release (which will publish a patch version if necessary).  
    - Confirm Vercel auto-deploys the reverted commit (`production` environment).  
-   - Sanity-check `/`, `/waitlist`, `/method`, `/status`, and review the published artifacts (Playwright, Lighthouse).
+   - Sanity-check `/`, `/de-de/waitlist`, `/de-de/method`, `/status`, and review the published artifacts (Playwright, Lighthouse).
 4. **Communicate & follow up**  
    - Announce the rollback in the release channel (include timelines, root cause, next steps).  
    - Update the original release PR with a link to the revert PR.  

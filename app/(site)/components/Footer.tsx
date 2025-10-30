@@ -6,20 +6,23 @@ import { cn, layout, text } from '@/app/(site)/_lib/ui';
 import { LEGAL_ENTITY } from '@/constants/site';
 import { useConsent } from '@/components/ConsentProvider';
 import LocaleSwitcher from '@/app/(site)/components/LocaleSwitcher';
-import { buildPathForLocale, DEFAULT_LOCALE, FULL_LOCALES, type AppLocale } from '@/lib/i18n/locales';
+import { DEFAULT_LOCALE, FULL_LOCALES, type AppLocale } from '@/lib/i18n/locales';
+import { legalPath, type LegalSlug } from '@lib/shared/routing/legal-path';
+import { imprintPath } from '@lib/shared/routing/imprint-path';
 
 export default function Footer() {
   const t = useTranslations('footer');
   const rawLocale = useLocale();
   const activeLocale = (FULL_LOCALES.includes(rawLocale as AppLocale) ? (rawLocale as AppLocale) : DEFAULT_LOCALE.value) as AppLocale;
-  const to = (pathname: string) => buildPathForLocale(activeLocale, pathname);
+  const legalHref = (slug: LegalSlug) => legalPath(activeLocale, slug);
+  const imprintHref = imprintPath(activeLocale);
   const year = new Date().getFullYear();
   const { openManager } = useConsent();
 
   return (
     <footer
       className={cn('border-t border-border/50 bg-bg/90 backdrop-blur-sm')}
-      data-testid="landing-footer"
+      data-testid="lh-footer-site-root"
     >
       <div className={cn(layout.container, 'flex flex-col gap-xl py-[calc(var(--layout-section-padding-clamp)/1.5)]')}>
         <div className={cn(layout.grid, 'items-start gap-y-lg')}>
@@ -31,21 +34,21 @@ export default function Footer() {
           <nav className="flex flex-col gap-sm md:col-span-5 lg:col-span-4" aria-label={t('legalNavLabel')}>
             <p className={cn(text.label, 'text-text')}>{t('legal.heading')}</p>
             <Link
-              href={to('/privacy')}
+              href={legalHref('privacy')}
               prefetch={false}
               className="touch-target touch-padding text-label text-text-muted transition-colors hover:text-text"
             >
               {t('legal.privacy')}
             </Link>
             <Link
-              href={to('/terms')}
+              href={legalHref('terms')}
               prefetch={false}
               className="touch-target touch-padding text-label text-text-muted transition-colors hover:text-text"
             >
               {t('legal.terms')}
             </Link>
             <Link
-              href={to('/imprint')}
+              href={imprintHref}
               prefetch={false}
               className="touch-target touch-padding text-label text-text-muted transition-colors hover:text-text"
             >

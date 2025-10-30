@@ -8,7 +8,7 @@ function resolveConfirmUrl(): string {
   const explicit = process.env.CONFIRM_URL?.trim();
   if (explicit) return explicit;
 
-  const base = process.env.APP_BASE_URL?.trim() || 'http://localhost:3000';
+  const base = process.env.APP_BASE_URL?.trim() || 'http://127.0.0.1:3000';
   const url = new URL('/api/waitlist/confirm', base);
   url.searchParams.set('token', 'preview-token');
   return url.toString();

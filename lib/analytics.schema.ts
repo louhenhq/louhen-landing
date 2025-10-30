@@ -1,4 +1,4 @@
-import type { HeaderUserState } from '@/lib/auth/userState';
+import type { HeaderUserState } from '@shared/auth/user-state';
 import type { SupportedLocale } from '@/next-intl.locales';
 
 export type SectionViewId = 'founder-story' | 'how';

@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-BASE_URL="${BASE_URL:-http://localhost:3000}"
+BASE_URL="${BASE_URL:-http://127.0.0.1:3000}"
 OWNER_EMAIL="${OWNER_EMAIL:-owner@example.com}"
 REF_CODE="${REF_CODE:-OWNERCODE}"
 

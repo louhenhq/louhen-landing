@@ -1,0 +1,15 @@
+   ▲ Next.js 15.5.3
+   - Local:        http://127.0.0.1:4312
+   - Network:      http://127.0.0.1:4312
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 1050ms
+ ✓ Compiled /middleware in 323ms (260 modules)
+ ○ Compiling /[locale] ...
+ ✓ Compiled /[locale] in 1662ms (1079 modules)
+ HEAD /de-de 200 in 2310ms
+ ○ Compiling /[locale]/method ...
+ ✓ Compiled /[locale]/method in 1008ms (1108 modules)
+ HEAD /de-de/method 200 in 1388ms
+ ✓ Compiled in 127ms (1108 modules)

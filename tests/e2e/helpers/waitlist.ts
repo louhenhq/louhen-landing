@@ -11,9 +11,9 @@ export async function seedWaitlistUser(request: APIRequestContext, email: string
   const response = await request.post('/api/waitlist', {
     data: {
       email,
-      consent: true,
+      consent: { gdpr: true },
       hcaptchaToken: 'e2e-mocked-token',
-      locale: 'en',
+      locale: process.env.DEFAULT_LOCALE || process.env.NEXT_PUBLIC_DEFAULT_LOCALE || 'de-de',
     },
     headers: { 'content-type': 'application/json' },
   });

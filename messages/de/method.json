@@ -1,0 +1,110 @@
+{
+  "method": {
+    "a11y": {
+      "skipToCta": "Zum Wartelisten-Bereich springen"
+    },
+    "seo": {
+      "title": "Methode – Louhen",
+      "description": "So funktioniert Louhen: Fit-first Beratung, verlässliche Größen und mühelose Entdeckung."
+    },
+    "hero": {
+      "eyebrow": "Die Louhen Methode",
+      "title": "Passform-Intelligenz, die mit wachsenden Füßen Schritt hält.",
+      "subtitle_generic": "Wir kombinieren kurze Scans mit podologisch geprüften Daten, damit sich jede Empfehlung persönlich, sicher und spielfreudig anfühlt.",
+      "subtitle_personalized": "Wir kombinieren kurze Scans mit podologisch geprüften Daten, damit sich jede Empfehlung für {name} persönlich anfühlt.",
+      "cta": "Warteliste beitreten",
+      "trustLine": "Von Podologinnen empfohlen und von Familien geliebt.",
+      "imageAlt": "Illustration eines Elternteils, das ein Kind bei einem Louhen Fußscan begleitet"
+    },
+    "pillars": {
+      "title": "Was jede Louhen-Empfehlung antreibt",
+      "items": [
+        {
+          "title": "Kindgerechtes Scannen",
+          "body": "Erfasse ein 3D-Fußprofil in unter einer Minute direkt mit dem Smartphone. Rohbilder verlassen dein Gerät nicht."
+        },
+        {
+          "title": "LouhenFit-Engine",
+          "body": "Messwerte werden auf reale Schuhinnenräume übertragen, damit Länge, Breite und Zehenfreiheit schon vor der Bestellung stimmen."
+        },
+        {
+          "title": "Adaptive Personalisierung",
+          "body": "Profile lernen aus Tragerückmeldungen und zeigen Modelle, die zu Wachstum, Stil und Vorlieben passen."
+        },
+        {
+          "title": "LouhenFit-Garantie",
+          "body": "Fühlt sich das erste Paar nicht richtig an, übernimmt LouhenFit die Retoure und stimmt die nächste Empfehlung gemeinsam mit dir ab.",
+          "badgeLabel": "Abgesichert durch LouhenFit",
+          "badgeTooltip": "Kostenlose Rücksendung und eine geführte Passformkontrolle, sobald sich etwas nicht gut anfühlt."
+        }
+      ],
+      "engine": {
+        "scienceDisclosure": {
+          "title": "So funktioniert die Wissenschaft",
+          "body": "Jeder Scan wird zu einer Karte des Schuhinnenraums, damit Länge, Breite und Spannfreiheit schon vor dem Versand passen. Rückmeldungen aus dem Tragealltag schärfen jede weitere Empfehlung.",
+          "privacyNote": "Wir synchronisieren Scans nur mit deiner Zustimmung. <privacyLink>In unserer Datenschutzerklärung erfährst du, wie wir Familien schützen</privacyLink>."
+        }
+      }
+    },
+    "scienceDisclosure": {
+      "cta": "Wissenschaft ansehen"
+    },
+    "how": {
+      "title": "So funktioniert es",
+      "defaultChildName": "dein Kind",
+      "xpTeaser": "Sammle XP schon beim ersten Scan und erhalte schneller Passform-Tipps.",
+      "steps": [
+        {
+          "title": "Starte mit einem Scan oder den aktuellen Maßen",
+          "body": "Lege ein Kinderprofil mit Messwerten an oder passe es für {name} an."
+        },
+        {
+          "title": "Louhen erstellt das Passform-Profil",
+          "body": "Wir analysieren Wachstum, Unterstützungsbedarf und Aktivitätsziele."
+        },
+        {
+          "title": "Empfehlungen bleiben relevant",
+          "body": "Es erscheinen nur Schuhe, die zu Passform, Stil und Saison passen."
+        },
+        {
+          "title": "Du prüfst, sie entdecken",
+          "body": "Bestelle mit Klarheit und kontrolliere die Passform zuhause mit einfachen Tragetests."
+        },
+        {
+          "title": "Gemeinsam dranzubleiben lohnt sich",
+          "body": "Tritt der Warteliste bei, um Einladungen, Tipps und Überraschungen zu erhalten."
+        }
+      ]
+    },
+    "trust": {
+      "badge": "Klinisch begleitet",
+      "headline": "Podologische Fachleute halten LouhenFit an gesunde Entwicklung angepasst.",
+      "body": "Jede Empfehlung enthält Passformvertrauen, Hinweise zum Eintragen und den nächsten Kontrollzeitpunkt.",
+      "quote": "„Wir raten nicht mehr. Louhen erklärt, warum ein Schuh passt – so kann ich mit gutem Gefühl Ja sagen.“",
+      "attribution": "Maya, Mama von zwei Entdeckerinnen"
+    },
+    "testimonial": {
+      "quote": "„Louhen zeigt die Daten, dadurch zweifle ich die Größe nicht mehr an.“",
+      "attribution": "Jon, Papa eines kleinen Wirbelwinds"
+    },
+    "founder": {
+      "title": "Von unserer Familie für deine",
+      "body": "Louhen entstand, als unsere Zwillinge ihre ersten Schuhe brauchten. Wir wollten, dass sich jede Bestellung vor dem Checkout richtig anfühlt."
+    },
+    "faqTeaser": {
+      "title": "Noch Fragen?",
+      "subtitle": "Wir haben die häufigsten Themen von Familien wie deiner gesammelt.",
+      "linkOnboarding": "Wie läuft das Onboarding ab?",
+      "linkGuarantee": "Was beinhaltet die LouhenFit-Garantie?",
+      "linkPrivacy": "Wie schützt ihr Daten?",
+      "cta": "FAQ entdecken",
+      "dismiss": "Schließen",
+      "dismissAria": "Hinweis schließen"
+    },
+    "cta": {
+      "title": "Teste Louhen zuerst mit deiner Familie.",
+      "button": "Zur Warteliste",
+      "final": "Zur Warteliste"
+    }
+  }
+}

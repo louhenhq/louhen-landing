@@ -41,7 +41,96 @@ const arbitraryTailwindUtilitySelectors = [
   },
 ];
 
+const clientRestrictedImportPatterns = [
+  {
+    group: [
+      '**/*.server',
+      '**/*.server.*',
+      '@server/*',
+      '@/lib/server/**',
+      '@/lib/**/nonce-context.server',
+      '@/lib/**/nonce-context.server.*',
+      '@/lib/security/tokens',
+      '@/lib/email/tokens',
+      '@/lib/email/suppress',
+      '@/lib/rate/limiter',
+      '@/lib/firestore/waitlist',
+      '@/lib/status/auth',
+    ],
+    message: 'Do not import server-only modules into client bundles.',
+  },
+];
+
+const requireUseClientDirective = {
+  selector: "Program:not(:has(ExpressionStatement[directive='use client']))",
+  message: "Client modules must include the 'use client' directive.",
+};
+
+const serverOnlyReexportSelectors = [
+  {
+    selector: "ExportAllDeclaration[source.value=/\\.server(\\.|$)/]",
+    message: 'Do not re-export server-only modules from client/shared namespaces.',
+  },
+  {
+    selector: "ExportNamedDeclaration[source.value=/\\.server(\\.|$)/]",
+    message: 'Do not re-export server-only modules from client/shared namespaces.',
+  },
+  {
+    selector: "ExportAllDeclaration[source.value^='@server/']",
+    message: 'Do not re-export server-only modules from client/shared namespaces.',
+  },
+  {
+    selector: "ExportNamedDeclaration[source.value^='@server/']",
+    message: 'Do not re-export server-only modules from client/shared namespaces.',
+  },
+  {
+    selector: "ExportAllDeclaration[source.value^='@/lib/server/']",
+    message: 'Do not re-export server-only modules from client/shared namespaces.',
+  },
+  {
+    selector: "ExportNamedDeclaration[source.value^='@/lib/server/']",
+    message: 'Do not re-export server-only modules from client/shared namespaces.',
+  },
+  ...[
+    '@/lib/security/tokens',
+    '@/lib/email/tokens',
+    '@/lib/email/suppress',
+    '@/lib/rate/limiter',
+    '@/lib/firestore/waitlist',
+    '@/lib/status/auth',
+    '@/lib/csp/nonce-context.server',
+  ].flatMap((source) => [
+    {
+      selector: `ExportAllDeclaration[source.value='${source}']`,
+      message: 'Do not re-export server-only modules from client/shared namespaces.',
+    },
+    {
+      selector: `ExportNamedDeclaration[source.value='${source}']`,
+      message: 'Do not re-export server-only modules from client/shared namespaces.',
+    },
+  ]),
+];
+
+const serverOnlyImportGuard = {
+  selector: "Program > :first-child:not(ImportDeclaration[source.value='server-only'])",
+  message: "Server modules under lib/server must begin with `import 'server-only';`.",
+};
+
 const eslintConfig = [
+  {
+    ignores: [
+      "artifacts/**",
+      "playwright-report/**",
+      "test-results/**",
+      "coverage/**",
+      ".next/**",
+      "dist/**",
+      "**/html/trace/**",
+      "**/*.bundle.js",
+      "**/*.min.js",
+      "public/tokens/**",
+    ],
+  },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
     rules: {
@@ -54,7 +143,6 @@ const eslintConfig = [
   {
     ignores: [
       "node_modules/**",
-      ".next/**",
       "out/**",
       "build/**",
       "packages/**",
@@ -70,10 +158,72 @@ const eslintConfig = [
     },
   },
   {
-    files: ['app/**/*.{ts,tsx}', 'components/**/*.{ts,tsx}'],
+    files: ['app/**/*.{ts,tsx}'],
     ignores: ['emails/**', 'tests/**'],
     rules: {
       'no-restricted-syntax': ['error', ...restrictedSyntaxBase, ...arbitraryTailwindUtilitySelectors],
+    },
+  },
+  {
+    files: ['components/**/*.{tsx}', 'app/**/components/**/*.{tsx}', 'lib/client/**/*.{tsx}', '**/*.client.tsx'],
+    ignores: ['emails/**', 'tests/**'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        ...restrictedSyntaxBase,
+        ...arbitraryTailwindUtilitySelectors,
+        ...serverOnlyReexportSelectors,
+        requireUseClientDirective,
+      ],
+    },
+  },
+  {
+    files: ['components/**/*.{ts}', 'app/**/components/**/*.{ts}', 'lib/client/**/*.{ts}', '**/*.client.ts'],
+    ignores: ['emails/**', 'tests/**'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        ...restrictedSyntaxBase,
+        ...arbitraryTailwindUtilitySelectors,
+        ...serverOnlyReexportSelectors,
+      ],
+    },
+  },
+  {
+    files: ['lib/shared/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        ...restrictedSyntaxBase,
+        ...serverOnlyReexportSelectors,
+      ],
+    },
+  },
+  {
+    files: [
+      'components/**/*.{ts,tsx}',
+      'app/**/components/**/*.{ts,tsx}',
+      'lib/client/**/*.{ts,tsx}',
+      '**/*.client.{ts,tsx}',
+      'lib/shared/**/*.{ts,tsx}',
+    ],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: clientRestrictedImportPatterns,
+        },
+      ],
+    },
+  },
+  {
+    files: ['lib/server/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        ...restrictedSyntaxBase,
+        serverOnlyImportGuard,
+      ],
     },
   },
   {
@@ -134,9 +284,38 @@ const eslintConfig = [
         ...globals.node,
       },
     },
+    rules: {
+      "react-hooks/rules-of-hooks": "off",
+      "react-hooks/exhaustive-deps": "off",
+    },
   },
   {
-    files: ["lighthouserc.cjs"],
+    files: ['tests/e2e/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            '@/lib/email/*',
+            '@/lib/email/**',
+            '@/lib/security/*',
+            '@/lib/security/**',
+            '@/lib/status/*',
+            '@/lib/status/**',
+            '@/lib/firestore/*',
+            '@/lib/firestore/**',
+            '@/lib/rate/*',
+            '@/lib/rate/**',
+            '@/lib/server/**',
+            '@/lib/csp/nonce-context.server',
+            '@/lib/csp/nonce-context.server.*',
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ["lighthouserc.cjs", "scripts/util/read-locales.cjs"],
     rules: {
       "@typescript-eslint/no-require-imports": "off",
     },

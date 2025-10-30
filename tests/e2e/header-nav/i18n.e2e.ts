@@ -1,14 +1,16 @@
 import { test, expect } from '@tests/fixtures/playwright';
-import { localeUrl } from '../_utils/url';
+import { getDefaultLocale, localeUrl } from '../_utils/url';
 
-const EXPECTED_HREFLANGS = ['en', 'de', 'en-de', 'de-de', 'de-at', 'x-default'] as const;
+const EXPECTED_HREFLANGS = ['en-de', 'de-de', 'fr-fr', 'nl-nl', 'it-it', 'x-default'] as const;
+const defaultLocale = getDefaultLocale();
 
 test.describe('Header locale switcher', () => {
   test('desktop switch preserves path, query, and metadata', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto(localeUrl('/method?utm_source=playwright'), { waitUntil: 'networkidle' });
+    await page.goto(localeUrl('/method?utm_source=playwright'), { waitUntil: 'domcontentloaded' });
+    await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
 
-    const select = page.locator('[data-ll="nav-locale-switcher"] select').first();
+    const select = page.getByTestId('lh-nav-lang-switcher-desktop-select');
     await select.selectOption('de-de');
 
     await expect(page).toHaveURL(/\/de-de\/method\?utm_source=playwright/);
@@ -20,29 +22,32 @@ test.describe('Header locale switcher', () => {
     await expect(hreflang).toHaveAttribute('href', expect.stringContaining('/de-de/method'));
 
     for (const hreflangValue of EXPECTED_HREFLANGS) {
-      const href = await page.locator(`link[rel="alternate"][hreflang="${hreflangValue}"]`).first().getAttribute('href');
+      const link = page.locator(`link[rel="alternate"][hreflang="${hreflangValue}"]`).first();
+      const href = await link.getAttribute('href');
       expect(href).toBeTruthy();
-      expect(href as string).toContain('/method');
+      const expectedLocale = hreflangValue === 'x-default' ? defaultLocale : hreflangValue;
+      expect(href as string).toContain(`/${expectedLocale}/method`);
     }
   });
 
   test('mobile drawer switch closes after changing locale', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto(localeUrl('?ref=mobile-test'), { waitUntil: 'networkidle' });
+    await page.goto(localeUrl('?ref=mobile-test'), { waitUntil: 'domcontentloaded' });
+    await expect(page.getByTestId('lh-page-ready')).toHaveAttribute('data-state', 'ready');
 
-    const trigger = page.locator('[data-ll="nav-menu-button"]');
+    const trigger = page.getByTestId('lh-nav-menu-toggle');
     await trigger.click();
 
     const drawer = page.locator('[data-nav-drawer]');
     await expect(drawer).toBeVisible();
 
-    const select = page.locator('[data-ll="nav-locale-switcher"] select').last();
+    const select = page.getByTestId('lh-nav-lang-switcher-mobile-select');
     await select.selectOption('de-de');
 
     await expect(page).toHaveURL(/\/de-de\?ref=mobile-test/);
     await expect(drawer).toHaveCount(0);
 
-    const skipLink = page.getByTestId('header-skip-link');
+    const skipLink = page.getByTestId('lh-nav-skip-link');
     await expect(skipLink).toHaveText('Zum Hauptinhalt springen');
   });
 });

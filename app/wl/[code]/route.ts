@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(_req: Request, { params }: { params: { code: string } }) {
   const code = (params.code || '').toUpperCase();
   const base = process.env.NEXT_PUBLIC_SITE_URL || '/';
-  const url = new URL(base.startsWith('http') ? base : 'http://localhost');
+  const url = new URL(base.startsWith('http') ? base : 'http://127.0.0.1');
   url.pathname = '/';
   url.searchParams.set('ref', code);
 
@@ -14,4 +14,3 @@ export async function GET(_req: Request, { params }: { params: { code: string } 
   res.headers.append('Set-Cookie', `wl_ref=${encodeURIComponent(code)}; Path=/; Max-Age=${60 * 60 * 24 * 90}`);
   return res;
 }
-

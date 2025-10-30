@@ -11,7 +11,7 @@ export default function ThanksPage({ searchParams }: { searchParams: Record<stri
   const code = typeof searchParams.code === 'string' ? searchParams.code : Array.isArray(searchParams.code) ? searchParams.code[0] : '';
   const confirmed = String(searchParams.confirmed) === '1';
   const base = process.env.NEXT_PUBLIC_SITE_URL || '';
-  const url = new URL(base || 'http://localhost');
+  const url = new URL(base || 'http://127.0.0.1');
   url.pathname = `/${DEFAULT_LOCALE.value}/`;
   if (code) url.searchParams.set('ref', code);
   const link = url.toString();

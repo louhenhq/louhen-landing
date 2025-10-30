@@ -1,11 +1,20 @@
-const { locales, defaultLocale } = require('./next-intl.locales');
+const { locales, defaultLocale } = require('./scripts/util/read-locales.cjs');
 
-const RAW_BASE = process.env.BASE_URL || 'http://127.0.0.1:4311';
+const RAW_BASE = (() => {
+  const host = process.env.HOST ? process.env.HOST.split('://').pop() : '127.0.0.1';
+  const port = process.env.PORT || '4311';
+  const fallback = `http://${host}:${port}`;
+  return (process.env.BASE_URL || fallback);
+})();
 const BASE = RAW_BASE.replace(/\/$/, '');
+const OUTPUT_DIR = '.lighthouseci';
 
 function localeUrl(locale, path) {
-  const normalizedPath = path === '/' ? '' : path;
-  return locale === defaultLocale ? `${BASE}${normalizedPath}` : `${BASE}/${locale}${normalizedPath}`;
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  if (normalizedPath === '/') {
+    return locale === defaultLocale ? `${BASE}/` : `${BASE}/${locale}/`;
+  }
+  return `${BASE}/${locale}${normalizedPath}`;
 }
 
 const secondaryLocale = locales.find((locale) => locale !== defaultLocale) || defaultLocale;

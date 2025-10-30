@@ -186,7 +186,7 @@ export default function HeaderDrawer({
             ref={headingRef}
             tabIndex={-1}
             className="text-base font-semibold text-text"
-            data-testid="header-drawer-heading"
+            data-testid="lh-nav-drawer-heading"
           >
             {title}
           </h2>
@@ -294,6 +294,7 @@ function DrawerLink({ item, label, onNavigate, analyticsContext }: DrawerLinkPro
         data-nav-id={item.id}
         data-analytics-event={item.analyticsEvent}
         data-surface="drawer"
+        data-testid={`lh-nav-item-${item.id}-drawer`}
         onClick={(event) => {
           handleClick(event);
         }}
@@ -311,6 +312,7 @@ function DrawerLink({ item, label, onNavigate, analyticsContext }: DrawerLinkPro
         data-nav-id={item.id}
         data-analytics-event={item.analyticsEvent}
         data-surface="drawer"
+        data-testid={`lh-nav-item-${item.id}-drawer`}
         onClick={(event) => {
           handleClick(event);
         }}
@@ -328,6 +330,7 @@ function DrawerLink({ item, label, onNavigate, analyticsContext }: DrawerLinkPro
       data-nav-id={item.id}
       data-analytics-event={item.analyticsEvent}
       data-surface="drawer"
+      data-testid={`lh-nav-item-${item.id}-drawer`}
       onClick={(event) => {
         handleClick(event);
       }}

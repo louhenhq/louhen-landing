@@ -41,6 +41,15 @@
       "@lib/*": [
         "./lib/*"
       ],
+      "@server/*": [
+        "./lib/server/*"
+      ],
+      "@client/*": [
+        "./lib/client/*"
+      ],
+      "@shared/*": [
+        "./lib/shared/*"
+      ],
       "@tests/*": [
         "./tests/*"
       ]

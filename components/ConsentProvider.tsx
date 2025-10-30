@@ -1,7 +1,16 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import ConsentBanner from '@/components/ConsentBanner';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
+import { ConsentBanner, ConsentManagerDialog } from '@/components/ConsentBanner';
 import { loadFromCookie, onConsentChange, setConsent, type ConsentState } from '@/lib/shared/consent/api';
 
 type ConsentValue = {
@@ -33,50 +42,58 @@ type ConsentProviderProps = {
 
 export function ConsentProvider({ children, initialState }: ConsentProviderProps) {
   const [state, setState] = useState<ConsentState>(initialState);
-  const [isManagerOpen, setManagerOpen] = useState(() => initialState === 'unknown');
-  const [dismissed, setDismissed] = useState(false);
+  const [bannerVisible, setBannerVisible] = useState(() => initialState === 'unknown');
+  const [managerOpen, setManagerOpen] = useState(false);
+  const dialogOpenRef = useRef(managerOpen);
+
+  useEffect(() => {
+    dialogOpenRef.current = managerOpen;
+  }, [managerOpen]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
     const current = loadFromCookie();
     setState(current);
-    if (current === 'unknown' && !dismissed) {
-      setManagerOpen(true);
-    }
+    setBannerVisible(current === 'unknown');
 
     const unsubscribe = onConsentChange((next) => {
       setState(next);
       if (next === 'unknown') {
-        if (!dismissed) {
-          setManagerOpen(true);
+        if (!dialogOpenRef.current) {
+          setBannerVisible(true);
         }
         return;
       }
-      setDismissed(false);
+      setBannerVisible(false);
       setManagerOpen(false);
+      dialogOpenRef.current = false;
     });
 
     return unsubscribe;
-  }, [dismissed]);
-
-  useEffect(() => {
-    if (state === 'unknown' && !dismissed) {
-      setManagerOpen(true);
-    }
-  }, [state, dismissed]);
+  }, []);
 
   const persistConsent = useCallback((value: ConsentValue) => {
     const nextState: ConsentState = value.analytics ? 'granted' : 'denied';
-    setConsent(nextState);
-    setDismissed(false);
+    setBannerVisible(false);
     setManagerOpen(false);
+    dialogOpenRef.current = false;
+    setConsent(nextState);
   }, []);
 
   const openManager = useCallback(() => {
-    setDismissed(false);
+    setBannerVisible(false);
     setManagerOpen(true);
+    dialogOpenRef.current = true;
   }, []);
+
+  const handleDialogClose = useCallback(() => {
+    setManagerOpen(false);
+    dialogOpenRef.current = false;
+    if (state === 'unknown') {
+      setBannerVisible(true);
+    }
+  }, [state]);
 
   const consentValue = useMemo<ConsentValue | null>(() => {
     if (state === 'unknown') return null;
@@ -97,13 +114,16 @@ export function ConsentProvider({ children, initialState }: ConsentProviderProps
     <ConsentContext.Provider value={contextValue}>
       {children}
       <ConsentBanner
-        forceOpen={isManagerOpen}
-        onClose={() => {
-          setManagerOpen(false);
-          if (state === 'unknown') {
-            setDismissed(true);
-          }
-        }}
+        open={bannerVisible}
+        onAccept={() => persistConsent({ analytics: true, marketing: false })}
+        onDecline={() => persistConsent({ analytics: false, marketing: false })}
+        onManage={openManager}
+      />
+      <ConsentManagerDialog
+        open={managerOpen}
+        onClose={handleDialogClose}
+        onAccept={() => persistConsent({ analytics: true, marketing: false })}
+        onDecline={() => persistConsent({ analytics: false, marketing: false })}
       />
     </ConsentContext.Provider>
   );

@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { randomUUID } from 'crypto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { WaitlistUpsertInput } from '@lib/server/waitlist/firestore.server';
 

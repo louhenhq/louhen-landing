@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import tokens from '@/packages/design-tokens/build/web/tokens.json';
 import { applyThemeFromMedia, getSavedTheme, getSavedContrast } from '@/app/theme-client';
-import { useNonce } from '@/lib/csp/nonce-context';
+import { useNonce } from '@/lib/csp/nonce-context.client';
 import { THEME_INIT_SNIPPET } from '@/lib/theme/init-snippet';
 
 const bgToken = tokens['--semantic-color-bg-page'];

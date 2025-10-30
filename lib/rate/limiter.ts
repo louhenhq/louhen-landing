@@ -1,4 +1,5 @@
-import { createHmac } from 'node:crypto';
+import 'server-only';
+import { createHmac } from 'crypto';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { getDb, initAdmin } from '@/lib/firebaseAdmin';
 import { isTestMode } from '@/lib/testMode';

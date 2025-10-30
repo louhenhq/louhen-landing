@@ -1,56 +1,42 @@
 import type { ReactNode } from 'react';
-import { NextIntlClientProvider, type AbstractIntlMessages } from 'next-intl';
+import { headers } from 'next/headers';
+import { notFound } from 'next/navigation';
+import { NextIntlClientProvider } from 'next-intl';
+import { unstable_setRequestLocale } from 'next-intl/server';
+import { ConsentProvider } from '@/components/ConsentProvider';
 import { loadMessages } from '@/lib/intl/loadMessages';
-import { locales, type SupportedLocale } from '@/next-intl.locales';
+import { type SupportedLocale } from '@/next-intl.locales';
+import { parseConsentFromCookie } from '@/lib/shared/consent/api';
+
+export const runtime = 'nodejs';
 
 type Props = {
   children: ReactNode;
-  params: Promise<{ locale: SupportedLocale }>;
+  params: Promise<{ locale: string }>;
 };
 
+const SUPPORTED_LOCALES: readonly SupportedLocale[] = ['de-de', 'en-de', 'fr-fr', 'nl-nl', 'it-it'];
+const SUPPORTED_LOCALE_SET = new Set<SupportedLocale>(SUPPORTED_LOCALES);
+
 export function generateStaticParams() {
-  return locales.map((locale) => ({ locale }));
-}
-
-const SUPPORTED_LOCALES = new Set<SupportedLocale>(locales);
-const FALLBACK_LOCALE: SupportedLocale = 'en-de';
-
-function isMessagesObject(value: unknown): value is AbstractIntlMessages {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
+  return SUPPORTED_LOCALES.map((locale) => ({ locale }));
 }
 
 export default async function LocaleLayout({ children, params }: Props) {
   const { locale: rawLocale } = await params;
-  let resolvedLocale: SupportedLocale = SUPPORTED_LOCALES.has(rawLocale) ? rawLocale : FALLBACK_LOCALE;
-
-  let messages: AbstractIntlMessages | null = null;
-
-  try {
-    const loaded = await loadMessages(resolvedLocale);
-    if (isMessagesObject(loaded)) {
-      messages = loaded;
-    }
-  } catch {
-    messages = null;
+  if (!SUPPORTED_LOCALE_SET.has(rawLocale as SupportedLocale)) {
+    notFound();
   }
-
-  if (!messages) {
-    resolvedLocale = FALLBACK_LOCALE;
-    try {
-      const fallbackMessages = await loadMessages(FALLBACK_LOCALE);
-      if (isMessagesObject(fallbackMessages)) {
-        messages = fallbackMessages;
-      }
-    } catch {
-      messages = {};
-    }
-  }
-
-  const resolvedMessages: AbstractIntlMessages = messages ?? {};
-
+  const locale = rawLocale as SupportedLocale;
+  unstable_setRequestLocale(locale);
+  const messages = await loadMessages(locale);
+  const requestHeaders = await headers();
+  const consentState = parseConsentFromCookie(requestHeaders.get('cookie'));
   return (
-    <NextIntlClientProvider locale={resolvedLocale} messages={resolvedMessages} timeZone="UTC">
-      {children}
+    <NextIntlClientProvider locale={locale} messages={messages} timeZone="UTC">
+      <ConsentProvider initialState={consentState}>
+        {children}
+      </ConsentProvider>
     </NextIntlClientProvider>
   );
 }

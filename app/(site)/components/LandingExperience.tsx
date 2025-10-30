@@ -23,7 +23,7 @@ import SiteShell from '@/app/(site)/components/SiteShell';
 import { cn, layout, surfaces } from '@/app/(site)/_lib/ui';
 import { usePrefersReducedMotion } from '@/app/(site)/_lib/usePrefersReducedMotion';
 import { track } from '@/lib/clientAnalytics';
-import type { HeaderUserState } from '@/lib/auth/userState';
+import type { HeaderUserState } from '@shared/auth/user-state';
 
 type LandingExperienceProps = {
   userState: HeaderUserState;

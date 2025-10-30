@@ -86,25 +86,25 @@ const NAV_DEFINITION: HeaderNavigationDefinition = {
   primary: [
     {
       id: 'how-it-works',
-      i18nKey: 'header.nav.primary.how',
+      i18nKey: 'nav.primary.how',
       target: { kind: 'anchor', value: '#how' },
       analyticsEvent: 'header_nav_click',
     },
     {
       id: 'founder-story',
-      i18nKey: 'header.nav.primary.story',
+      i18nKey: 'nav.primary.story',
       target: { kind: 'anchor', value: '#story' },
       analyticsEvent: 'header_nav_click',
     },
     {
       id: 'faq',
-      i18nKey: 'header.nav.primary.faq',
+      i18nKey: 'nav.primary.faq',
       target: { kind: 'anchor', value: '#faq' },
       analyticsEvent: 'header_nav_click',
     },
     {
       id: 'method',
-      i18nKey: 'header.nav.primary.method',
+      i18nKey: 'nav.primary.method',
       target: { kind: 'internal', destination: { type: 'method' }, prefetch: false },
       analyticsEvent: 'header_nav_click',
     },
@@ -112,13 +112,13 @@ const NAV_DEFINITION: HeaderNavigationDefinition = {
   secondary: [
     {
       id: 'privacy',
-      i18nKey: 'header.nav.secondary.privacy',
+      i18nKey: 'nav.secondary.privacy',
       target: { kind: 'internal', destination: { type: 'legal', slug: 'privacy' }, prefetch: false },
       analyticsEvent: 'header_nav_click',
     },
     {
       id: 'terms',
-      i18nKey: 'header.nav.secondary.terms',
+      i18nKey: 'nav.secondary.terms',
       target: { kind: 'internal', destination: { type: 'legal', slug: 'terms' }, prefetch: false },
       analyticsEvent: 'header_nav_click',
     },

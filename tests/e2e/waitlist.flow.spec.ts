@@ -12,14 +12,14 @@ test.describe('Waitlist flows', () => {
 
     const payload = await seedWaitlistUser(page.request, email);
 
-    await page.goto(`/en-de/waitlist/confirm?token=${payload.token}`);
-    await page.waitForURL('**/en-de/waitlist/success');
+    await page.goto(`/de-de/waitlist/confirm?token=${payload.token}`);
+    await page.waitForURL('**/de-de/waitlist/success');
     await expect(page.getByRole('heading', { level: 1 })).toContainText(/you're in/i);
     const preOnboardingLink = page.getByRole('link', { name: /pre-onboarding/i });
     await expect(preOnboardingLink).toBeVisible();
 
     await preOnboardingLink.click();
-    await page.waitForURL('**/en-de/waitlist/pre-onboarding');
+    await page.waitForURL('**/de-de/waitlist/pre-onboarding');
 
     await page.fill('#parent-first-name', 'Alex');
     await page.fill('#child-name-0', 'Mila');
@@ -39,19 +39,19 @@ test.describe('Waitlist flows', () => {
     await page.reload();
     await expect(page.getByRole('status')).toContainText('Your family profile is already saved');
 
-    await page.goto('/en-de/waitlist/already-confirmed');
+    await page.goto('/de-de/waitlist/already-confirmed');
     await expect(page.getByRole('status')).toContainText('already saved');
   });
 
-  test('expired token flow with resend produces new confirmation', async ({ page, request }) => {
+  test('expired token flow with resend produces new confirmation @extended', async ({ page, request }) => {
     const email = uniqueEmail('expired');
 
     const payload = await seedWaitlistUser(page.request, email);
 
     await markTokenExpired(request, payload.token);
 
-    await page.goto(`/en-de/waitlist/confirm?token=${payload.token}`);
-    await page.waitForURL('**/en-de/waitlist/expired');
+    await page.goto(`/de-de/waitlist/confirm?token=${payload.token}`);
+    await page.waitForURL('**/de-de/waitlist/expired');
     await expect(page.getByRole('heading', { name: /confirmation link expired/i })).toBeVisible();
 
     const resendResponse = page.waitForResponse((res) =>
@@ -64,8 +64,8 @@ test.describe('Waitlist flows', () => {
     expect(resendPayload.token).toBeTruthy();
     await expect(page.getByRole('status')).toContainText('Check your inbox');
 
-    await page.goto(`/en-de/waitlist/confirm?token=${resendPayload.token}`);
-    await page.waitForURL('**/en-de/waitlist/success');
+    await page.goto(`/de-de/waitlist/confirm?token=${resendPayload.token}`);
+    await page.waitForURL('**/de-de/waitlist/success');
     await expect(page.getByRole('heading', { level: 1 })).toContainText("You're in!");
   });
 });

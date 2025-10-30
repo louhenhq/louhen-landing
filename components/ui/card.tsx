@@ -18,6 +18,7 @@ type BaseCardProps = {
   interactive?: boolean;
   className?: string;
   children?: ReactNode;
+  testId?: string;
 };
 
 type CardAsDiv = BaseCardProps & Omit<HTMLAttributes<HTMLDivElement>, 'className'> & {
@@ -47,7 +48,7 @@ const variantClasses: Record<CardVariant, string> = {
 export const Card = forwardRef<
   HTMLDivElement | HTMLButtonElement | HTMLAnchorElement,
   CardProps
->(function Card({ as = 'div', variant = 'surface', interactive = false, className, children, ...rest }, ref) {
+>(function Card({ as = 'div', variant = 'surface', interactive = false, className, children, testId, ...rest }, ref) {
   const Component = (as ?? 'div') as 'div' | 'button' | 'a' | 'form';
   const isInteractive =
     interactive || Component === 'button' || Component === 'a';
@@ -74,6 +75,7 @@ export const Card = forwardRef<
         ref={ref as ForwardedRef<HTMLButtonElement>}
         className={cardClasses}
         type={type ?? 'button'}
+        data-testid={testId}
         {...buttonRest}
       >
         {children}
@@ -87,6 +89,7 @@ export const Card = forwardRef<
       <a
         ref={ref as ForwardedRef<HTMLAnchorElement>}
         className={cardClasses}
+        data-testid={testId}
         {...anchorProps}
       >
         {children}
@@ -97,7 +100,7 @@ export const Card = forwardRef<
   if (Component === 'form') {
     const formProps = rest as FormHTMLAttributes<HTMLFormElement>;
     return (
-      <form ref={ref as ForwardedRef<HTMLFormElement>} className={cardClasses} {...formProps}>
+      <form ref={ref as ForwardedRef<HTMLFormElement>} className={cardClasses} data-testid={testId} {...formProps}>
         {children}
       </form>
     );
@@ -105,7 +108,7 @@ export const Card = forwardRef<
 
   const divProps = rest as HTMLAttributes<HTMLDivElement>;
   return (
-    <div ref={ref as ForwardedRef<HTMLDivElement>} className={cardClasses} {...divProps}>
+    <div ref={ref as ForwardedRef<HTMLDivElement>} className={cardClasses} data-testid={testId} {...divProps}>
       {children}
     </div>
   );

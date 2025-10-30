@@ -33,7 +33,7 @@ type HeaderEvent = {
   mode: 'prelaunch' | 'launch' | 'postlaunch' | 'authenticated';
   surface: 'header' | 'drawer' | 'ribbon';
   user_state: 'guest' | 'hinted';
-  target?: string; // e.g., '#waitlist-form', '/method', 'app-store'
+  target?: string; // e.g., '#waitlist-form', '/de-de/method', 'app-store'
   trigger?: 'click' | 'keyboard' | 'touch' | 'pointer' | 'brand' | 'change' | 'auto' | 'button' | 'escape' | 'backdrop' | 'nav' | 'cta' | 'system';
   ctaId?: 'waitlist' | 'access' | 'download';
   navId?: 'how-it-works' | 'founder-story' | 'faq' | 'method' | 'privacy' | 'terms';

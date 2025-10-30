@@ -22,7 +22,7 @@ const surfaces: Surface[] = [
   {
     name: 'waitlist',
     key: 'waitlist',
-    pathForLocale: () => waitlistLandingPath(),
+    pathForLocale: (locale) => waitlistLandingPath(locale),
     requiresLocaleCookie: true,
   },
   {
@@ -74,7 +74,7 @@ test.describe('OG images – dynamic mode', () => {
         }
 
         const path = surface.pathForLocale(locale);
-        await page.goto(path, { waitUntil: 'networkidle' });
+        await page.goto(path, { waitUntil: 'domcontentloaded' });
 
         const ogImageUrl = await page.getAttribute('meta[property="og:image"]', 'content');
         expect(ogImageUrl, `${surface.name} (${locale}) should define og:image`).toBeTruthy();

@@ -10,7 +10,7 @@ const confirmMock = vi.hoisted(() => ({
 vi.mock('@/lib/waitlist/confirm', () => confirmMock);
 
 function makeRequest(token?: string) {
-  const url = new URL('http://localhost/waitlist/confirm');
+  const url = new URL('http://127.0.0.1/waitlist/confirm');
   if (token) {
     url.searchParams.set('token', token);
   }

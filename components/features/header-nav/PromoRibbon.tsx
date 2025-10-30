@@ -26,9 +26,9 @@ function getStorageKey(config: PromoRibbonConfig, locale: string) {
 function findPostDismissFocusTarget(): HTMLElement | null {
   const desktopCta = document.querySelector<HTMLElement>('[data-ll="nav-waitlist-cta"]');
   if (desktopCta) return desktopCta;
-  const mobileCta = document.querySelector<HTMLElement>('[data-testid="header-cta-mobile"]');
+  const mobileCta = document.querySelector<HTMLElement>('[data-testid="lh-nav-cta-primary-mobile"]');
   if (mobileCta) return mobileCta;
-  const skipLink = document.querySelector<HTMLElement>('[data-testid="header-skip-link"]');
+  const skipLink = document.querySelector<HTMLElement>('[data-testid="lh-nav-skip-link"]');
   return skipLink ?? null;
 }
 

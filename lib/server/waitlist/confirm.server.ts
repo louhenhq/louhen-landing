@@ -1,4 +1,6 @@
-import { findByTokenHash, markConfirmedByTokenHash, markExpiredByTokenHash } from '@lib/server/waitlist/firestore.server';
+import 'server-only';
+
+import { findByTokenHash, markConfirmedByTokenHash, markExpiredByTokenHash } from '@server/waitlist/firestore.server';
 import { constantTimeEquals, createTokenLookupHash, hashToken } from '@/lib/security/tokens';
 
 export type ConfirmResult = 'confirmed' | 'already' | 'expired' | 'not_found' | 'invalid';

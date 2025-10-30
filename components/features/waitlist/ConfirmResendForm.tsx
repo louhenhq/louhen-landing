@@ -43,6 +43,7 @@ export function ConfirmResendForm() {
       className="mt-lg flex flex-col gap-sm md:flex-row md:items-center"
       onSubmit={handleSubmit}
       aria-busy={pending}
+      noValidate
       data-ll="wl-resend-form"
     >
       <label className="flex w-full flex-col gap-xs md:max-w-sm">
@@ -61,18 +62,30 @@ export function ConfirmResendForm() {
         <button
           type="submit"
           disabled={pending || email === ''}
+          aria-disabled={pending || email === '' ? 'true' : undefined}
+          aria-busy={pending ? 'true' : undefined}
           className={cn(buttons.secondary, 'whitespace-nowrap')}
           data-ll="wl-resend-submit"
         >
           {t('cta')}
         </button>
         {status === 'success' && (
-          <span className="text-sm text-status-success" aria-live="polite" data-ll="wl-resend-status">
+          <span
+            className="text-sm text-status-success"
+            role="status"
+            aria-live="polite"
+            data-ll="wl-resend-status"
+          >
             {t('sent')}
           </span>
         )}
         {status === 'error' && (
-          <span className="text-sm text-status-danger" aria-live="polite" data-ll="wl-resend-status">
+          <span
+            className="text-sm text-status-danger"
+            role="alert"
+            aria-live="assertive"
+            data-ll="wl-resend-status"
+          >
             {t('error')}
           </span>
         )}

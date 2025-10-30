@@ -1,4 +1,5 @@
-import { createHash } from 'node:crypto';
+import 'server-only';
+import { createHash } from 'crypto';
 import { FieldValue } from 'firebase-admin/firestore';
 
 import { initAdmin } from '@/lib/firebaseAdmin';

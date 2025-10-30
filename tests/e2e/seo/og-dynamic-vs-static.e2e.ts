@@ -1,4 +1,5 @@
 import { expect, test } from '@tests/fixtures/playwright';
+import { getDefaultLocale, localeUrl } from '@tests/e2e/_utils/url';
 import { OG_IMAGE_MAX_BYTES } from '@lib/shared/og/builder';
 
 test.describe('OG dynamic vs static fallback', () => {
@@ -8,9 +9,10 @@ test.describe('OG dynamic vs static fallback', () => {
     }
 
     await request.post('/api/test/og-mode', { data: { mode: 'dynamic' } });
+    const defaultLocale = getDefaultLocale();
 
     try {
-      await page.goto('/waitlist', { waitUntil: 'networkidle' });
+      await page.goto(localeUrl('/waitlist', { locale: defaultLocale }), { waitUntil: 'domcontentloaded' });
       const dynamicOg = await page.getAttribute('meta[property="og:image"]', 'content');
       expect(dynamicOg).toBeTruthy();
       expect(dynamicOg).toContain('/opengraph-image');
@@ -29,7 +31,9 @@ test.describe('OG dynamic vs static fallback', () => {
 
       await request.post('/api/test/og-mode', { data: { mode: 'static' } });
       const cacheBuster = `?t=${Date.now()}`;
-      await page.goto(`/waitlist${cacheBuster}`, { waitUntil: 'networkidle' });
+      await page.goto(localeUrl(`/waitlist${cacheBuster}`, { locale: defaultLocale }), {
+        waitUntil: 'domcontentloaded',
+      });
       const staticOg = await page.getAttribute('meta[property="og:image"]', 'content');
       expect(staticOg).toBeTruthy();
       expect(staticOg).not.toContain('/opengraph-image');

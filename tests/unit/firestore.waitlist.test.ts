@@ -1,100 +1,29 @@
-import { randomUUID } from 'node:crypto';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { WaitlistUpsertInput } from '@/lib/firestore/waitlist';
 
-const store = new (class FakeStore {
-  private collections = new Map<string, Map<string, Record<string, unknown>>>();
+type TestStore = Map<string, unknown>;
+const testGlobal = globalThis as typeof globalThis & { __WAITLIST_TEST_STORE__?: TestStore };
+const originalTestMode = process.env.TEST_MODE;
 
-  clear() {
-    this.collections.clear();
+beforeAll(() => {
+  process.env.TEST_MODE = '1';
+});
+
+afterAll(() => {
+  if (originalTestMode === undefined) {
+    delete process.env.TEST_MODE;
+  } else {
+    process.env.TEST_MODE = originalTestMode;
   }
+});
 
-  collection(name: string) {
-    if (!this.collections.has(name)) {
-      this.collections.set(name, new Map());
-    }
-    const bucket = this.collections.get(name)!;
-    return new FakeCollection(bucket);
-  }
-})();
+beforeEach(() => {
+  testGlobal.__WAITLIST_TEST_STORE__ = new Map();
+});
 
-class FakeCollection {
-  constructor(private bucket: Map<string, Record<string, unknown>>) {}
-
-  doc(id?: string) {
-    const docId = id ?? randomUUID();
-    return new FakeDocRef(this.bucket, docId);
-  }
-
-  where(field: string, _op: string, value: string) {
-    return new FakeQuery(this.bucket, field, value);
-  }
-}
-
-class FakeDocRef {
-  constructor(private bucket: Map<string, Record<string, unknown>>, public readonly id: string) {}
-
-  async set(data: Record<string, unknown>, options?: { merge?: boolean }) {
-    const existing = this.bucket.get(this.id) || {};
-    const next = options?.merge ? { ...existing, ...data } : { ...data };
-    this.bucket.set(this.id, JSON.parse(JSON.stringify(next)));
-  }
-
-  get ref() {
-    return this;
-  }
-
-  async get() {
-    const data = this.bucket.get(this.id);
-    return new FakeDocSnapshot(this.bucket, this.id, data ?? null);
-  }
-}
-
-class FakeQuery {
-  constructor(private bucket: Map<string, Record<string, unknown>>, private field: string, private value: string, private limitValue = 0) {}
-
-  limit(n: number) {
-    this.limitValue = n;
-    return this;
-  }
-
-  async get() {
-    const docs: FakeDocSnapshot[] = [];
-    for (const [id, data] of this.bucket.entries()) {
-      if ((data as Record<string, unknown>)[this.field] === this.value) {
-        docs.push(new FakeDocSnapshot(this.bucket, id, data));
-      }
-      if (this.limitValue > 0 && docs.length >= this.limitValue) {
-        break;
-      }
-    }
-    return {
-      empty: docs.length === 0,
-      docs,
-    };
-  }
-}
-
-class FakeDocSnapshot {
-  public readonly exists: boolean;
-
-  constructor(private bucket: Map<string, Record<string, unknown>>, public readonly id: string, private readonly snapshotData: Record<string, unknown> | null) {
-    this.exists = this.snapshotData !== null;
-  }
-
-  data() {
-    if (!this.snapshotData) return undefined;
-    return JSON.parse(JSON.stringify(this.snapshotData));
-  }
-
-  get ref() {
-    return new FakeDocRef(this.bucket, this.id);
-  }
-}
-
-vi.mock('@/lib/firebaseAdmin', () => ({
-  getDb: () => store,
-}));
+afterEach(() => {
+  delete testGlobal.__WAITLIST_TEST_STORE__;
+});
 
 import {
   findByEmail,
@@ -120,11 +49,7 @@ function buildInput(overrides: Partial<WaitlistUpsertInput> = {}): WaitlistUpser
   };
 }
 
-beforeEach(() => {
-  store.clear();
-});
-
-describe('waitlist Firestore helpers', () => {
+describe.sequential('waitlist Firestore helpers', () => {
   it('creates a pending record for new emails', async () => {
     const result = await upsertPending('Test@Example.com', buildInput());
     expect(result.created).toBe(true);
@@ -146,14 +71,50 @@ describe('waitlist Firestore helpers', () => {
   });
 
   it('does not overwrite confirmed records', async () => {
-    await upsertPending('confirmed@example.com', buildInput());
-    const hash = 'lookup';
-    await markConfirmedByTokenHash('lookup-123');
+    const email = 'confirmed@example.com';
+    const initialInput = buildInput();
 
-    await upsertPending('confirmed@example.com', buildInput({ confirmTokenHash: 'new-hash', confirmTokenLookupHash: hash }));
-    const record = await findByEmail('confirmed@example.com');
-    expect(record?.status).toBe('confirmed');
-    expect(record?.confirmTokenHash).toBeNull();
+    await upsertPending(email, initialInput);
+
+    const pending = await findByEmail(email);
+    expect(pending).not.toBeNull();
+    const pendingRecord = pending!;
+    expect(pendingRecord.status).toBe('pending');
+    expect(pendingRecord.confirmTokenHash).toBe(initialInput.confirmTokenHash);
+    expect(pendingRecord.confirmTokenLookupHash).toBe(initialInput.confirmTokenLookupHash);
+
+    const lookupHash = pendingRecord.confirmTokenLookupHash;
+    expect(lookupHash).toBeTruthy();
+    if (!lookupHash) {
+      throw new Error('lookup hash should be present before confirmation step');
+    }
+
+    const confirmResult = await markConfirmedByTokenHash(lookupHash);
+    expect(confirmResult).toBe('confirmed');
+
+    const confirmed = await findByEmail(email);
+    console.log('[TEST][pre-upsert]', confirmed);
+    expect(confirmed).not.toBeNull();
+    const confirmedRecord = confirmed!;
+    expect(confirmedRecord.status).toBe('confirmed');
+    expect(confirmedRecord.confirmTokenHash).toBeNull();
+    expect(confirmedRecord.confirmTokenLookupHash).toBeNull();
+
+    const nextInput: WaitlistUpsertInput = {
+      ...initialInput,
+      confirmTokenHash: 'new-hash',
+      confirmTokenLookupHash: 'new-lookup',
+      confirmExpiresAt: new Date(Date.now() + 86400000),
+    };
+
+    await upsertPending(email, nextInput);
+    const record = await findByEmail(email);
+    console.log('[TEST][post-upsert]', record);
+    expect(record).not.toBeNull();
+    const finalRecord = record!;
+    expect(finalRecord.status).toBe('confirmed');
+    expect(finalRecord.confirmTokenHash).toBeNull();
+    expect(finalRecord.confirmTokenLookupHash).toBeNull();
   });
 
   it('marks record confirmed by lookup hash', async () => {

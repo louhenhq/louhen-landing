@@ -34,8 +34,8 @@ const targets: Target[] = [
   },
   {
     name: 'waitlist landing',
-    pathForLocale: () => waitlistLandingPath(),
-    hreflangPathBuilder: () => waitlistLandingPath(),
+    pathForLocale: (locale) => waitlistLandingPath(locale),
+    hreflangPathBuilder: (locale) => waitlistLandingPath(locale),
   },
   {
     name: 'waitlist confirm',
@@ -59,7 +59,7 @@ test.describe('Canonical self-consistency', () => {
     for (const locale of testLocales) {
       test(`${target.name} (${locale}) has exactly one canonical and full hreflang map`, async ({ page }) => {
         const path = target.pathForLocale(locale as SupportedLocale);
-        await page.goto(path, { waitUntil: 'networkidle' });
+        await page.goto(path, { waitUntil: 'domcontentloaded' });
 
         const canonicalLinks = page.locator('link[rel="canonical"]');
         await expect(canonicalLinks).toHaveCount(1);

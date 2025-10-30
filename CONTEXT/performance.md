@@ -9,7 +9,7 @@ The marketing site must stay fast, stable, and accessible across locales and env
 | `/` (default locale) | Primary marketing & waitlist funnel | 90 / 95 / 95 / 95 | Run on every PR/merge. |
 | `/[locale]/` | Locale-specific hero & consent copy | 90 / 95 / 95 / 95 | Rotate locale under test weekly. |
 | `/[locale]/legal/privacy` | High-content page, hreflang critical | 85 / 95 / 95 / 95 | Ensures structured data & noindex alignment. |
-| `/method` (default locale) | Rich media and JSON-LD heavy | 88 / 95 / 95 / 95 | Watch CLS when campaigns change. |
+| `/de-de/method` | Rich media and JSON-LD heavy | 88 / 95 / 95 / 95 | Watch CLS when campaigns change. |
 | `/status` | Auth-gated diagnostics | n/a / 95 / 95 / 95 | Performance uncapped; focus on security headers. |
 
 Budgets tighten post-launch; update this table as new routes ship. When a page is below target, treat the regression as a release blocker.
@@ -33,3 +33,4 @@ Budgets tighten post-launch; update this table as new routes ship. When a page i
 - Run Lighthouse locally (`npm run lhci -- collect --url http://localhost:3000`) before approving big UI changes.
 - For regressions >5% in any metric, open an issue and attach the artifact diff.
 - Confirm any structural changes place components/utilities in directories defined by [/CONTEXT/naming.md](naming.md); update [/CONTEXT/rename_map.md](rename_map.md) if new assets require budget tracking.
+- Temporary budget waivers require the `perf-waiver` label and an accompanying entry in `/CONTEXT/decision_log.md` with owner + expiry.

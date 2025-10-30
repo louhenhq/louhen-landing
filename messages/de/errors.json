@@ -1,0 +1,9 @@
+{
+  "errors": {
+    "required": "Dieses Feld ist erforderlich.",
+    "email": {
+      "invalid": "Bitte gib eine gültige E-Mail-Adresse ein."
+    },
+    "generic": "Etwas ist schiefgelaufen. Bitte versuch es erneut."
+  }
+}

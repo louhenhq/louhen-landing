@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { headers } from 'next/headers';
 import { getTranslations, unstable_setRequestLocale } from 'next-intl/server';
-import { BreadcrumbJsonLd } from '@/components/SeoJsonLd';
+import { BreadcrumbJsonLd } from '@shared/seo/json-ld';
 import { legalPath, localeHomePath } from '@lib/shared/routing/legal-path';
 import { buildLegalMetadata } from '@/lib/seo/legalMetadata';
 import { getSiteOrigin, makeCanonical } from '@/lib/seo/shared';

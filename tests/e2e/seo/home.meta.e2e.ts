@@ -1,12 +1,13 @@
 import { expect, test } from '@tests/fixtures/playwright';
-import { getTestLocales, localeUrl } from '../_utils/url';
+import { getTestLocales } from '../_utils/url';
 
 const locales = getTestLocales();
 
 test.describe('Home metadata', () => {
   for (const locale of locales) {
-    test(`${locale} exposes description and JSON-LD`, async ({ page }) => {
-      await page.goto(localeUrl('/', { locale }), { waitUntil: 'networkidle' });
+    test(`${locale} exposes description and JSON-LD @smoke`, async ({ page }) => {
+      await page.goto(`/${locale}`, { waitUntil: 'domcontentloaded' });
+      await expect(page).toHaveURL(new RegExp(`/${locale}/?(?:[?#].*)?$`));
 
       const metaDescriptions = await page
         .locator('meta[name="description"]')

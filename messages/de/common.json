@@ -1,0 +1,183 @@
+{
+  "header": {
+    "logo": "Louhen",
+    "nav": {
+      "primary": {
+        "how": "[DE] How it works",
+        "story": "[DE] Founder story",
+        "faq": "[DE] FAQ",
+        "method": "[DE] Method"
+      },
+      "secondary": {
+        "privacy": "[DE] Privacy",
+        "terms": "[DE] Terms"
+      },
+      "primaryLabel": "[DE] Primary navigation",
+      "secondaryLabel": "[DE] Secondary navigation"
+    },
+    "cta": {
+      "waitlist": "Zur Warteliste",
+      "access": "Zugang anfragen",
+      "download": "App herunterladen",
+      "dashboard": "Dashboard"
+    },
+    "ctaPostlaunch": "[DE] Request access",
+    "system": {
+      "theme": "Erscheinungsbild",
+      "consent": "Privatsphäre"
+    },
+    "auth": {
+      "logout": "Abmelden"
+    },
+    "ribbon": {
+      "default": {
+        "title": "Limitierter Start",
+        "body": "Sichere dir jetzt einen Platz, bevor wir weiter öffnen.",
+        "cta": "Mehr erfahren",
+        "dismiss": "Ausblenden"
+      }
+    },
+    "drawer": {
+      "title": "[DE] Menu",
+      "open": "[DE] Menu",
+      "close": "[DE] Close menu",
+      "navLabel": "[DE] Mobile navigation"
+    },
+    "locale": {
+      "label": "Sprache",
+      "en": "English",
+      "de": "Deutsch",
+      "fr": "Französisch",
+      "nl": "Niederländisch",
+      "it": "Italienisch",
+      "en-de": "Englisch (Deutschland)",
+      "de-de": "Deutsch (Deutschland)",
+      "fr-fr": "Französisch (Frankreich)",
+      "nl-nl": "Niederländisch (Niederlande)",
+      "it-it": "Italienisch (Italien)",
+      "submit": "Sprache wechseln"
+    },
+    "theme": {
+      "label": "Erscheinungsbild",
+      "modes": {
+        "system": "System",
+        "light": "Hell",
+        "dark": "Dunkel"
+      }
+    },
+    "consent": {
+      "label": "Privatsphäre",
+      "state": {
+        "granted": "Aktiv",
+        "denied": "Aus",
+        "unset": "Prüfen"
+      },
+      "manager": {
+        "title": "Privatsphäre",
+        "description": "Wir verwenden notwendige Cookies für den Betrieb von Louhen. Aktiviere Analyse, wenn du uns bei der Verbesserung helfen möchtest.",
+        "accept": "Alle akzeptieren",
+        "reject": "Nur notwendige",
+        "settings": "Datenschutzhinweise",
+        "close": "Schließen"
+      }
+    },
+    "skipLink": "Zum Hauptinhalt springen"
+  },
+  "layout": {
+    "skipToMain": "Zum Hauptinhalt springen"
+  },
+  "footer": {
+    "trustEyebrow": "Warum Eltern Louhen vertrauen",
+    "trustHeadline": "Podolog:innen-geprüfte Passform mit Datenschutz",
+    "trustBody": "LouhenFit verarbeitet Familienprofile innerhalb der EU und erfüllt die DSGVO.",
+    "legalNavLabel": "Rechtliche Links",
+    "legal": {
+      "privacy": "[DE] Privacy",
+      "terms": "[DE] Terms",
+      "imprint": "[DE] Imprint",
+      "preferences": "[DE] Cookie preferences",
+      "heading": "Rechtliches"
+    },
+    "localeLabel": "Sprache wählen",
+    "dataResidency": "DSGVO-konform • EU-Datenhaltung",
+    "rights": "Alle Rechte vorbehalten"
+  },
+  "consent": {
+    "banner": {
+      "title": "Wir verwenden Cookies für Analysen",
+      "body": "Wir möchten verstehen, wie Besuchende Louhen nutzen, um die Erfahrung zu verbessern.",
+      "accept": "Analyse erlauben",
+      "decline": "Ablehnen",
+      "manage": "Später verwalten"
+    },
+    "manage": {
+      "title": "Cookie-Einstellungen",
+      "description": "Aktiviere Analyse-Cookies, damit wir sehen, was funktioniert.",
+      "analytics": "Anonyme Analysen erlauben",
+      "cancel": "Abbrechen",
+      "save": "Speichern",
+      "close": "Schließen"
+    }
+  },
+  "common": {
+    "learnMore": "[DE] Learn more",
+    "breadcrumb": {
+      "home": "Startseite"
+    },
+    "accessibility": {
+      "opensInNewTab": "öffnet in einem neuen Tab"
+    }
+  },
+  "admin": {
+    "metrics": {
+      "title": "Metriken-Dashboard",
+      "intro": "Wichtige Wartelistenkennzahlen, aktualisiert alle 60 Sekunden.",
+      "totals": {
+        "signups": "Anmeldungen",
+        "confirmed": "Bestätigt",
+        "conversion": "Conversion"
+      },
+      "topReferrers": "Top-Empfehlungen",
+      "blocks": "Gesperrte Empfehlungen",
+      "trend": "14-Tage-Trend",
+      "noReferrers": "Noch keine Empfehlungsdaten.",
+      "noBlocks": "Keine blockierten Empfehlungen.",
+      "noTrend": "In diesem Zeitraum wurden keine Ereignisse erfasst.",
+      "reason": "Grund",
+      "count": "Anzahl",
+      "date": "Datum",
+      "codeLabel": "Code",
+      "signupsLabel": "Anmeldungen",
+      "confirmedLabel": "Bestätigt",
+      "sparkline": {
+        "signups": "Anmeldungen (14 Tage)",
+        "confirms": "Bestätigungen (14 Tage)"
+      }
+    }
+  },
+  "localeSuggestion": {
+    "title": "Lieber auf {locale} surfen?",
+    "body": {
+      "cookie": "Du nutzt Louhen meistens in {locale}.",
+      "acceptLanguage": "Dein Browser ist auf {locale} eingestellt."
+    },
+    "action": "Zu {locale} wechseln",
+    "dismiss": "Hier bleiben"
+  },
+  "trustCopy": {
+    "fitTitle": "LouhenFit",
+    "fitGuarantee": "Abgesichert durch LouhenFit – kostenlose Rücksendung garantiert.",
+    "fitDetail": "LouhenFit schützt jede Bestellung – kostenlose Rücksendung, bis alles passt.",
+    "fitCard": "LouhenFit übernimmt die Rücksendung deines ersten Paars, damit wir die Passform gemeinsam einstellen.",
+    "gdprTitle": "Datenschutz & GDPR",
+    "gdpr": "Deine Familiendaten bleiben in der EU – voll GDPR-konform.",
+    "gdprDetail": "Wir speichern jedes Profil auf EU-Servern und verkaufen oder teilen keine Kundendaten.",
+    "payment": "Zahlungen laufen über Adyen mit Banksicherheitsniveau.",
+    "coverage": {
+      "coveredNamed": "{name} ist durch LouhenFit abgesichert – kostenlose Rücksendung beim ersten Paar, bis alles richtig sitzt.",
+      "covered": "Dieses Profil ist durch LouhenFit abgesichert – kostenlose Rücksendung beim ersten Paar, bis alles richtig sitzt.",
+      "notCoveredNamed": "{name} ist noch nicht durch LouhenFit abgedeckt. Wir begleiten dich mit sanften Passform-Tipps, bis die Abdeckung erweitert wird.",
+      "notCovered": "LouhenFit ist für dieses Profil noch nicht verfügbar. Wir begleiten dich mit sanften Passform-Tipps, bis die Abdeckung erweitert wird."
+    }
+  }
+}

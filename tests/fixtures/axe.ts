@@ -8,6 +8,7 @@ export type AxeContext = {
   route: string;
   locale: string;
   viewport: 'desktop' | 'mobile';
+  disabledRules?: string[];
 };
 
 export type AllowlistEntry = {
@@ -29,8 +30,11 @@ function isAllowed(rule: string, targets: string[]): boolean {
 
 export async function runAxe(page: Page, info: TestInfo, context: AxeContext): Promise<void> {
   const builder = new AxeBuilder({ page })
-    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
-    .disableRules([]);
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']);
+
+  if (context.disabledRules && context.disabledRules.length > 0) {
+    builder.disableRules(context.disabledRules);
+  }
 
   const result = await builder.analyze();
 
