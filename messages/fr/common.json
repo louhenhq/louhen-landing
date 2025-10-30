@@ -75,7 +75,10 @@
     }
   },
   "common": {
-    "learnMore": "Learn more"
+    "learnMore": "Learn more",
+    "accessibility": {
+      "opensInNewTab": "s’ouvre dans un nouvel onglet"
+    }
   },
   "admin": {
     "metrics": {

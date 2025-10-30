@@ -9,6 +9,7 @@ import { sha256Hex } from '@/lib/crypto/token';
 import { ConfirmResendForm, ConfirmAnalytics } from '@components/features/waitlist';
 import { cn, layout, text } from '@/app/(site)/_lib/ui';
 import { loadMessages } from '@/lib/intl/loadMessages';
+import { safeGetMessage } from '@/lib/intl/getMessage';
 import { isPrelaunch } from '@/lib/env/prelaunch';
 import { getSiteOrigin, hreflangMapFor, makeCanonical } from '@/lib/seo/shared';
 import { getOgImageEntry } from '@lib/shared/og/builder';
@@ -158,11 +159,16 @@ export default async function ConfirmPage({ params, searchParams }: ConfirmPageP
   const token = typeof searchParams?.token === 'string' ? searchParams.token.trim() : '';
   const localeMessages = await loadMessages(locale);
   const baseMessages = localeMessages as Record<string, unknown>;
+  const skipToMainLabel =
+    safeGetMessage(baseMessages, 'layout.skipToMain', {
+      locale,
+      fallbackHint: 'layout skip to main',
+    }) || 'Skip to main content';
   const confirmMessages = getConfirmMessages(baseMessages);
   const shareCopy = getShareCopy(baseMessages, locale);
 
   if (!token || token.length < 20) {
-    return renderInfo('invalid', confirmMessages);
+    return renderInfo('invalid', confirmMessages, skipToMainLabel);
   }
 
   const hash = sha256Hex(token);
@@ -171,7 +177,7 @@ export default async function ConfirmPage({ params, searchParams }: ConfirmPageP
   const snap = await db.collection('waitlist').where('confirmTokenHash', '==', hash).limit(1).get();
 
   if (snap.empty) {
-    return renderInfo('invalid', confirmMessages);
+    return renderInfo('invalid', confirmMessages, skipToMainLabel);
   }
 
   const doc = snap.docs[0];
@@ -180,12 +186,20 @@ export default async function ConfirmPage({ params, searchParams }: ConfirmPageP
   const creditDelayed = Boolean(doc.get('creditDelayed'));
 
   if (data.confirmedAt) {
-    return renderShare({ state: 'already', confirmMessages, shareCopy, locale, code: refCode, creditDelayed });
+    return renderShare({
+      state: 'already',
+      confirmMessages,
+      shareCopy,
+      locale,
+      code: refCode,
+      creditDelayed,
+      skipToMainLabel,
+    });
   }
 
   const expires = typeof data.confirmExpiresAt?.toMillis === 'function' ? data.confirmExpiresAt.toMillis() : undefined;
   if (expires && Date.now() > expires) {
-    return renderInfo('expired', confirmMessages);
+    return renderInfo('expired', confirmMessages, skipToMainLabel);
   }
 
   await doc.ref.set(
@@ -198,10 +212,18 @@ export default async function ConfirmPage({ params, searchParams }: ConfirmPageP
     { merge: true }
   );
 
-  return renderShare({ state: 'confirmed', confirmMessages, shareCopy, locale, code: refCode, creditDelayed });
+  return renderShare({
+    state: 'confirmed',
+    confirmMessages,
+    shareCopy,
+    locale,
+    code: refCode,
+    creditDelayed,
+    skipToMainLabel,
+  });
 }
 
-function renderInfo(state: ConfirmState, messages: ConfirmMessages) {
+function renderInfo(state: ConfirmState, messages: ConfirmMessages, skipToMainLabel: string) {
   const titles: Record<ConfirmState, string> = {
     confirmed: messages.success.title,
     expired: messages.expired.title,
@@ -218,18 +240,26 @@ function renderInfo(state: ConfirmState, messages: ConfirmMessages) {
   const showResend = state === 'expired' || state === 'invalid';
 
   return (
-    <main className={cn(layout.page, 'flex items-center justify-center bg-bg py-3xl')}>
-      <ConfirmAnalytics state={state} />
-      <div className={cn(layout.card, 'mx-auto max-w-2xl px-gutter py-2xl')}>
-        <div className="flex flex-col gap-md">
-          <div className="flex flex-col gap-xs">
-            <h1 className={text.heading}>{titles[state]}</h1>
-            <p className={text.body}>{bodies[state]}</p>
+    <>
+      <a
+        href="#main-content"
+        className="sr-only focus-visible:not-sr-only focus-visible:absolute focus-visible:left-1/2 focus-visible:top-sm focus-visible:-translate-x-1/2 focus-visible:inline-flex focus-visible:items-center focus-visible:rounded-pill focus-visible:border focus-visible:border-border focus-visible:bg-bg focus-visible:px-sm focus-visible:py-xs focus-visible:text-sm focus-visible:text-text focus-visible:shadow-card focus-visible:transition focus-visible:z-header focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
+      >
+        {skipToMainLabel}
+      </a>
+      <main id="main-content" tabIndex={-1} className={cn(layout.page, 'flex items-center justify-center bg-bg py-3xl')}>
+        <ConfirmAnalytics state={state} />
+        <div className={cn(layout.card, 'mx-auto max-w-2xl px-gutter py-2xl')}>
+          <div className="flex flex-col gap-md">
+            <div className="flex flex-col gap-xs">
+              <h1 className={text.heading}>{titles[state]}</h1>
+              <p className={text.body}>{bodies[state]}</p>
+            </div>
+            {showResend && <ConfirmResendForm />}
           </div>
-          {showResend && <ConfirmResendForm />}
         </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }
 
@@ -240,29 +270,38 @@ type ShareRenderParams = {
   locale: SupportedLocale;
   code: string | null;
   creditDelayed: boolean;
+  skipToMainLabel: string;
 };
 
-function renderShare({ state, confirmMessages, shareCopy, locale, code, creditDelayed }: ShareRenderParams) {
+function renderShare({ state, confirmMessages, shareCopy, locale, code, creditDelayed, skipToMainLabel }: ShareRenderParams) {
   const heading = state === 'confirmed' ? confirmMessages.success.title : confirmMessages.already.title;
   const body = state === 'confirmed' ? confirmMessages.success.body : confirmMessages.already.body;
 
   return (
-    <main className={cn(layout.page, 'flex items-center justify-center bg-bg py-3xl')}>
-      <ConfirmAnalytics state={state} />
-      <div className={cn(layout.card, 'mx-auto max-w-3xl px-gutter py-2xl')}>
-        <div className="flex flex-col gap-lg">
-          <div className="flex flex-col gap-xs text-center">
-            <h1 className={text.heading}>{heading}</h1>
-            <p className={text.body}>{body}</p>
+    <>
+      <a
+        href="#main-content"
+        className="sr-only focus-visible:not-sr-only focus-visible:absolute focus-visible:left-1/2 focus-visible:top-sm focus-visible:-translate-x-1/2 focus-visible:inline-flex focus-visible:items-center focus-visible:rounded-pill focus-visible:border focus-visible:border-border focus-visible:bg-bg focus-visible:px-sm focus-visible:py-xs focus-visible:text-sm focus-visible:text-text focus-visible:shadow-card focus-visible:transition focus-visible:z-header focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
+      >
+        {skipToMainLabel}
+      </a>
+      <main id="main-content" tabIndex={-1} className={cn(layout.page, 'flex items-center justify-center bg-bg py-3xl')}>
+        <ConfirmAnalytics state={state} />
+        <div className={cn(layout.card, 'mx-auto max-w-3xl px-gutter py-2xl')}>
+          <div className="flex flex-col gap-lg">
+            <div className="flex flex-col gap-xs text-center">
+              <h1 className={text.heading}>{heading}</h1>
+              <p className={text.body}>{body}</p>
+            </div>
+            {creditDelayed && (
+              <p className="text-body-sm text-status-warning text-center" aria-live="polite">
+                {shareCopy.verificationPending}
+              </p>
+            )}
+            <SharePanel locale={locale} code={code} copy={shareCopy} />
           </div>
-          {creditDelayed && (
-            <p className="text-body-sm text-status-warning text-center" aria-live="polite">
-              {shareCopy.verificationPending}
-            </p>
-          )}
-          <SharePanel locale={locale} code={code} copy={shareCopy} />
         </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }

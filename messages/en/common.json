@@ -108,7 +108,7 @@
       "body": "We’d like to measure how visitors use Louhen so we can improve the experience.",
       "accept": "Accept analytics",
       "decline": "Decline",
-      "manage": "Manage later"
+      "manage": "More options"
     },
     "manage": {
       "title": "Cookie preferences",
@@ -121,6 +121,9 @@
   },
   "common": {
     "learnMore": "Learn more",
+    "accessibility": {
+      "opensInNewTab": "opens in a new tab"
+    },
     "breadcrumb": {
       "home": "Home"
     }

@@ -13,5 +13,10 @@
     },
     "action": "Passa a {locale}",
     "dismiss": "Resta qui"
+  },
+  "common": {
+    "accessibility": {
+      "opensInNewTab": "si apre in una nuova scheda"
+    }
   }
 }

@@ -401,6 +401,7 @@ type HeaderNavLinkProps = {
 };
 
 function HeaderNavLink({ item, label, subtle, analyticsContext, surface }: HeaderNavLinkProps) {
+  const commonT = useTranslations('common');
   const baseClass = cn(
     'inline-flex h-11 items-center rounded-pill px-md text-sm font-medium transition-colors duration-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus',
     subtle ? 'text-text-muted hover:text-text' : 'text-text hover:text-text'
@@ -419,6 +420,15 @@ function HeaderNavLink({ item, label, subtle, analyticsContext, surface }: Heade
     ? ({ 'data-prefetch-policy': 'intent' } as const)
     : {};
   const analyticsTarget = useMemo(() => getNavAnalyticsTarget(item) ?? item.href, [item]);
+  const externalHint = commonT('accessibility.opensInNewTab');
+  const labelContent = item.isExternal ? (
+    <>
+      <span>{label}</span>
+      <span className="sr-only">{` (${externalHint})`}</span>
+    </>
+  ) : (
+    label
+  );
 
   const emitNavEvent = (event: ReactMouseEvent<HTMLAnchorElement>) => {
     const trigger = resolveInteractionTrigger(event);
@@ -447,7 +457,7 @@ function HeaderNavLink({ item, label, subtle, analyticsContext, surface }: Heade
           emitNavEvent(event);
         }}
       >
-        {label}
+        {labelContent}
       </a>
     );
   }
@@ -463,7 +473,7 @@ function HeaderNavLink({ item, label, subtle, analyticsContext, surface }: Heade
           emitNavEvent(event);
         }}
       >
-        {label}
+        {labelContent}
       </a>
     );
   }
@@ -481,7 +491,7 @@ function HeaderNavLink({ item, label, subtle, analyticsContext, surface }: Heade
         emitNavEvent(event);
       }}
     >
-      {label}
+      {labelContent}
     </Link>
   );
 }
@@ -496,6 +506,7 @@ type HeaderCtaButtonProps = {
 };
 
 function HeaderCtaButton({ variant, config, label, onScrollTarget, analyticsContext, surface = 'header' }: HeaderCtaButtonProps) {
+  const commonT = useTranslations('common');
   const buttonClasses = variant === 'desktop'
     ? cn(buttons.primary, 'hidden h-11 min-w-[12rem] justify-center gap-sm lg:inline-flex')
     : cn(buttons.primary, 'h-11 w-full justify-center');
@@ -514,6 +525,14 @@ function HeaderCtaButton({ variant, config, label, onScrollTarget, analyticsCont
   const prefetchPolicyAttributes = isInternalLink
     ? ({ 'data-prefetch-policy': 'intent' } as const)
     : {};
+  const labelContent = linkAction?.external
+    ? (
+      <>
+        <span>{label}</span>
+        <span className="sr-only">{` (${commonT('accessibility.opensInNewTab')})`}</span>
+      </>
+    )
+    : label;
 
   const emitCtaEvent = (event?: ReactMouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
     const trigger = resolveInteractionTrigger(event);
@@ -558,7 +577,7 @@ function HeaderCtaButton({ variant, config, label, onScrollTarget, analyticsCont
         }}
         {...dataAttrs}
       >
-        {label}
+        {labelContent}
       </a>
     );
   }

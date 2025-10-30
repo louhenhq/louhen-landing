@@ -8,6 +8,10 @@
       "label": "Waitlist"
     },
     "trust": {
+      "labels": {
+        "louhenfit": "LouhenFit",
+        "podiatrist": "Podiatry"
+      },
       "louhenfit": "LouhenFit covers free returns on your first pair if the fit isn't perfect.",
       "podiatrist": "Podiatrists review every recommendation so growing feet stay healthy."
     },

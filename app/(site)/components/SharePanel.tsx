@@ -113,7 +113,15 @@ export function SharePanel({ locale, code, copy }: Props) {
                 {copy.nativeShare}
               </Button>
             </div>
-            {copyFeedback && <p className="text-body-sm text-status-success" aria-live="polite">{copyFeedback}</p>}
+            {copyFeedback && (
+              <p
+                className="text-body-sm text-status-success"
+                role="status"
+                aria-live="polite"
+              >
+                {copyFeedback}
+              </p>
+            )}
             <p className={cn(text.meta, 'text-text-muted normal-case tracking-normal')}>{copy.assurance}</p>
           </section>
           <section className="flex flex-col gap-sm">

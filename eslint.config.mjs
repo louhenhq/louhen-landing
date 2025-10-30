@@ -290,6 +290,31 @@ const eslintConfig = [
     },
   },
   {
+    files: ['tests/e2e/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            '@/lib/email/*',
+            '@/lib/email/**',
+            '@/lib/security/*',
+            '@/lib/security/**',
+            '@/lib/status/*',
+            '@/lib/status/**',
+            '@/lib/firestore/*',
+            '@/lib/firestore/**',
+            '@/lib/rate/*',
+            '@/lib/rate/**',
+            '@/lib/server/**',
+            '@/lib/csp/nonce-context.server',
+            '@/lib/csp/nonce-context.server.*',
+          ],
+        },
+      ],
+    },
+  },
+  {
     files: ["lighthouserc.cjs", "scripts/util/read-locales.cjs"],
     rules: {
       "@typescript-eslint/no-require-imports": "off",

@@ -13,5 +13,10 @@
     },
     "action": "Overschakelen naar {locale}",
     "dismiss": "Hier blijven"
+  },
+  "common": {
+    "accessibility": {
+      "opensInNewTab": "opent in een nieuw tabblad"
+    }
   }
 }

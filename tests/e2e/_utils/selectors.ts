@@ -2,6 +2,11 @@ export const testIds = {
   sentinel: {
     pageReady: 'lh-page-ready',
   },
+  consent: {
+    banner: 'lh-consent-banner',
+    dialog: 'lh-consent-dialog',
+    acceptAll: 'lh-consent-accept-all',
+  },
   nav: {
     root: 'lh-nav-root',
     skipLink: 'lh-nav-skip-link',

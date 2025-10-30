@@ -3,7 +3,7 @@ import { randomUUID } from 'crypto';
 import { expect, test } from '@tests/fixtures/playwright';
 import type { APIRequestContext } from '@playwright/test';
 
-import { buildUnsubUrl } from '@/lib/email/tokens';
+import { buildUnsubscribeUrl } from '@tests/e2e/_utils/server/unsubscribe';
 
 const TEST_SCOPE = 'transactional' as const;
 
@@ -29,7 +29,7 @@ async function expectSuppressed(request: APIRequestContext, email: string) {
 test.describe('Unsubscribe flow', () => {
   test('token link suppresses future sends', async ({ page, request }) => {
     const email = uniqueEmail();
-    const url = buildUnsubUrl(email, 'all');
+    const url = buildUnsubscribeUrl(email, 'all');
 
     await page.goto(url);
     await expect(page.getByTestId('unsubscribe-token-success')).toBeVisible();

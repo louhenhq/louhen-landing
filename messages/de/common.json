@@ -123,6 +123,9 @@
     "learnMore": "[DE] Learn more",
     "breadcrumb": {
       "home": "Startseite"
+    },
+    "accessibility": {
+      "opensInNewTab": "öffnet in einem neuen Tab"
     }
   },
   "admin": {
