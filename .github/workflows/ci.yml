@@ -310,30 +310,168 @@ jobs:
         # prevent Homebrew profile sourcing in CI
         shell: bash --noprofile --norc -eo pipefail {0}
         run: |
-          npm run start:e2e > "${NEXT_BUILD_DIR}/test-server.log" 2>&1 &
-          echo $! > /tmp/e2e-server.pid
+          set -Eeuo pipefail
+          LOG_DIR="${NEXT_BUILD_DIR:-.next}"
+          LOG_PATH="${LOG_DIR}/server.log"
+          PID_PATH="${LOG_DIR}/server.pid"
+          mkdir -p "$LOG_DIR"
+          HOST_CLEAN=$(printf '%s' "$HOST" | tr -d '\r\n')
+          PORT_CLEAN=$(printf '%s' "$PORT" | tr -d '\r\n')
+          if [ -f "$PID_PATH" ]; then
+            EXISTING_PID=$(cat "$PID_PATH")
+            if [ -n "$EXISTING_PID" ] && kill -0 "$EXISTING_PID" 2>/dev/null; then
+              echo "Stopping previous Next.js server (pid ${EXISTING_PID})"
+              kill "$EXISTING_PID" 2>/dev/null || true
+              sleep 2
+            fi
+            rm -f "$PID_PATH"
+          fi
+          echo "Starting Next.js server on ${HOST_CLEAN}:${PORT_CLEAN}"
+          nohup npx next start -p "${PORT_CLEAN}" -H "${HOST_CLEAN}" > "$LOG_PATH" 2>&1 &
+          SERVER_PID=$!
+          echo "$SERVER_PID" > "$PID_PATH"
+          echo "Next.js server pid ${SERVER_PID}; streaming logs to ${LOG_PATH}"
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
+      - name: Wait for Next.js TCP socket
+        shell: bash --noprofile --norc -eo pipefail {0}
+        run: |
+          set -Eeuo pipefail
+          HOST_CLEAN=$(printf '%s' "$HOST" | tr -d '\r\n')
+          PORT_CLEAN=$(printf '%s' "$PORT" | tr -d '\r\n')
+          echo "Waiting for tcp:${HOST_CLEAN}:${PORT_CLEAN}"
+          npx wait-on -t 60000 "tcp:${HOST_CLEAN}:${PORT_CLEAN}"
+          echo "TCP socket accepting connections on ${HOST_CLEAN}:${PORT_CLEAN}"
+
       - name: Wait for app to respond
         shell: bash --noprofile --norc -eo pipefail {0}
         run: |
-          BASE_URL_CLEAN=$(printf '%s' "$BASE_URL" | tr -d '\r\n')
-          DEFAULT_LOCALE_CLEAN=$(printf '%s' "$DEFAULT_LOCALE" | tr -d '\r\n')
-          BASE_URL_STRIPPED=${BASE_URL_CLEAN%/}
-          WAITLIST_URL="${BASE_URL_STRIPPED}/${DEFAULT_LOCALE_CLEAN}/waitlist"
-          ROOT_URL="${BASE_URL_STRIPPED}/"
-          for i in {1..40}; do
-            if curl -sSf "$WAITLIST_URL" >/dev/null 2>&1; then
-              echo "Waitlist reachable at $WAITLIST_URL"
-              break
+          set -Eeuo pipefail
+          LOG_DIR="${NEXT_BUILD_DIR:-.next}"
+          LOG_PATH="${LOG_DIR}/server.log"
+          PID_PATH="${LOG_DIR}/server.pid"
+
+          trim_newlines() {
+            printf '%s' "${1-}" | tr -d '\r\n'
+          }
+
+          trim_trailing_slashes() {
+            local value="${1-}"
+            while [ "$value" != "${value%/}" ]; do
+              value="${value%/}"
+            done
+            printf '%s' "$value"
+          }
+
+          sanitize_path_segment() {
+            local value
+            value="$(trim_newlines "${1-}")"
+            while [ "$value" != "${value#/}" ]; do
+              value="${value#/}"
+            done
+            while [ "$value" != "${value%/}" ]; do
+              value="${value%/}"
+            done
+            printf '%s' "$value"
+          }
+
+          build_url() {
+            local base="$1"
+            local segment="${2-}"
+            if [ -z "$segment" ]; then
+              printf '%s' "$base"
+              return
             fi
-            echo "Waiting for app..."
-            sleep 0.5
+            local cleaned="$segment"
+            while [ "$cleaned" != "${cleaned#/}" ]; do
+              cleaned="${cleaned#/}"
+            done
+            while [ "$cleaned" != "${cleaned%/}" ]; do
+              cleaned="${cleaned%/}"
+            done
+            if [ -z "$cleaned" ]; then
+              printf '%s' "$base"
+            else
+              printf '%s/%s' "$base" "$cleaned"
+            fi
+          }
+
+          HOST_CLEAN=$(trim_newlines "$HOST")
+          PORT_CLEAN=$(trim_newlines "$PORT")
+          BASE_URL_CLEAN=$(trim_trailing_slashes "$(trim_newlines "${BASE_URL:-}")")
+          DEFAULT_LOCALE_CLEAN=$(sanitize_path_segment "${DEFAULT_LOCALE:-}")
+          HEALTH_PATH_CLEAN=$(sanitize_path_segment "${PW_HEALTH_PATH:-}")
+
+          if [ -n "$BASE_URL_CLEAN" ]; then
+            BASE_ORIGIN="$BASE_URL_CLEAN"
+          else
+            BASE_ORIGIN=$(printf 'http://%s:%s' "$HOST_CLEAN" "$PORT_CLEAN")
+          fi
+
+          WAITLIST_PATH="waitlist"
+          if [ -n "$DEFAULT_LOCALE_CLEAN" ]; then
+            WAITLIST_PATH="${DEFAULT_LOCALE_CLEAN}/waitlist"
+          fi
+
+          STATUS_URL=$(build_url "$BASE_ORIGIN" "api/status")
+          ICON_URL=""
+          if [ -n "$HEALTH_PATH_CLEAN" ]; then
+            ICON_URL=$(build_url "$BASE_ORIGIN" "$HEALTH_PATH_CLEAN")
+          fi
+          WAITLIST_URL=$(build_url "$BASE_ORIGIN" "$WAITLIST_PATH")
+
+          MAX_ATTEMPTS=40
+          SLEEP_SECONDS=2
+          attempt=1
+          ready_target=''
+
+          declare -a readiness_targets
+          readiness_targets=("$STATUS_URL")
+          if [ -n "$ICON_URL" ]; then
+            readiness_targets+=("$ICON_URL")
+          fi
+          readiness_targets+=("$WAITLIST_URL")
+
+          echo "Readiness targets (in order): ${readiness_targets[*]}"
+
+          while [ $attempt -le $MAX_ATTEMPTS ]; do
+            for target in "${readiness_targets[@]}"; do
+              if curl -fsS --max-time 10 "$target" >/dev/null 2>&1; then
+                ready_target="$target"
+                break 2
+              fi
+            done
+            echo "Attempt ${attempt}/${MAX_ATTEMPTS}: waiting for Next.js readiness..."
+            sleep "$SLEEP_SECONDS"
+            attempt=$((attempt + 1))
           done
-          curl -sSf "$WAITLIST_URL" >/dev/null || (echo "Waitlist route failed readiness check" && exit 1)
-          curl -sSf "$ROOT_URL" >/dev/null || echo "::warning::Root route not ready; continuing because waitlist succeeded."
+
+          if [ -n "$ready_target" ]; then
+            echo "✅ Next.js readiness confirmed via ${ready_target}"
+          else
+            echo "❌ Next.js readiness probe failed after $((MAX_ATTEMPTS * SLEEP_SECONDS)) seconds."
+            if [ -f "$LOG_PATH" ]; then
+              echo "Last 200 lines from ${LOG_PATH}:"
+              tail -n 200 "$LOG_PATH" || true
+            else
+              echo "No server log present at ${LOG_PATH}"
+            fi
+            if command -v ss >/dev/null 2>&1; then
+              echo "ss -ltnp output:"
+              ss -ltnp || true
+            fi
+            if command -v netstat >/dev/null 2>&1; then
+              echo "netstat -plant output:"
+              netstat -plant || true
+            fi
+            if [ -f "$PID_PATH" ]; then
+              echo "Server pid file contents:"
+              cat "$PID_PATH"
+            fi
+            exit 1
+          fi
 
       - name: Verify test-mode captcha bypass
         shell: bash --noprofile --norc -eo pipefail {0}
@@ -389,9 +527,10 @@ jobs:
       - name: Tail Next.js server log
         if: always()
         run: |
-          if [ -f "${NEXT_BUILD_DIR}/test-server.log" ]; then
-            echo "Last 300 lines from ${NEXT_BUILD_DIR}/test-server.log"
-            tail -n 300 "${NEXT_BUILD_DIR}/test-server.log"
+          LOG_FILE="${NEXT_BUILD_DIR:-.next}/server.log"
+          if [ -f "$LOG_FILE" ]; then
+            echo "Last 300 lines from ${LOG_FILE}"
+            tail -n 300 "$LOG_FILE"
           else
             echo 'No server log found'
           fi
@@ -414,7 +553,21 @@ jobs:
 
       - name: Stop server
         if: always()
-        run: kill "$(cat /tmp/e2e-server.pid)" 2>/dev/null || true
+        run: |
+          set -Eeuo pipefail
+          PID_FILE="${NEXT_BUILD_DIR:-.next}/server.pid"
+          if [ -f "$PID_FILE" ]; then
+            PID_VALUE=$(cat "$PID_FILE")
+            if [ -n "$PID_VALUE" ]; then
+              echo "Stopping Next.js server pid ${PID_VALUE}"
+              kill "$PID_VALUE" 2>/dev/null || true
+              sleep 2
+              kill -9 "$PID_VALUE" 2>/dev/null || true
+            fi
+            rm -f "$PID_FILE"
+          else
+            echo "No Next.js server pid file found"
+          fi
 
   axe:
     name: axe
